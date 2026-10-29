@@ -21,7 +21,6 @@ public class ManagementPlanDTO {
     private Boolean hasApiAccess;
     private Boolean hasExcelExport;
     private Boolean isActive;
-    private String displayPrice;
     private Boolean isRecommended;
 
     public String getDisplayPrice() {

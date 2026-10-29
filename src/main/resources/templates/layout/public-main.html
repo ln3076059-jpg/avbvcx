@@ -1,36 +1,942 @@
-<!doctype html>
-<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
   <head>
-    <meta charset="UTF-8" />
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title th:text="${pageTitle != null ? pageTitle + ' | PMS' : 'Property Management System'}">Property Management System</title>
+    <title th:text="${title ?: 'TrọMới - Hệ Thống Quản Lý &amp; Tìm Phòng Trọ Trực Tuyến'}">
+      TrọMới - Hệ Thống Quản Lý &amp; Tìm Phòng Trọ Trực Tuyến
+    </title>
+    <meta name="description" content="Nền tảng tìm kiếm phòng trọ, căn hộ dịch vụ, nhà nguyên căn xác thực và quản lý lưu trú trực tuyến." />
 
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!-- Favicons -->
+    <link th:href="@{/rhino/images/fevicon.png}" rel="icon" type="image/gif" />
+
+    <!-- Google Fonts with Full Vietnamese Diacritics Support -->
+    <link href="https://fonts.googleapis.com" rel="preconnect" />
+    <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin />
     <link
       href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap"
       rel="stylesheet"
     />
 
-    <script
-      src="https://kit.fontawesome.com/a37ac37445.js"
-      crossorigin="anonymous"
-    ></script>
+    <!-- Bootstrap & Icon CSS -->
+    <link th:href="@{/assets/vendor/bootstrap/css/bootstrap.min.css}" rel="stylesheet" />
+    <link th:href="@{/assets/vendor/bootstrap-icons/bootstrap-icons.css}" rel="stylesheet" />
+    <link th:href="@{/assets/vendor/fontawesome-free/css/all.min.css}" rel="stylesheet" />
+    <link th:href="@{/assets/vendor/swiper/swiper-bundle.min.css}" rel="stylesheet" />
+
+    <!-- Rhino Template Core CSS -->
+    <link th:href="@{/rhino/css/style.css}" rel="stylesheet" />
+    <link th:href="@{/rhino/css/responsive.css}" rel="stylesheet" />
+
+    <!-- Tailwind Utilities (Preflight disabled to preserve Rhino + Bootstrap styles) -->
+    <script>
+      window.tailwind = { config: { corePlugins: { preflight: false } } };
+    </script>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" th:href="@{/css/public-site.css}" />
+
+    <!-- Alpine.js -->
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+    <style>
+      /* =========================================================================
+         Rhino Senior UI/UX Bright Design System
+         - Bright White Cards (#ffffff) with Soft Elevation
+         - Vibrant Rhino Orange (#fe9901 -> #ea580c) with Crisp White Text (#ffffff)
+         - Rhino Navy (#161825) Top Bar & Footer Framing
+         ========================================================================= */
+      :root {
+        --default-font: 'Be Vietnam Pro', sans-serif;
+        --heading-font: 'Be Vietnam Pro', sans-serif;
+        --nav-font: 'Be Vietnam Pro', sans-serif;
+        --rhino-dark: #161825;
+        --rhino-orange: #fe9901;
+        --rhino-orange-deep: #ea580c;
+        --rhino-surface: #f8fafc;
+        --ease-out-quart: cubic-bezier(0.22, 1, 0.36, 1);
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body {
+        color: #334155;
+        font-size: 15px;
+        font-family: var(--default-font) !important;
+        line-height: 1.65;
+        font-weight: 400;
+        background-color: #ffffff;
+        overflow-x: hidden;
+      }
+
+      .container,
+      .container-fluid,
+      .container_staff {
+        max-width: 1280px;
+        padding-left: 20px !important;
+        padding-right: 20px !important;
+        margin-left: auto !important;
+        margin-right: auto !important;
+      }
+
+      h1, h2, h3, h4, h5, h6 {
+        font-family: var(--heading-font) !important;
+        color: #161825;
+        letter-spacing: -0.015em;
+      }
+
+      [data-aos] {
+        opacity: 1 !important;
+        transform: none !important;
+      }
+
+      .hidden {
+        display: none !important;
+      }
+
+      .tabular-nums {
+        font-variant-numeric: tabular-nums;
+      }
+
+      /* =========================================================================
+         Rhino Header (Single-Line Desktop Guaranteed, White-on-Orange Active Pill)
+         ========================================================================= */
+      .header_section {
+        position: relative;
+        z-index: 1000;
+        width: 100%;
+      }
+
+      .header {
+        width: 100%;
+        height: auto !important;
+      }
+
+      .header_top {
+        background-color: #161825;
+        padding: 9px 0;
+      }
+
+      ul.contat_infoma {
+        display: flex !important;
+        align-items: center;
+        gap: 12px;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+      }
+
+      ul.contat_infoma li {
+        color: #ffffff;
+        font-size: 13.5px;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      ul.contat_infoma li i {
+        color: #fe9901;
+      }
+
+      ul.contat_infoma li a {
+        color: #ffffff;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        text-decoration: none;
+      }
+
+      ul.contat_infoma li a:hover {
+        color: #fe9901;
+      }
+
+      ul.social_icon_top {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+      }
+
+      ul.social_icon_top li a {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        color: #161825;
+        background: #ffffff;
+        width: 28px;
+        height: 28px;
+        font-size: 13px;
+        text-decoration: none;
+      }
+
+      ul.social_icon_top li a:hover {
+        background: #fe9901;
+        color: #ffffff;
+      }
+
+      .header_bottom {
+        background-color: #ffffff;
+        height: auto !important;
+        padding: 12px 0 !important;
+        border-bottom: 1px solid #e2e8f0;
+        box-shadow: 0 4px 20px rgba(15, 23, 42, 0.04);
+      }
+
+      .logo {
+        flex-shrink: 0;
+        margin-right: 10px;
+      }
+
+      .logo a {
+        font-family: var(--heading-font) !important;
+        font-size: 22px !important;
+        line-height: 1.2 !important;
+        color: #161825 !important;
+        font-weight: 800 !important;
+        text-transform: uppercase;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        white-space: nowrap;
+      }
+
+      .navigation.navbar {
+        float: none !important;
+        padding: 0;
+        width: 100%;
+      }
+
+      /* Desktop: min-width 1200px */
+      @media (min-width: 1200px) {
+        .navbar-toggler {
+          display: none !important;
+        }
+        .navigation.navbar {
+          flex-wrap: nowrap !important;
+        }
+        .navigation .navbar-collapse {
+          flex-basis: auto !important;
+          flex-grow: 0 !important;
+          display: flex !important;
+          align-items: center !important;
+          visibility: visible !important;
+        }
+        .navigation .navbar-nav {
+          display: flex !important;
+          flex-direction: row !important;
+          align-items: center !important;
+          gap: 2px !important;
+        }
+        .navigation .navbar-nav .nav-link {
+          padding: 6px 7px !important;
+          font-size: 11.8px !important;
+          font-weight: 700;
+          text-transform: uppercase;
+          border-radius: 8px;
+          margin: 0 1px;
+          white-space: nowrap;
+          transition: all 0.2s ease;
+        }
+        .btn-estate-nav {
+          padding: 6px 9px !important;
+          font-size: 11.5px !important;
+        }
+        ul.search {
+          display: flex !important;
+        }
+        ul.search li a {
+          width: 32px !important;
+          height: 32px !important;
+        }
+      }
+
+      @media (min-width: 1366px) {
+        .navigation .navbar-nav {
+          gap: 4px !important;
+        }
+        .navigation .navbar-nav .nav-link {
+          padding: 7px 10px !important;
+          font-size: 12.8px !important;
+          margin: 0 2px;
+        }
+        .btn-estate-nav {
+          padding: 7px 12px !important;
+          font-size: 12.5px !important;
+        }
+        ul.search li a {
+          width: 36px !important;
+          height: 36px !important;
+        }
+      }
+
+      /* Mobile & Tablet Drawer: max-width 1199.98px */
+      @media (max-width: 1199.98px) {
+        .navigation.navbar {
+          flex-wrap: wrap !important;
+        }
+        .navbar-toggler {
+          display: inline-flex !important;
+        }
+        .navigation .navbar-collapse:not(.show) {
+          display: none !important;
+        }
+        .navigation .navbar-collapse.show {
+          display: block !important;
+        }
+        .navigation .navbar-collapse {
+          background: #ffffff;
+          border-radius: 12px;
+          padding: 16px;
+          margin-top: 12px;
+          box-shadow: 0 12px 32px rgba(15, 23, 42, 0.12);
+          border: 1px solid #e2e8f0;
+          width: 100%;
+        }
+        .navigation .navbar-nav {
+          display: flex;
+          flex-direction: column;
+          gap: 6px;
+          width: 100%;
+        }
+        .navigation .navbar-nav .nav-link {
+          padding: 10px 14px !important;
+          font-size: 14px !important;
+          border-radius: 8px;
+          width: 100%;
+        }
+        .navigation .btn-estate-nav {
+          width: 100%;
+          justify-content: center;
+          margin-top: 8px;
+          padding: 10px !important;
+        }
+        .navigation .search {
+          display: none !important;
+        }
+      }
+
+      .navigation .navbar-nav .nav-link:hover {
+        background-color: #fff7ed !important;
+        color: #ea580c !important;
+      }
+
+      .navigation .navbar-nav .active > .nav-link,
+      .navigation .navbar-nav .nav-link.active {
+        background: linear-gradient(135deg, #f97316 0%, #ea580c 100%) !important;
+        color: #ffffff !important;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(234, 88, 12, 0.25);
+      }
+
+      .navigation .navbar-nav .nav-link:hover {
+        background-color: #fff7ed !important;
+        color: #ea580c !important;
+      }
+
+      .navigation .navbar-nav .active > .nav-link,
+      .navigation .navbar-nav .nav-link.active {
+        background: linear-gradient(135deg, #f97316 0%, #ea580c 100%) !important;
+        color: #ffffff !important;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(234, 88, 12, 0.25);
+      }
+
+      .navigation .nav-item.dropdown:hover > .dropdown-menu {
+        display: block;
+      }
+
+      .navigation .dropdown-menu {
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        padding: 8px;
+        background-color: #ffffff;
+        box-shadow: 0 12px 32px rgba(15, 23, 42, 0.12);
+        margin-top: 0;
+      }
+
+      .navigation .dropdown-item {
+        font-size: 14px;
+        font-weight: 600;
+        color: #1e293b;
+        padding: 8px 14px;
+        border-radius: 7px;
+      }
+
+      .navigation .dropdown-item:hover,
+      .navigation .dropdown-item:focus {
+        background-color: #fe9901;
+        color: #ffffff;
+      }
+
+      /* =========================================================================
+         Rhino Hero Banner (Bright Architectural Photo + Warm Orange Accents)
+         ========================================================================= */
+      .rhino_hero_bg {
+        background: linear-gradient(105deg, rgba(15, 23, 42, 0.72) 0%, rgba(15, 23, 42, 0.30) 58%, rgba(234, 88, 12, 0.22) 100%),
+                    url('/images/rooms/room-1.jpg') center center / cover no-repeat !important;
+        margin-top: 0 !important;
+        padding: 64px 0 130px 0 !important;
+        position: relative;
+      }
+
+      .hero_showcase_frame {
+        border-radius: 16px;
+        overflow: hidden;
+        border: 4px solid rgba(255, 255, 255, 0.96);
+        box-shadow: 0 20px 45px rgba(15, 23, 42, 0.22);
+        background-color: #ffffff;
+      }
+
+      .hero_showcase_frame img {
+        width: 100%;
+        height: 320px;
+        object-fit: cover;
+        display: block;
+      }
+
+      .build_box .conatct_btn {
+        background: linear-gradient(135deg, #f97316 0%, #ea580c 100%) !important;
+        color: #ffffff !important;
+        font-weight: 700 !important;
+        border-radius: 8px;
+        box-shadow: 0 6px 20px rgba(234, 88, 12, 0.32);
+      }
+
+      .build_box .conatct_btn:hover {
+        background: #c2410c !important;
+        color: #ffffff !important;
+      }
+
+      /* =========================================================================
+         Rhino Inner Page Title Banner (Architectural Navy #161825 + Warm Orange Accent)
+         ========================================================================= */
+      .back_re,
+      .page-title {
+        background: linear-gradient(135deg, #161825 0%, #1e2438 100%) !important;
+        padding: 42px 0 36px 0 !important;
+        border-bottom: 3px solid #ea580c !important;
+        color: #ffffff;
+      }
+
+      .back_re .title h2,
+      .page-title .heading h1,
+      .page-title .Properties_taital {
+        color: #ffffff !important;
+        font-size: 30px !important;
+        font-weight: 800 !important;
+        text-transform: uppercase !important;
+        padding: 0 !important;
+        margin-bottom: 10px !important;
+        letter-spacing: -0.015em;
+      }
+
+      .page-title .heading h1 span,
+      .page-title .Properties_taital span {
+        color: #fb923c !important;
+      }
+
+      .page-title .heading p {
+        color: #cbd5e1 !important;
+        font-size: 15px !important;
+        max-width: 72ch;
+        line-height: 1.6;
+      }
+
+      .page-title .breadcrumbs {
+        padding-top: 14px;
+      }
+
+      .page-title .breadcrumbs ol {
+        display: flex;
+        flex-wrap: wrap;
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        font-size: 13.5px;
+        font-weight: 600;
+        gap: 8px;
+        color: #94a3b8;
+      }
+
+      .page-title .breadcrumbs ol li + li::before {
+        content: "/";
+        padding-right: 8px;
+        color: #64748b;
+      }
+
+      .page-title .breadcrumbs ol li a {
+        color: #cbd5e1 !important;
+        text-decoration: none;
+        transition: color 0.2s ease;
+      }
+      .page-title .breadcrumbs ol li a:hover {
+        color: #ea580c !important;
+      }
+
+      /* Category pills inside Navy page-title (White text on Orange Active Pill, Never Black!) */
+      .page-title .btn-estate {
+        background: linear-gradient(135deg, #f97316 0%, #ea580c 100%) !important;
+        color: #ffffff !important;
+        box-shadow: 0 4px 14px rgba(234, 88, 12, 0.35);
+        border: none !important;
+        font-weight: 700 !important;
+      }
+
+      .page-title .btn-estate:hover {
+        background: #c2410c !important;
+        color: #ffffff !important;
+      }
+
+      .page-title .btn-estate-outline {
+        background-color: rgba(255, 255, 255, 0.08) !important;
+        color: #e2e8f0 !important;
+        border: 1.5px solid rgba(255, 255, 255, 0.22) !important;
+        font-weight: 600 !important;
+      }
+
+      .page-title .btn-estate-outline:hover {
+        background-color: #ffffff !important;
+        color: #ea580c !important;
+        border-color: #ffffff !important;
+      }
+
+      /* =========================================================================
+         Rhino Buttons & Badges (Crisp White Text #ffffff on Rich Orange)
+         ========================================================================= */
+      .read_more {
+        background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+        color: #ffffff !important;
+        padding: 12px 26px;
+        min-width: 180px;
+        text-align: center;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        font-weight: 700;
+        font-size: 14.5px;
+        border-radius: 8px;
+        height: auto;
+        text-transform: uppercase;
+        text-decoration: none;
+        box-shadow: 0 4px 14px rgba(234, 88, 12, 0.26);
+        transition: all 0.22s ease;
+      }
+
+      .read_more:hover {
+        background: #c2410c !important;
+        color: #ffffff !important;
+        transform: translateY(-2px);
+      }
+
+      .btn-estate,
+      .btn-visit,
+      .find_btn button {
+        font-family: var(--default-font);
+        font-weight: 700;
+        font-size: 14px !important;
+        text-transform: uppercase;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 10px 22px;
+        border-radius: 8px;
+        white-space: nowrap !important;
+        color: #ffffff !important;
+        background: linear-gradient(135deg, #f97316 0%, #ea580c 100%) !important;
+        border: none !important;
+        text-decoration: none;
+        cursor: pointer;
+        box-shadow: 0 4px 14px rgba(234, 88, 12, 0.25);
+        transition: all 0.22s ease;
+      }
+
+      .btn-estate:hover,
+      .btn-visit:hover,
+      .find_btn button:hover {
+        background: #c2410c !important;
+        color: #ffffff !important;
+        transform: translateY(-1px);
+      }
+
+      .btn-estate-outline {
+        font-family: var(--default-font);
+        font-weight: 700;
+        font-size: 14px !important;
+        text-transform: uppercase;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 10px 18px;
+        border-radius: 8px;
+        white-space: nowrap !important;
+        color: #ea580c !important;
+        background-color: #ffffff !important;
+        border: 1.5px solid #fdba74 !important;
+        text-decoration: none;
+        cursor: pointer;
+        transition: all 0.22s ease;
+      }
+
+      .btn-estate-outline:hover {
+        background: #fff7ed !important;
+        color: #c2410c !important;
+        border-color: #ea580c !important;
+      }
+
+      .btn-estate-nav {
+        font-family: var(--default-font);
+        font-weight: 700;
+        font-size: 12.8px !important;
+        text-transform: uppercase;
+        padding: 7px 12px !important;
+        border-radius: 8px;
+        white-space: nowrap !important;
+        background: linear-gradient(135deg, #f97316 0%, #ea580c 100%) !important;
+        color: #ffffff !important;
+        border: none !important;
+        display: inline-flex !important;
+        align-items: center;
+        gap: 6px;
+        flex-shrink: 0;
+        box-shadow: 0 4px 12px rgba(234, 88, 12, 0.25);
+        transition: all 0.22s ease;
+      }
+
+      .btn-estate-nav:hover {
+        background: #c2410c !important;
+        color: #ffffff !important;
+      }
+
+      .estate-badge-cat {
+        background: linear-gradient(135deg, #f97316 0%, #ea580c 100%) !important;
+        color: #ffffff !important;
+        font-size: 12px !important;
+        font-weight: 700;
+        text-transform: uppercase;
+        padding: 5px 12px;
+        border-radius: 6px;
+        white-space: nowrap !important;
+        box-shadow: 0 2px 8px rgba(234, 88, 12, 0.28);
+      }
+
+      .estate-action-pill {
+        background-color: rgba(255, 255, 255, 0.96) !important;
+        color: #1e293b !important;
+        border: 1px solid #e2e8f0 !important;
+        font-size: 12.5px !important;
+        font-weight: 700;
+        padding: 5px 11px;
+        border-radius: 8px;
+        white-space: nowrap !important;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        cursor: pointer;
+        box-shadow: 0 2px 6px rgba(15, 23, 42, 0.08);
+        transition: all 0.2s ease;
+      }
+
+      .estate-action-pill:hover {
+        background-color: #ea580c !important;
+        color: #ffffff !important;
+        border-color: #ea580c !important;
+      }
+
+      /* =========================================================================
+         Rhino Property Card (Bright White Card #ffffff + Full-Width Metadata)
+         ========================================================================= */
+      .upside-property-card {
+        margin-bottom: 24px;
+        border-radius: 14px;
+        overflow: hidden;
+        background-color: #ffffff !important;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 8px 24px rgba(15, 23, 42, 0.05);
+        transition: all 0.3s var(--ease-out-quart);
+        display: flex;
+        flex-direction: column;
+        height: calc(100% - 24px);
+      }
+
+      .upside-property-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 16px 36px rgba(15, 23, 42, 0.11);
+        border-color: #fed7aa;
+      }
+
+      .upside-property-card .blog_img {
+        position: relative;
+        margin-top: 0 !important;
+        overflow: hidden;
+        height: 220px;
+        background-color: #f1f5f9;
+        flex-shrink: 0;
+      }
+
+      .upside-property-card .blog_img img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.45s var(--ease-out-quart);
+      }
+
+      .upside-property-card:hover .blog_img img {
+        transform: scale(1.05);
+      }
+
+      .upside-property-card .image_box {
+        width: 100% !important;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: stretch !important;
+        justify-content: space-between !important;
+        gap: 12px !important;
+        background-color: #ffffff !important;
+        padding: 16px 18px !important;
+        border-top: 1px solid #f1f5f9;
+        flex: 1 1 auto !important;
+      }
+
+      .upside-property-card .left_box {
+        width: 100% !important;
+        min-width: 0 !important;
+      }
+
+      .upside-property-card .right_box {
+        width: 100% !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: flex-start !important;
+        padding-top: 12px !important;
+        border-top: 1px solid #f1f5f9 !important;
+        margin-top: auto !important;
+      }
+
+      .upside-property-card .road_text {
+        font-size: 16.5px !important;
+        font-weight: 700 !important;
+        color: #0f172a;
+        margin: 0 0 10px 0 !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        display: block !important;
+      }
+
+      .upside-property-card .road_text a {
+        color: #0f172a !important;
+      }
+
+      .upside-property-card .road_text a:hover {
+        color: #ea580c !important;
+      }
+
+      .upside-property-card .area_main {
+        width: 100% !important;
+        display: grid !important;
+        grid-template-columns: auto auto minmax(0, 1fr) !important;
+        gap: 14px !important;
+        background: #f8fafc;
+        padding: 8px 12px;
+        border-radius: 8px;
+        border: 1px solid #f1f5f9;
+      }
+
+      .upside-property-card h3.area_text {
+        font-size: 12px !important;
+        color: #64748b;
+        text-align: left;
+        font-weight: 500 !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+      }
+
+      .upside-property-card h3.area_text span {
+        display: block;
+        color: #1e293b;
+        font-weight: 700;
+        font-size: 13px !important;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .upside-property-card h3.area_text a {
+        color: #64748b !important;
+        display: block;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .upside-property-card h3.area_text.active a span,
+      .upside-property-card h3.area_text a:hover span {
+        color: #ea580c !important;
+      }
+
+      .upside-property-card .rate_text {
+        min-width: 110px;
+        font-size: 14px !important;
+        color: #ffffff !important;
+        text-align: center !important;
+        background: linear-gradient(135deg, #f97316 0%, #ea580c 100%) !important;
+        padding: 8px 14px !important;
+        font-weight: 800 !important;
+        white-space: nowrap !important;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(234, 88, 12, 0.22);
+      }
+
+      /* =========================================================================
+         Rhino Search Card & Inputs
+         ========================================================================= */
+      .rhino_search_card {
+        background: #ffffff;
+        padding: 28px;
+        border-radius: 12px;
+        border: 1px solid #e2e8f0;
+        border-top: 4px solid #fe9901;
+        box-shadow: 0 14px 36px rgba(15, 23, 42, 0.08);
+      }
+
+      .upside-select-input {
+        width: 100%;
+        height: 46px;
+        padding: 10px 14px;
+        font-size: 14.5px;
+        font-family: var(--default-font);
+        color: #161825;
+        background-color: #f8fafc;
+        border: 1.5px solid #e2e8f0;
+        border-radius: 8px;
+        transition: all 0.2s ease;
+      }
+
+      .upside-select-input:focus {
+        background-color: #ffffff;
+        border-color: #fe9901;
+        box-shadow: 0 0 0 3px rgba(254, 153, 1, 0.15);
+        outline: none;
+      }
+
+      .scroll-top {
+        position: fixed;
+        left: 24px !important;
+        right: auto !important;
+        bottom: 24px !important;
+        width: 44px;
+        height: 44px;
+        background: linear-gradient(135deg, #f97316 0%, #ea580c 100%) !important;
+        color: #ffffff !important;
+        border-radius: 50% !important;
+        box-shadow: 0 4px 16px rgba(234, 88, 12, 0.35);
+        z-index: 999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: none;
+        transition: all 0.22s ease;
+      }
+      .scroll-top i {
+        color: #ffffff !important;
+        font-size: 16px;
+      }
+      .scroll-top:hover {
+        background: #c2410c !important;
+        color: #ffffff !important;
+        transform: translateY(-2px);
+      }
+          .process-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 18px 36px rgba(15, 23, 42, 0.1) !important;
+        border-color: #fed7aa !important;
+      }
+    </style>
+
+    <script>
+      window.addEventListener('error', function (e) {
+        var el = e.target;
+        if (el && el.tagName === 'IMG' && !el.getAttribute('data-fb-applied')) {
+          el.setAttribute('data-fb-applied', '1');
+          var idx = (Math.abs((el.alt || '').length) % 12) + 1;
+          var fb = '/images/rooms/room-' + idx + '.jpg';
+          el.src = fb;
+          if (el.parentElement && el.parentElement.hasAttribute('data-img')) {
+            el.parentElement.setAttribute('data-img', fb);
+          }
+        }
+      }, true);
+    </script>
   </head>
-  <body class="public-body">
-    <div class="public-shell min-h-screen">
-      <div th:replace="~{layout/header :: header-main}"></div>
+  <body class="main-layout d-flex flex-column min-vh-100">
+    <a href="#main-content" class="visually-hidden-focusable position-fixed top-0 start-0 z-3 bg-dark text-white px-3 py-2 small">Chuyển tới nội dung chính</a>
 
-      <main class="container mx-auto px-4 py-6 md:px-6 lg:px-8">
-        <div th:replace="~{${content}}"></div>
-      </main>
+    <div th:replace="~{layout/header :: header-main}"></div>
 
-      <div th:replace="~{layout/footer :: footer-main}"></div>
-      <div th:replace="~{layout/parts/chat-widget :: chat-widget}"></div>
-    </div>
+    <main id="main-content" class="main flex-grow-1">
+      <div th:replace="~{${content}}"></div>
+    </main>
 
+    <div th:replace="~{layout/footer :: footer-main}"></div>
+    <div th:replace="~{layout/parts/chat-widget :: chat-widget}"></div>
+
+    <!-- Scroll Top -->
+    <a href="#" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center" aria-label="Lên đầu trang"><i class="bi bi-arrow-up-short fs-4"></i></a>
+
+    <!-- Vendor JS Files -->
+    <script th:src="@{/assets/vendor/bootstrap/js/bootstrap.bundle.min.js}"></script>
+    <script th:src="@{/assets/vendor/aos/aos.js}"></script>
+    <script th:src="@{/assets/vendor/swiper/swiper-bundle.min.js}"></script>
+    <script th:src="@{/assets/vendor/purecounter/purecounter_vanilla.js}"></script>
     <script th:src="@{/js/public-site.js}"></script>
+
+    <script>
+      (function () {
+        // Global Double-Submit Prevention on <form> submissions
+        document.addEventListener('submit', function (e) {
+          var form = e.target;
+          if (!form || form.tagName !== 'FORM') return;
+          if ((form.method || '').toLowerCase() === 'get') return;
+          if (form.getAttribute('data-submitted') === 'true') {
+            e.preventDefault();
+            return;
+          }
+          form.setAttribute('data-submitted', 'true');
+          var btn = form.querySelector('button[type="submit"], input[type="submit"]');
+          if (btn) {
+            btn.disabled = true;
+            btn.classList.add('opacity-75');
+            if (btn.tagName === 'BUTTON') {
+              btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin me-1"></i> Đang gửi...';
+            }
+          }
+        });
+
+        // Global Escape key handler to close any open modal and restore body scroll
+        document.addEventListener('keydown', function (e) {
+          if (e.key === 'Escape') {
+            ['photoLightboxModal', 'videoTourModal', 'compareModal'].forEach(function (id) {
+              var modal = document.getElementById(id);
+              if (modal && !modal.classList.contains('hidden')) {
+                modal.classList.add('hidden');
+              }
+            });
+            document.body.style.overflow = '';
+          }
+        });
+      })();
+    </script>
   </body>
 </html>

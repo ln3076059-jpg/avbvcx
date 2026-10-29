@@ -1,303 +1,326 @@
-<div th:fragment="content" class="bg-gray-50 min-h-screen py-8">
-  <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-    <div class="flex items-center justify-between mb-8">
-      <div>
-        <h1 class="text-2xl font-bold text-gray-900">Lập hợp đồng mới</h1>
-        <p class="text-sm text-gray-500 mt-1">
-          Tạo hợp đồng thuê phòng cho khách hàng
-        </p>
-      </div>
-      <a
-        th:href="@{/owner/contracts}"
-        class="text-gray-500 hover:text-gray-700 font-medium flex items-center gap-2"
-      >
-        <i class="fa-solid fa-arrow-left"></i> Quay lại
-      </a>
+<div th:fragment="content" class="container-fluid mb-4">
+    <!-- Page Heading -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <div>
+            <h1 class="h3 mb-0 text-gray-800 font-weight-bold">
+                <i class="fas fa-file-contract text-success mr-2"></i>Lập Hợp Đồng Thuê Nhà Mới
+            </h1>
+            <p class="text-muted small mb-0 mt-1">Tạo hồ sơ hợp đồng pháp lý, thỏa thuận giá thuê, tiền đặt cọc và danh sách khách ở</p>
+        </div>
+        <a th:href="@{/owner/contracts}" class="btn btn-secondary btn-sm shadow-sm font-weight-bold">
+            <i class="fas fa-arrow-left mr-1"></i>Quay lại danh sách
+        </a>
     </div>
 
-    <form
-      th:action="@{/owner/contracts/create}"
-      method="post"
-      class="space-y-6"
-    >
-      <!-- Thông tin cơ bản -->
-      <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-        <h2
-          class="text-lg font-bold text-gray-800 mb-6 flex items-center pb-4 border-b border-gray-100"
-        >
-          <span class="w-1 h-6 bg-blue-600 mr-3 rounded-full"></span>
-          Thông tin phòng & Thời gian
-        </h2>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <!-- Property Select -->
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1"
-              >Nhà trọ <span class="text-red-500">*</span></label
-            >
-            <select
-              id="propertySelect"
-              name="propertyId"
-              required
-              onchange="loadRooms(this.value)"
-              class="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-            >
-              <option value="">-- Chọn nhà trọ --</option>
-              <option
-                th:each="prop : ${properties}"
-                th:value="${prop.id}"
-                th:text="${prop.name}"
-              ></option>
-            </select>
-          </div>
-
-          <!-- Room Select -->
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1"
-              >Phòng <span class="text-red-500">*</span></label
-            >
-            <select
-              id="roomSelect"
-              name="roomId"
-              required
-              class="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-gray-50 transition-colors"
-            >
-              <option value="">-- Chọn nhà trọ trước --</option>
-            </select>
-          </div>
-
-          <!-- Dates -->
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1"
-              >Ngày bắt đầu <span class="text-red-500">*</span></label
-            >
-            <input
-              type="date"
-              name="startDate"
-              required
-              class="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-            />
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1"
-              >Ngày kết thúc <span class="text-red-500">*</span></label
-            >
-            <input
-              type="date"
-              name="endDate"
-              required
-              class="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-            />
-          </div>
+    <form th:action="@{/owner/contracts/create}" method="post" class="card shadow mb-4">
+        <div class="card-header py-3 bg-white border-bottom-success">
+            <h6 class="m-0 font-weight-bold text-success">
+                <i class="fas fa-file-signature mr-1"></i>Thông Tin Hợp Đồng & Khách Thuê
+            </h6>
         </div>
-      </div>
+        <div class="card-body">
+            <!-- 1. Cơ sở & Phòng & Thời hạn -->
+            <div class="mb-4">
+                <h6 class="font-weight-bold text-primary mb-3">
+                    <i class="fas fa-door-open mr-1"></i>1. Cơ Sở, Phòng & Thời Hạn Hợp Đồng
+                </h6>
+                <div class="form-row">
+                    <div class="form-group col-md-6">
+                        <label class="font-weight-bold small text-gray-700">Cơ Sở Nhà Trọ <span class="text-danger">*</span></label>
+                        <select id="propertySelect" name="propertyId" required onchange="loadRooms(this.value)" class="form-control custom-select">
+                            <option value="">-- Chọn cơ sở nhà trọ --</option>
+                            <option th:each="prop : ${properties}" th:value="${prop.id}" th:text="${prop.name}"></option>
+                        </select>
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label class="font-weight-bold small text-gray-700">Phòng Trọ <span class="text-danger">*</span></label>
+                        <select id="roomSelect" name="roomId" required class="form-control custom-select">
+                            <option value="">-- Chọn cơ sở trước --</option>
+                        </select>
+                    </div>
+                </div>
 
-      <!-- Thông tin tài chính -->
-      <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-        <h2
-          class="text-lg font-bold text-gray-800 mb-6 flex items-center pb-4 border-b border-gray-100"
-        >
-          <span class="w-1 h-6 bg-blue-600 mr-3 rounded-full"></span>
-          Chi phí & Thanh toán
-        </h2>
+                <div class="form-row">
+                    <div class="form-group col-md-6">
+                        <label class="font-weight-bold small text-gray-700">Ngày Bắt Đầu Thuê <span class="text-danger">*</span></label>
+                        <input type="date" id="startDateInput" name="startDate" required class="form-control">
+                    </div>
+                    <div class="form-group col-md-6">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <label class="font-weight-bold small text-gray-700 mb-0">Ngày Kết Thúc Thuê <span class="text-danger">*</span></label>
+                            <div>
+                                <button type="button" class="btn btn-outline-primary btn-sm py-0 px-2 small" onclick="addContractDuration(6)">+6 tháng</button>
+                                <button type="button" class="btn btn-outline-primary btn-sm py-0 px-2 small ml-1" onclick="addContractDuration(12)">+1 năm</button>
+                                <button type="button" class="btn btn-outline-primary btn-sm py-0 px-2 small ml-1" onclick="addContractDuration(24)">+2 năm</button>
+                            </div>
+                        </div>
+                        <input type="date" id="endDateInput" name="endDate" required class="form-control">
+                    </div>
+                </div>
+            </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1"
-              >Giá thuê (VNĐ) <span class="text-red-500">*</span></label
-            >
-            <input
-              type="number"
-              name="rentPrice"
-              required
-              min="0"
-              value="0"
-              class="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-            />
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1"
-              >Tiền cọc (VNĐ) <span class="text-red-500">*</span></label
-            >
-            <input
-              type="number"
-              name="deposit"
-              required
-              min="0"
-              value="0"
-              class="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-            />
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1"
-              >Chu kỳ thanh toán <span class="text-red-500">*</span></label
-            >
-            <select
-              name="paymentCycle"
-              class="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-            >
-              <option value="1">1 tháng</option>
-              <option value="3">3 tháng</option>
-              <option value="6">6 tháng</option>
-              <option value="12">12 tháng</option>
-            </select>
-          </div>
+            <hr class="my-4">
+
+            <!-- 2. Chi phí & Thanh toán -->
+            <div class="mb-4">
+                <h6 class="font-weight-bold text-success mb-3">
+                    <i class="fas fa-money-bill-wave mr-1"></i>2. Chi Phí Thuê & Đặt Cọc
+                </h6>
+                <div class="form-row">
+                    <div class="form-group col-md-4">
+                        <label class="font-weight-bold small text-gray-700">Giá Thuê Hàng Tháng (VNĐ) <span class="text-danger">*</span></label>
+                        <input type="number" name="rentPrice" required min="0" value="0" class="form-control font-mono font-weight-bold text-danger">
+                    </div>
+                    <div class="form-group col-md-4">
+                        <label class="font-weight-bold small text-gray-700">Tiền Đặt Cọc Giữ Phòng (VNĐ) <span class="text-danger">*</span></label>
+                        <input type="number" name="deposit" required min="0" value="0" class="form-control font-mono font-weight-bold text-warning">
+                    </div>
+                    <div class="form-group col-md-4">
+                        <label class="font-weight-bold small text-gray-700">Chu Kỳ Thu Tiền <span class="text-danger">*</span></label>
+                        <select name="paymentCycle" class="form-control custom-select">
+                            <option value="1">1 tháng / lần</option>
+                            <option value="2">2 tháng / lần</option>
+                            <option value="3">3 tháng / lần</option>
+                            <option value="6">6 tháng / lần</option>
+                            <option value="12">1 năm / lần</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group mt-2">
+                    <label class="font-weight-bold small text-gray-700 d-block">Hình thức chi phí điện nước</label>
+                    <div class="custom-control custom-radio custom-control-inline">
+                        <input type="radio" id="elecIncYes" name="isElectricityWaterIncluded" value="true" class="custom-control-input">
+                        <label class="custom-control-label" for="elecIncYes">Đã bao gồm trọn gói trong tiền phòng</label>
+                    </div>
+                    <div class="custom-control custom-radio custom-control-inline">
+                        <input type="radio" id="elecIncNo" name="isElectricityWaterIncluded" value="false" checked class="custom-control-input">
+                        <label class="custom-control-label" for="elecIncNo">Tính riêng theo công tơ thực tế hàng tháng</label>
+                    </div>
+                </div>
+            </div>
+
+            <hr class="my-4">
+
+            <!-- 3. Khách thuê & Khác -->
+            <div class="mb-4">
+                <h6 class="font-weight-bold text-info mb-3">
+                    <i class="fas fa-users mr-1"></i>3. Danh Sách Khách Thuê & Ghi Chú
+                </h6>
+                <div class="form-group">
+                    <label class="font-weight-bold small text-gray-700">Chọn Khách Thuê Vào Phòng <span class="text-danger">*</span></label>
+                    <div class="input-group input-group-sm mb-2">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text bg-light"><i class="fas fa-search text-muted"></i></span>
+                        </div>
+                        <input type="text" id="contractTenantSearch" class="form-control"
+                               placeholder="Tìm nhanh khách thuê theo tên, SĐT, CCCD..." oninput="filterContractTenants()">
+                    </div>
+                    <div id="contractTenantCheckboxList" class="border rounded p-2 mb-2 bg-light" style="max-height: 150px; overflow-y: auto;">
+                        <div th:each="tenant : ${tenants}" class="custom-control custom-checkbox py-1 contract-tenant-item"
+                             th:data-search="${(tenant.fullName ?: '') + ' ' + (tenant.phone ?: '') + ' ' + (tenant.citizenId ?: '')}">
+                            <input type="checkbox" class="custom-control-input tenant-checkbox-sync"
+                                   th:id="'tenantChk_' + ${tenant.id}"
+                                   th:value="${tenant.id}"
+                                   th:checked="${preselectedTenantId != null and preselectedTenantId == tenant.id}"
+                                   onchange="syncTenantSelectFromCheckboxes()">
+                            <label class="custom-control-label small font-weight-bold text-dark cursor-pointer"
+                                   th:for="'tenantChk_' + ${tenant.id}"
+                                   th:text="${tenant.fullName + ' - SĐT: ' + tenant.phone + ' - CCCD: ' + (tenant.citizenId ?: '-')}"></label>
+                        </div>
+                    </div>
+                    <select id="tenantSelect" name="tenantIds" multiple class="form-control" style="height: 100px;" required onchange="syncCheckboxesFromTenantSelect()">
+                        <option th:each="tenant : ${tenants}"
+                                th:value="${tenant.id}"
+                                th:selected="${preselectedTenantId != null and preselectedTenantId == tenant.id}"
+                                th:text="${tenant.fullName + ' - SĐT: ' + tenant.phone + ' - CCCD: ' + (tenant.citizenId ?: '-')}"></option>
+                    </select>
+                    <small class="form-text text-muted">
+                        <i class="fas fa-info-circle mr-1 text-primary"></i>Người được chọn đầu tiên sẽ là đại diện pháp lý của hợp đồng. Có thể tích chọn trực tiếp hoặc giữ phím <strong>Ctrl</strong> ở khung danh sách.
+                    </small>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group col-md-4">
+                        <label class="font-weight-bold small text-gray-700">Số Giường Bàn Giao</label>
+                        <input type="number" name="bedCount" min="0" value="1" class="form-control">
+                    </div>
+                    <div class="form-group col-md-8">
+                        <label class="font-weight-bold small text-gray-700">Ghi Chú Hợp Đồng / Điều Khoản Bổ Sung</label>
+                        <input type="text" name="note" class="form-control" placeholder="Ví dụ: Bàn giao 1 chìa khóa cổng, 1 điều hòa hoạt động tốt...">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="d-flex justify-content-end mt-4 pt-3 border-top">
+                <a th:href="@{/owner/contracts}" class="btn btn-secondary font-weight-bold mr-2 shadow-sm">
+                    <i class="fas fa-times mr-1"></i>Hủy Bỏ
+                </a>
+                <button type="submit" class="btn btn-success font-weight-bold px-4 shadow-sm">
+                    <i class="fas fa-save mr-1"></i>Lưu Hợp Đồng Thuê
+                </button>
+            </div>
         </div>
-
-        <div class="mt-6">
-          <label class="block text-sm font-medium text-gray-700 mb-2"
-            >Chi phí điện nước</label
-          >
-          <div
-            class="flex gap-6 p-4 bg-gray-50 rounded-lg border border-gray-200"
-          >
-            <label class="flex items-center gap-2 cursor-pointer">
-              <input
-                type="radio"
-                name="isElectricityWaterIncluded"
-                value="true"
-                class="w-4 h-4 text-blue-600 focus:ring-blue-500"
-              />
-              <span class="text-sm text-gray-700"
-                >Giá thuê đã bao gồm điện nước</span
-              >
-            </label>
-            <label class="flex items-center gap-2 cursor-pointer">
-              <input
-                type="radio"
-                name="isElectricityWaterIncluded"
-                value="false"
-                checked
-                class="w-4 h-4 text-blue-600 focus:ring-blue-500"
-              />
-              <span class="text-sm text-gray-700"
-                >Tính theo công tơ thực tế</span
-              >
-            </label>
-          </div>
-        </div>
-      </div>
-
-      <!-- Thông tin khách thuê & Khác -->
-      <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-        <h2
-          class="text-lg font-bold text-gray-800 mb-6 flex items-center pb-4 border-b border-gray-100"
-        >
-          <span class="w-1 h-6 bg-blue-600 mr-3 rounded-full"></span>
-          Khách thuê & Ghi chú
-        </h2>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div class="md:col-span-2">
-            <label class="block text-sm font-medium text-gray-700 mb-1"
-              >Khách thuê</label
-            >
-            <select
-              name="tenantIds"
-              multiple
-              class="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 h-32 transition-colors"
-            >
-              <option
-                th:each="tenant : ${tenants}"
-                th:value="${tenant.id}"
-                th:text="${tenant.fullName + ' - ' + tenant.phone}"
-              ></option>
-            </select>
-            <p class="text-xs text-blue-600 mt-2 flex items-center gap-1">
-              <i class="fa-solid fa-circle-info"></i>
-              Người được chọn đầu tiên sẽ là người đại diện hợp đồng (Giữ phím
-              Ctrl để chọn nhiều)
-            </p>
-          </div>
-
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1"
-              >Số giường</label
-            >
-            <input
-              type="number"
-              name="bedCount"
-              min="0"
-              class="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-              placeholder="Nhập số lượng"
-            />
-          </div>
-
-          <div class="md:col-span-2">
-            <label class="block text-sm font-medium text-gray-700 mb-1"
-              >Ghi chú thêm</label
-            >
-            <textarea
-              name="note"
-              rows="3"
-              class="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-              placeholder="Nhập ghi chú hợp đồng (điều khoản bổ sung, tình trạng phòng...)"
-            ></textarea>
-          </div>
-        </div>
-      </div>
-
-      <!-- Actions -->
-      <div class="flex items-center justify-end gap-4 pt-4">
-        <a
-          th:href="@{/owner/contracts}"
-          class="px-6 py-2.5 border border-gray-300 rounded-xl text-sm font-medium text-gray-700 hover:bg-white hover:border-gray-400 bg-gray-50 transition-all shadow-sm"
-        >
-          Hủy bỏ
-        </a>
-        <button
-          type="submit"
-          class="px-6 py-2.5 bg-blue-600 text-white rounded-xl text-sm font-bold hover:bg-blue-700 shadow-lg shadow-blue-200 transition-all active:scale-95 flex items-center gap-2"
-        >
-          <i class="fa-solid fa-check"></i>
-          Lưu hợp đồng
-        </button>
-      </div>
     </form>
-  </div>
 
-  <script>
-    function loadRooms(propertyId) {
-      const roomSelect = document.getElementById("roomSelect");
-      roomSelect.innerHTML = '<option value="">Đang tải...</option>';
-      roomSelect.classList.add("animate-pulse");
+    <script th:inline="javascript">
+    function escapeHtml(str) {
+        return String(str == null ? '' : str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    }
 
-      if (!propertyId) {
-        roomSelect.innerHTML =
-          '<option value="">-- Chọn nhà trọ trước --</option>';
-        roomSelect.classList.remove("animate-pulse");
-        return;
-      }
+    function formatDateISO(d) {
+        var year = d.getFullYear();
+        var month = String(d.getMonth() + 1).padStart(2, '0');
+        var day = String(d.getDate()).padStart(2, '0');
+        return year + '-' + month + '-' + day;
+    }
 
-      fetch(`/owner/contracts/api/rooms-by-property?propertyId=${propertyId}`)
-        .then((response) => response.json())
-        .then((rooms) => {
-          roomSelect.classList.remove("animate-pulse");
-          roomSelect.innerHTML = '<option value="">-- Chọn phòng --</option>';
-          if (rooms.length === 0) {
-            roomSelect.innerHTML +=
-              '<option value="" disabled>Không có phòng trống</option>';
-          }
-          rooms.forEach((room) => {
-            roomSelect.innerHTML += `<option value="${room.id}" data-price="${room.price}">${room.name}</option>`;
-          });
-        })
-        .catch((error) => {
-          console.error("Error:", error);
-          roomSelect.classList.remove("animate-pulse");
-          roomSelect.innerHTML = '<option value="">Lỗi tải dữ liệu</option>';
+    function addContractDuration(months) {
+        var startEl = document.getElementById('startDateInput');
+        var endEl = document.getElementById('endDateInput');
+        if (!startEl.value) {
+            startEl.value = formatDateISO(new Date());
+        }
+        var parts = startEl.value.split('-');
+        var d = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
+        d.setMonth(d.getMonth() + months);
+        endEl.value = formatDateISO(d);
+    }
+
+    function updateRepresentativeOptions() {
+        // Hỗ trợ đồng bộ danh sách khách thuê được chọn
+    }
+
+    function filterContractTenants() {
+        var input = document.getElementById('contractTenantSearch');
+        var q = input ? input.value.toLowerCase().trim() : '';
+
+        var items = document.querySelectorAll('.contract-tenant-item');
+        items.forEach(function(item) {
+            var text = (item.getAttribute('data-search') || item.textContent || '').toLowerCase();
+            item.style.display = (!q || text.includes(q)) ? '' : 'none';
+        });
+
+        var select = document.getElementById('tenantSelect');
+        if (select) {
+            Array.from(select.options).forEach(function(opt) {
+                var text = (opt.text || '').toLowerCase();
+                opt.style.display = (!q || text.includes(q)) ? '' : 'none';
+            });
+        }
+    }
+
+    function syncTenantSelectFromCheckboxes() {
+        var select = document.getElementById('tenantSelect');
+        if (!select) return;
+        var checkedValues = Array.from(document.querySelectorAll('.tenant-checkbox-sync:checked')).map(function(cb) {
+            return String(cb.value);
+        });
+        Array.from(select.options).forEach(function(opt) {
+            opt.selected = checkedValues.includes(String(opt.value));
         });
     }
 
-    // Auto fill price when room selected
-    document
-      .getElementById("roomSelect")
-      .addEventListener("change", function () {
-        const selectedOption = this.options[this.selectedIndex];
-        const price = selectedOption.getAttribute("data-price");
-        if (price) {
-          document.querySelector('input[name="rentPrice"]').value = price;
+    function syncCheckboxesFromTenantSelect() {
+        var select = document.getElementById('tenantSelect');
+        if (!select) return;
+        var selectedValues = Array.from(select.selectedOptions).map(function(opt) {
+            return String(opt.value);
+        });
+        document.querySelectorAll('.tenant-checkbox-sync').forEach(function(cb) {
+            cb.checked = selectedValues.includes(String(cb.value));
+        });
+    }
+
+    function loadRooms(propertyId, targetRoomId) {
+        const roomSelect = document.getElementById("roomSelect");
+        roomSelect.innerHTML = '<option value="">Đang tải phòng...</option>';
+
+        if (!propertyId) {
+            roomSelect.innerHTML = '<option value="">-- Chọn cơ sở trước --</option>';
+            return Promise.resolve();
         }
-      });
-  </script>
+
+        return fetch(`/owner/contracts/api/rooms-by-property?propertyId=${propertyId}`)
+            .then((response) => {
+                if (!response.ok) {
+                    return fetch(`/owner/contracts/api/rooms?propertyId=${propertyId}`);
+                }
+                return response;
+            })
+            .then((response) => response.json())
+            .then((rooms) => {
+                roomSelect.innerHTML = '<option value="">-- Chọn phòng --</option>';
+                if (!rooms || rooms.length === 0) {
+                    roomSelect.innerHTML += '<option value="" disabled>Không có phòng trống</option>';
+                } else {
+                    rooms.forEach((room) => {
+                        const dep = room.deposit != null && room.deposit > 0 ? room.deposit : room.price;
+                        roomSelect.innerHTML += `<option value="${room.id}" data-price="${room.price}" data-deposit="${dep}">${escapeHtml(room.name)} (${room.area}m² - ${new Intl.NumberFormat('vi-VN').format(room.price)} đ)</option>`;
+                    });
+                    if (targetRoomId) {
+                        roomSelect.value = String(targetRoomId);
+                        roomSelect.dispatchEvent(new Event('change'));
+                    }
+                }
+            })
+            .catch((error) => {
+                console.error("Error:", error);
+                roomSelect.innerHTML = '<option value="">Lỗi tải dữ liệu phòng</option>';
+            });
+    }
+
+    document.getElementById("roomSelect").addEventListener("change", function () {
+        const selectedOption = this.options[this.selectedIndex];
+        if (!selectedOption) return;
+        const price = selectedOption.getAttribute("data-price");
+        const deposit = selectedOption.getAttribute("data-deposit") || price;
+        if (price) {
+            document.querySelector('input[name="rentPrice"]').value = price;
+            document.querySelector('input[name="deposit"]').value = deposit;
+        }
+    });
+
+    document.addEventListener("DOMContentLoaded", function () {
+        const startEl = document.getElementById('startDateInput');
+        if (startEl && !startEl.value) {
+            startEl.value = formatDateISO(new Date());
+            addContractDuration(12);
+        }
+
+        const preselectedPropertyId = /*[[${preselectedPropertyId}]]*/ null;
+        const preselectedRoomId = /*[[${preselectedRoomId}]]*/ null;
+        const preselectedTenantId = /*[[${preselectedTenantId}]]*/ null;
+
+        if (preselectedPropertyId) {
+            const propSelect = document.getElementById('propertySelect');
+            if (propSelect) {
+                propSelect.value = String(preselectedPropertyId);
+                loadRooms(preselectedPropertyId, preselectedRoomId);
+            }
+        }
+
+        if (preselectedTenantId) {
+            const tenantSelect = document.getElementById('tenantSelect');
+            if (tenantSelect) {
+                Array.from(tenantSelect.options).forEach(opt => {
+                    if (String(opt.value) === String(preselectedTenantId)) {
+                        opt.selected = true;
+                    }
+                });
+            }
+            const tenantCheckbox = document.querySelector(`input[type="checkbox"][name="tenantIds"][value="${preselectedTenantId}"]`);
+            if (tenantCheckbox) {
+                tenantCheckbox.checked = true;
+            }
+            updateRepresentativeOptions();
+        }
+    });
+    </script>
 </div>

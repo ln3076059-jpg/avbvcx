@@ -1,0 +1,127 @@
+<div th:fragment="content" class="container-fluid">
+
+    <!-- Page Heading -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <div>
+            <h1 class="h3 mb-1 text-gray-800 font-weight-bold">
+                Chi Tiết Hóa Đơn: <span class="text-primary" th:text="${invoice.invoiceCode}">INV-001</span>
+            </h1>
+            <p class="text-muted small mb-0">Bảng kê chi tiết tiền phòng, định mức điện nước và dịch vụ phát sinh.</p>
+        </div>
+        <a th:href="@{/admin/invoices}" class="btn btn-secondary btn-sm shadow-sm font-weight-bold">
+            <i class="fas fa-arrow-left mr-1"></i> Quay Lại Danh Sách
+        </a>
+    </div>
+
+    <div class="row">
+        <!-- Thông tin hóa đơn -->
+        <div class="col-lg-7 mb-4">
+            <div class="card shadow h-100">
+                <div class="card-header py-3 bg-white border-bottom-primary d-flex align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-receipt mr-1"></i> Bảng Kê Chi Phí Hóa Đơn
+                    </h6>
+                    <span class="badge" 
+                          th:classappend="${invoice.status != null and invoice.status.name() == 'PAID' ? 'badge-success' : 'badge-warning'}"
+                          th:text="${invoice.status != null ? invoice.status.displayName : 'PENDING'}">CHƯA THANH TOÁN</span>
+                </div>
+                <div class="card-body">
+                    <table class="table table-bordered mb-4">
+                        <thead class="bg-light">
+                            <tr>
+                                <th>Khoản Mục</th>
+                                <th class="text-center">Số Lượng / Chỉ Số</th>
+                                <th class="text-right">Đơn Giá</th>
+                                <th class="text-right">Thành Tiền (VNĐ)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="font-weight-bold">Tiền thuê phòng</td>
+                                <td class="text-center">1 tháng</td>
+                                <td class="text-right" th:text="${#numbers.formatDecimal(invoice.roomPrice, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</td>
+                                <td class="text-right font-weight-bold" th:text="${#numbers.formatDecimal(invoice.roomPrice, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</td>
+                            </tr>
+                            <tr>
+                                <td class="font-weight-bold">Tiền điện tiêu thụ</td>
+                                <td class="text-center" th:text="${invoice.electricityUsage} + ' kWh'">0 kWh</td>
+                                <td class="text-right" th:text="${#numbers.formatDecimal(invoice.electricityPrice, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</td>
+                                <td class="text-right font-weight-bold" th:text="${#numbers.formatDecimal(invoice.electricityAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</td>
+                            </tr>
+                            <tr>
+                                <td class="font-weight-bold">Tiền nước sinh hoạt</td>
+                                <td class="text-center" th:text="${invoice.waterUsage} + ' m³'">0 m³</td>
+                                <td class="text-right" th:text="${#numbers.formatDecimal(invoice.waterPrice, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</td>
+                                <td class="text-right font-weight-bold" th:text="${#numbers.formatDecimal(invoice.waterAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</td>
+                            </tr>
+                            <tr>
+                                <td class="font-weight-bold">Phí dịch vụ & Khác</td>
+                                <td class="text-center">-</td>
+                                <td class="text-right">-</td>
+                                <td class="text-right font-weight-bold" th:text="${#numbers.formatDecimal((invoice.serviceAmount + invoice.otherAmount), 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</td>
+                            </tr>
+                        </tbody>
+                        <tfoot class="bg-light font-weight-bold">
+                            <tr>
+                                <th colspan="3" class="text-right">TỔNG CỘNG:</th>
+                                <th class="text-right text-success h5 mb-0" 
+                                    th:text="${#numbers.formatDecimal(invoice.totalAmount, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'">0 VNĐ</th>
+                            </tr>
+                        </tfoot>
+                    </table>
+
+                    <div class="d-flex justify-content-end" th:if="${invoice.status != null and invoice.status.name() != 'PAID'}">
+                        <form th:action="@{'/admin/invoices/' + ${invoice.id} + '/mark-paid'}" method="post"
+                              data-confirm="Xác nhận hóa đơn này đã được thanh toán toàn bộ?">
+                            <button type="submit" class="btn btn-success font-weight-bold"
+                                    data-confirm="Xác nhận hóa đơn này đã được thanh toán toàn bộ?">
+                                <i class="fas fa-check-circle mr-1"></i> Xác Nhận Đã Thu Đủ Tiền
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Thông tin phòng & khách -->
+        <div class="col-lg-5 mb-4">
+            <div class="card shadow h-100">
+                <div class="card-header py-3 bg-white border-bottom-info">
+                    <h6 class="m-0 font-weight-bold text-info">
+                        <i class="fas fa-info-circle mr-1"></i> Đối Tượng Thu Phí
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <span class="small text-muted">Phòng cho thuê:</span><br>
+                        <strong class="h5 text-primary" th:text="${invoice.room != null ? invoice.room.name : 'N/A'}">Phòng 101</strong>
+                        <div class="small text-muted" th:if="${invoice.room != null and invoice.room.property != null}">
+                            Thuộc cơ sở: <strong th:text="${invoice.room.property.name}">Nhà trọ A</strong>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <span class="small text-muted">Khách nhận hóa đơn:</span><br>
+                        <strong class="text-dark" th:text="${invoice.tenant != null ? invoice.tenant.fullName : 'N/A'}">Nguyễn Văn B</strong>
+                        <div class="small text-muted" th:if="${invoice.tenant != null and invoice.tenant.phone != null}">
+                            SĐT: <span th:text="${invoice.tenant.phone}">0912345678</span>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <span class="small text-muted">Hạn chót thanh toán:</span><br>
+                        <strong class="text-danger" th:text="${invoice.dueDate != null ? #temporals.format(invoice.dueDate, 'dd/MM/yyyy') : 'Theo thỏa thuận'}">15/01/2026</strong>
+                    </div>
+
+                    <div class="p-3 bg-light rounded border small">
+                        <span class="text-muted">Đã thanh toán: </span>
+                        <strong class="text-success" th:text="${#numbers.formatDecimal(invoice.paidAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</strong><br>
+                        <span class="text-muted">Còn lại: </span>
+                        <strong class="text-danger" th:text="${#numbers.formatDecimal(invoice.remainingAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>

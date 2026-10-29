@@ -32,7 +32,7 @@ public class PropertySlot {
     @Column(nullable = false, name = "is_active")
     private boolean isActive = true; // plan_slot = true/false
     
-    @Column(columnDefinition = "nvarchar(500)", name = "deactivation_reason")
+    @Column(length = 500, name = "deactivation_reason")
     private String deactivationReason; // Lý do bị vô hiệu hóa
     
     @Column(name = "activated_at")

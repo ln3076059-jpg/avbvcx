@@ -1,0 +1,109 @@
+<div th:fragment="content" class="container-fluid">
+
+    <!-- Page Heading -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <div>
+            <h1 class="h3 mb-1 text-gray-800 font-weight-bold">Đăng Tin Cho Thuê Mới</h1>
+            <p class="text-muted small mb-0">Tạo tin rao cho thuê phòng/căn hộ trực tiếp lên sàn giao dịch Trọ Mới.</p>
+        </div>
+        <a th:href="@{/admin/posts}" class="btn btn-secondary btn-icon-split shadow-sm">
+            <span class="icon text-white-50">
+                <i class="fas fa-arrow-left"></i>
+            </span>
+            <span class="text font-weight-bold">Quay Lại Danh Sách</span>
+        </a>
+    </div>
+
+    <!-- Form Card -->
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 bg-white border-bottom-primary">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-bullhorn mr-1"></i> Thông Tin Bài Đăng Thị Trường
+                    </h6>
+                </div>
+                <div class="card-body p-4">
+                    <form th:action="@{/admin/posts/create}" method="post">
+                        
+                        <div class="form-group">
+                            <label for="propertyId" class="font-weight-bold text-gray-700">
+                                Chọn cơ sở nhà trọ liên kết <span class="text-danger">*</span>
+                            </label>
+                            <select class="form-control" id="propertyId" name="propertyId" required>
+                                <option value="">-- Chọn cơ sở trọ --</option>
+                                <option th:each="p : ${properties}" 
+                                        th:value="${p.id}" 
+                                        th:text="${p.name + ' (' + (p.owner != null ? p.owner.fullName : 'N/A') + ')'}">Nhà trọ</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="title" class="font-weight-bold text-gray-700">
+                                Tiêu đề tin đăng hiển thị <span class="text-danger">*</span>
+                            </label>
+                            <input type="text" class="form-control" id="title" name="title" required 
+                                   placeholder="Ví dụ: Phòng trọ khép kín full nội thất gần đại học Quốc Gia..."
+                                   onkeyup="generateSlug(this.value)">
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group col-md-6">
+                                <label for="slug" class="font-weight-bold text-gray-700">
+                                    Đường dẫn SEO (Slug) <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" class="form-control" id="slug" name="slug" required 
+                                       placeholder="duong-dan-tin-dang">
+                            </div>
+
+                            <div class="form-group col-md-6">
+                                <label for="status" class="font-weight-bold text-gray-700">
+                                    Trạng thái xuất bản <span class="text-danger">*</span>
+                                </label>
+                                <select class="form-control" id="status" name="status" required>
+                                    <option value="ACTIVE" selected>Hiển thị ngay (ACTIVE)</option>
+                                    <option value="PENDING_APPROVAL">Chờ duyệt (PENDING_APPROVAL)</option>
+                                    <option value="DRAFT">Bản nháp (DRAFT)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="description" class="font-weight-bold text-gray-700">
+                                Nội dung chi tiết bài đăng
+                            </label>
+                            <textarea class="form-control" id="description" name="description" rows="5" 
+                                      placeholder="Mô tả tiện ích, vị trí, giờ giấc tự do, an ninh khu vực..."></textarea>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <div class="d-flex justify-content-end">
+                            <a th:href="@{/admin/posts}" class="btn btn-secondary mr-2">
+                                <i class="fas fa-times mr-1"></i> Hủy Bỏ
+                            </a>
+                            <button type="submit" class="btn btn-primary font-weight-bold">
+                                <i class="fas fa-save mr-1"></i> Xuất Bản Tin Đăng
+                            </button>
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function generateSlug(text) {
+            var slug = text.toLowerCase()
+                .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+                .replace(/[đĐ]/g, "d")
+                .replace(/([^0-9a-z-\s])/g, '')
+                .replace(/(\s+)/g, '-')
+                .replace(/-+/g, '-')
+                .replace(/^-+|-+$/g, '');
+            document.getElementById('slug').value = slug;
+        }
+    </script>
+
+</div>

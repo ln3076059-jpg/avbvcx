@@ -1,0 +1,381 @@
+<div class="container-fluid mb-4" th:fragment="content">
+    <style>
+        @media print {
+            #accordionSidebar, .topbar, .navbar, footer, .btn, .alert, .no-print, form, .card-header {
+                display: none !important;
+            }
+            #content-wrapper, #content, .container-fluid {
+                margin: 0 !important;
+                padding: 0 !important;
+                background: #fff !important;
+                width: 100% !important;
+            }
+            .card {
+                border: none !important;
+                box-shadow: none !important;
+            }
+            body {
+                background: #fff !important;
+                color: #000 !important;
+                font-size: 13px !important;
+            }
+            .table-bordered th, .table-bordered td {
+                border: 1px solid #dee2e6 !important;
+            }
+            .print-only {
+                display: block !important;
+            }
+        }
+        .print-only {
+            display: none;
+        }
+    </style>
+
+    <!-- Page Heading -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4 no-print">
+        <div>
+            <h1 class="h3 mb-0 text-gray-800 font-weight-bold">
+                <i class="fas fa-file-invoice text-success mr-2"></i>Chi Tiết Hóa Đơn Thu Tiền
+            </h1>
+            <p class="text-muted small mb-0 mt-1">Thông tin thanh toán, các khoản mục dịch vụ và lịch sử các lần thu tiền</p>
+        </div>
+        <div class="d-flex align-items-center flex-wrap">
+            <a th:href="@{/owner/invoices}" class="btn btn-secondary btn-sm shadow-sm font-weight-bold mr-2">
+                <i class="fas fa-arrow-left mr-1"></i>Danh Sách HĐ
+            </a>
+            <button type="button" id="btnCopyZaloBill"
+                    onclick="copyZaloInvoiceMessage()"
+                    th:attr="data-room=${invoice.room.name},
+                             data-prop=${invoice.room.property.name},
+                             data-tenant=${invoice.tenant != null ? invoice.tenant.fullName : 'Quý khách'},
+                             data-month=${invoice.month + '/' + invoice.year},
+                             data-code=${invoice.invoiceCode},
+                             data-total=${#numbers.formatDecimal(invoice.remainingAmount > 0 ? invoice.remainingAmount : invoice.totalAmount, 0, 'COMMA', 0, 'POINT')},
+                             data-due=${invoice.dueDate != null ? #temporals.format(invoice.dueDate, 'dd/MM/yyyy') : '10/' + invoice.month + '/' + invoice.year},
+                             data-bank=${invoice.room.property.owner.effectiveBankCode},
+                             data-acc=${invoice.room.property.owner.effectiveBankAccountNumber},
+                             data-accname=${invoice.room.property.owner.effectiveBankAccountName}"
+                    class="btn btn-info btn-sm shadow-sm font-weight-bold mr-2">
+                <i class="fas fa-comment-dots mr-1"></i>Sao Chép Tin Nhắn Báo Tiền Phòng (Zalo / SMS)
+            </button>
+            <button onclick="window.print()" class="btn btn-outline-primary btn-sm shadow-sm font-weight-bold mr-2">
+                <i class="fas fa-print mr-1"></i>In Phiếu Báo Tiền Phòng
+            </button>
+            <a th:if="${invoice.status != T(com.pms.propertymanagement.enums.InvoiceStatus).PAID}" 
+               th:href="@{'/owner/invoices/' + ${invoice.id} + '/edit'}" 
+               class="btn btn-warning btn-sm shadow-sm font-weight-bold">
+                <i class="fas fa-edit mr-1"></i>Chỉnh Sửa
+            </a>
+        </div>
+    </div>
+
+    <!-- Toast Thông Báo Sao Chép Zalo / SMS -->
+    <div id="zaloCopyToast" class="alert alert-success border-left-success shadow-sm py-2 px-3 mb-3 no-print" style="display: none;" role="alert">
+        <i class="fas fa-check-circle mr-2"></i>
+        <strong>Đã sao chép tin nhắn báo tiền phòng vào bộ nhớ tạm!</strong> Bạn có thể dán (Ctrl + V) gửi trực tiếp cho khách qua Zalo hoặc SMS.
+    </div>
+
+    <!-- Main Card -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 bg-white border-bottom-success d-flex justify-content-between align-items-center">
+            <h6 class="m-0 font-weight-bold text-success">
+                <i class="fas fa-receipt mr-1"></i>Hóa Đơn: <span class="font-mono text-primary" th:text="${invoice.invoiceCode}">INV-01</span>
+            </h6>
+            <div>
+                <span th:if="${invoice.transferNotifiedAt != null and invoice.status.name() != 'PAID'}" class="badge badge-info mr-1" style="font-size: 0.85rem;">
+                    <i class="fas fa-bell mr-1"></i>Khách báo đã CK
+                </span>
+                <span class="badge" th:classappend="${invoice.status.badgeClass}" style="font-size: 0.9rem;" th:text="${invoice.status.displayName}">
+                    Đang chờ thanh toán
+                </span>
+            </div>
+        </div>
+        <div class="card-body">
+            <!-- Thông báo khách báo đã chuyển khoản -->
+            <div th:if="${invoice.transferNotifiedAt != null and invoice.status.name() != 'PAID'}"
+                 class="alert alert-info border-left-info shadow-sm d-flex align-items-center justify-content-between mb-4 no-print" role="alert">
+                <div>
+                    <div class="font-weight-bold">
+                        <i class="fas fa-bell mr-1"></i>Khách thuê đã báo chuyển khoản lúc 
+                        <span class="font-mono" th:text="${#temporals.format(invoice.transferNotifiedAt, 'dd/MM/yyyy HH:mm')}"></span>
+                    </div>
+                    <div class="small mt-1" th:if="${invoice.transferNote != null and !#strings.isEmpty(invoice.transferNote)}">
+                        Nội dung / Mã GD khách gửi: <strong class="font-mono text-dark" th:text="${invoice.transferNote}"></strong>
+                    </div>
+                </div>
+                <span class="badge badge-info px-3 py-2">Chờ kiểm tra & xác nhận</span>
+            </div>
+            
+            <!-- Header Paper -->
+            <div class="row border-bottom pb-4 mb-4">
+                <div class="col-md-6 mb-3 mb-md-0">
+                    <h5 class="font-weight-bold text-success uppercase mb-1">PHIẾU THU TIỀN NHÀ TRỌ</h5>
+                    <div class="text-muted small">
+                        Kỳ thanh toán: <strong class="text-dark">Tháng <span th:text="${invoice.month}">1</span>/<span th:text="${invoice.year}">2026</span></strong>
+                    </div>
+                    <div class="text-muted small">
+                        Ngày lập phiếu: <span th:text="${#temporals.format(invoice.createdAt, 'dd/MM/yyyy HH:mm')}">01/01/2026</span>
+                    </div>
+                    <div class="text-danger small font-weight-bold" th:if="${invoice.dueDate != null}">
+                        Hạn thanh toán: <span th:text="${#temporals.format(invoice.dueDate, 'dd/MM/yyyy')}">10/01/2026</span>
+                    </div>
+                </div>
+                <div class="col-md-6 text-md-right">
+                    <h6 class="font-weight-bold text-dark mb-1" th:text="${invoice.room.property.name}">Nhà Trọ Xanh</h6>
+                    <div class="small text-muted" th:text="${(invoice.room.property.addressNumber ?: '') + ', ' + (invoice.room.property.ward != null ? invoice.room.property.ward.name : '')}">
+                        123 Cầu Giấy
+                    </div>
+                    <div class="small text-muted">
+                        Chủ nhà: <strong class="text-dark" th:text="${invoice.room.property.owner.fullName ?: invoice.room.property.owner.username}">Chủ trọ</strong>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Customer & Room Info -->
+            <div class="row bg-light p-3 rounded mb-4">
+                <div class="col-md-6 mb-2 mb-md-0">
+                    <div class="text-xs font-weight-bold text-muted text-uppercase">Phòng Thuê</div>
+                    <div class="h5 font-weight-bold text-primary mb-0 mt-1" th:text="${invoice.room.name}">Phòng 101</div>
+                    <div class="small text-muted mt-1">
+                        Giá thuê niêm yết: <span class="font-weight-bold font-mono" th:text="${#numbers.formatDecimal(invoice.roomPrice, 0, 'COMMA', 0, 'POINT')} + ' đ/th'">3.000.000 đ</span>
+                    </div>
+                </div>
+                <div class="col-md-6 text-md-right">
+                    <div class="text-xs font-weight-bold text-muted text-uppercase">Khách Hàng Thanh Toán</div>
+                    <div class="h5 font-weight-bold text-dark mb-0 mt-1" th:text="${invoice.tenant != null ? invoice.tenant.fullName : 'N/A'}">Nguyễn Văn An</div>
+                    <div class="small text-muted mt-1" th:if="${invoice.tenant != null and invoice.tenant.phone != null}">
+                        <i class="fas fa-phone-alt text-success mr-1"></i><span th:text="${invoice.tenant.phone}">0912345678</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Breakdown Table -->
+            <div class="table-responsive mb-4">
+                <table class="table table-bordered table-hover mb-0">
+                    <thead class="bg-light text-dark font-weight-bold">
+                        <tr>
+                            <th style="width: 5%;">#</th>
+                            <th>Khoản Mục Thu</th>
+                            <th class="text-center" style="width: 15%;">Phân Loại</th>
+                            <th class="text-center" style="width: 15%;">Số Lượng</th>
+                            <th class="text-right" style="width: 20%;">Đơn Giá</th>
+                            <th class="text-right" style="width: 20%;">Thành Tiền</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Khi có danh sách chi tiết invoice.details -->
+                        <tr th:if="${invoice.details != null and !invoice.details.empty}" th:each="d, stat : ${invoice.details}">
+                            <td class="font-mono text-center text-muted" th:text="${stat.count}">1</td>
+                            <td>
+                                <strong class="text-dark" th:text="${d.description}">Tiền thuê phòng</strong>
+                            </td>
+                            <td class="text-center">
+                                <span class="badge badge-light border text-muted" th:text="${d.type != null ? d.type.displayName : 'Khác'}">Dịch vụ</span>
+                            </td>
+                            <td class="text-center font-mono" th:text="${d.quantity}">1</td>
+                            <td class="text-right font-mono" th:text="${#numbers.formatDecimal(d.unitPrice, 0, 'COMMA', 0, 'POINT')} + ' đ'"></td>
+                            <td class="text-right font-mono font-weight-bold text-dark" th:text="${#numbers.formatDecimal(d.amount, 0, 'COMMA', 0, 'POINT')} + ' đ'"></td>
+                        </tr>
+                        <!-- Fallback nếu chưa sinh details -->
+                        <tr th:if="${invoice.details == null or invoice.details.empty}">
+                            <td class="font-mono text-center text-muted">1</td>
+                            <td><strong class="text-dark">Tiền thuê phòng</strong></td>
+                            <td class="text-center"><span class="badge badge-light border">Tiền phòng</span></td>
+                            <td class="text-center font-mono">1</td>
+                            <td class="text-right font-mono" th:text="${#numbers.formatDecimal(invoice.roomPrice, 0, 'COMMA', 0, 'POINT')} + ' đ'"></td>
+                            <td class="text-right font-mono font-weight-bold text-dark" th:text="${#numbers.formatDecimal(invoice.roomPrice, 0, 'COMMA', 0, 'POINT')} + ' đ'"></td>
+                        </tr>
+                    </tbody>
+                    <tfoot class="bg-light">
+                        <tr>
+                            <th colspan="5" class="text-right font-weight-bold text-dark">TỔNG CỘNG HÓA ĐƠN:</th>
+                            <th class="text-right font-weight-bold text-primary font-mono" style="font-size: 1.15rem;"
+                                th:text="${#numbers.formatDecimal(invoice.totalAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'"></th>
+                        </tr>
+                        <tr>
+                            <th colspan="5" class="text-right text-muted small">Đã thanh toán:</th>
+                            <th class="text-right text-success font-mono font-weight-bold" 
+                                th:text="${#numbers.formatDecimal(invoice.paidAmount ?: 0, 0, 'COMMA', 0, 'POINT')} + ' đ'"></th>
+                        </tr>
+                        <tr th:if="${invoice.remainingAmount > 0}">
+                            <th colspan="5" class="text-right text-danger font-weight-bold">SỐ TIỀN CÒN PHẢI THU:</th>
+                            <th class="text-right text-danger font-mono font-weight-bold" style="font-size: 1.1rem;"
+                                th:text="${#numbers.formatDecimal(invoice.remainingAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'"></th>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+
+            <!-- VietQR Khách quét trả tiền (Hỗ trợ chủ trọ show QR hoặc in ra phiếu thu) -->
+            <div th:if="${invoice.remainingAmount > 0}" class="card bg-light border-0 shadow-xs mb-4">
+                <div class="card-body p-3">
+                    <div class="row align-items-center">
+                        <div class="col-md-3 text-center mb-2 mb-md-0">
+                            <img th:src="@{'https://img.vietqr.io/image/' + ${invoice.room.property.owner.effectiveBankCode} + '-' + ${invoice.room.property.owner.effectiveBankAccountNumber} + '-compact2.png(amount=' + ${#numbers.formatDecimal(invoice.remainingAmount, 0, 'POINT', 0, 'POINT')} + ',addInfo=' + ${invoice.invoiceCode} + ',accountName=' + ${invoice.room.property.owner.effectiveBankAccountName} + ')'}" 
+                                 alt="VietQR" class="img-fluid rounded border bg-white p-1" style="max-height: 140px;">
+                            <div class="small text-muted mt-1 font-weight-bold"><i class="fas fa-qrcode mr-1 text-primary"></i>VietQR Napas 24/7</div>
+                        </div>
+                        <div class="col-md-9">
+                            <h6 class="font-weight-bold text-dark mb-1">
+                                <i class="fas fa-mobile-alt text-primary mr-1"></i>Mã QR Thanh Toán Tự Động
+                            </h6>
+                            <p class="small text-muted mb-2">Chủ trọ có thể đưa mã QR này cho khách quét bằng app ngân hàng để chuyển đúng số tiền và nội dung hóa đơn.</p>
+                            <div class="row small">
+                                <div class="col-sm-4 mb-1">
+                                    <span class="text-muted">Ngân hàng:</span> <strong class="text-dark" th:text="${invoice.room.property.owner.effectiveBankCode}">MB</strong>
+                                </div>
+                                <div class="col-sm-4 mb-1">
+                                    <span class="text-muted">STK:</span> <strong class="text-dark font-mono" th:text="${invoice.room.property.owner.effectiveBankAccountNumber}">0975893248</strong>
+                                </div>
+                                <div class="col-sm-4 mb-1">
+                                    <span class="text-muted">Nội dung:</span> <strong class="text-primary font-mono" th:text="${invoice.invoiceCode}">INV-01</strong>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Ghi nhận thanh toán Form (Khi còn nợ) -->
+            <div th:if="${invoice.remainingAmount > 0 and invoice.status != T(com.pms.propertymanagement.enums.InvoiceStatus).CANCELLED}" 
+                 class="card border-left-success shadow-sm mb-4 no-print">
+                <div class="card-body">
+                    <h6 class="font-weight-bold text-success mb-3">
+                        <i class="fas fa-hand-holding-usd mr-1"></i>Ghi Nhận Thu Tiền Cho Hóa Đơn Này
+                    </h6>
+                    <form th:action="@{/owner/payments/create}" th:object="${paymentRequest}" method="post" class="form-row align-items-end">
+                        <input type="hidden" th:field="*{invoiceId}">
+                        <div class="col-md-3 mb-2">
+                            <label class="small font-weight-bold text-gray-700">Số tiền thu (VNĐ) <span class="text-danger">*</span></label>
+                            <input type="number" step="1000" th:field="*{amount}" class="form-control font-weight-bold text-dark font-mono" 
+                                   required min="1000" th:max="${invoice.remainingAmount}">
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <label class="small font-weight-bold text-gray-700">Phương thức <span class="text-danger">*</span></label>
+                            <select th:field="*{paymentMethod}" class="form-control custom-select">
+                                <option th:each="m : ${T(com.pms.propertymanagement.enums.PaymentMethod).values()}" 
+                                        th:value="${m}" th:text="${m.displayName}"></option>
+                            </select>
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <label class="small font-weight-bold text-gray-700">Ghi chú phiếu thu</label>
+                            <input type="text" th:field="*{note}" class="form-control" placeholder="Thu tiền mặt tại phòng, CK...">
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <button type="submit" class="btn btn-success btn-block font-weight-bold shadow-sm">
+                                <i class="fas fa-check mr-1"></i>Xác Nhận Đã Thu
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Lịch sử các lần thanh toán -->
+            <div th:if="${invoice.payments != null and !invoice.payments.empty}">
+                <h6 class="font-weight-bold text-dark mb-2">
+                    <i class="fas fa-history mr-1 text-info"></i>Lịch Sử Các Lần Thu Tiền
+                </h6>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover mb-0">
+                        <thead class="bg-light">
+                            <tr>
+                                <th style="width: 20%;">Thời Gian Thu</th>
+                                <th style="width: 25%;" class="text-right">Số Tiền Đã Thu</th>
+                                <th style="width: 20%;">Phương Thức</th>
+                                <th style="width: 20%;">Ghi Chú</th>
+                                <th style="width: 15%;" class="text-center">Trạng Thái</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="p : ${invoice.payments}">
+                                <td class="font-mono small" th:text="${#temporals.format(p.paymentDate, 'dd/MM/yyyy HH:mm')}"></td>
+                                <td class="text-right font-weight-bold text-success font-mono" 
+                                    th:text="${#numbers.formatDecimal(p.amount, 0, 'COMMA', 0, 'POINT')} + ' đ'"></td>
+                                <td class="small" th:text="${p.paymentMethod != null ? p.paymentMethod.displayName : 'Tiền mặt'}"></td>
+                                <td class="small text-muted" th:text="${p.note ?: '-'}"></td>
+                                <td class="text-center">
+                                    <span class="badge badge-success font-weight-bold">Thành Công</span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Chữ ký xác nhận in ấn -->
+            <div class="print-only mt-5 pt-3 border-top">
+                <div class="row text-center">
+                    <div class="col-6">
+                        <p class="font-weight-bold mb-1 text-dark">NGƯỜI NỘP TIỀN</p>
+                        <p class="small text-muted font-italic">(Ký & ghi rõ họ tên)</p>
+                        <div style="height: 70px;"></div>
+                        <p class="font-weight-bold text-dark" th:text="${invoice.tenant != null ? invoice.tenant.fullName : ''}"></p>
+                    </div>
+                    <div class="col-6">
+                        <p class="font-weight-bold mb-1 text-dark">NGƯỜI LẬP PHIẾU THU</p>
+                        <p class="small text-muted font-italic">(Ký & ghi rõ họ tên)</p>
+                        <div style="height: 70px;"></div>
+                        <p class="font-weight-bold text-dark" th:text="${invoice.room.property.owner.fullName ?: invoice.room.property.owner.username}"></p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+    function copyZaloInvoiceMessage() {
+        var btn = document.getElementById('btnCopyZaloBill');
+        if (!btn) return;
+
+        var room = btn.getAttribute('data-room') || '';
+        var prop = btn.getAttribute('data-prop') || '';
+        var tenant = btn.getAttribute('data-tenant') || 'Quý khách';
+        var month = btn.getAttribute('data-month') || '';
+        var code = btn.getAttribute('data-code') || '';
+        var total = btn.getAttribute('data-total') || '0';
+        var due = btn.getAttribute('data-due') || '';
+        var bank = btn.getAttribute('data-bank') || '';
+        var acc = btn.getAttribute('data-acc') || '';
+        var accName = btn.getAttribute('data-accname') || '';
+
+        var msg = 'THÔNG BÁO TIỀN PHÒNG THÁNG ' + month + ' (' + prop + ')\n' +
+                  '- Kính gửi: ' + tenant + ' (' + room + ')\n' +
+                  '- Mã hóa đơn: ' + code + '\n' +
+                  '- Tổng số tiền thanh toán: ' + total + ' VNĐ\n' +
+                  '- Hạn thanh toán: ' + due + '\n' +
+                  '- Thông tin chuyển khoản: Ngân hàng ' + bank + ' - STK: ' + acc + ' (' + accName + ')\n' +
+                  '- Nội dung CK: ' + code + '\n' +
+                  'Xin cảm ơn Quý khách!';
+
+        var showToast = function() {
+            var toast = document.getElementById('zaloCopyToast');
+            if (toast) {
+                toast.style.display = 'block';
+                setTimeout(function() { toast.style.display = 'none'; }, 4000);
+            }
+        };
+
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(msg).then(showToast).catch(function() {
+                fallbackCopyText(msg, showToast);
+            });
+        } else {
+            fallbackCopyText(msg, showToast);
+        }
+    }
+
+    function fallbackCopyText(text, cb) {
+        var ta = document.createElement('textarea');
+        ta.value = text;
+        ta.style.position = 'fixed';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.select();
+        try { document.execCommand('copy'); } catch (e) {}
+        document.body.removeChild(ta);
+        if (cb) cb();
+    }
+    </script>
+
+</div>

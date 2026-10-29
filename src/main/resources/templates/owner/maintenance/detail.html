@@ -1,129 +1,181 @@
-<div th:fragment="content">
-    <div class="flex items-center justify-between mb-6">
+<div class="container-fluid mb-4" th:fragment="content">
+
+    <!-- Page Heading -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
         <div>
-            <h1 class="text-2xl font-bold text-gray-900">Chi tiết yêu cầu bảo trì</h1>
-            <p class="text-sm text-gray-500" th:text="${request.code != null ? request.code : request.id}">MR-...</p>
+            <h1 class="h3 mb-0 text-gray-800 font-weight-bold">
+                <i class="fas fa-tools text-success mr-2"></i>Chi Tiết Yêu Cầu Sửa Chữa
+            </h1>
+            <p class="text-muted small mb-0 mt-1">Thông tin sự cố do khách thuê phản ánh và thao tác phân công kỹ thuật viên</p>
         </div>
-        <a href="/owner/maintenance" class="text-sm text-blue-600 hover:underline">&larr; Quay lại</a>
+        <a th:href="@{/owner/maintenance}" class="btn btn-secondary btn-sm shadow-sm font-weight-bold">
+            <i class="fas fa-arrow-left mr-1"></i>Quay lại danh sách
+        </a>
     </div>
 
-    <div th:if="${param.success}" class="mb-4 p-3 bg-green-100 text-green-800 rounded">
-        Thao tác thành công.
+    <!-- Alert Messages -->
+    <div th:if="${param.success}" class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+        <i class="fas fa-check-circle mr-2"></i>Thao tác cập nhật yêu cầu bảo trì thành công!
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    <div th:if="${errorAssign != null}" class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
+        <i class="fas fa-exclamation-triangle mr-2"></i><span th:text="${errorAssign}">Lỗi</span>
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    <div th:if="${errorReject != null}" class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
+        <i class="fas fa-exclamation-triangle mr-2"></i><span th:text="${errorReject}">Lỗi</span>
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
     </div>
 
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 space-y-3">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-                <div class="text-xs text-gray-500">Phòng</div>
-                <div class="font-semibold text-gray-900" th:text="${request.room != null ? request.room.name : 'N/A'}">
+    <div class="row">
+
+        <!-- Column 1: Chi tiết sự cố -->
+        <div class="col-lg-7">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 bg-white border-bottom-success d-flex justify-content-between align-items-center">
+                    <h6 class="m-0 font-weight-bold text-success">
+                        <i class="fas fa-info-circle mr-1"></i>Mã Yêu Cầu: <span class="font-mono text-primary" th:text="${request.code != null ? request.code : ('#MR-' + request.id)}">MR-001</span>
+                    </h6>
+                    <span th:class="${request.status.name() == 'PENDING' ? 'badge badge-warning' :
+                                     request.status.name() == 'ASSIGNED' ? 'badge badge-primary' :
+                                     request.status.name() == 'IN_PROGRESS' ? 'badge badge-info' :
+                                     request.status.name() == 'COMPLETED' ? 'badge badge-success' :
+                                     request.status.name() == 'CONFIRMED' ? 'badge badge-secondary' :
+                                     request.status.name() == 'REJECTED' ? 'badge badge-danger' :
+                                     request.status.name() == 'REOPENED' ? 'badge badge-dark' : 'badge badge-light'} + ' px-3 py-2 font-weight-bold'"
+                          th:text="${request.status.displayName}">Trạng thái</span>
                 </div>
-                <div class="text-sm text-gray-600"
-                    th:text="${request.room != null && request.room.property != null ? request.room.property.name : ''}">
-                </div>
-            </div>
-            <div>
-                <div class="text-xs text-gray-500">Khách thuê</div>
-                <div class="font-semibold text-gray-900"
-                    th:text="${request.tenant != null ? (request.tenant.fullName != null ? request.tenant.fullName : request.tenant.username) : 'N/A'}">
-                </div>
-                <div class="text-sm text-gray-600" th:text="${request.tenant != null ? request.tenant.phone : ''}">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-borderless text-dark mb-0">
+                            <tbody>
+                                <tr>
+                                    <th style="width: 35%;" class="text-gray-600 font-weight-bold">Phòng & Cơ Sở:</th>
+                                    <td>
+                                        <div class="font-weight-bold text-dark" th:text="${request.room != null ? request.room.name : 'N/A'}">Phòng 101</div>
+                                        <div class="small text-muted" th:text="${request.room != null and request.room.property != null ? request.room.property.name : ''}">Nhà Trọ Xanh</div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th class="text-gray-600 font-weight-bold">Khách Thuê Báo:</th>
+                                    <td>
+                                        <span class="font-weight-bold text-gray-800" th:text="${request.tenant != null ? (request.tenant.fullName != null ? request.tenant.fullName : request.tenant.username) : 'N/A'}">Anh B</span>
+                                        <div class="small text-muted" th:if="${request.tenant != null and request.tenant.phone != null}">
+                                            <i class="fas fa-phone-alt text-success mr-1"></i>
+                                            <a th:href="'tel:' + ${request.tenant.phone}" class="text-success font-weight-bold" th:text="${request.tenant.phone}">0912345678</a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th class="text-gray-600 font-weight-bold">Hạng Mục Sửa Chữa:</th>
+                                    <td>
+                                        <span class="badge badge-light border text-dark font-weight-bold px-2 py-1" th:text="${request.category.displayName}">
+                                            Điện nước
+                                        </span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th class="text-gray-600 font-weight-bold align-top">Mô Tả Sự Cố:</th>
+                                    <td class="bg-light p-3 rounded" style="white-space: pre-line;" th:text="${request.description}">
+                                        Chi tiết sự cố...
+                                    </td>
+                                </tr>
+                                <tr th:if="${request.imageUrl != null}">
+                                    <th class="text-gray-600 font-weight-bold align-top">Ảnh Đính Kèm:</th>
+                                    <td>
+                                        <a th:href="${request.imageUrl}" target="_blank">
+                                            <img th:src="${request.imageUrl}" alt="Ảnh sự cố" class="img-thumbnail rounded" style="max-height: 200px;">
+                                        </a>
+                                    </td>
+                                </tr>
+                                <tr th:if="${request.rejectedReason != null}">
+                                    <th class="text-danger font-weight-bold">Lý Do Từ Chối:</th>
+                                    <td class="text-danger font-weight-bold" th:text="${request.rejectedReason}"></td>
+                                </tr>
+                                <tr th:if="${request.completionNote != null}">
+                                    <th class="text-success font-weight-bold">Ghi Chú Hoàn Thành:</th>
+                                    <td class="text-success font-weight-bold" th:text="${request.completionNote}"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <div>
-            <div class="text-xs text-gray-500">Danh mục</div>
-            <div class="font-medium text-gray-900" th:text="${request.category.displayName}"></div>
-        </div>
+        <!-- Column 2: Phân công & Tiến trình -->
+        <div class="col-lg-5">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 bg-white border-bottom-success">
+                    <h6 class="m-0 font-weight-bold text-success">
+                        <i class="fas fa-user-cog mr-1"></i>Kỹ Thuật Viên & Phân Công
+                    </h6>
+                </div>
+                <div class="card-body">
+                    
+                    <div class="mb-3">
+                        <span class="small font-weight-bold text-gray-700">Kỹ thuật viên phụ trách:</span>
+                        <div class="mt-1" th:if="${request.staff != null}">
+                            <strong class="text-primary font-weight-bold" style="font-size: 1.05rem;" 
+                                    th:text="${request.staff.fullName != null ? request.staff.fullName : request.staff.username}">
+                                Nguyễn Văn Thợ
+                            </strong>
+                        </div>
+                        <div class="mt-1" th:unless="${request.staff != null}">
+                            <span class="badge badge-warning">Chưa có kỹ thuật viên tiếp nhận</span>
+                        </div>
+                    </div>
 
-        <div>
-            <div class="text-xs text-gray-500">Mô tả</div>
-            <div class="text-gray-700 whitespace-pre-line" th:text="${request.description}"></div>
-        </div>
+                    <div class="small text-muted mb-4">
+                        <div><i class="far fa-clock mr-1"></i>Phân công: <span th:text="${request.assignedAt != null ? #temporals.format(request.assignedAt, 'dd/MM/yyyy HH:mm') : '-'}">-</span></div>
+                        <div><i class="fas fa-hourglass-start mr-1"></i>Bắt đầu: <span th:text="${request.startedAt != null ? #temporals.format(request.startedAt, 'dd/MM/yyyy HH:mm') : '-'}">-</span></div>
+                        <div><i class="fas fa-check-circle mr-1"></i>Hoàn thành: <span th:text="${request.completedAt != null ? #temporals.format(request.completedAt, 'dd/MM/yyyy HH:mm') : '-'}">-</span></div>
+                    </div>
 
-        <div th:if="${request.imageUrl != null}">
-            <div class="text-xs text-gray-500 mb-1">Ảnh đính kèm</div>
-            <a th:href="${request.imageUrl}" target="_blank" rel="noopener noreferrer">
-                <img th:src="${request.imageUrl}" alt="Ảnh yêu cầu bảo trì"
-                    class="max-w-sm max-h-72 rounded-xl border object-cover hover:opacity-90 transition-opacity cursor-pointer" />
-            </a>
-        </div>
+                    <hr class="sidebar-divider">
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-                <div class="text-xs text-gray-500">Trạng thái</div>
-                <div class="font-semibold" th:text="${request.status.displayName}"></div>
-            </div>
-            <div>
-                <div class="text-xs text-gray-500">Nhân viên</div>
-                <div class="font-semibold"
-                    th:text="${request.staff != null ? (request.staff.fullName != null ? request.staff.fullName : request.staff.username) : '-'}">
+                    <!-- Form Phân công (Khi đang chờ) -->
+                    <div th:if="${request.status.name() == 'PENDING' or request.status.name() == 'REOPENED'}">
+                        <h6 class="font-weight-bold text-dark mb-2">Phân Công Kỹ Thuật Viên:</h6>
+                        <form th:action="@{|/owner/maintenance/${request.id}/assign|}" method="post" class="mb-4">
+                            <div class="form-group">
+                                <label class="small font-weight-bold text-gray-700">Chọn nhân viên sửa chữa:</label>
+                                <select name="staffId" class="form-control custom-select" required>
+                                    <option value="">-- Chọn nhân viên kỹ thuật --</option>
+                                    <option th:each="s : ${staffs}" th:value="${s.id}"
+                                            th:text="${s.fullName != null ? s.fullName : s.username}"></option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-block font-weight-bold shadow-sm">
+                                <i class="fas fa-user-check mr-1"></i>Giao Việc Cho Thợ
+                            </button>
+                        </form>
+
+                        <h6 class="font-weight-bold text-danger mb-2">Từ Chối Tiếp Nhận:</h6>
+                        <form th:action="@{|/owner/maintenance/${request.id}/reject|}" method="post">
+                            <div class="form-group">
+                                <textarea name="reason" rows="2" class="form-control" placeholder="Nhập lý do từ chối (nếu có)..."></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-outline-danger btn-block font-weight-bold shadow-sm">
+                                <i class="fas fa-ban mr-1"></i>Từ Chối Yêu Cầu
+                            </button>
+                        </form>
+                    </div>
+
+                    <div th:unless="${request.status.name() == 'PENDING' or request.status.name() == 'REOPENED'}" class="text-center py-3">
+                        <span class="text-muted small">Yêu cầu đã qua bước tiếp nhận ban đầu.</span>
+                    </div>
+
                 </div>
             </div>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-                <div class="text-xs text-gray-500">Phân công lúc</div>
-                <div class="text-sm text-gray-700"
-                    th:text="${request.assignedAt != null ? #temporals.format(request.assignedAt, 'dd/MM/yyyy HH:mm') : '-'}">
-                </div>
-            </div>
-            <div>
-                <div class="text-xs text-gray-500">Bắt đầu lúc</div>
-                <div class="text-sm text-gray-700"
-                    th:text="${request.startedAt != null ? #temporals.format(request.startedAt, 'dd/MM/yyyy HH:mm') : '-'}">
-                </div>
-            </div>
-            <div>
-                <div class="text-xs text-gray-500">Hoàn thành lúc</div>
-                <div class="text-sm text-gray-700"
-                    th:text="${request.completedAt != null ? #temporals.format(request.completedAt, 'dd/MM/yyyy HH:mm') : '-'}">
-                </div>
-            </div>
-        </div>
-
-        <div th:if="${request.status.name() == 'REJECTED'}" class="p-3 bg-red-50 text-red-700 rounded">
-            <div class="font-semibold">Lý do từ chối</div>
-            <div class="text-sm whitespace-pre-line" th:text="${request.rejectedReason}"></div>
-        </div>
-        <div th:if="${request.status.name() == 'COMPLETED' or request.status.name() == 'CONFIRMED'}"
-            class="p-3 bg-gray-50 text-gray-700 rounded">
-            <div class="font-semibold">Ghi chú hoàn thành</div>
-            <div class="text-sm whitespace-pre-line" th:text="${request.completionNote}"></div>
-        </div>
-        <div th:if="${request.status.name() == 'REOPENED'}" class="p-3 bg-purple-50 text-purple-700 rounded">
-            <div class="font-semibold">Lý do mở lại</div>
-            <div class="text-sm whitespace-pre-line" th:text="${request.reopenedReason}"></div>
-        </div>
     </div>
 
-    <div th:if="${request.status.name() == 'PENDING'}" class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-            <h2 class="text-lg font-semibold text-gray-900 mb-3">Phân công</h2>
-            <p class="text-sm text-red-600 mb-2" th:if="${errorAssign != null}" th:text="${errorAssign}"></p>
-            <form th:action="@{|/owner/maintenance/${request.id}/assign|}" method="post">
-                <label class="block text-sm font-medium mb-2">Chọn nhân viên</label>
-                <select name="staffId" class="w-full border rounded px-3 py-2">
-                    <option value="">-- Chọn --</option>
-                    <option th:each="s : ${staffs}" th:value="${s.id}"
-                        th:text="${s.fullName != null ? s.fullName : s.username}"></option>
-                </select>
-                <button type="submit" class="mt-3 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Phân
-                    công</button>
-            </form>
-        </div>
-
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-            <h2 class="text-lg font-semibold text-gray-900 mb-3">Từ chối</h2>
-            <p class="text-sm text-red-600 mb-2" th:if="${errorReject != null}" th:text="${errorReject}"></p>
-            <form th:action="@{|/owner/maintenance/${request.id}/reject|}" method="post">
-                <label class="block text-sm font-medium mb-2">Lý do</label>
-                <textarea name="reason" rows="4" class="w-full border rounded px-3 py-2"
-                    th:text="${rejectReason}"></textarea>
-                <button type="submit" class="mt-3 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700">Từ
-                    chối</button>
-            </form>
-        </div>
-    </div>
 </div>

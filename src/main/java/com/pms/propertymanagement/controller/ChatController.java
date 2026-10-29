@@ -126,12 +126,34 @@ public class ChatController {
             }
         } catch (RuntimeException e) {
             log.error("Chat error for guestId={}: {}", guestId, e.getMessage(), e);
-            return ResponseEntity.ok(ChatResponse.ofMessage(
-                    "Xin lỗi, hệ thống đang gặp sự cố kỹ thuật. Bạn vui lòng thử lại sau nhé ạ."));
+            try {
+                if (state.getBudget() == null) state.setBudget(5_000_000.0);
+                List<PropertySummaryForChat> fallbackResults = recommendationService.findRecommendations(state);
+                if (!fallbackResults.isEmpty()) {
+                    state.setCachedResults(fallbackResults);
+                    state.setPhase(ChatPhase.SHOWING_RESULTS);
+                    response = ChatResponse.ofResults(
+                            "Mình gợi ý cho bạn một số phòng phù hợp nhất hiện có nhé:", fallbackResults);
+                } else {
+                    response = ChatResponse.ofMessageWithReplies(
+                            "Bạn muốn tìm phòng ở khu vực nào và ngân sách khoảng bao nhiêu một tháng ạ?",
+                            QUICK_REPLIES_LOCATION);
+                }
+            } catch (Exception ignored) {
+                response = ChatResponse.ofMessageWithReplies(
+                        "Bạn muốn tìm phòng ở khu vực nào và ngân sách khoảng bao nhiêu một tháng ạ?",
+                        QUICK_REPLIES_LOCATION);
+            }
         }
 
         session.setAttribute(SESSION_KEY, state);
         return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/reset")
+    public ResponseEntity<Map<String, Object>> resetChat(HttpSession session) {
+        session.removeAttribute(SESSION_KEY);
+        return ResponseEntity.ok(Map.of("success", true, "message", "Đã làm mới cuộc trò chuyện"));
     }
 
     // =========================================================================
@@ -246,24 +268,24 @@ public class ChatController {
     private ChatResponse handleRefiningCollect(String message, ChatSessionState state) {
         state.addTurn("user", message);
 
+        List<Amenity>     amenities    = amenityRepository.findAll();
+        List<Surrounding> surroundings = surroundingRepository.findAll();
+        List<Category>    categories   = categoryRepository.findAll();
+        List<Province>    provinces    = provinceRepository.findAll();
+
         if (!isRefiningSkip(message)) {
             // Use Gemini to extract any optional fields the user mentioned
-            List<Amenity>       amenities    = amenityRepository.findAll();
-            List<Surrounding>   surroundings = surroundingRepository.findAll();
-            List<TargetTenant>  targets      = targetTenantsRepository.findAll();
-            List<Category>      categories   = categoryRepository.findAll();
-            List<Province>      provinces    = provinceRepository.findAll();
+            List<TargetTenant> targets = targetTenantsRepository.findAll();
             GeminiExtractResult geminiResult = geminiService.extractParams(
                     message, state, amenities, surroundings, targets, categories, provinces);
             mergeExtracted(state, geminiResult.getExtracted());
         }
 
         // Build summary and move to confirm step
-        List<Amenity>     amenities    = amenityRepository.findAll();
-        List<Surrounding> surroundings = surroundingRepository.findAll();
-        List<Category>    categories   = categoryRepository.findAll();
-        List<Province>    provinces    = provinceRepository.findAll();
         String provinceName = resolveProvinceName(state.getProvinceCode(), provinces);
+        if (state.getPlaceName() != null || state.getLocalKeyword() != null) {
+            locationResolverService.resolve(state, provinceName);
+        }
 
         String summary = buildConfirmSummary(state, provinceName, amenities, surroundings, categories);
         state.setRefiningConfirmStep(true);
@@ -446,9 +468,17 @@ public class ChatController {
     }
 
     private ChatResponse handleNewSearch(String originalMessage, ChatSessionState state) {
+        Double previousBudget = state.getBudget();
+        Long previousCategoryId = state.getCategoryId();
         // Reset all mutable fields in-place so the outer handleMessage's
         // session.setAttribute(SESSION_KEY, state) saves the fresh state correctly.
         state.reset();
+        if (previousBudget != null) {
+            state.setBudget(previousBudget);
+        }
+        if (previousCategoryId != null) {
+            state.setCategoryId(previousCategoryId);
+        }
         // Design §9 kịch bản 5b: re-process the SAME message through Phase 1 immediately
         // so the user doesn't need to repeat location/budget they already typed.
         return handleSlotFilling(originalMessage, state);

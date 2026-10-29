@@ -1,0 +1,344 @@
+<div class="container-fluid" th:fragment="content">
+
+    <!-- Page Heading -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <div>
+            <h1 class="h3 mb-0 text-gray-800 font-weight-bold">
+                <i class="fas fa-tachometer-alt text-success mr-2"></i>Quản Lý Chỉ Số Điện - Nước
+            </h1>
+            <p class="text-muted small mb-0 mt-1">Theo dõi, ghi nhận và tính toán lượng điện nước tiêu thụ hàng tháng của từng phòng trọ</p>
+        </div>
+        <div class="d-flex align-items-center">
+            <button type="button" onclick="openBulkMeterModal()" class="btn btn-sm btn-primary shadow-sm font-weight-bold mr-2">
+                <i class="fas fa-table mr-1"></i>Nhập Nhanh Dạng Bảng (Bulk Excel Mode)
+            </button>
+            <a th:href="@{/owner/meters/create}" class="btn btn-sm btn-success shadow-sm font-weight-bold">
+                <i class="fas fa-plus fa-sm text-white-50 mr-1"></i>Ghi Chỉ Số Mới
+            </a>
+        </div>
+    </div>
+
+    <!-- Filter Card -->
+    <div class="search-container border-left-success">
+        <form th:action="@{/owner/meters}" method="get" class="row align-items-end">
+            <div class="col-md-3 col-sm-6 mb-2">
+                <label class="small font-weight-bold text-gray-700 mb-1">Cơ Sở Nhà Trọ:</label>
+                <select name="propertyId" class="form-control custom-select" onchange="this.form.submit()">
+                    <option value="">-- Tất cả nhà trọ --</option>
+                    <option th:each="prop : ${properties}" th:value="${prop.id}" th:text="${prop.name}" th:selected="${selectedPropertyId == prop.id}"></option>
+                </select>
+            </div>
+            <div class="col-md-2 col-sm-6 mb-2">
+                <label class="small font-weight-bold text-gray-700 mb-1">Kỳ Tháng:</label>
+                <select name="month" class="form-control custom-select" onchange="this.form.submit()">
+                    <option value="">-- Tất cả tháng --</option>
+                    <option th:each="m : ${#numbers.sequence(1, 12)}" th:value="${m}" th:text="'Tháng ' + ${m}" th:selected="${selectedMonth == m}"></option>
+                </select>
+            </div>
+            <div class="col-md-2 col-sm-6 mb-2">
+                <label class="small font-weight-bold text-gray-700 mb-1">Năm:</label>
+                <select name="year" class="form-control custom-select" onchange="this.form.submit()">
+                    <option value="">-- Tất cả năm --</option>
+                    <option th:each="y : ${#numbers.sequence(2024, 2028)}" th:value="${y}" th:text="${y}" th:selected="${selectedYear == y}"></option>
+                </select>
+            </div>
+            <div class="col-md-3 col-sm-6 mb-2">
+                <button type="submit" class="btn btn-success btn-block font-weight-bold shadow-sm">
+                    <i class="fas fa-filter mr-1"></i>Lọc Dữ Liệu
+                </button>
+            </div>
+            <div class="col-md-2 mb-2 text-right">
+                <a th:href="@{/owner/meters}" class="btn btn-outline-secondary btn-block font-weight-bold" title="Xóa bộ lọc">
+                    <i class="fas fa-redo mr-1"></i>Làm Mới
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <!-- DataTales Card -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 bg-white border-bottom-success d-flex justify-content-between align-items-center">
+            <h6 class="m-0 font-weight-bold text-success">
+                <i class="fas fa-bolt mr-1"></i>Bảng Chỉ Số Điện Nước
+            </h6>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover mb-0" id="ownerMetersTable" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th style="width: 20%;">Kỳ Ghi & Thời Gian</th>
+                            <th style="width: 20%;">Phòng & Cơ Sở Nhà Trọ</th>
+                            <th style="width: 20%;">Chỉ Số & Tiêu Thụ Điện</th>
+                            <th style="width: 20%;">Chỉ Số & Tiêu Thụ Nước</th>
+                            <th style="width: 20%;" class="text-center">Chức Năng</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:if="${readings == null or readings.empty}">
+                            <td colspan="5" class="text-center py-5 text-muted">
+                                <i class="fas fa-tachometer-alt fa-3x mb-3 text-gray-300 d-block"></i>
+                                Chưa có dữ liệu chỉ số điện nước nào trong kỳ này. Nhấn <strong>"Ghi Chỉ Số Mới"</strong> để cập nhật.
+                            </td>
+                        </tr>
+                        <tr th:each="r : ${readings}">
+                            <!-- Cột 1: Kỳ ghi & Ngày ghi -->
+                            <td>
+                                <strong class="text-primary font-mono" style="font-size: 1rem;">
+                                    <i class="far fa-calendar-alt mr-1"></i>Tháng <span th:text="${r.month + '/' + r.year}">03/2026</span>
+                                </strong>
+                                <div class="small text-muted font-mono mt-1" th:if="${r.createdAt != null}">
+                                    Ngày chốt: <span th:text="${#temporals.format(r.createdAt, 'dd/MM/yyyy')}">30/03/2026</span>
+                                </div>
+                            </td>
+
+                            <!-- Cột 2: Phòng & Cơ sở -->
+                            <td>
+                                <div class="font-weight-bold text-dark" th:text="${r.room != null ? r.room.name : ''}">Phòng 101</div>
+                                <div class="small text-muted" th:text="${r.room != null and r.room.property != null ? r.room.property.name : ''}">Nhà Trọ Xanh</div>
+                            </td>
+
+                            <!-- Cột 3: Điện -->
+                            <td>
+                                <div class="font-mono text-dark small">
+                                    <span class="text-muted" th:text="${#numbers.formatDecimal(r.oldElectricityIndex, 1, 1)}">100.0</span>
+                                    <span> &rarr; </span>
+                                    <span class="font-weight-bold" th:text="${#numbers.formatDecimal(r.newElectricityIndex, 1, 1)}">150.0</span>
+                                </div>
+                                <div class="mt-1">
+                                    <span class="badge badge-warning font-weight-bold font-mono">
+                                        <i class="fas fa-bolt mr-1"></i><span th:text="${#numbers.formatDecimal(r.electricityUsage, 1, 1)} + ' kWh'">50.0 kWh</span>
+                                    </span>
+                                </div>
+                            </td>
+
+                            <!-- Cột 4: Nước -->
+                            <td>
+                                <div class="font-mono text-dark small">
+                                    <span class="text-muted" th:text="${#numbers.formatDecimal(r.oldWaterIndex, 1, 1)}">20.0</span>
+                                    <span> &rarr; </span>
+                                    <span class="font-weight-bold" th:text="${#numbers.formatDecimal(r.newWaterIndex, 1, 1)}">25.0</span>
+                                </div>
+                                <div class="mt-1">
+                                    <span class="badge badge-info font-weight-bold font-mono">
+                                        <i class="fas fa-tint mr-1"></i><span th:text="${#numbers.formatDecimal(r.waterUsage, 1, 1)} + ' m³'">5.0 m³</span>
+                                    </span>
+                                </div>
+                            </td>
+
+                            <!-- Cột 5: Chức Năng (Thao Tác) -->
+                            <td class="text-center action-btns">
+                                <a th:href="@{|/owner/meters/${r.id}/edit|}" class="btn btn-primary btn-sm shadow-sm" title="Chỉnh sửa chỉ số">
+                                    <i class="fas fa-edit mr-1"></i>Sửa
+                                </a>
+                                <form th:action="@{|/owner/meters/${r.id}/quick-invoice|}" method="post" class="d-inline">
+                                    <button type="submit" class="btn btn-success btn-sm shadow-sm font-weight-bold" title="Tự động tính và tạo ngay hóa đơn tháng này từ chỉ số điện nước">
+                                        <i class="fas fa-magic mr-1"></i>Lập HĐ Nhanh
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Phân trang SB Admin 2 -->
+            <div class="d-flex justify-content-between align-items-center p-3 border-top" th:if="${readings != null and readings.totalPages > 1}">
+                <div class="small text-muted">
+                    Trang <span th:text="${currentPage}">1</span> / <span th:text="${readings.totalPages}">1</span>
+                </div>
+                <ul class="pagination pagination-sm m-0">
+                    <li class="page-item" th:classappend="${currentPage <= 1} ? 'disabled' : ''">
+                        <a class="page-link" th:href="@{/owner/meters(page=${currentPage - 1}, propertyId=${selectedPropertyId}, roomId=${selectedRoomId}, month=${selectedMonth}, year=${selectedYear})}">Trước</a>
+                    </li>
+                    <li class="page-item" th:each="p : ${#numbers.sequence(1, readings.totalPages)}" th:classappend="${p == currentPage} ? 'active' : ''">
+                        <a class="page-link" th:href="@{/owner/meters(page=${p}, propertyId=${selectedPropertyId}, roomId=${selectedRoomId}, month=${selectedMonth}, year=${selectedYear})}" th:text="${p}">1</a>
+                    </li>
+                    <li class="page-item" th:classappend="${currentPage >= readings.totalPages} ? 'disabled' : ''">
+                        <a class="page-link" th:href="@{/owner/meters(page=${currentPage + 1}, propertyId=${selectedPropertyId}, roomId=${selectedRoomId}, month=${selectedMonth}, year=${selectedYear})}">Sau</a>
+                    </li>
+                </ul>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Modal Nhập Nhanh Dạng Bảng (Bulk Excel Mode) -->
+    <div class="modal fade" id="bulkMeterModal" tabindex="-1" role="dialog" aria-labelledby="bulkMeterModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl" role="document" style="max-width: 94%;">
+            <div class="modal-content border-0 shadow">
+                <form th:action="@{/owner/meters/bulk-save}" method="post" id="bulkMeterForm">
+                    <div class="modal-header text-white" style="background: #1b6c80;">
+                        <h5 class="modal-title font-weight-bold" id="bulkMeterModalLabel">
+                            <i class="fas fa-table mr-2"></i>Nhập Nhanh Chỉ Số Điện Nước Dạng Bảng (Bulk Excel Mode)
+                        </h5>
+                        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-row align-items-end bg-light p-3 rounded border mb-3">
+                            <div class="col-md-5 mb-2 mb-md-0">
+                                <label class="small font-weight-bold text-gray-700 mb-1">Chọn Cơ Sở Nhà Trọ:</label>
+                                <select id="bulkPropertySelect" name="propertyId" class="form-control custom-select" onchange="loadBulkMeterRooms()">
+                                    <option value="">-- Tất cả cơ sở --</option>
+                                    <option th:each="prop : ${properties}" th:value="${prop.id}" th:text="${prop.name}" th:selected="${selectedPropertyId == prop.id}"></option>
+                                </select>
+                            </div>
+                            <div class="col-md-3 mb-2 mb-md-0">
+                                <label class="small font-weight-bold text-gray-700 mb-1">Kỳ Tháng:</label>
+                                <select id="bulkMonthSelect" name="month" class="form-control custom-select" onchange="loadBulkMeterRooms()">
+                                    <option th:each="m : ${#numbers.sequence(1, 12)}" th:value="${m}" th:text="'Tháng ' + ${m}"
+                                            th:selected="${selectedMonth != null ? selectedMonth == m : m == #temporals.month(#temporals.createNow())}"></option>
+                                </select>
+                            </div>
+                            <div class="col-md-2 mb-2 mb-md-0">
+                                <label class="small font-weight-bold text-gray-700 mb-1">Năm:</label>
+                                <select id="bulkYearSelect" name="year" class="form-control custom-select" onchange="loadBulkMeterRooms()">
+                                    <option th:each="y : ${#numbers.sequence(2024, 2028)}" th:value="${y}" th:text="${y}"
+                                            th:selected="${selectedYear != null ? selectedYear == y : y == #temporals.year(#temporals.createNow())}"></option>
+                                </select>
+                            </div>
+                            <div class="col-md-2 text-right">
+                                <button type="button" onclick="loadBulkMeterRooms()" class="btn btn-outline-primary btn-block font-weight-bold">
+                                    <i class="fas fa-sync-alt mr-1"></i>Tải Bảng
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="table-responsive" style="max-height: 440px; overflow-y: auto;">
+                            <table class="table table-bordered table-sm table-hover mb-0" id="bulkMeterSpreadsheet">
+                                <thead class="bg-light text-dark">
+                                    <tr>
+                                        <th style="width: 18%;">Phòng / Cơ Sở</th>
+                                        <th style="width: 14%;">Điện Cũ (kWh)</th>
+                                        <th style="width: 14%;">Điện Mới (kWh)</th>
+                                        <th style="width: 12%;" class="text-center">Tiêu Thụ Điện</th>
+                                        <th style="width: 14%;">Nước Cũ (m³)</th>
+                                        <th style="width: 14%;">Nước Mới (m³)</th>
+                                        <th style="width: 14%;" class="text-center">Tiêu Thụ Nước</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="bulkMeterTableBody">
+                                    <tr>
+                                        <td colspan="7" class="text-center py-4 text-muted">
+                                            <i class="fas fa-spinner fa-spin mr-1"></i>Đang tải danh sách phòng...
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="d-flex flex-wrap justify-content-between align-items-center mt-3 pt-2 border-top">
+                            <div class="custom-control custom-checkbox">
+                                <input type="checkbox" class="custom-control-input" id="autoCreateInvoicesChk" name="autoCreateInvoices" value="true" checked>
+                                <label class="custom-control-label font-weight-bold text-success cursor-pointer" for="autoCreateInvoicesChk">
+                                    <i class="fas fa-file-invoice-dollar mr-1"></i>Tự động phát hành hóa đơn cho các phòng vừa chốt
+                                </label>
+                            </div>
+                            <span class="small text-muted">
+                                <i class="fas fa-exclamation-triangle text-warning mr-1"></i>Cảnh báo tự động khi Điện &gt; 300 kWh hoặc Nước &gt; 25 m³
+                            </span>
+                        </div>
+                    </div>
+                    <div class="modal-footer bg-light">
+                        <button type="button" class="btn btn-secondary font-weight-bold" data-dismiss="modal">
+                            <i class="fas fa-times mr-1"></i>Đóng
+                        </button>
+                        <button type="submit" class="btn btn-success font-weight-bold px-4 shadow-sm">
+                            <i class="fas fa-save mr-1"></i>Lưu Toàn Bộ Chỉ Số Đã Nhập
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    function openBulkMeterModal() {
+        $('#bulkMeterModal').modal('show');
+        loadBulkMeterRooms();
+    }
+
+    function loadBulkMeterRooms() {
+        var propId = document.getElementById('bulkPropertySelect').value || '';
+        var month = document.getElementById('bulkMonthSelect').value || '';
+        var year = document.getElementById('bulkYearSelect').value || '';
+        var tbody = document.getElementById('bulkMeterTableBody');
+
+        tbody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-muted"><i class="fas fa-spinner fa-spin mr-1"></i>Đang tải dữ liệu phòng...</td></tr>';
+
+        var url = '/owner/meters/api/bulk-rooms?propertyId=' + encodeURIComponent(propId) + '&month=' + encodeURIComponent(month) + '&year=' + encodeURIComponent(year);
+        fetch(url)
+            .then(function(res) { return res.json(); })
+            .then(function(rooms) {
+                if (!rooms || rooms.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-muted">Không có phòng nào phù hợp để ghi chỉ số.</td></tr>';
+                    return;
+                }
+                var html = '';
+                rooms.forEach(function(r, idx) {
+                    var roomId = r.roomId != null ? r.roomId : r.id;
+                    var roomName = r.roomName || r.name || ('Phòng #' + roomId);
+                    var propName = r.propertyName || '';
+                    var oldE = r.oldElectricityIndex != null ? r.oldElectricityIndex : 0;
+                    var newE = r.newElectricityIndex != null ? r.newElectricityIndex : oldE;
+                    var oldW = r.oldWaterIndex != null ? r.oldWaterIndex : 0;
+                    var newW = r.newWaterIndex != null ? r.newWaterIndex : oldW;
+
+                    html += '<tr class="bulk-meter-row" data-idx="' + idx + '">' +
+                        '<td class="align-middle">' +
+                            '<input type="hidden" name="roomIds" value="' + roomId + '">' +
+                            '<div class="font-weight-bold text-dark">' + roomName + '</div>' +
+                            '<div class="text-xs text-muted">' + propName + '</div>' +
+                        '</td>' +
+                        '<td class="align-middle">' +
+                            '<input type="number" step="0.1" min="0" name="oldElectricityIndices" class="form-control form-control-sm font-mono tabular-nums bulk-old-elec" value="' + oldE + '" oninput="recalcBulkRow(' + idx + ')">' +
+                        '</td>' +
+                        '<td class="align-middle">' +
+                            '<input type="number" step="0.1" min="0" name="newElectricityIndices" class="form-control form-control-sm font-mono font-weight-bold text-warning tabular-nums bulk-new-elec" value="' + newE + '" oninput="recalcBulkRow(' + idx + ')">' +
+                        '</td>' +
+                        '<td class="align-middle text-center">' +
+                            '<span class="badge badge-warning font-mono tabular-nums bulk-elec-usage">0.0 kWh</span>' +
+                            '<div class="bulk-elec-spike mt-1" style="display:none;"><span class="badge badge-danger"><i class="fas fa-exclamation-triangle mr-1"></i>Spike &gt;300kWh</span></div>' +
+                        '</td>' +
+                        '<td class="align-middle">' +
+                            '<input type="number" step="0.1" min="0" name="oldWaterIndices" class="form-control form-control-sm font-mono tabular-nums bulk-old-water" value="' + oldW + '" oninput="recalcBulkRow(' + idx + ')">' +
+                        '</td>' +
+                        '<td class="align-middle">' +
+                            '<input type="number" step="0.1" min="0" name="newWaterIndices" class="form-control form-control-sm font-mono font-weight-bold text-info tabular-nums bulk-new-water" value="' + newW + '" oninput="recalcBulkRow(' + idx + ')">' +
+                        '</td>' +
+                        '<td class="align-middle text-center">' +
+                            '<span class="badge badge-info font-mono tabular-nums bulk-water-usage">0.0 m³</span>' +
+                            '<div class="bulk-water-spike mt-1" style="display:none;"><span class="badge badge-danger"><i class="fas fa-exclamation-triangle mr-1"></i>Spike &gt;25m³</span></div>' +
+                        '</td>' +
+                    '</tr>';
+                });
+                tbody.innerHTML = html;
+                rooms.forEach(function(_, idx) { recalcBulkRow(idx); });
+            })
+            .catch(function() {
+                tbody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-danger"><i class="fas fa-exclamation-circle mr-1"></i>Không thể tải dữ liệu phòng. Vui lòng thử lại.</td></tr>';
+            });
+    }
+
+    function recalcBulkRow(idx) {
+        var row = document.querySelector('.bulk-meter-row[data-idx="' + idx + '"]');
+        if (!row) return;
+        var oE = parseFloat(row.querySelector('.bulk-old-elec').value) || 0;
+        var nE = parseFloat(row.querySelector('.bulk-new-elec').value) || 0;
+        var oW = parseFloat(row.querySelector('.bulk-old-water').value) || 0;
+        var nW = parseFloat(row.querySelector('.bulk-new-water').value) || 0;
+
+        var uE = Math.max(0, nE - oE);
+        var uW = Math.max(0, nW - oW);
+
+        row.querySelector('.bulk-elec-usage').textContent = uE.toFixed(1) + ' kWh';
+        row.querySelector('.bulk-water-usage').textContent = uW.toFixed(1) + ' m³';
+
+        row.querySelector('.bulk-elec-spike').style.display = (uE > 300) ? 'block' : 'none';
+        row.querySelector('.bulk-water-spike').style.display = (uW > 25) ? 'block' : 'none';
+    }
+    </script>
+
+</div>

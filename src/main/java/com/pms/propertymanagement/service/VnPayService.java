@@ -9,6 +9,8 @@ public interface VnPayService {
     String createPaymentUrl(PostingOrder order, String ipAddress, String returnUrlOverride);
     
     String createWalletDepositUrl(Long amount, String txnRef, String returnUrl, String ipAddress);
+    
+    String createCustomPaymentUrl(Long amount, String txnRef, String orderInfo, String returnUrl, String ipAddress);
 
     VnPayReturnResult handleReturn(Map<String, String> returnParams, String rawQuery);
 

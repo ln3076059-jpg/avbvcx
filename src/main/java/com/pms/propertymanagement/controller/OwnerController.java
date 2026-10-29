@@ -20,7 +20,6 @@ import java.util.List;
 public class OwnerController {
 
     private final PropertyService propertyService;
-    private final UserService userService;
     private final CategoryService categoryService;
     private final ContactService contactService;
     private final PropertyManagementService propertyManagementService;
@@ -94,11 +93,17 @@ public class OwnerController {
     }
 
     @GetMapping("/properties/edit/{id}")
-    public String showEditPropertyForm(@PathVariable Long id, Model model, HttpSession session) {
+    public String showEditPropertyForm(@PathVariable Long id, Model model, HttpSession session, RedirectAttributes ra) {
         User user = (User) session.getAttribute("user");
         if (user == null) return "redirect:/login/owner";
 
-        PropertyRequest propertyRequest = propertyService.getPropertyForEdit(id);
+        PropertyRequest propertyRequest;
+        try {
+            propertyRequest = propertyService.getPropertyForEdit(id, user.getId());
+        } catch (Exception ex) {
+            ra.addFlashAttribute("errorMessage", ex.getMessage());
+            return "redirect:/owner/properties";
+        }
         model.addAttribute("propertyRequest", propertyRequest);
         model.addAttribute("actionUrl", "/owner/properties/edit/" + id);
 
@@ -128,7 +133,7 @@ public class OwnerController {
         if (user == null) return "redirect:/login/owner";
 
         try {
-            propertyService.updateProperty(id, propertyRequest);
+            propertyService.updateProperty(id, propertyRequest, user.getId());
             ra.addFlashAttribute("successMessage", "Cập nhật thông tin nhà trọ thành công!");
         } catch (Exception ex) {
             ra.addFlashAttribute("errorMessage", "Lỗi: " + ex.getMessage());
@@ -145,7 +150,7 @@ public class OwnerController {
         if (user == null) return "redirect:/login/owner";
 
         try {
-            propertyService.deleteProperty(id);
+            propertyService.deleteProperty(id, user.getId());
             ra.addFlashAttribute("successMessage", "Đã xóa nhà trọ thành công!");
         } catch (Exception ex) {
             ra.addFlashAttribute("errorMessage", "Không thể xóa: " + ex.getMessage());
@@ -156,9 +161,14 @@ public class OwnerController {
 
     @PostMapping("/contact/{slug}")
     public String createContact(@ModelAttribute("contact") ContactRequest contact, @PathVariable("slug") String slug, Model model, HttpSession session, RedirectAttributes redirectAttributes) {
+        User user = (User) session.getAttribute("user");
+        if (user == null) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Vui lòng đăng nhập tài khoản để đặt lịch hẹn xem phòng.");
+            return "redirect:/login";
+        }
         contactService.createContact(slug, contact);
         redirectAttributes.addFlashAttribute("contactSuccess", true);
-        return "redirect:/public/property/"+slug;
+        return "redirect:/properties/" + slug;
     }
 
     @GetMapping("/contacts")
@@ -166,18 +176,65 @@ public class OwnerController {
         User user = (User) session.getAttribute("user");
         if (user == null) return "redirect:/login/owner";
 
-        model.addAttribute("contacts", contactService.getContactsByOwner(user.getId()));
+        var contacts = contactService.getContactsByOwner(user.getId());
+        long rentOrderCount = contacts.stream().filter(com.pms.propertymanagement.dto.response.ContactResponse::isRentRegistration).count();
+        long pendingCount = contacts.stream().filter(c -> !Boolean.TRUE.equals(c.getStatus())).count();
+        long approvedCount = contacts.stream().filter(c -> Boolean.TRUE.equals(c.getStatus())).count();
+        long visitCount = contacts.size() - rentOrderCount;
+
+        model.addAttribute("contacts", contacts);
+        model.addAttribute("rentOrderCount", rentOrderCount);
+        model.addAttribute("pendingCount", pendingCount);
+        model.addAttribute("approvedCount", approvedCount);
+        model.addAttribute("visitCount", visitCount);
         model.addAttribute("content", "owner/contact/list");
         model.addAttribute("activeMenu", "contacts");
         return "layout/owner-layout";
     }
 
-    @GetMapping("/contact/toggle/{id}")
-    public String toggleContact(@PathVariable("id") Long id, HttpSession session) {
+    @RequestMapping(value = "/contact/toggle/{id}", method = {RequestMethod.GET, RequestMethod.POST})
+    public String toggleContact(@PathVariable("id") Long id, HttpSession session, RedirectAttributes ra) {
         User user = (User) session.getAttribute("user");
         if (user == null) return "redirect:/login/owner";
 
-        contactService.changeStatus(id);
+        try {
+            contactService.changeStatus(id, user.getId());
+            ra.addFlashAttribute("successMessage", "Đã cập nhật trạng thái đơn đặt thuê / liên hệ #" + id);
+        } catch (Exception ex) {
+            ra.addFlashAttribute("errorMessage", ex.getMessage());
+        }
+        return "redirect:/owner/contacts";
+    }
+
+    @PostMapping("/contact/approve-auto/{id}")
+    public String approveAndCreateContractAuto(@PathVariable("id") Long id, HttpSession session, RedirectAttributes ra) {
+        User user = (User) session.getAttribute("user");
+        if (user == null) return "redirect:/login/owner";
+
+        boolean isAdmin = user.getRoles() != null && user.getRoles().stream().anyMatch(r -> "ADMIN".equals(r.getName()));
+        try {
+            var contract = contactService.approveAndCreateContractAutomatically(id, user.getId(), isAdmin);
+            ra.addFlashAttribute("successMessage", contract != null
+                    ? "Đã phê duyệt đơn #" + id + " và tự động kích hoạt Hợp đồng " + contract.getCode() + "!"
+                    : "Đã phê duyệt đơn đặt thuê #" + id + " thành công!");
+        } catch (Exception ex) {
+            ra.addFlashAttribute("errorMessage", ex.getMessage());
+        }
+        return "redirect:/owner/contacts";
+    }
+
+    @PostMapping("/contact/reject/{id}")
+    public String rejectContactBooking(@PathVariable("id") Long id, HttpSession session, RedirectAttributes ra) {
+        User user = (User) session.getAttribute("user");
+        if (user == null) return "redirect:/login/owner";
+
+        boolean isAdmin = user.getRoles() != null && user.getRoles().stream().anyMatch(r -> "ADMIN".equals(r.getName()));
+        try {
+            contactService.updateBookingStatus(id, "CANCELLED", user.getId(), isAdmin);
+            ra.addFlashAttribute("successMessage", "Đã từ chối / hủy đơn đặt phòng #" + id);
+        } catch (Exception ex) {
+            ra.addFlashAttribute("errorMessage", ex.getMessage());
+        }
         return "redirect:/owner/contacts";
     }
 }

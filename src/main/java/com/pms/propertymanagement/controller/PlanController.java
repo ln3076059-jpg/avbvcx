@@ -95,6 +95,7 @@ public class PlanController {
             model.addAttribute("availableSlots", availableSlots);
             model.addAttribute("canCreateProperty", canCreateProperty);
             model.addAttribute("hasActiveSubscription", hasActiveSubscription);
+            model.addAttribute("walletBalance", walletService.getOrCreateWallet(owner).getBalance());
             
             model.addAttribute("content", "owner/package/management-plans");
             model.addAttribute("activeMenu", "management-plans");
@@ -236,8 +237,8 @@ public class PlanController {
     }
 
     /**
-     * Process the downgrade: lock deselected properties, then switch plan.
-     * keepPropertyIds — IDs of ACTIVE properties the owner wants to keep.
+     * Process the downgrade: switch plan first, then apply explicit property selection.
+     * keepPropertyIds — IDs of properties the owner wants to keep ACTIVE.
      */
     @PostMapping("/management-plans/downgrade/{newPlanId}")
     public String processDowngrade(@PathVariable Long newPlanId,
@@ -247,12 +248,6 @@ public class PlanController {
         try {
             User owner = getCurrentOwner(session);
             ManagementPlan newPlan = managementPlanService.getById(newPlanId);
-
-            // Get ALL properties (ACTIVE + PLAN_LOCKED) for full selection pool
-            List<PropertyOwnerResponse> allProps = propertyService.getPropertiesByOwner(owner)
-                .stream()
-                .filter(p -> "ACTIVE".equals(p.getStatus()) || "PLAN_LOCKED".equals(p.getStatus()))
-                .toList();
 
             Set<Long> keepSet = (keepPropertyIds != null) ? new HashSet<>(keepPropertyIds) : Set.of();
 
@@ -264,13 +259,20 @@ public class PlanController {
                 return "redirect:/owner/management-plans/downgrade/" + newPlanId;
             }
 
-            // Lock ACTIVE properties NOT selected by owner
+            // 1. Switch the management plan FIRST (so if wallet deduction fails, properties are untouched)
+            subscriptionManagementService.upgradeManagementPlan(owner.getId(), newPlanId);
+
+            // 2. Re-fetch properties and apply the user's explicit lock/unlock selection
+            List<PropertyOwnerResponse> allProps = propertyService.getPropertiesByOwner(owner)
+                .stream()
+                .filter(p -> "ACTIVE".equals(p.getStatus()) || "PLAN_LOCKED".equals(p.getStatus()))
+                .toList();
+
             List<Long> lockIds = allProps.stream()
                 .filter(p -> "ACTIVE".equals(p.getStatus()) && !keepSet.contains(p.getId()))
                 .map(PropertyOwnerResponse::getId)
                 .toList();
 
-            // Unlock PLAN_LOCKED properties that owner selected
             List<Long> unlockIds = allProps.stream()
                 .filter(p -> "PLAN_LOCKED".equals(p.getStatus()) && keepSet.contains(p.getId()))
                 .map(PropertyOwnerResponse::getId)
@@ -286,9 +288,6 @@ public class PlanController {
                 log.info("Unlocked {} properties for user {} during plan switch to {}",
                     unlockIds.size(), owner.getId(), newPlanId);
             }
-
-            // Switch the management plan
-            subscriptionManagementService.upgradeManagementPlan(owner.getId(), newPlanId);
 
             session.setAttribute("lastWalletUpdate", 0L);
             int finalActive = (int) allProps.stream()
@@ -346,6 +345,7 @@ public class PlanController {
             model.addAttribute("postPackages", postPackages);
             model.addAttribute("activePostSubscriptions", activePostSubscriptions);
             model.addAttribute("subscriptionCounts", subscriptionCounts);
+            model.addAttribute("walletBalance", walletService.getOrCreateWallet(owner).getBalance());
             
             model.addAttribute("content", "owner/package/list");
             return "layout/owner-layout";

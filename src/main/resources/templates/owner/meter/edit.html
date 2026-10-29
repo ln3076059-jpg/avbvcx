@@ -1,0 +1,189 @@
+<div class="container-fluid" th:fragment="content">
+
+        <!-- Page Heading -->
+        <div class="d-sm-flex align-items-center justify-content-between mb-4">
+            <div>
+                <a th:href="@{/owner/meters}" class="btn btn-sm btn-outline-secondary mb-2">
+                    <i class="fas fa-arrow-left fa-sm mr-1"></i> Quay lại danh sách chỉ số
+                </a>
+                <h1 class="h3 mb-0 text-gray-800 font-weight-bold">
+                    <i class="fas fa-edit text-warning mr-2"></i>Chỉnh Sửa Chỉ Số Điện - Nước
+                </h1>
+                <p class="text-muted small mb-0 mt-1" th:text="${'Phòng: ' + reading.room.name + ' - Kỳ: Tháng ' + reading.month + '/' + reading.year}"></p>
+            </div>
+        </div>
+
+        <form th:action="@{'/owner/meters/' + ${reading.id} + '/edit'}" th:object="${meterRequest}" method="post" id="meterForm">
+            <input type="hidden" th:field="*{id}">
+            <input type="hidden" th:field="*{roomId}">
+
+            <div class="row">
+                <div class="col-lg-8">
+                    <!-- Card Thông tin kỳ ghi & phòng -->
+                    <div class="card shadow mb-4">
+                        <div class="card-header py-3 bg-white border-bottom-warning">
+                            <h6 class="m-0 font-weight-bold text-warning">
+                                <i class="fas fa-info-circle mr-2"></i>Thông Tin Kỳ Ghi & Phòng
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="form-row">
+                                <div class="form-group col-md-6">
+                                    <label class="font-weight-bold small text-gray-700">Phòng Trọ</label>
+                                    <input type="text" readonly class="form-control bg-light font-weight-bold" th:value="${reading.room.name + ' (' + reading.room.property.name + ')'}">
+                                </div>
+                                <div class="form-group col-md-3">
+                                    <label class="font-weight-bold small text-gray-700">Kỳ Tháng <span class="text-danger">*</span></label>
+                                    <select th:field="*{month}" class="form-control" required>
+                                        <option th:each="m : ${#numbers.sequence(1, 12)}" th:value="${m}" th:text="'Tháng ' + ${m}"></option>
+                                    </select>
+                                </div>
+                                <div class="form-group col-md-3">
+                                    <label class="font-weight-bold small text-gray-700">Năm <span class="text-danger">*</span></label>
+                                    <input type="number" th:field="*{year}" class="form-control" required min="2020" max="2030">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Card Chỉ số Điện -->
+                    <div class="card shadow mb-4">
+                        <div class="card-header py-3 bg-white">
+                            <h6 class="m-0 font-weight-bold text-warning">
+                                <i class="fas fa-bolt mr-2"></i>Chỉ Số Điện Tiêu Thụ (kWh)
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="form-row">
+                                <div class="form-group col-md-3">
+                                    <label class="font-weight-bold small text-gray-700">Chỉ số cũ <span class="text-danger">*</span></label>
+                                    <input type="number" step="0.1" th:field="*{oldElectricityIndex}" id="oldElec" class="form-control bg-light" required min="0">
+                                </div>
+                                <div class="form-group col-md-3">
+                                    <label class="font-weight-bold small text-gray-700">Chỉ số mới <span class="text-danger">*</span></label>
+                                    <input type="number" step="0.1" th:field="*{newElectricityIndex}" id="newElec" class="form-control font-weight-bold text-warning" required min="0">
+                                </div>
+                                <div class="form-group col-md-3">
+                                    <label class="font-weight-bold small text-gray-700">Lượng dùng (kWh)</label>
+                                    <input type="text" id="elecUsage" readonly class="form-control bg-light font-weight-bold text-dark" value="0">
+                                </div>
+                                <div class="form-group col-md-3">
+                                    <label class="font-weight-bold small text-gray-700">Đơn giá (đ/kWh)</label>
+                                    <input type="number" step="100" th:field="*{electricityPrice}" id="elecPrice" class="form-control">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Card Chỉ số Nước -->
+                    <div class="card shadow mb-4">
+                        <div class="card-header py-3 bg-white">
+                            <h6 class="m-0 font-weight-bold text-info">
+                                <i class="fas fa-tint mr-2"></i>Chỉ Số Nước Tiêu Thụ (m³)
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="form-row">
+                                <div class="form-group col-md-3">
+                                    <label class="font-weight-bold small text-gray-700">Chỉ số cũ <span class="text-danger">*</span></label>
+                                    <input type="number" step="0.1" th:field="*{oldWaterIndex}" id="oldWater" class="form-control bg-light" required min="0">
+                                </div>
+                                <div class="form-group col-md-3">
+                                    <label class="font-weight-bold small text-gray-700">Chỉ số mới <span class="text-danger">*</span></label>
+                                    <input type="number" step="0.1" th:field="*{newWaterIndex}" id="newWater" class="form-control font-weight-bold text-info" required min="0">
+                                </div>
+                                <div class="form-group col-md-3">
+                                    <label class="font-weight-bold small text-gray-700">Lượng dùng (m³)</label>
+                                    <input type="text" id="waterUsage" readonly class="form-control bg-light font-weight-bold text-dark" value="0">
+                                </div>
+                                <div class="form-group col-md-3">
+                                    <label class="font-weight-bold small text-gray-700">Đơn giá (đ/m³)</label>
+                                    <input type="number" step="100" th:field="*{waterPrice}" id="waterPrice" class="form-control">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cột phải: Tính toán & Lưu -->
+                <div class="col-lg-4">
+                    <div class="card shadow mb-4">
+                        <div class="card-header py-3 bg-white border-bottom-primary">
+                            <h6 class="m-0 font-weight-bold text-primary">
+                                <i class="fas fa-calculator mr-2"></i>Tạm Tính Lại Chi Phí
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
+                                <span class="text-muted small">Tiền điện tiêu thụ:</span>
+                                <span id="estElecCost" class="font-weight-bold text-warning">0 đ</span>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
+                                <span class="text-muted small">Tiền nước tiêu thụ:</span>
+                                <span id="estWaterCost" class="font-weight-bold text-info">0 đ</span>
+                            </div>
+                            <div class="p-3 bg-light rounded text-center mb-4">
+                                <div class="small text-uppercase text-muted font-weight-bold mb-1">Tổng tiền điện + nước</div>
+                                <div id="totalCost" class="h4 mb-0 font-weight-bold text-success">0 đ</div>
+                            </div>
+
+                            <button type="submit" class="btn btn-warning btn-block py-2 font-weight-bold text-white shadow-sm">
+                                <i class="fas fa-save mr-2"></i>Cập Nhật Chỉ Số
+                            </button>
+                            <a th:href="@{/owner/meters}" class="btn btn-outline-secondary btn-block mt-2">
+                                <i class="fas fa-times mr-1"></i>Hủy Bỏ
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+
+    <!-- Script tính toán -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const oldElec = document.getElementById('oldElec');
+            const newElec = document.getElementById('newElec');
+            const elecUsage = document.getElementById('elecUsage');
+            const elecPrice = document.getElementById('elecPrice');
+
+            const oldWater = document.getElementById('oldWater');
+            const newWater = document.getElementById('newWater');
+            const waterUsage = document.getElementById('waterUsage');
+            const waterPrice = document.getElementById('waterPrice');
+
+            const estElecCost = document.getElementById('estElecCost');
+            const estWaterCost = document.getElementById('estWaterCost');
+            const totalCost = document.getElementById('totalCost');
+
+            function calc() {
+                const oE = parseFloat(oldElec.value) || 0;
+                const nE = parseFloat(newElec.value) || 0;
+                const eP = parseFloat(elecPrice.value) || 0;
+                const uE = Math.max(0, nE - oE);
+                elecUsage.value = uE.toFixed(1);
+
+                const oW = parseFloat(oldWater.value) || 0;
+                const nW = parseFloat(newWater.value) || 0;
+                const wP = parseFloat(waterPrice.value) || 0;
+                const uW = Math.max(0, nW - oW);
+                waterUsage.value = uW.toFixed(1);
+
+                const costE = uE * eP;
+                const costW = uW * wP;
+                const total = costE + costW;
+
+                estElecCost.textContent = costE.toLocaleString('vi-VN') + ' đ';
+                estWaterCost.textContent = costW.toLocaleString('vi-VN') + ' đ';
+                totalCost.textContent = total.toLocaleString('vi-VN') + ' đ';
+            }
+
+            [oldElec, newElec, elecPrice, oldWater, newWater, waterPrice].forEach(input => {
+                input.addEventListener('input', calc);
+            });
+
+            calc();
+        });
+    </script>
+</div>
+

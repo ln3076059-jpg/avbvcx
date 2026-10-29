@@ -2,16 +2,12 @@ package com.pms.propertymanagement.service.impl;
 
 import com.pms.propertymanagement.entity.PostingOrder;
 import com.pms.propertymanagement.enums.PaymentStatus;
-import com.pms.propertymanagement.enums.TransactionType;
 import com.pms.propertymanagement.repository.PostingOrderRepository;
 import com.pms.propertymanagement.service.VnPayService;
-import com.pms.propertymanagement.service.WalletService;
 import com.pms.propertymanagement.utils.VnPayUtil;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
@@ -21,11 +17,9 @@ import java.util.Map;
 public class VnPayServiceImpl implements VnPayService {
 
     private final PostingOrderRepository postingOrderRepository;
-    private final WalletService walletService;
     
-    public VnPayServiceImpl(PostingOrderRepository postingOrderRepository, @Lazy WalletService walletService) {
+    public VnPayServiceImpl(PostingOrderRepository postingOrderRepository) {
         this.postingOrderRepository = postingOrderRepository;
-        this.walletService = walletService;
     }
 
     @Value("${vnpay.tmnCode}")
@@ -117,6 +111,35 @@ public class VnPayServiceImpl implements VnPayService {
     }
 
     @Override
+    public String createCustomPaymentUrl(Long amount, String txnRef, String orderInfo, String returnUrl, String ipAddress) {
+        long vnpayAmount = amount * 100L;
+        LocalDateTime now = LocalDateTime.now();
+        String createDate = now.format(VN_DATE);
+        String expireDate = now.plusMinutes(15).format(VN_DATE);
+        
+        Map<String, String> params = new HashMap<>();
+        params.put("vnp_Version", "2.1.0");
+        params.put("vnp_Command", "pay");
+        params.put("vnp_TmnCode", tmnCode);
+        params.put("vnp_Amount", String.valueOf(vnpayAmount));
+        params.put("vnp_CurrCode", "VND");
+        params.put("vnp_TxnRef", txnRef);
+        params.put("vnp_OrderInfo", (orderInfo != null && !orderInfo.isBlank()) ? orderInfo : "Thanh toan VNPay - " + amount + " VND");
+        params.put("vnp_OrderType", "billpayment");
+        params.put("vnp_Locale", "vn");
+        params.put("vnp_ReturnUrl", returnUrl);
+        params.put("vnp_IpAddr", (ipAddress == null || ipAddress.isBlank()) ? "127.0.0.1" : ipAddress);
+        params.put("vnp_CreateDate", createDate);
+        params.put("vnp_ExpireDate", expireDate);
+        
+        String hashData = VnPayUtil.buildQueryString(params, true);
+        String secureHash = VnPayUtil.hmacSHA512(hashSecret, hashData);
+        
+        String queryString = VnPayUtil.buildQueryString(params, false);
+        return payUrl + "?" + queryString + "&vnp_SecureHash=" + secureHash;
+    }
+
+    @Override
     public VnPayReturnResult handleReturn(Map<String, String> returnParams, String rawQuery) {
         boolean validSig = VnPayUtil.verifySecureHash(returnParams, hashSecret);
         if (!validSig) {
@@ -167,29 +190,13 @@ public class VnPayServiceImpl implements VnPayService {
         // success = "00"
         if ("00".equals(responseCode)) {
             if (order.getStatus() != PaymentStatus.PAID) {
-                // Trừ tiền từ ví và tạo wallet transaction
-                try {
-                    walletService.deduct(
-                        order.getOwner(), 
-                        BigDecimal.valueOf(order.getAmount()), 
-                        TransactionType.PURCHASE,
-                        "Mua gói đăng tin: " + order.getPostingPackage().getName(),
-                        "ORDER_" + order.getId()
-                    );
-                    
-                    // Cập nhật order status
-                    order.setStatus(PaymentStatus.PAID);
-                    order.setPaidAt(LocalDateTime.now());
-                    order.setRemainingUses(order.getPostingPackage().getUsageLimit());
-                } catch (Exception e) {
-                    // Nếu không đủ tiền ví thì fail payment
-                    order.setStatus(PaymentStatus.FAILED);
-                    postingOrderRepository.save(order);
-                    return new VnPayReturnResult(true, false, "Không đủ số dư trong ví để thanh toán. " + e.getMessage(), order.getId());
-                }
+                // Cập nhật trạng thái đơn hàng khi thanh toán trực tiếp qua cổng VNPay thành công
+                order.setStatus(PaymentStatus.PAID);
+                order.setPaidAt(LocalDateTime.now());
+                order.setRemainingUses(order.getPostingPackage().getUsageLimit());
             }
             postingOrderRepository.save(order);
-            return new VnPayReturnResult(true, true, "Thanh toán thành công! Số tiền đã được trừ khỏi ví của bạn.", order.getId());
+            return new VnPayReturnResult(true, true, "Thanh toán thành công qua cổng VNPay!", order.getId());
         }
 
         order.setStatus(PaymentStatus.FAILED);

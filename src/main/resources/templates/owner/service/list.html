@@ -1,179 +1,298 @@
-<div th:fragment="content" class="bg-gray-50 min-h-screen">
-  <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-100 mb-6">
-    <div class="flex justify-between items-center mb-6">
-      <h2 class="text-2xl font-bold text-gray-800">Quản lý dịch vụ</h2>
-      <a
-        th:href="@{/owner/services/create}"
-        class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg flex items-center gap-2 transition-colors shadow-md"
-      >
-        <i class="fa-solid fa-plus"></i>
-        Thêm dịch vụ
-      </a>
+<div class="container-fluid" th:fragment="content">
+
+    <!-- Page Heading -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <div>
+            <h1 class="h3 mb-0 text-gray-800 font-weight-bold">
+                <i class="fas fa-concierge-bell text-success mr-2"></i>Quản Lý Dịch Vụ Nhà Trọ
+            </h1>
+            <p class="text-muted small mb-0 mt-1">Thiết lập đơn giá và phân loại các dịch vụ tiện ích áp dụng cho từng cơ sở (wifi, rác, vệ sinh, gửi xe...)</p>
+        </div>
+        <div class="d-flex flex-wrap align-items-center" style="gap: 8px;">
+            <button type="button" class="btn btn-sm btn-outline-primary shadow-sm font-weight-bold"
+                    data-toggle="modal" data-target="#quickPresetServiceModal">
+                <i class="fas fa-magic mr-1"></i>Khởi Tạo Nhanh Bộ Dịch Vụ Chuẩn (Điện, Nước, Wifi, Rác)
+            </button>
+            <a th:href="@{/owner/services/create}" class="btn btn-sm btn-success shadow-sm font-weight-bold">
+                <i class="fas fa-plus fa-sm text-white-50 mr-1"></i>Thêm Dịch Vụ Mới
+            </a>
+        </div>
     </div>
 
-    <!-- Filter Bar -->
-    <div class="flex justify-between items-center mb-4">
-      <div class="flex items-center gap-2 text-sm text-gray-600">
-        <span>Hiển thị</span>
-        <select
-          class="border border-gray-300 rounded px-2 py-1 focus:outline-none focus:border-blue-500"
-        >
-          <option>25</option>
-          <option>50</option>
-          <option>100</option>
-        </select>
-      </div>
-      <div class="relative">
-        <input
-          type="text"
-          placeholder="Nhập từ khóa tìm kiếm..."
-          class="border border-gray-300 rounded px-4 py-1.5 w-64 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-        />
-        <i
-          class="fa-solid fa-magnifying-glass absolute right-3 top-2.5 text-gray-400 text-xs"
-        ></i>
-      </div>
+    <!-- Alert Messages -->
+    <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+        <i class="fas fa-check-circle mr-2"></i><span th:text="${successMessage}">Thao tác thành công!</span>
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    <div th:if="${param.success != null and successMessage == null}" class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+        <i class="fas fa-check-circle mr-2"></i>Thêm dịch vụ tiện ích thành công!
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    <div th:if="${param.deleted}" class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+        <i class="fas fa-check-circle mr-2"></i>Đã xóa dịch vụ thành công!
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
     </div>
 
-    <!-- Table -->
-    <div class="overflow-x-auto">
-      <table class="w-full text-left border-collapse">
-        <thead>
-          <tr
-            class="border-b border-gray-200 text-sm font-semibold text-gray-700 bg-white"
-          >
-            <th class="py-3 px-4">
-              <div
-                class="flex items-center gap-1 cursor-pointer hover:text-blue-600"
-              >
-                Tên <i class="fa-solid fa-sort text-gray-300 text-xs"></i>
-              </div>
-            </th>
-            <th class="py-3 px-4">
-              <div
-                class="flex items-center gap-1 cursor-pointer hover:text-blue-600"
-              >
-                Loại <i class="fa-solid fa-sort text-gray-300 text-xs"></i>
-              </div>
-            </th>
-            <th class="py-3 px-4">
-              <div
-                class="flex items-center gap-1 cursor-pointer hover:text-blue-600"
-              >
-                Giá tiền (đ)
-                <i class="fa-solid fa-sort text-gray-300 text-xs"></i>
-              </div>
-            </th>
-            <th class="py-3 px-4">
-              <div
-                class="flex items-center gap-1 cursor-pointer hover:text-blue-600"
-              >
-                Đơn vị <i class="fa-solid fa-sort text-gray-300 text-xs"></i>
-              </div>
-            </th>
-            <th class="py-3 px-4">
-              <div
-                class="flex items-center gap-1 cursor-pointer hover:text-blue-600"
-              >
-                Nhà trọ <i class="fa-solid fa-sort text-gray-300 text-xs"></i>
-              </div>
-            </th>
-            <th class="py-3 px-4">Ngày tạo</th>
-            <th class="py-3 px-4 text-center">Hành động</th>
-          </tr>
-        </thead>
-        <tbody class="text-sm text-gray-700">
-          <tr
-            th:if="${#lists.isEmpty(services)}"
-            class="border-b border-gray-100 bg-gray-50"
-          >
-            <td colspan="7" class="py-8 text-center text-gray-500">
-              Chưa có dữ liệu
-            </td>
-          </tr>
-          <tr
-            th:each="s : ${services}"
-            class="border-b border-gray-100 hover:bg-gray-50 transition-colors"
-          >
-            <td class="py-3 px-4 font-medium text-gray-800" th:text="${s.name}">
-              Điện
-            </td>
-            <td class="py-3 px-4">
-              <span
-                th:if="${s.type.name() == 'FIXED'}"
-                class="bg-blue-100 text-blue-700 text-xs font-bold px-2 py-1 rounded"
-                >Cố định</span
-              >
-              <span
-                th:if="${s.type.name() == 'METERED'}"
-                class="bg-orange-100 text-orange-700 text-xs font-bold px-2 py-1 rounded"
-                >Theo chỉ số</span
-              >
-            </td>
-            <td
-              class="py-3 px-4 font-bold text-gray-800"
-              th:text="${#numbers.formatDecimal(s.price, 0, 'COMMA', 0, 'POINT')}"
-            >
-              3,500
-            </td>
-            <td class="py-3 px-4" th:text="${s.unit}">Kwh</td>
-            <td class="py-3 px-4" th:text="${s.propertyName}">Trọ A</td>
-            <td class="py-3 px-4" th:text="${s.formattedCreatedAt}">
-              27/01/2026
-            </td>
-            <td class="py-3 px-4 text-center">
-              <a
-                th:href="@{/owner/services/delete/{id}(id=${s.id})}"
-                onclick="
-                  return confirm('Bạn có chắc chắn muốn xóa dịch vụ này?');
-                "
-                class="text-red-500 hover:text-red-700 hover:bg-red-50 p-2 rounded-full transition-colors"
-                title="Xóa"
-              >
-                <i class="fa-solid fa-trash-can"></i>
-              </a>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+    <!-- Search & Filter Card -->
+    <div class="search-container border-left-success">
+        <div class="row align-items-center">
+            <div class="col-md-5 mb-2 mb-md-0">
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text bg-light border-0"><i class="fas fa-search text-gray-400"></i></span>
+                    </div>
+                    <input type="text" id="ownerServiceSearch" class="form-control border-0 bg-light small" 
+                           placeholder="Tìm nhanh theo tên dịch vụ, cơ sở nhà trọ..." onkeyup="filterOwnerServices()">
+                </div>
+            </div>
+            <div class="col-md-4 mb-2 mb-md-0">
+                <select id="ownerServicePropertyFilter" class="form-control custom-select bg-light border-0 small font-weight-bold text-gray-700" onchange="filterOwnerServices()">
+                    <option value="ALL">-- Tất cả cơ sở nhà trọ --</option>
+                    <option th:if="${properties != null}" th:each="p : ${properties}" th:value="${p.name != null ? p.name.toLowerCase() : ''}" th:text="${p.name}"></option>
+                </select>
+            </div>
+            <div class="col-md-3 text-md-right">
+                <span class="small text-gray-600 font-weight-bold">
+                    Hiển thị <span id="serviceFilteredCount" class="text-success font-weight-bold" th:text="${services != null ? services.size() : 0}">0</span> dịch vụ
+                </span>
+            </div>
+        </div>
     </div>
 
-    <div class="mt-4 text-xs text-gray-500">
-      Hiển thị <span th:text="${services.size()}">0</span> mục
+    <!-- DataTales Card -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 bg-white border-bottom-success d-flex justify-content-between align-items-center">
+            <h6 class="m-0 font-weight-bold text-success">
+                <i class="fas fa-list mr-1"></i>Danh Sách Dịch Vụ Tiện Ích
+            </h6>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover mb-0" id="ownerServicesTable" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th style="width: 25%;">Tên Dịch Vụ & Biểu Tượng</th>
+                            <th style="width: 25%;">Cơ Sở Nhà Trọ Áp Dụng</th>
+                            <th style="width: 20%;">Đơn Giá & Đơn Vị Tính</th>
+                            <th style="width: 15%;">Hình Thức Thu Phí</th>
+                            <th style="width: 15%;" class="text-center">Chức Năng</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:if="${services == null or #lists.isEmpty(services)}">
+                            <td colspan="5" class="text-center py-5 text-muted">
+                                <i class="fas fa-concierge-bell fa-3x mb-3 text-gray-300 d-block"></i>
+                                Bạn chưa tạo dịch vụ tiện ích nào. Nhấn <strong>"Thêm Dịch Vụ Mới"</strong> để thiết lập đơn giá điện, nước, wifi...
+                            </td>
+                        </tr>
+                        <tr th:each="s : ${services}" class="owner-service-row"
+                            th:data-name="${s.name != null ? s.name.toLowerCase() : ''}"
+                            th:data-prop="${s.propertyName != null ? s.propertyName.toLowerCase() : ''}">
+                            
+                            <!-- Cột 1: Tên & Icon -->
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="btn btn-sm btn-circle btn-success mr-2 text-white">
+                                        <i class="fas fa-concierge-bell"></i>
+                                    </div>
+                                    <div>
+                                        <strong class="text-dark font-weight-bold" th:text="${s.name}">Internet / Wifi</strong>
+                                        <div class="small text-muted font-mono" th:text="'Mã: #' + ${s.id}">#1</div>
+                                    </div>
+                                </div>
+                            </td>
+
+                            <!-- Cột 2: Cơ sở áp dụng -->
+                            <td>
+                                <div class="font-weight-bold text-primary" th:text="${s.propertyName}">Nhà Trọ Xanh</div>
+                                <div class="small text-muted">Toàn bộ phòng trong cơ sở</div>
+                            </td>
+
+                            <!-- Cột 3: Đơn giá & ĐVT -->
+                            <td>
+                                <div class="font-weight-bold text-danger font-mono" style="font-size: 1.05rem;"
+                                     th:text="${#numbers.formatDecimal(s.price != null ? s.price : 0, 0, 'COMMA', 0, 'POINT')} + ' đ'">
+                                    100.000 đ
+                                </div>
+                                <div class="small text-muted">
+                                    Đơn vị tính: <span class="font-weight-bold text-dark" th:text="${s.unit ?: 'Tháng'}">Phòng/Tháng</span>
+                                </div>
+                            </td>
+
+                            <!-- Cột 4: Hình thức thu phí -->
+                            <td>
+                                <span th:if="${s.type == 'FIXED' or s.type == 'MONTHLY'}" class="badge badge-success font-weight-bold px-2 py-1">
+                                    <i class="fas fa-calendar-check mr-1"></i>Cố Định / Tháng
+                                </span>
+                                <span th:if="${s.type == 'METERED' or s.type == 'VARIABLE'}" class="badge badge-info font-weight-bold px-2 py-1">
+                                    <i class="fas fa-tachometer-alt mr-1"></i>Theo Chỉ Số
+                                </span>
+                                <span th:if="${s.type != 'FIXED' and s.type != 'MONTHLY' and s.type != 'METERED' and s.type != 'VARIABLE'}" 
+                                      class="badge badge-secondary font-weight-bold px-2 py-1" th:text="${s.type}">
+                                    Khác
+                                </span>
+                            </td>
+
+                            <!-- Cột 5: Chức Năng (Thao Tác) -->
+                            <td class="text-center action-btns">
+                                <button type="button" class="btn btn-outline-info btn-sm mr-1 shadow-sm"
+                                        onclick="openEditServiceModal(this)"
+                                        th:attr="data-id=${s.id},data-name=${s.name},data-price=${s.price},data-unit=${s.unit},data-type=${s.type}"
+                                        title="Chỉnh sửa dịch vụ">
+                                    <i class="fas fa-edit mr-1"></i>Sửa
+                                </button>
+                                <form th:action="@{|/owner/services/delete/${s.id}|}" method="post" style="display:inline-block;"
+                                      data-confirm="Bạn có chắc chắn muốn xóa dịch vụ này?">
+                                    <button type="submit" class="btn btn-danger btn-sm shadow-sm" title="Xóa dịch vụ"
+                                            data-confirm="Bạn có chắc chắn muốn xóa dịch vụ này?">
+                                        <i class="fas fa-trash-alt mr-1"></i>Xóa
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
-  </div>
 
-  {{/*
-  <!-- Alert Success -->
-  <div
-    th:if="${param.success}"
-    class="fixed bottom-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg animate-bounce z-50 flex items-center gap-2"
-  >
-    <i class="fa-solid fa-circle-check"></i>
-    <span>Lưu thành công!</span>
-  </div>
-  <div
-    th:if="${param.deleted}"
-    class="fixed bottom-4 right-4 bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg animate-bounce z-50 flex items-center gap-2"
-  >
-    <i class="fa-solid fa-trash"></i>
-    <span>Đã xóa dịch vụ!</span>
-  </div>
-  */}}
+    <!-- Modal Chỉnh Sửa Nhanh Dịch Vụ -->
+    <div class="modal fade" id="editServiceModal" tabindex="-1" role="dialog" aria-labelledby="editServiceModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content border-0 shadow">
+                <form id="editServiceForm" method="post">
+                    <div class="modal-header text-white" style="background: #1b6c80;">
+                        <h5 class="modal-title font-weight-bold" id="editServiceModalLabel">
+                            <i class="fas fa-concierge-bell mr-2"></i>Cập Nhật Bảng Giá Dịch Vụ
+                        </h5>
+                        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label class="font-weight-bold small text-gray-700">Tên Dịch Vụ <span class="text-danger">*</span></label>
+                            <input type="text" name="name" id="editServiceName" class="form-control" required placeholder="Ví dụ: Wifi, Rác, Gửi xe...">
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group col-md-6">
+                                <label class="font-weight-bold small text-gray-700">Đơn Giá (VNĐ) <span class="text-danger">*</span></label>
+                                <input type="number" name="price" id="editServicePrice" class="form-control font-mono font-weight-bold text-danger" min="0" step="500" required>
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label class="font-weight-bold small text-gray-700">Đơn Vị Tính <span class="text-danger">*</span></label>
+                                <input type="text" name="unit" id="editServiceUnit" class="form-control" required placeholder="Tháng, Người, kWh, m³...">
+                            </div>
+                        </div>
+                        <div class="form-group mb-0">
+                            <label class="font-weight-bold small text-gray-700">Hình Thức Thu Phí <span class="text-danger">*</span></label>
+                            <select name="type" id="editServiceType" class="form-control custom-select">
+                                <option value="FIXED">Thu cố định hàng tháng (FIXED)</option>
+                                <option value="METERED">Tính theo chỉ số sử dụng (METERED)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer bg-light">
+                        <button type="button" class="btn btn-secondary font-weight-bold" data-dismiss="modal">
+                            <i class="fas fa-times mr-1"></i>Hủy Bỏ
+                        </button>
+                        <button type="submit" class="btn btn-success font-weight-bold shadow-sm">
+                            <i class="fas fa-save mr-1"></i>Lưu Thay Đổi
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 
-  <style>
-    @keyframes fadeInDown {
-      from {
-        opacity: 0;
-        transform: translateY(-20px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
+    <!-- Modal Khởi Tạo Nhanh Bộ Dịch Vụ Chuẩn -->
+    <div class="modal fade" id="quickPresetServiceModal" tabindex="-1" role="dialog" aria-labelledby="quickPresetServiceModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content border-0 shadow">
+                <form th:action="@{/owner/services/quick-preset}" method="post">
+                    <div class="modal-header text-white" style="background: #1b6c80;">
+                        <h5 class="modal-title font-weight-bold" id="quickPresetServiceModalLabel">
+                            <i class="fas fa-magic mr-2"></i>Khởi Tạo Nhanh Bộ Dịch Vụ Chuẩn
+                        </h5>
+                        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label class="font-weight-bold small text-gray-700">Chọn Cơ Sở Nhà Trọ Áp Dụng</label>
+                            <select th:if="${properties != null and !#lists.isEmpty(properties)}" name="propertyId" class="form-control custom-select">
+                                <option value="">-- Áp dụng cho tất cả cơ sở nhà trọ --</option>
+                                <option th:each="p : ${properties}" th:value="${p.id}" th:text="${p.name}"></option>
+                            </select>
+                            <input th:if="${properties == null or #lists.isEmpty(properties)}" type="number" name="propertyId" min="1" class="form-control font-mono" placeholder="Để trống áp dụng tất cả hoặc nhập ID cơ sở nhà trọ">
+                        </div>
+                        <div class="p-3 bg-light rounded border small">
+                            <div class="font-weight-bold text-dark mb-2">
+                                <i class="fas fa-check-circle text-success mr-1"></i>Bộ 4 dịch vụ tiêu chuẩn sẽ được tạo tự động:
+                            </div>
+                            <ul class="mb-0 pl-3 text-gray-700 font-mono">
+                                <li>Điện sinh hoạt: <strong>3,500 đ / kWh</strong> (Theo chỉ số)</li>
+                                <li>Nước sinh hoạt: <strong>20,000 đ / m³</strong> (Theo chỉ số)</li>
+                                <li>Internet Wifi tốc độ cao: <strong>100,000 đ / Phòng/Tháng</strong> (Cố định)</li>
+                                <li>Vệ sinh &amp; Thu gom rác: <strong>30,000 đ / Phòng/Tháng</strong> (Cố định)</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="modal-footer bg-light">
+                        <button type="button" class="btn btn-secondary font-weight-bold" data-dismiss="modal">
+                            <i class="fas fa-times mr-1"></i>Hủy Bỏ
+                        </button>
+                        <button type="submit" class="btn btn-success font-weight-bold shadow-sm">
+                            <i class="fas fa-bolt mr-1"></i>Khởi Tạo Ngay
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    function openEditServiceModal(btn) {
+        var id = btn.getAttribute('data-id');
+        document.getElementById('editServiceForm').action = '/owner/services/update/' + id;
+        document.getElementById('editServiceName').value = btn.getAttribute('data-name') || '';
+        document.getElementById('editServicePrice').value = btn.getAttribute('data-price') || 0;
+        document.getElementById('editServiceUnit').value = btn.getAttribute('data-unit') || 'Tháng';
+        var rawType = btn.getAttribute('data-type') || 'FIXED';
+        document.getElementById('editServiceType').value = (rawType === 'METERED' || rawType === 'VARIABLE') ? 'METERED' : 'FIXED';
+        $('#editServiceModal').modal('show');
     }
-    .animate-fade-in-down {
-      animation: fadeInDown 0.3s ease-out;
+
+    function filterOwnerServices() {
+        var search = document.getElementById('ownerServiceSearch').value.toLowerCase().trim();
+        var propFilterEl = document.getElementById('ownerServicePropertyFilter');
+        var propFilter = propFilterEl ? propFilterEl.value.toLowerCase().trim() : 'all';
+        var rows = document.querySelectorAll('.owner-service-row');
+        var count = 0;
+
+        rows.forEach(function(row) {
+            var name = row.getAttribute('data-name') || '';
+            var prop = row.getAttribute('data-prop') || '';
+
+            var matchSearch = !search || name.includes(search) || prop.includes(search);
+            var matchProp = !propFilter || propFilter === 'all' || prop === propFilter;
+            if (matchSearch && matchProp) {
+                row.style.display = '';
+                count++;
+            } else {
+                row.style.display = 'none';
+            }
+        });
+
+        document.getElementById('serviceFilteredCount').textContent = count;
     }
-  </style>
+    </script>
+
 </div>

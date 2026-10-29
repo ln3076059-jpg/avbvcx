@@ -1,235 +1,457 @@
-<div th:fragment="content" class="space-y-6">
-  <!-- Header -->
-  <div class="flex justify-between items-center">
-    <h1 class="text-2xl font-bold text-gray-900">Quản lý hợp đồng</h1>
-    <a
-      th:href="@{/owner/contracts/create}"
-      class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 text-sm font-medium transition-colors"
-    >
-      <i class="fa-solid fa-plus"></i>
-      Lập hợp đồng
-    </a>
-  </div>
+<div class="container-fluid" th:fragment="content">
 
-  <!-- Filters -->
-  <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
-    <label class="block text-sm font-medium text-gray-700 mb-2"
-      >Trạng thái</label
-    >
-    <div class="flex flex-wrap gap-4">
-      <a
-        th:href="@{/owner/contracts(status='ACTIVE')}"
-        th:class="${status != null and status.name() == 'ACTIVE'} ? 'flex items-center gap-2 px-3 py-1.5 rounded bg-blue-50 text-blue-700 border border-blue-200' : 'flex items-center gap-2 px-3 py-1.5 rounded hover:bg-gray-50 text-gray-600 border border-transparent'"
-      >
-        <div class="w-2 h-2 rounded-full bg-green-500"></div>
-        <span class="text-sm">Đang hiệu lực</span>
-      </a>
-      <a
-        th:href="@{/owner/contracts(status='EXPIRING_SOON')}"
-        th:class="${status != null and status.name() == 'EXPIRING_SOON'} ? 'flex items-center gap-2 px-3 py-1.5 rounded bg-blue-50 text-blue-700 border border-blue-200' : 'flex items-center gap-2 px-3 py-1.5 rounded hover:bg-gray-50 text-gray-600 border border-transparent'"
-      >
-        <div class="w-2 h-2 rounded-full bg-yellow-500"></div>
-        <span class="text-sm">Sắp hết hạn</span>
-      </a>
-      <a
-        th:href="@{/owner/contracts(status='EXPIRED')}"
-        th:class="${status != null and status.name() == 'EXPIRED'} ? 'flex items-center gap-2 px-3 py-1.5 rounded bg-blue-50 text-blue-700 border border-blue-200' : 'flex items-center gap-2 px-3 py-1.5 rounded hover:bg-gray-50 text-gray-600 border border-transparent'"
-      >
-        <div class="w-2 h-2 rounded-full bg-red-500"></div>
-        <span class="text-sm">Đã hết hạn</span>
-      </a>
-      <a
-        th:href="@{/owner/contracts(status='TERMINATED')}"
-        th:class="${status != null and status.name() == 'TERMINATED'} ? 'flex items-center gap-2 px-3 py-1.5 rounded bg-blue-50 text-blue-700 border border-blue-200' : 'flex items-center gap-2 px-3 py-1.5 rounded hover:bg-gray-50 text-gray-600 border border-transparent'"
-      >
-        <div class="w-2 h-2 rounded-full bg-gray-500"></div>
-        <span class="text-sm">Đã kết thúc</span>
-      </a>
-      <a
-        th:href="@{/owner/contracts}"
-        th:if="${status != null}"
-        class="text-sm text-gray-500 hover:text-gray-700 underline flex items-center"
-      >
-        Xóa bộ lọc
-      </a>
-    </div>
-  </div>
-
-  <!-- Table -->
-  <div
-    class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden"
-  >
-    <div
-      class="p-4 border-b border-gray-200 flex justify-between items-center gap-4"
-    >
-      <div class="flex items-center gap-2">
-        <span class="text-sm text-gray-600">Hiển thị</span>
-        <select
-          class="border-gray-300 rounded text-sm focus:ring-blue-500 focus:border-blue-500"
-          onchange="window.location.href = this.value"
-        >
-          <option value="10">10</option>
-          <option value="25">25</option>
-          <option value="50">50</option>
-        </select>
-      </div>
-      <form th:action="@{/owner/contracts}" class="flex-1 max-w-sm">
-        <input
-          type="hidden"
-          name="status"
-          th:value="${status}"
-          th:if="${status != null}"
-        />
-        <div class="relative">
-          <input
-            type="text"
-            name="keyword"
-            th:value="${keyword}"
-            class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-blue-500 focus:border-blue-500"
-            placeholder="Nhập từ khóa tìm kiếm (Mã, Phòng, Người dd...)"
-          />
-          <i
-            class="fa-solid fa-search absolute left-3 top-2.5 text-gray-400"
-          ></i>
+    <!-- Page Heading -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <div>
+            <h1 class="h3 mb-0 text-gray-800 font-weight-bold">
+                <i class="fas fa-file-contract text-success mr-2"></i>Quản Lý Hợp Đồng Thuê Nhà
+            </h1>
+            <p class="text-muted small mb-0 mt-1">Quản lý hiệu lực, thời hạn thuê, tiền cọc và thủ tục thanh lý phòng của khách thuê</p>
         </div>
-      </form>
+        <div class="d-flex align-items-center">
+            <a th:href="@{/owner/contracts/create}" class="btn btn-sm btn-success shadow-sm font-weight-bold">
+                <i class="fas fa-plus fa-sm text-white-50 mr-1"></i>Lập Hợp Đồng Mới
+            </a>
+        </div>
     </div>
 
-    <div class="overflow-x-auto">
-      <table class="w-full text-sm text-left">
-        <thead
-          class="text-xs text-gray-700 uppercase bg-gray-50 border-b border-gray-200"
-        >
-          <tr>
-            <th class="px-6 py-3 font-medium">Mã</th>
-            <th class="px-6 py-3 font-medium">Nhà trọ</th>
-            <th class="px-6 py-3 font-medium">Phòng</th>
-            <th class="px-6 py-3 font-medium">Người đại diện</th>
-            <th class="px-6 py-3 font-medium">Ngày bắt đầu</th>
-            <th class="px-6 py-3 font-medium">Ngày kết thúc</th>
-            <th class="px-6 py-3 font-medium">Trạng thái</th>
-            <th class="px-6 py-3 font-medium text-center">Hành động</th>
-          </tr>
-        </thead>
-        <tbody class="divide-y divide-gray-200">
-          <tr th:if="${contracts.empty}">
-            <td colspan="8" class="px-6 py-8 text-center text-gray-500">
-              Chưa có dữ liệu
-            </td>
-          </tr>
-          <tr th:each="contract : ${contracts}" class="hover:bg-gray-50">
-            <td
-              class="px-6 py-4 font-medium text-blue-600"
-              th:text="${contract.code}"
-            ></td>
-            <td
-              class="px-6 py-4 text-gray-900"
-              th:text="${contract.room.property.name}"
-            ></td>
-            <td
-              class="px-6 py-4 text-gray-900"
-              th:text="${contract.room.name}"
-            ></td>
-            <td class="px-6 py-4">
-              <div
-                class="flex items-center gap-2"
-                th:if="${contract.representative != null}"
-              >
-                <div
-                  class="w-6 h-6 rounded-full bg-gray-200 overflow-hidden flex-shrink-0"
-                >
-                  <!-- Placeholder avatar -->
-                  <i class="fa-solid fa-user text-xs text-gray-500 p-1"></i>
+    <!-- Alert Messages -->
+    <div th:if="${param.success}" class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+        <i class="fas fa-check-circle mr-2"></i>Lập hợp đồng thuê nhà thành công!
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    <div th:if="${param.checkoutSuccess}" class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+        <i class="fas fa-check-circle mr-2"></i>Đã thực hiện thanh lý hợp đồng và bàn giao phòng thành công!
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+
+    <!-- Filter & Status Tabs Card -->
+    <div class="search-container border-left-success">
+        <form th:action="@{/owner/contracts}" method="get" class="row align-items-center">
+            <div class="col-md-5 mb-2 mb-md-0">
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text bg-light border-0"><i class="fas fa-search text-gray-400"></i></span>
+                    </div>
+                    <input type="text" name="keyword" th:value="${keyword}" class="form-control border-0 bg-light small" 
+                           placeholder="Tìm nhanh theo mã hợp đồng, tên phòng, người thuê...">
                 </div>
-                <span th:text="${contract.representative.fullName}"></span>
-              </div>
-            </td>
-            <td
-              class="px-6 py-4 text-gray-600"
-              th:text="${#temporals.format(contract.startDate, 'dd/MM/yyyy')}"
-            ></td>
-            <td
-              class="px-6 py-4 text-gray-600"
-              th:text="${#temporals.format(contract.endDate, 'dd/MM/yyyy')}"
-            ></td>
-            <td class="px-6 py-4">
-              <span
-                th:if="${contract.status.name() == 'ACTIVE'}"
-                class="px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800"
-                >Hiệu lực</span
-              >
-              <span
-                th:if="${contract.status.name() == 'EXPIRING_SOON'}"
-                class="px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800"
-                >Sắp hết hạn</span
-              >
-              <span
-                th:if="${contract.status.name() == 'EXPIRED'}"
-                class="px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800"
-                >Hết hạn</span
-              >
-              <span
-                th:if="${contract.status.name() == 'TERMINATED'}"
-                class="px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800"
-                >Đã kết thúc</span
-              >
-            </td>
-            <td class="px-6 py-4 text-center">
-              <div class="flex justify-center gap-2">
-                <a
-                  href="#"
-                  class="text-gray-500 hover:text-blue-600"
-                  title="Chi tiết"
-                  ><i class="fa-regular fa-eye"></i
-                ></a>
-                <form
-                  th:if="${contract.status.name() == 'ACTIVE'}"
-                  th:action="@{/owner/contracts/{id}/terminate(id=${contract.id})}"
-                  method="post"
-                  onsubmit="
-                    return confirm(
-                      'Bạn có chắc chắn muốn kết thúc hợp đồng này?',
-                    );
-                  "
-                >
-                  <button
-                    type="submit"
-                    class="text-gray-500 hover:text-red-600"
-                    title="Kết thúc"
-                  >
-                    <i class="fa-solid fa-ban"></i>
-                  </button>
-                </form>
-              </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+            </div>
+            <div class="col-md-4 mb-2 mb-md-0">
+                <select name="status" class="form-control custom-select" onchange="this.form.submit()">
+                    <option value="">-- Tất cả trạng thái --</option>
+                    <option value="ACTIVE" th:selected="${status != null and status.name() == 'ACTIVE'}">Đang hiệu lực (ACTIVE)</option>
+                    <option value="EXPIRING_SOON" th:selected="${status != null and status.name() == 'EXPIRING_SOON'}">Sắp hết hạn (EXPIRING_SOON)</option>
+                    <option value="EXPIRED" th:selected="${status != null and status.name() == 'EXPIRED'}">Đã hết hạn (EXPIRED)</option>
+                    <option value="TERMINATED" th:selected="${status != null and status.name() == 'TERMINATED'}">Đã kết thúc (TERMINATED)</option>
+                </select>
+            </div>
+            <div class="col-md-3 text-md-right">
+                <button type="submit" class="btn btn-success btn-sm font-weight-bold shadow-sm mr-1">
+                    <i class="fas fa-filter mr-1"></i>Lọc
+                </button>
+                <a th:href="@{/owner/contracts}" class="btn btn-outline-secondary btn-sm font-weight-bold" title="Xóa bộ lọc">
+                    <i class="fas fa-redo"></i>
+                </a>
+            </div>
+        </form>
     </div>
 
-    <!-- Pagination (Simplified) -->
-    <div
-      class="p-4 border-t border-gray-200 flex justify-between items-center"
-      th:if="${contracts.totalPages > 1}"
-    >
-      <span class="text-sm text-gray-600">
-        Trang <span th:text="${currentPage}"></span> /
-        <span th:text="${contracts.totalPages}"></span>
-      </span>
-      <div class="flex gap-1">
-        <a
-          th:if="${currentPage > 1}"
-          th:href="@{/owner/contracts(page=${currentPage - 1}, status=${status}, keyword=${keyword})}"
-          class="px-3 py-1 border rounded hover:bg-gray-50 text-sm"
-          >Trước</a
-        >
-        <a
-          th:if="${currentPage < contracts.totalPages}"
-          th:href="@{/owner/contracts(page=${currentPage + 1}, status=${status}, keyword=${keyword})}"
-          class="px-3 py-1 border rounded hover:bg-gray-50 text-sm"
-          >Sau</a
-        >
-      </div>
+    <!-- DataTales Card -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 bg-white border-bottom-success d-flex justify-content-between align-items-center">
+            <h6 class="m-0 font-weight-bold text-success">
+                <i class="fas fa-list-alt mr-1"></i>Danh Sách Hợp Đồng Thuê
+            </h6>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover mb-0" id="ownerContractsTable" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th style="width: 20%;">Mã Hợp Đồng & Thời Hạn</th>
+                            <th style="width: 20%;">Phòng & Cơ Sở Cho Thuê</th>
+                            <th style="width: 20%;">Khách Thuê Đại Diện</th>
+                            <th style="width: 20%;">Tiền Thuê & Trạng Thái</th>
+                            <th style="width: 20%;" class="text-center">Chức Năng</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:if="${contracts == null or contracts.empty}">
+                            <td colspan="5" class="text-center py-5 text-muted">
+                                <i class="fas fa-file-contract fa-3x mb-3 text-gray-300 d-block"></i>
+                                Chưa có hợp đồng thuê nhà nào. Hãy nhấn <strong>"Lập Hợp Đồng Mới"</strong> khi có khách vào ở.
+                            </td>
+                        </tr>
+                        <tr th:each="c : ${contracts}">
+                            <!-- Cột 1: Mã HĐ & Thời hạn -->
+                            <td>
+                                <strong class="text-primary font-weight-bold" th:text="${c.code != null ? c.code : ('#HD-' + c.id)}">HD-001</strong>
+                                <div class="small text-muted mt-1 font-mono">
+                                    <i class="far fa-calendar-alt text-success mr-1"></i>
+                                    <span th:text="${c.startDate != null ? #temporals.format(c.startDate, 'dd/MM/yyyy') : '-'}">01/01/2026</span>
+                                    <span> &rarr; </span>
+                                    <span th:text="${c.endDate != null ? #temporals.format(c.endDate, 'dd/MM/yyyy') : '-'}">01/01/2027</span>
+                                </div>
+                            </td>
+
+                            <!-- Cột 2: Phòng & Cơ sở -->
+                            <td>
+                                <div class="font-weight-bold text-dark" th:text="${c.room != null ? c.room.name : 'N/A'}">Phòng 101</div>
+                                <div class="small text-muted" th:text="${c.room != null and c.room.property != null ? c.room.property.name : ''}">Nhà Trọ Xanh</div>
+                            </td>
+
+                            <!-- Cột 3: Khách thuê -->
+                            <td>
+                                <div class="font-weight-bold text-gray-800" 
+                                     th:text="${c.representative != null ? (c.representative.fullName != null ? c.representative.fullName : c.representative.username) : 'N/A'}">
+                                    Trần Văn B
+                                </div>
+                                <div class="small text-muted" th:if="${c.representative != null and c.representative.phone != null}">
+                                    <i class="fas fa-phone-alt text-success mr-1"></i>
+                                    <span th:text="${c.representative.phone}">0987654321</span>
+                                </div>
+                            </td>
+
+                            <!-- Cột 4: Tiền thuê & Trạng thái -->
+                            <td>
+                                <div class="font-weight-bold text-danger font-mono" 
+                                     th:text="${#numbers.formatDecimal(c.rentPrice != null ? c.rentPrice : 0, 0, 'COMMA', 0, 'POINT')} + ' đ/th'">
+                                    3.000.000 đ
+                                </div>
+                                <div class="small text-muted font-mono" th:if="${c.deposit != null}">
+                                    Cọc: <span th:text="${#numbers.formatDecimal(c.deposit, 0, 'COMMA', 0, 'POINT')} + ' đ'">1.000.000 đ</span>
+                                </div>
+                                <div class="mt-1">
+                                    <span th:if="${c.status.name() == 'ACTIVE'}" class="badge badge-success font-weight-bold">
+                                        <i class="fas fa-check-circle mr-1"></i>Hiệu Lực
+                                    </span>
+                                    <span th:if="${c.status.name() == 'EXPIRING_SOON'}" class="badge badge-warning font-weight-bold">
+                                        <i class="fas fa-clock mr-1"></i>Sắp Hết Hạn
+                                    </span>
+                                    <span th:if="${c.status.name() == 'EXPIRED'}" class="badge badge-secondary font-weight-bold">
+                                        <i class="fas fa-hourglass-end mr-1"></i>Hết Hạn
+                                    </span>
+                                    <span th:if="${c.status.name() == 'TERMINATED'}" class="badge badge-dark font-weight-bold">
+                                        <i class="fas fa-ban mr-1"></i>Đã Kết Thúc
+                                    </span>
+                                </div>
+                                <div th:if="${c.note != null and (c.note.contains('GIA HẠN') or c.note.contains('TRẢ PHÒNG'))}">
+                                    <span class="badge badge-warning text-dark font-weight-bold mt-1 d-inline-block" th:title="${c.note}">
+                                        <i class="fas fa-bell mr-1"></i>Khách gửi yêu cầu
+                                    </span>
+                                </div>
+                            </td>
+
+                            <!-- Cột 5: Chức Năng (Thao Tác) -->
+                            <td class="text-center action-btns">
+                                <button type="button" class="btn btn-outline-info btn-sm shadow-sm font-weight-bold"
+                                        onclick="openContractDetailModal(this)"
+                                        th:attr="data-code=${c.code != null ? c.code : ('#HD-' + c.id)},data-room=${c.room != null ? c.room.name : 'N/A'},data-prop=${c.room != null and c.room.property != null ? c.room.property.name : 'N/A'},data-rep=${c.representative != null ? (c.representative.fullName != null ? c.representative.fullName : c.representative.username) : 'N/A'},data-phone=${c.representative != null and c.representative.phone != null ? c.representative.phone : '-'},data-price=${#numbers.formatDecimal(c.rentPrice != null ? c.rentPrice : 0, 0, 'COMMA', 0, 'POINT') + ' đ/tháng'},data-deposit=${#numbers.formatDecimal(c.deposit != null ? c.deposit : 0, 0, 'COMMA', 0, 'POINT') + ' đ'},data-cycle=${(c.paymentCycle != null ? c.paymentCycle : 1) + ' tháng/lần'},data-start=${c.startDate != null ? #temporals.format(c.startDate, 'dd/MM/yyyy') : '-'},data-end=${c.endDate != null ? #temporals.format(c.endDate, 'dd/MM/yyyy') : '-'},data-status=${c.status != null ? c.status.name() : ''},data-note=${c.note != null and !#strings.isEmpty(c.note) ? c.note : 'Không có ghi chú bổ sung'}"
+                                        title="Xem chi tiết hợp đồng & biên bản thanh lý">
+                                    <i class="fas fa-eye mr-1"></i>Chi tiết
+                                </button>
+                                <button th:if="${c.status.name() == 'ACTIVE' or c.status.name() == 'EXPIRING_SOON' or c.status.name() == 'EXPIRED'}"
+                                        type="button"
+                                        class="btn btn-success btn-sm shadow-sm font-weight-bold"
+                                        onclick="openRenewContractModal(this)"
+                                        th:attr="data-id=${c.id},
+                                                 data-code=${c.code != null ? c.code : ('#HD-' + c.id)},
+                                                 data-room=${c.room != null ? c.room.name : 'N/A'},
+                                                 data-rep=${c.representative != null ? (c.representative.fullName != null ? c.representative.fullName : c.representative.username) : 'N/A'},
+                                                 data-end-iso=${c.endDate != null ? #temporals.format(c.endDate, 'yyyy-MM-dd') : ''},
+                                                 data-end-display=${c.endDate != null ? #temporals.format(c.endDate, 'dd/MM/yyyy') : '-'},
+                                                 data-rent-price=${c.rentPrice != null ? #numbers.formatDecimal(c.rentPrice, 0, 'POINT', 0, 'POINT') : 0}"
+                                        title="Gia hạn thời hạn thuê & cập nhật giá thuê">
+                                    <i class="fas fa-sync-alt mr-1"></i>Gia hạn
+                                </button>
+                                <a th:if="${c.status.name() == 'ACTIVE' or c.status.name() == 'EXPIRING_SOON'}" 
+                                   th:href="@{|/owner/contracts/${c.id}/checkout|}" 
+                                   class="btn btn-warning btn-sm shadow-sm font-weight-bold" title="Thủ tục trả phòng & đối soát cọc">
+                                    <i class="fas fa-sign-out-alt mr-1"></i>Trả Phòng
+                                </a>
+                                <form th:if="${c.status.name() == 'ACTIVE' or c.status.name() == 'EXPIRING_SOON'}" 
+                                      th:action="@{|/owner/contracts/${c.id}/terminate|}" method="post" style="display:inline-block;"
+                                      data-confirm="Bạn có chắc chắn muốn kết thúc hợp đồng này ngay lập tức?">
+                                    <button type="submit" class="btn btn-danger btn-sm shadow-sm" title="Kết thúc hợp đồng"
+                                            data-confirm="Bạn có chắc chắn muốn kết thúc hợp đồng này ngay lập tức?">
+                                        <i class="fas fa-ban mr-1"></i>Kết Thúc
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Phân trang SB Admin 2 -->
+            <div class="d-flex justify-content-between align-items-center p-3 border-top" th:if="${contracts != null and contracts.totalPages > 1}">
+                <div class="small text-muted">
+                    Trang <span th:text="${currentPage}">1</span> / <span th:text="${contracts.totalPages}">1</span>
+                </div>
+                <ul class="pagination pagination-sm m-0">
+                    <li class="page-item" th:classappend="${currentPage <= 1} ? 'disabled' : ''">
+                        <a class="page-link" th:href="@{/owner/contracts(page=${currentPage - 1}, keyword=${keyword}, status=${status})}">Trước</a>
+                    </li>
+                    <li class="page-item" th:each="p : ${#numbers.sequence(1, contracts.totalPages)}" th:classappend="${p == currentPage} ? 'active' : ''">
+                        <a class="page-link" th:href="@{/owner/contracts(page=${p}, keyword=${keyword}, status=${status})}" th:text="${p}">1</a>
+                    </li>
+                    <li class="page-item" th:classappend="${currentPage >= contracts.totalPages} ? 'disabled' : ''">
+                        <a class="page-link" th:href="@{/owner/contracts(page=${currentPage + 1}, keyword=${keyword}, status=${status})}">Sau</a>
+                    </li>
+                </ul>
+            </div>
+
+        </div>
     </div>
-  </div>
+
+    <!-- Modal Chi Tiết Hợp Đồng -->
+    <div class="modal fade" id="contractDetailModal" tabindex="-1" role="dialog" aria-labelledby="contractDetailModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header text-white" style="background: #1b6c80;">
+                    <h5 class="modal-title font-weight-bold" id="contractDetailModalLabel">
+                        <i class="fas fa-file-contract mr-2"></i>Chi Tiết Hợp Đồng Thuê Phòng
+                    </h5>
+                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body p-4" id="contractPrintableArea">
+                    <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-3">
+                        <div>
+                            <span class="text-xs font-weight-bold text-uppercase text-muted d-block">Mã Hợp Đồng</span>
+                            <h4 class="font-weight-bold text-primary font-mono mb-0" id="cdCode">HD-001</h4>
+                        </div>
+                        <div id="cdStatusBadge"></div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6 mb-3 mb-md-0">
+                            <div class="p-3 bg-light rounded border h-100">
+                                <div class="text-xs font-weight-bold text-uppercase text-success mb-2">
+                                    <i class="fas fa-door-open mr-1"></i>Thông Tin Phòng & Cơ Sở
+                                </div>
+                                <div class="mb-1">
+                                    <span class="text-muted small">Phòng thuê:</span>
+                                    <strong class="text-dark ml-1" id="cdRoom">Phòng 101</strong>
+                                </div>
+                                <div>
+                                    <span class="text-muted small">Cơ sở nhà trọ:</span>
+                                    <strong class="text-dark ml-1" id="cdProp">Nhà Trọ Xanh</strong>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="p-3 bg-light rounded border h-100">
+                                <div class="text-xs font-weight-bold text-uppercase text-info mb-2">
+                                    <i class="fas fa-user-check mr-1"></i>Người Đại Diện Hợp Đồng
+                                </div>
+                                <div class="mb-1">
+                                    <span class="text-muted small">Họ và tên:</span>
+                                    <strong class="text-dark ml-1" id="cdRep">Nguyễn Văn A</strong>
+                                </div>
+                                <div>
+                                    <span class="text-muted small">Số điện thoại:</span>
+                                    <strong class="text-success font-mono ml-1" id="cdPhone">0912345678</strong>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-4 mb-2 mb-md-0">
+                            <div class="p-3 border rounded text-center">
+                                <div class="text-xs text-muted text-uppercase font-weight-bold">Giá Thuê Hàng Tháng</div>
+                                <div class="h6 font-weight-bold text-danger font-mono mt-1 mb-0" id="cdPrice">0 đ</div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-2 mb-md-0">
+                            <div class="p-3 border rounded text-center">
+                                <div class="text-xs text-muted text-uppercase font-weight-bold">Tiền Đặt Cọc</div>
+                                <div class="h6 font-weight-bold text-warning font-mono mt-1 mb-0" id="cdDeposit">0 đ</div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="p-3 border rounded text-center">
+                                <div class="text-xs text-muted text-uppercase font-weight-bold">Kỳ Thanh Toán</div>
+                                <div class="h6 font-weight-bold text-primary mt-1 mb-0" id="cdCycle">1 tháng/lần</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="p-3 border rounded mb-3 bg-white">
+                        <div class="row align-items-center">
+                            <div class="col-sm-6">
+                                <span class="text-muted small"><i class="far fa-calendar-check text-success mr-1"></i>Ngày bắt đầu:</span>
+                                <strong class="font-mono text-dark ml-1" id="cdStart">--/--/----</strong>
+                            </div>
+                            <div class="col-sm-6">
+                                <span class="text-muted small"><i class="far fa-calendar-times text-danger mr-1"></i>Ngày kết thúc:</span>
+                                <strong class="font-mono text-dark ml-1" id="cdEnd">--/--/----</strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="p-3 bg-light border rounded">
+                        <div class="text-xs font-weight-bold text-uppercase text-gray-700 mb-1">
+                            <i class="fas fa-clipboard-list mr-1 text-warning"></i>Ghi Chú Hợp Đồng / Biên Bản Thanh Lý
+                        </div>
+                        <div class="small text-dark" id="cdNote" style="white-space: pre-line;">Không có ghi chú</div>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light">
+                    <button type="button" class="btn btn-outline-primary font-weight-bold" onclick="printContractSummary()">
+                        <i class="fas fa-print mr-1"></i>In tóm tắt HĐ
+                    </button>
+                    <button type="button" class="btn btn-secondary font-weight-bold" data-dismiss="modal">
+                        <i class="fas fa-times mr-1"></i>Đóng
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Gia Hạn Hợp Đồng -->
+    <div class="modal fade" id="renewContractModal" tabindex="-1" role="dialog" aria-labelledby="renewContractModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content border-0 shadow">
+                <form id="renewContractForm" method="post" action="">
+                    <div class="modal-header text-white" style="background: #1b6c80;">
+                        <h5 class="modal-title font-weight-bold" id="renewContractModalLabel">
+                            <i class="fas fa-sync-alt mr-2"></i>Gia Hạn Hợp Đồng Thuê Phòng
+                        </h5>
+                        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body p-4">
+                        <div class="p-3 bg-light rounded border mb-3">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <span class="text-xs font-weight-bold text-muted text-uppercase">Hợp đồng & Phòng:</span>
+                                <strong class="text-primary font-mono" id="rnCodeRoom">HD-001 • Phòng 101</strong>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <span class="text-xs font-weight-bold text-muted text-uppercase">Khách đại diện:</span>
+                                <strong class="text-dark" id="rnRep">Nguyễn Văn A</strong>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center pt-1 border-top mt-1">
+                                <span class="text-xs font-weight-bold text-muted text-uppercase">Hạn kết thúc hiện tại:</span>
+                                <strong class="font-mono text-danger" id="rnCurrentEnd">01/01/2027</strong>
+                            </div>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <label class="small font-weight-bold text-gray-800 mb-0">Ngày kết thúc mới <span class="text-danger">*</span></label>
+                                <div>
+                                    <button type="button" class="btn btn-xs btn-outline-success py-0 px-2 small font-weight-bold mr-1" onclick="addRenewalMonths(6)">+6 tháng</button>
+                                    <button type="button" class="btn btn-xs btn-outline-primary py-0 px-2 small font-weight-bold" onclick="addRenewalMonths(12)">+1 năm</button>
+                                </div>
+                            </div>
+                            <input type="date" id="rnNewEndDate" name="newEndDate" required class="form-control font-mono font-weight-bold">
+                        </div>
+
+                        <div class="form-group mb-0">
+                            <label class="small font-weight-bold text-gray-800">Giá thuê áp dụng kỳ mới (VNĐ/tháng)</label>
+                            <input type="number" id="rnNewRentPrice" name="newRentPrice" step="50000" min="0"
+                                   class="form-control font-mono font-weight-bold text-danger"
+                                   placeholder="Để nguyên nếu không thay đổi giá thuê">
+                            <small class="text-muted">Mặc định giữ nguyên giá thuê hiện tại nếu không điều chỉnh.</small>
+                        </div>
+                    </div>
+                    <div class="modal-footer bg-light">
+                        <button type="button" class="btn btn-secondary font-weight-bold" data-dismiss="modal">Hủy</button>
+                        <button type="submit" class="btn btn-success font-weight-bold shadow-sm">
+                            <i class="fas fa-check-circle mr-1"></i>Xác Nhận Gia Hạn
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    var currentContractEndIso = '';
+
+    function openRenewContractModal(btn) {
+        var id = btn.getAttribute('data-id');
+        var code = btn.getAttribute('data-code') || '';
+        var room = btn.getAttribute('data-room') || '';
+        var rep = btn.getAttribute('data-rep') || '';
+        var endIso = btn.getAttribute('data-end-iso') || '';
+        var endDisplay = btn.getAttribute('data-end-display') || '-';
+        var rentPrice = btn.getAttribute('data-rent-price') || '';
+
+        currentContractEndIso = endIso;
+
+        document.getElementById('renewContractForm').setAttribute('action', '/owner/contracts/' + id + '/renew');
+        document.getElementById('rnCodeRoom').textContent = code + ' • ' + room;
+        document.getElementById('rnRep').textContent = rep;
+        document.getElementById('rnCurrentEnd').textContent = endDisplay;
+        document.getElementById('rnNewRentPrice').value = rentPrice;
+
+        addRenewalMonths(6);
+        $('#renewContractModal').modal('show');
+    }
+
+    function addRenewalMonths(months) {
+        var baseDate = currentContractEndIso ? new Date(currentContractEndIso + 'T00:00:00') : new Date();
+        var today = new Date();
+        if (isNaN(baseDate.getTime()) || baseDate < today) {
+            baseDate = today;
+        }
+        var target = new Date(baseDate.getFullYear(), baseDate.getMonth() + months, baseDate.getDate());
+        var yyyy = target.getFullYear();
+        var mm = String(target.getMonth() + 1).padStart(2, '0');
+        var dd = String(target.getDate()).padStart(2, '0');
+        document.getElementById('rnNewEndDate').value = yyyy + '-' + mm + '-' + dd;
+    }
+
+    function openContractDetailModal(btn) {
+        document.getElementById('cdCode').textContent = btn.getAttribute('data-code') || '';
+        document.getElementById('cdRoom').textContent = btn.getAttribute('data-room') || '';
+        document.getElementById('cdProp').textContent = btn.getAttribute('data-prop') || '';
+        document.getElementById('cdRep').textContent = btn.getAttribute('data-rep') || '';
+        document.getElementById('cdPhone').textContent = btn.getAttribute('data-phone') || '';
+        document.getElementById('cdPrice').textContent = btn.getAttribute('data-price') || '';
+        document.getElementById('cdDeposit').textContent = btn.getAttribute('data-deposit') || '';
+        document.getElementById('cdCycle').textContent = btn.getAttribute('data-cycle') || '';
+        document.getElementById('cdStart').textContent = btn.getAttribute('data-start') || '';
+        document.getElementById('cdEnd').textContent = btn.getAttribute('data-end') || '';
+        document.getElementById('cdNote').textContent = btn.getAttribute('data-note') || '';
+
+        var status = btn.getAttribute('data-status');
+        var badgeEl = document.getElementById('cdStatusBadge');
+        if (status === 'ACTIVE') {
+            badgeEl.innerHTML = '<span class="badge badge-success px-3 py-2"><i class="fas fa-check-circle mr-1"></i>Đang Hiệu Lực</span>';
+        } else if (status === 'EXPIRING_SOON') {
+            badgeEl.innerHTML = '<span class="badge badge-warning px-3 py-2"><i class="fas fa-clock mr-1"></i>Sắp Hết Hạn</span>';
+        } else if (status === 'EXPIRED') {
+            badgeEl.innerHTML = '<span class="badge badge-secondary px-3 py-2"><i class="fas fa-hourglass-end mr-1"></i>Đã Hết Hạn</span>';
+        } else {
+            badgeEl.innerHTML = '<span class="badge badge-dark px-3 py-2"><i class="fas fa-ban mr-1"></i>Đã Kết Thúc / Thanh Lý</span>';
+        }
+
+        $('#contractDetailModal').modal('show');
+    }
+
+    function printContractSummary() {
+        var content = document.getElementById('contractPrintableArea').innerHTML;
+        var win = window.open('', '_blank', 'width=800,height=650');
+        win.document.write('<html><head><title>Tóm Tắt Hợp Đồng Thuê Phòng</title>');
+        win.document.write('<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">');
+        win.document.write('</head><body class="p-4">');
+        win.document.write('<h3 class="text-center font-weight-bold mb-4">TÓM TẮT HỢP ĐỒNG THUÊ NHÀ TRỌ</h3>');
+        win.document.write(content);
+        win.document.write('</body></html>');
+        win.document.close();
+        setTimeout(function() { win.print(); }, 400);
+    }
+    </script>
+
 </div>

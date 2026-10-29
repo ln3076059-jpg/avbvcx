@@ -1,53 +1,662 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Admin Dashboard - Trọ Mới</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="Trang Quản Trị Hệ Thống Quản Lý Phòng Trọ Trọ Mới">
+    <meta name="author" content="Trọ Mới Admin">
+
+    <title th:text="${pageTitle != null ? pageTitle + ' - Trọ Mới Admin' : 'Trọ Mới - Trang Quản Trị Hệ Thống'}">Trọ Mới - Trang Quản Trị Hệ Thống</title>
+
+    <!-- Custom fonts for SB Admin 2 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
+
+    <!-- SB Admin 2 Custom Styles -->
+    <link th:href="@{/sb-admin-2/css/sb-admin-2.min.css}" rel="stylesheet">
+
+    <!-- DataTables Bootstrap 4 Styles -->
+    <link th:href="@{/sb-admin-2/vendor/datatables/dataTables.bootstrap4.min.css}" rel="stylesheet">
+
+    <style>
+        .action-btns .btn {
+            margin: 2px;
+        }
+        .btn-circle-sm {
+            width: 32px;
+            height: 32px;
+            padding: 0;
+            border-radius: 50%;
+            text-align: center;
+            font-size: 13px;
+            line-height: 32px;
+        }
+        .search-container {
+            background: #ffffff;
+            padding: 16px;
+            border-radius: 0.35rem;
+            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+            margin-bottom: 1.5rem;
+        }
+    </style>
 </head>
-<body class="bg-gray-50 text-gray-800">
-    <div class="flex min-h-screen">
+
+<body id="page-top">
+
+    <!-- Page Wrapper -->
+    <div id="wrapper">
+
         <!-- Sidebar -->
-        <aside class="w-64 bg-white border-r border-gray-200 flex flex-col sticky top-0 h-screen">
-            <div class="p-6 border-b border-gray-100 flex items-center gap-3">
-                <i class="fa-solid fa-shield-halved text-blue-600 text-2xl"></i>
-                <span class="text-xl font-bold text-gray-800">Admin</span>
-            </div>
-            <nav class="flex-1 p-4 space-y-1">
-                <a href="/admin/dashboard" class="flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg bg-blue-50 text-blue-700">
-                    <i class="fa-solid fa-chart-pie w-5"></i>
-                    Thống kê
-                </a>
-            </nav>
-            <div class="p-4 border-t border-gray-100">
-                <a href="/logout" class="flex items-center gap-3 px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50 rounded-lg transition-colors">
-                    <i class="fa-solid fa-right-from-bracket w-5"></i>
-                    Đăng xuất
-                </a>
-            </div>
-        </aside>
+        <ul class="navbar-nav sidebar sidebar-dark accordion" style="background-color: #0a68ff;" id="accordionSidebar">
 
-        <!-- Main Content -->
-        <div class="flex-1 flex flex-col">
-            <header class="bg-white border-b border-gray-200 px-8 py-4 flex justify-between items-center shadow-sm">
-                <h2 class="text-lg font-semibold text-gray-800">Tổng quan hệ thống</h2>
-                <div class="flex items-center gap-3">
-                    <div class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-500">
-                        <i class="fa-solid fa-user"></i>
-                    </div>
-                    <span class="text-sm font-medium text-gray-700">Administrator</span>
+            <!-- Sidebar - Brand -->
+            <a class="sidebar-brand d-flex align-items-center justify-content-center" th:href="@{/admin/dashboard}">
+                <div class="sidebar-brand-icon">
+                    <i class="fas fa-house-chimney"></i>
                 </div>
-            </header>
+                <div class="sidebar-brand-text mx-2 text-nowrap" style="white-space: nowrap !important;">Trọ Mới <sup>Admin</sup></div>
+            </a>
 
-            <main class="flex-1 p-8">
+            <!-- Divider -->
+            <hr class="sidebar-divider my-0">
+
+            <!-- Nav Item - Dashboard -->
+            <li class="nav-item" th:classappend="${activePage == 'dashboard'} ? 'active' : ''">
+                <a class="nav-link" th:href="@{/admin/dashboard}">
+                    <i class="fas fa-fw fa-tachometer-alt"></i>
+                    <span>Tổng quan hệ thống</span>
+                </a>
+            </li>
+
+            <!-- Divider -->
+            <hr class="sidebar-divider">
+
+            <!-- Heading -->
+            <div class="sidebar-heading">
+                Quản lý dữ liệu
+            </div>
+
+            <!-- Nav Item - Người dùng -->
+            <li class="nav-item" th:classappend="${activePage == 'users'} ? 'active' : ''">
+                <a class="nav-link" th:href="@{/admin/users}">
+                    <i class="fas fa-fw fa-users"></i>
+                    <span>Quản lý người dùng</span>
+                </a>
+            </li>
+
+            <!-- Nav Item - Danh mục -->
+            <li class="nav-item" th:classappend="${activePage == 'categories'} ? 'active' : ''">
+                <a class="nav-link" th:href="@{/admin/categories}">
+                    <i class="fas fa-fw fa-th-list"></i>
+                    <span>Danh mục nhà trọ</span>
+                </a>
+            </li>
+
+            <!-- Nav Item - Cơ sở Nhà trọ -->
+            <li class="nav-item" th:classappend="${activePage == 'properties'} ? 'active' : ''">
+                <a class="nav-link" th:href="@{/admin/properties}">
+                    <i class="fas fa-fw fa-hotel"></i>
+                    <span>Cơ sở nhà trọ</span>
+                </a>
+            </li>
+
+            <!-- Divider -->
+            <hr class="sidebar-divider">
+
+            <!-- Heading -->
+            <div class="sidebar-heading">
+                Vận hành &amp; dịch vụ
+            </div>
+
+            <!-- Nav Item - Bài đăng -->
+            <li class="nav-item" th:classappend="${activePage == 'posts'} ? 'active' : ''">
+                <a class="nav-link" th:href="@{/admin/posts}">
+                    <i class="fas fa-fw fa-bullhorn"></i>
+                    <span>Quản lý tin đăng</span>
+                </a>
+            </li>
+
+            <!-- Nav Item - Gói dịch vụ -->
+            <li class="nav-item" th:classappend="${activePage == 'plans'} ? 'active' : ''">
+                <a class="nav-link" th:href="@{/admin/plans}">
+                    <i class="fas fa-fw fa-box-open"></i>
+                    <span>Gói dịch vụ quản lý</span>
+                </a>
+            </li>
+
+            <!-- Divider -->
+            <hr class="sidebar-divider">
+
+            <!-- Heading -->
+            <div class="sidebar-heading">
+                Nghiệp vụ &amp; tài chính
+            </div>
+
+            <!-- Nav Item - Đơn đặt thuê & Liên hệ -->
+            <li class="nav-item" th:classappend="${activePage == 'bookings'} ? 'active' : ''">
+                <a class="nav-link" th:href="@{/admin/bookings}">
+                    <i class="fas fa-fw fa-clipboard-check"></i>
+                    <span>Đơn đặt thuê &amp; Liên hệ</span>
+                </a>
+            </li>
+
+            <!-- Nav Item - Hợp đồng thuê -->
+            <li class="nav-item" th:classappend="${activePage == 'contracts'} ? 'active' : ''">
+                <a class="nav-link" th:href="@{/admin/contracts}">
+                    <i class="fas fa-fw fa-file-contract"></i>
+                    <span>Hợp đồng thuê nhà</span>
+                </a>
+            </li>
+
+            <!-- Nav Item - Hóa đơn -->
+            <li class="nav-item" th:classappend="${activePage == 'invoices'} ? 'active' : ''">
+                <a class="nav-link" th:href="@{/admin/invoices}">
+                    <i class="fas fa-fw fa-file-invoice-dollar"></i>
+                    <span>Hóa đơn &amp; thu chi</span>
+                </a>
+            </li>
+
+            <!-- Nav Item - Bảo trì sửa chữa -->
+            <li class="nav-item" th:classappend="${activePage == 'maintenance'} ? 'active' : ''">
+                <a class="nav-link" th:href="@{/admin/maintenance}">
+                    <i class="fas fa-fw fa-tools"></i>
+                    <span>Yêu cầu sửa chữa</span>
+                </a>
+            </li>
+
+            <!-- Divider -->
+            <hr class="sidebar-divider d-none d-md-block">
+
+            <!-- Sidebar Toggler (Sidebar) -->
+            <div class="text-center d-none d-md-inline">
+                <button class="rounded-circle border-0" id="sidebarToggle"></button>
+            </div>
+
+        </ul>
+        <!-- End of Sidebar -->
+
+        <!-- Content Wrapper -->
+        <div id="content-wrapper" class="d-flex flex-column">
+
+            <!-- Main Content -->
+            <div id="content">
+
+                <!-- Topbar -->
+                <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
+
+                    <!-- Sidebar Toggle (Topbar) -->
+                    <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
+                        <i class="fa fa-bars"></i>
+                    </button>
+
+                    <!-- Topbar Search (SB Admin 2 Classic) -->
+                    <form th:action="@{/admin/users}" method="get"
+                          class="d-none d-sm-inline-block form-inline mr-auto ml-md-3 my-2 my-md-0 mw-100 navbar-search">
+                        <div class="input-group">
+                            <input type="text" name="keyword" class="form-control bg-light border-0 small"
+                                   placeholder="Tìm kiếm nhanh người dùng, cơ sở..." aria-label="Search">
+                            <div class="input-group-append">
+                                <button class="btn btn-primary" type="submit">
+                                    <i class="fas fa-search fa-sm"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+
+                    <!-- Topbar Navbar -->
+                    <ul class="navbar-nav ml-auto">
+
+                        <!-- Nav Item - Role Portal Switcher Dropdown (3 Roles) -->
+                        <li class="nav-item dropdown no-arrow mx-1">
+                            <a class="nav-link dropdown-toggle" href="#" id="roleDropdown" role="button"
+                               data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <span class="badge badge-primary px-2 py-1"><i class="fas fa-exchange-alt mr-1"></i> Chuyển cổng vai trò (Full quyền)</span>
+                            </a>
+                            <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in p-2" aria-labelledby="roleDropdown" style="min-width: 250px;">
+                                <div class="dropdown-header font-weight-bold text-primary small">
+                                    <i class="fas fa-th-large mr-1"></i> Hệ thống 3 vai trò (Admin Toàn quyền)
+                                </div>
+                                <a class="dropdown-item py-2" th:href="@{/admin/dashboard}">
+                                    <i class="fas fa-shield-alt text-danger mr-2 fa-fw"></i> 1. Quản trị viên (Admin - Toàn quyền)
+                                </a>
+                                <a class="dropdown-item py-2" th:href="@{/owner/dashboard}">
+                                    <i class="fas fa-building text-success mr-2 fa-fw"></i> 2. Chủ nhà trọ (Owner)
+                                </a>
+                                <a class="dropdown-item py-2" th:href="@{/tenant/dashboard}">
+                                    <i class="fas fa-user-friends text-info mr-2 fa-fw"></i> 3. Khách hàng / Thuê phòng (User)
+                                </a>
+                                <div class="dropdown-divider"></div>
+                                <a class="dropdown-item py-2 text-primary" th:href="@{/}" target="_blank">
+                                    <i class="fas fa-globe mr-2 fa-fw"></i> Xem trang chủ tìm phòng
+                                </a>
+                            </div>
+                        </li>
+
+                        <div class="topbar-divider d-none d-sm-block"></div>
+
+                        <!-- Nav Item - User Information -->
+                        <li class="nav-item dropdown no-arrow">
+                            <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
+                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <span class="mr-2 d-none d-lg-inline text-gray-600 small font-weight-bold"
+                                      th:text="${session.user != null ? (session.user.fullName != null ? session.user.fullName : session.user.username) : 'Quản trị viên'}">Quản trị viên</span>
+                                <img class="img-profile rounded-circle" th:src="@{/sb-admin-2/img/undraw_profile.svg}" alt="Avatar Admin">
+                            </a>
+                            <!-- Dropdown - User Information -->
+                            <div class="dropdown-menu dropdown-menu-right animated--grow-in" aria-labelledby="userDropdown">
+                                <div class="dropdown-item-text text-muted small pb-2 border-bottom">
+                                    <strong class="text-dark" th:text="${session.user != null ? session.user.username : 'admin'}">admin</strong><br>
+                                    Vai trò: <span class="badge badge-danger">Quản trị viên</span>
+                                </div>
+                                <a class="dropdown-item" th:href="@{/admin/dashboard}">
+                                    <i class="fas fa-tachometer-alt fa-sm fa-fw mr-2 text-gray-400"></i>
+                                    Bảng điều khiển
+                                </a>
+                                <a class="dropdown-item" th:href="@{/admin/users}">
+                                    <i class="fas fa-user-cog fa-sm fa-fw mr-2 text-gray-400"></i>
+                                    Quản lý tài khoản
+                                </a>
+                                <div class="dropdown-divider"></div>
+                                <a class="dropdown-item text-danger font-weight-bold" href="#" data-toggle="modal" data-target="#logoutModal">
+                                    <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-danger"></i>
+                                    Đăng xuất
+                                </a>
+                            </div>
+                        </li>
+
+                    </ul>
+
+                </nav>
+                <!-- End of Topbar -->
+
+                <!-- Flash Messages & Impersonation Banner -->
+                <div class="px-3 pt-2" th:if="${session.originalAdminUser != null or successMessage != null or errorMessage != null}">
+                    <!-- Impersonation Notice -->
+                    <div th:if="${session.originalAdminUser != null}" class="alert alert-warning d-flex align-items-center justify-content-between mb-3" role="alert">
+                        <div>
+                            <i class="fas fa-user-secret fa-lg mr-2 text-warning"></i>
+                            <strong>Chế độ giả lập:</strong> Bạn đang thao tác dưới danh nghĩa người dùng
+                            <span class="badge badge-dark" th:text="${session.user.username}">username</span>
+                        </div>
+                        <a th:href="@{/admin/impersonate/exit}" class="btn btn-warning btn-sm font-weight-bold">
+                            <i class="fas fa-undo-alt mr-1"></i> Quay lại quyền Admin
+                        </a>
+                    </div>
+
+                    <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+                        <i class="fas fa-check-circle mr-2"></i>
+                        <span th:text="${successMessage}">Thao tác thực hiện thành công!</span>
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+
+                    <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <i class="fas fa-exclamation-triangle mr-2"></i>
+                        <span th:text="${errorMessage}">Đã xảy ra lỗi trong quá trình thực hiện!</span>
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                </div>
+
                 <!-- Dynamic Content Injection -->
-                <!-- Expects 'content' model attribute to be the template path, e.g. 'admin/dashboard' -->
-                <!-- And that template must have a fragment named 'content' -->
                 <div th:replace="~{${content} :: content}"></div>
-            </main>
+
+            </div>
+            <!-- End of Main Content -->
+
+            <!-- Footer -->
+            <footer class="sticky-footer bg-white">
+                <div class="container my-auto">
+                    <div class="copyright text-center my-auto">
+                        <span>Bản quyền &copy; Hệ thống quản lý nhà trọ Trọ Mới 2026</span>
+                    </div>
+                </div>
+            </footer>
+            <!-- End of Footer -->
+
+        </div>
+        <!-- End of Content Wrapper -->
+
+    </div>
+    <!-- End of Page Wrapper -->
+
+    <!-- Scroll to Top Button-->
+    <a class="scroll-to-top rounded" href="#page-top">
+        <i class="fas fa-angle-up"></i>
+    </a>
+
+    <!-- Logout Modal-->
+    <div class="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="logoutModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header text-white" style="background: #131416;">
+                    <h5 class="modal-title font-weight-bold" id="logoutModalLabel">
+                        <i class="fas fa-sign-out-alt mr-2"></i> Xác nhận đăng xuất
+                    </h5>
+                    <button class="close text-white" type="button" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body py-4">
+                    <p class="mb-0 text-gray-700">Bạn có chắc chắn muốn kết thúc phiên làm việc Quản trị viên của hệ thống <strong>Trọ Mới</strong> không?</p>
+                </div>
+                <div class="modal-footer bg-light">
+                    <button class="btn btn-secondary font-weight-bold" type="button" data-dismiss="modal">
+                        <i class="fas fa-times mr-1"></i> Ở lại
+                    </button>
+                    <a class="btn btn-danger font-weight-bold" th:href="@{/logout}">
+                        <i class="fas fa-power-off mr-1"></i> Đăng xuất ngay
+                    </a>
+                </div>
+            </div>
         </div>
     </div>
+
+    <!-- Bootstrap core JavaScript-->
+    <script th:src="@{/sb-admin-2/vendor/jquery/jquery.min.js}"></script>
+    <script th:src="@{/sb-admin-2/vendor/bootstrap/js/bootstrap.bundle.min.js}"></script>
+
+    <!-- Core plugin JavaScript-->
+    <script th:src="@{/sb-admin-2/vendor/jquery-easing/jquery.easing.min.js}"></script>
+
+    <!-- Custom scripts for all pages-->
+    <script th:src="@{/sb-admin-2/js/sb-admin-2.min.js}"></script>
+
+    <!-- Page level plugins -->
+    <script th:src="@{/sb-admin-2/vendor/datatables/jquery.dataTables.min.js}"></script>
+    <script th:src="@{/sb-admin-2/vendor/datatables/dataTables.bootstrap4.min.js}"></script>
+
+    <!-- Init DataTables with Vietnamese localized text -->
+    <script>
+        $(document).ready(function() {
+            if ($('#dataTable').length && $('form[method="get"]').length === 0) {
+                $('#dataTable').DataTable({
+                    "language": {
+                        "search": "Tìm kiếm nhanh:",
+                        "lengthMenu": "Hiển thị _MENU_ mục mỗi trang",
+                        "info": "Đang xem _START_ đến _END_ trong tổng số _TOTAL_ bản ghi",
+                        "infoEmpty": "Không có dữ liệu",
+                        "infoFiltered": "(lọc từ _MAX_ mục)",
+                        "zeroRecords": "Không tìm thấy kết quả phù hợp",
+                        "paginate": {
+                            "first": "Đầu",
+                            "last": "Cuối",
+                            "next": "Tiếp",
+                            "previous": "Trước"
+                        }
+                    },
+                    "pageLength": 10,
+                    "order": []
+                });
+            }
+        });
+    </script>
+
+    <!-- Global Accessible Confirmation Modal -->
+    <div class="modal fade" id="globalUxConfirmModal" tabindex="-1" role="dialog" aria-modal="true" aria-labelledby="globalUxConfirmTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content shadow border-0">
+                <div class="modal-header text-white" style="background: var(--accent, #1b6c80);">
+                    <h5 class="modal-title font-weight-bold" id="globalUxConfirmTitle">
+                        <i class="fas fa-shield-alt mr-2"></i>Xác nhận thao tác quản trị
+                    </h5>
+                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Đóng">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body py-4">
+                    <p id="globalUxConfirmMessage" class="mb-0 text-gray-800 font-weight-medium" style="white-space: pre-line; line-height: 1.5;">
+                        Bạn có chắc chắn muốn thực hiện thao tác này không?
+                    </p>
+                </div>
+                <div class="modal-footer bg-light">
+                    <button type="button" class="btn btn-secondary font-weight-bold" data-dismiss="modal">
+                        <i class="fas fa-times mr-1"></i> Hủy bỏ
+                    </button>
+                    <button type="button" id="globalUxConfirmApproveBtn" class="btn btn-danger font-weight-bold shadow-sm">
+                        <i class="fas fa-check mr-1"></i> Xác nhận thực hiện
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Global Toast Feedback Banner -->
+    <div id="globalUxToast" role="status" aria-live="polite"
+         style="display: none; position: fixed; top: 20px; right: 20px; z-index: 9999; min-width: 280px; max-width: 420px;"
+         class="alert alert-success shadow-lg border-left-success py-3 px-4">
+        <div class="d-flex align-items-center justify-content-between">
+            <div class="d-flex align-items-center">
+                <i id="globalUxToastIcon" class="fas fa-check-circle mr-2"></i>
+                <span id="globalUxToastText" class="font-weight-bold small">Thông báo hệ thống</span>
+            </div>
+            <button type="button" class="close ml-3" onclick="document.getElementById('globalUxToast').style.display='none'" aria-label="Đóng">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Global UX Controller: Accessible Confirm Modal, Toast, Double-Submit Guard & Smart Table Paginator -->
+    <script>
+        (function () {
+            var pendingAction = null;
+            var toastTimer = null;
+
+            window.showUxToast = function (msg, type) {
+                var toast = document.getElementById('globalUxToast');
+                var textEl = document.getElementById('globalUxToastText');
+                var iconEl = document.getElementById('globalUxToastIcon');
+                if (!toast || !textEl) return;
+                textEl.textContent = msg || '';
+                toast.className = 'alert shadow-lg py-3 px-4 ';
+                if (type === 'danger' || type === 'error') {
+                    toast.className += 'alert-danger border-left-danger';
+                    if (iconEl) iconEl.className = 'fas fa-exclamation-triangle mr-2';
+                } else if (type === 'warning') {
+                    toast.className += 'alert-warning border-left-warning';
+                    if (iconEl) iconEl.className = 'fas fa-exclamation-circle mr-2';
+                } else {
+                    toast.className += 'alert-success border-left-success';
+                    if (iconEl) iconEl.className = 'fas fa-check-circle mr-2';
+                }
+                toast.style.display = 'block';
+                clearTimeout(toastTimer);
+                toastTimer = setTimeout(function () {
+                    toast.style.display = 'none';
+                }, 4000);
+            };
+
+            function openUxConfirmModal(message, onConfirm) {
+                var msgEl = document.getElementById('globalUxConfirmMessage');
+                if (msgEl) msgEl.textContent = message || 'Bạn có chắc chắn muốn thực hiện thao tác này?';
+                pendingAction = onConfirm;
+                if (window.jQuery && $('#globalUxConfirmModal').modal) {
+                    $('#globalUxConfirmModal').modal('show');
+                }
+            }
+
+            document.addEventListener('DOMContentLoaded', function () {
+                var approveBtn = document.getElementById('globalUxConfirmApproveBtn');
+                if (approveBtn) {
+                    approveBtn.addEventListener('click', function () {
+                        if (window.jQuery && $('#globalUxConfirmModal').modal) {
+                            $('#globalUxConfirmModal').modal('hide');
+                        }
+                        if (typeof pendingAction === 'function') {
+                            var fn = pendingAction;
+                            pendingAction = null;
+                            fn();
+                        }
+                    });
+                }
+
+                // 1. Intercept clicks on <button data-confirm="..."> or <a data-confirm="...">
+                document.addEventListener('click', function (e) {
+                    var trigger = e.target.closest('button[data-confirm], a[data-confirm]');
+                    if (!trigger) return;
+                    if (trigger.getAttribute('data-confirmed') === 'true') {
+                        trigger.removeAttribute('data-confirmed');
+                        return;
+                    }
+                    var msg = trigger.getAttribute('data-confirm');
+                    if (!msg) return;
+                    e.preventDefault();
+                    e.stopPropagation();
+
+                    openUxConfirmModal(msg, function () {
+                        trigger.setAttribute('data-confirmed', 'true');
+                        if (trigger.tagName === 'A' && trigger.href) {
+                            window.location.href = trigger.href;
+                        } else if (trigger.form) {
+                            trigger.form.setAttribute('data-confirmed', 'true');
+                            if (typeof trigger.form.requestSubmit === 'function') {
+                                trigger.form.requestSubmit(trigger);
+                            } else {
+                                trigger.form.submit();
+                            }
+                        } else {
+                            trigger.click();
+                        }
+                    });
+                }, true);
+
+                // 2. Intercept form submissions for <form data-confirm="..."> & Form Double-Submit Guard
+                document.addEventListener('submit', function (e) {
+                    var form = e.target;
+                    if (!form || form.tagName !== 'FORM') return;
+
+                    var confirmMsg = form.getAttribute('data-confirm');
+                    if (confirmMsg && form.getAttribute('data-confirmed') !== 'true') {
+                        e.preventDefault();
+                        openUxConfirmModal(confirmMsg, function () {
+                            form.setAttribute('data-confirmed', 'true');
+                            if (typeof form.requestSubmit === 'function') {
+                                form.requestSubmit();
+                            } else {
+                                form.submit();
+                            }
+                        });
+                        return;
+                    }
+
+                    if (e.defaultPrevented) return;
+                    var method = (form.getAttribute('method') || 'get').toLowerCase();
+                    if (method === 'post') {
+                        var submitBtns = form.querySelectorAll('button[type="submit"], input[type="submit"]');
+                        submitBtns.forEach(function (btn) {
+                            if (!btn.disabled) {
+                                btn.disabled = true;
+                                if (btn.tagName === 'BUTTON') {
+                                    btn.innerHTML = '<i class="fas fa-circle-notch fa-spin mr-1"></i> Đang xử lý...';
+                                }
+                            }
+                        });
+                    }
+                });
+
+                // 3. Smart Automatic Table Pagination (15 / 30 / 50 / Tất cả) for tables with > 15 rows not using DataTables
+                var tables = document.querySelectorAll('table.table');
+                tables.forEach(function (table) {
+                    if (table.classList.contains('dataTable') || table.closest('.dataTables_wrapper')) {
+                        return;
+                    }
+                    var tbody = table.querySelector('tbody');
+                    if (!tbody) return;
+                    var allRows = Array.prototype.slice.call(tbody.querySelectorAll('tr')).filter(function (tr) {
+                        return !tr.querySelector('td[colspan]');
+                    });
+                    if (allRows.length <= 15) return;
+
+                    var state = { page: 1, pageSize: 15 };
+                    var pagerBar = document.createElement('div');
+                    pagerBar.className = 'd-flex flex-wrap justify-content-between align-items-center px-3 py-2 border-top bg-light small no-print';
+
+                    var infoSpan = document.createElement('div');
+                    infoSpan.className = 'text-muted font-weight-bold mb-1 mb-sm-0';
+
+                    var controlsDiv = document.createElement('div');
+                    controlsDiv.className = 'd-flex align-items-center';
+
+                    var sizeSelect = document.createElement('select');
+                    sizeSelect.className = 'custom-select custom-select-sm mr-2 font-weight-bold';
+                    sizeSelect.style.width = 'auto';
+                    [
+                        { val: 15, label: '15 dòng' },
+                        { val: 30, label: '30 dòng' },
+                        { val: 50, label: '50 dòng' },
+                        { val: 999999, label: 'Tất cả' }
+                    ].forEach(function (opt) {
+                        var o = document.createElement('option');
+                        o.value = opt.val;
+                        o.textContent = opt.label;
+                        sizeSelect.appendChild(o);
+                    });
+
+                    var navUl = document.createElement('ul');
+                    navUl.className = 'pagination pagination-sm mb-0';
+
+                    controlsDiv.appendChild(sizeSelect);
+                    controlsDiv.appendChild(navUl);
+                    pagerBar.appendChild(infoSpan);
+                    pagerBar.appendChild(controlsDiv);
+
+                    var container = table.closest('.table-responsive') || table;
+                    if (container.parentNode) {
+                        container.parentNode.insertBefore(pagerBar, container.nextSibling);
+                    }
+
+                    function renderTablePage() {
+                        var total = allRows.length;
+                        var totalPages = Math.max(1, Math.ceil(total / state.pageSize));
+                        if (state.page > totalPages) state.page = totalPages;
+                        var startIdx = (state.page - 1) * state.pageSize;
+                        var endIdx = Math.min(total, startIdx + state.pageSize);
+
+                        allRows.forEach(function (row, idx) {
+                            row.style.display = (idx >= startIdx && idx < endIdx) ? '' : 'none';
+                        });
+
+                        infoSpan.textContent = 'Đang xem ' + (startIdx + 1) + ' - ' + endIdx + ' trong tổng số ' + total + ' dòng';
+                        navUl.innerHTML = '';
+
+                        function addPageItem(label, targetPage, disabled, active) {
+                            var li = document.createElement('li');
+                            li.className = 'page-item' + (disabled ? ' disabled' : '') + (active ? ' active' : '');
+                            var a = document.createElement('a');
+                            a.className = 'page-link';
+                            a.href = '#';
+                            a.textContent = label;
+                            a.addEventListener('click', function (ev) {
+                                ev.preventDefault();
+                                if (!disabled && !active) {
+                                    state.page = targetPage;
+                                    renderTablePage();
+                                }
+                            });
+                            li.appendChild(a);
+                            navUl.appendChild(li);
+                        }
+
+                        addPageItem('Trước', state.page - 1, state.page <= 1, false);
+                        for (var p = 1; p <= totalPages; p++) {
+                            addPageItem(String(p), p, false, p === state.page);
+                        }
+                        addPageItem('Sau', state.page + 1, state.page >= totalPages, false);
+                    }
+
+                    sizeSelect.addEventListener('change', function () {
+                        state.pageSize = parseInt(this.value, 10) || 15;
+                        state.page = 1;
+                        renderTablePage();
+                    });
+
+                    renderTablePage();
+                });
+            });
+        })();
+    </script>
 </body>
 </html>

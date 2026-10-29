@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+</head>
+<body>
+<div th:fragment="content" class="max-w-4xl mx-auto space-y-6">
+    <style>
+        @media print {
+            header, footer, nav, .no-print, button, a {
+                display: none !important;
+            }
+            body, main {
+                background: white !important;
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+            .printable-bill {
+                border: none !important;
+                box-shadow: none !important;
+                padding: 0 !important;
+                width: 100% !important;
+            }
+        }
+    </style>
+
+    <!-- Thông báo kết quả thanh toán -->
+    <div th:if="${successMessage}" class="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm flex items-center gap-3 no-print">
+        <i class="fa-solid fa-circle-check text-emerald-500 text-lg"></i>
+        <span th:text="${successMessage}"></span>
+    </div>
+    <div th:if="${errorMessage}" class="p-4 rounded-xl bg-red-50 border border-red-200 text-red-800 text-sm flex items-center gap-3 no-print">
+        <i class="fa-solid fa-circle-exclamation text-red-500 text-lg"></i>
+        <span th:text="${errorMessage}"></span>
+    </div>
+
+    <!-- Banner trạng thái đã báo chuyển khoản -->
+    <div th:if="${invoice.transferNotifiedAt != null and invoice.status.name() != 'PAID'}"
+         class="p-4 rounded-xl bg-sky-50 border border-sky-200 text-sky-900 text-sm flex flex-col sm:flex-row sm:items-center justify-between gap-2 no-print shadow-xs">
+        <div class="flex items-center gap-3">
+            <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-sky-600 text-white shrink-0">
+                <i class="fa-solid fa-bell"></i>
+            </span>
+            <div>
+                <div class="font-bold">
+                    Bạn đã báo chuyển khoản lúc <span class="font-mono" th:text="${#temporals.format(invoice.transferNotifiedAt, 'dd/MM/yyyy HH:mm')}"></span> — Đang chờ chủ trọ xác nhận
+                </div>
+                <div th:if="${invoice.transferNote != null and !#strings.isEmpty(invoice.transferNote)}" class="text-xs text-sky-700 mt-0.5">
+                    Ghi chú giao dịch: <span class="font-mono font-semibold" th:text="${invoice.transferNote}"></span>
+                </div>
+            </div>
+        </div>
+        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-sky-100 text-sky-800 border border-sky-300 self-start sm:self-auto">
+            <i class="fa-solid fa-clock mr-1"></i> Chờ đối soát
+        </span>
+    </div>
+
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 no-print">
+        <div>
+            <a th:href="@{/tenant/invoices}" class="inline-flex items-center text-sm text-gray-500 hover:text-tm-blue transition mb-2">
+                <i class="fa-solid fa-arrow-left mr-2"></i> Quay lại danh sách hóa đơn
+            </a>
+            <div class="flex items-center gap-3">
+                <h1 class="text-2xl font-bold text-gray-900" th:text="${'Chi tiết hóa đơn: ' + invoice.invoiceCode}"></h1>
+                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold border" th:classappend="${invoice.status.badgeClass}" th:text="${invoice.status.displayName}"></span>
+            </div>
+        </div>
+        <div>
+            <button onclick="window.print()" class="px-4 py-2 border border-gray-300 text-gray-700 hover:bg-gray-100 rounded-lg text-sm font-medium transition flex items-center gap-2">
+                <i class="fa-solid fa-print"></i> In hóa đơn
+            </button>
+        </div>
+    </div>
+
+    <!-- Paper Bill -->
+    <div class="printable-bill bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden p-8 space-y-6">
+        <!-- Header -->
+        <div class="border-b border-gray-200 pb-6 flex flex-col md:flex-row justify-between gap-6">
+            <div>
+                <div class="text-2xl font-bold text-tm-blue uppercase">PHIẾU THU TIỀN NHÀ</div>
+                <div class="text-sm text-gray-500 mt-1" th:text="${'Kỳ thanh toán: Tháng ' + invoice.month + ' năm ' + invoice.year}"></div>
+                <div class="text-xs text-gray-400 mt-0.5" th:text="${'Ngày lập phiếu: ' + #temporals.format(invoice.createdAt, 'dd/MM/yyyy HH:mm')}"></div>
+            </div>
+            <div class="text-right space-y-1 text-sm">
+                <div class="font-bold text-gray-800" th:text="${invoice.room.property.name}"></div>
+                <div class="text-gray-500 text-xs" th:text="${(invoice.room.property.addressNumber ?: '') + ', ' + (invoice.room.property.ward != null ? invoice.room.property.ward.name : '')}"></div>
+                <div class="text-xs text-gray-500">Chủ nhà: <span class="font-semibold text-gray-700" th:text="${invoice.room.property.owner.fullName ?: invoice.room.property.owner.username}"></span></div>
+                <div class="text-xs text-gray-500">SĐT: <span class="font-semibold text-gray-700" th:text="${invoice.room.property.owner.phone ?: 'Chưa cập nhật'}"></span></div>
+            </div>
+        </div>
+
+        <!-- Room & Tenant -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 bg-gray-50 p-4 rounded-xl border border-gray-100 text-sm">
+            <div>
+                <div class="text-xs font-semibold text-gray-400 uppercase">Phòng thuê</div>
+                <div class="font-bold text-gray-900 text-base mt-1" th:text="${invoice.room.name}"></div>
+                <div class="text-xs text-gray-500 mt-0.5">Mã hợp đồng: <span class="font-mono text-gray-700" th:text="${invoice.contract.code}"></span></div>
+            </div>
+            <div>
+                <div class="text-xs font-semibold text-gray-400 uppercase">Người nhận hóa đơn</div>
+                <div class="font-bold text-gray-900 text-base mt-1" th:text="${invoice.tenant != null ? invoice.tenant.fullName : 'N/A'}"></div>
+                <div class="text-xs text-gray-500 mt-0.5">Hạn thanh toán: <span class="font-semibold text-red-600" th:text="${#temporals.format(invoice.dueDate, 'dd/MM/yyyy')}"></span></div>
+            </div>
+        </div>
+
+        <!-- Details Table -->
+        <div>
+            <h3 class="text-sm font-bold text-gray-800 uppercase tracking-wider mb-3">Bảng kê chi tiết các khoản phí</h3>
+            <div class="border border-gray-200 rounded-xl overflow-hidden">
+                <table class="w-full text-left text-sm text-gray-600">
+                    <thead class="bg-gray-50 border-b border-gray-200 text-xs font-semibold uppercase text-gray-500">
+                        <tr>
+                            <th class="py-3 px-4">#</th>
+                            <th class="py-3 px-4">Khoản mục</th>
+                            <th class="py-3 px-4 text-center">Phân loại</th>
+                            <th class="py-3 px-4 text-center">Số lượng</th>
+                            <th class="py-3 px-4 text-right">Đơn giá</th>
+                            <th class="py-3 px-4 text-right">Thành tiền</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100">
+                        <tr th:each="det, iter : ${invoice.details}">
+                            <td class="py-3 px-4 text-gray-400 text-xs" th:text="${iter.count}"></td>
+                            <td class="py-3 px-4 font-medium text-gray-800" th:text="${det.description}"></td>
+                            <td class="py-3 px-4 text-center">
+                                <span class="inline-flex px-2 py-0.5 rounded text-xs font-semibold bg-gray-100 text-gray-600" th:text="${det.type.displayName}"></span>
+                            </td>
+                            <td class="py-3 px-4 text-center font-mono" th:text="${#numbers.formatDecimal(det.quantity, 1, 1)}"></td>
+                            <td class="py-3 px-4 text-right font-mono" th:text="${#numbers.formatDecimal(det.unitPrice, 0, 'POINT', 0, 'COMMA') + ' đ'}"></td>
+                            <td class="py-3 px-4 text-right font-bold text-gray-900 font-mono" th:text="${#numbers.formatDecimal(det.amount, 0, 'POINT', 0, 'COMMA') + ' đ'}"></td>
+                        </tr>
+                    </tbody>
+                    <tfoot class="bg-gray-50/80 border-t border-gray-200 text-sm">
+                        <tr>
+                            <td colspan="5" class="py-3 px-4 text-right font-bold text-gray-800">TỔNG TIỀN PHẢI TRẢ:</td>
+                            <td class="py-3 px-4 text-right font-bold text-xl text-tm-blue font-mono" th:text="${#numbers.formatDecimal(invoice.totalAmount, 0, 'POINT', 0, 'COMMA') + ' đ'}"></td>
+                        </tr>
+                        <tr>
+                            <td colspan="5" class="py-2 px-4 text-right text-emerald-600 font-medium">Đã thanh toán:</td>
+                            <td class="py-2 px-4 text-right font-semibold text-emerald-600 font-mono" th:text="${#numbers.formatDecimal(invoice.paidAmount, 0, 'POINT', 0, 'COMMA') + ' đ'}"></td>
+                        </tr>
+                        <tr class="border-t border-gray-200">
+                            <td colspan="5" class="py-3 px-4 text-right font-bold text-red-600">SỐ TIỀN CÒN LẠI:</td>
+                            <td class="py-3 px-4 text-right font-bold text-xl text-red-600 font-mono" th:text="${#numbers.formatDecimal(invoice.remainingAmount, 0, 'POINT', 0, 'COMMA') + ' đ'}"></td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+
+        <!-- Phương thức thanh toán khi còn nợ -->
+        <div th:if="${invoice.remainingAmount > 0}" class="space-y-4 no-print">
+            <h3 class="text-sm font-bold text-gray-800 uppercase tracking-wider flex items-center gap-2">
+                <i class="fa-solid fa-credit-card text-tm-blue"></i> Lựa chọn phương thức thanh toán
+            </h3>
+
+            <!-- Cách 1: Thanh toán trực tuyến VNPay (Tự động gạch nợ ngay) -->
+            <div class="p-5 rounded-xl text-white relative overflow-hidden" style="background: #1b6c80;">
+                <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 relative z-10">
+                    <div class="space-y-1">
+                        <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-400 text-slate-900 shadow-xs uppercase">
+                            <i class="fa-solid fa-bolt"></i> Khuyên dùng: Gạch nợ tức thì
+                        </div>
+                        <h4 class="font-extrabold text-lg text-white">Cách 1: Cổng thanh toán trực tuyến VNPay</h4>
+                        <p class="text-xs text-blue-100 max-w-xl">
+                            Hệ thống tự động cập nhật hóa đơn sang trạng thái <strong>ĐÃ THANH TOÁN</strong> ngay sau khi giao dịch thành công. Hỗ trợ quét mã VNPay-QR trên 40+ app ngân hàng, thẻ ATM & Visa/Mastercard.
+                        </p>
+                    </div>
+                    <a th:href="@{'/tenant/invoices/' + ${invoice.id} + '/pay-vnpay'}" 
+                       class="inline-flex items-center justify-center gap-2 px-6 py-3 bg-white text-blue-700 font-bold text-sm rounded-xl hover:bg-blue-50 transition shadow-sm whitespace-nowrap shrink-0">
+                        <i class="fa-solid fa-credit-card text-blue-600"></i> Thanh toán VNPay ngay
+                        <span class="font-mono" th:text="${#numbers.formatDecimal(invoice.remainingAmount, 0, 'POINT', 0, 'COMMA') + ' đ'}"></span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Cách 2: Chuyển khoản VietQR Napas 24/7 (Thủ công) -->
+            <div class="p-6 rounded-2xl bg-slate-50 border border-slate-200/90 shadow-2xs space-y-4">
+                <div class="flex items-start gap-3">
+                    <span class="inline-flex items-center justify-center w-8 h-8 rounded-xl bg-slate-800 text-white font-bold text-xs shrink-0 shadow-xs">
+                        <i class="fa-solid fa-qrcode text-sm"></i>
+                    </span>
+                    <div>
+                        <h4 class="font-bold text-gray-900 text-base">Cách 2: Chuyển khoản thủ công qua VietQR (Napas 24/7)</h4>
+                        <p class="text-xs text-gray-500 mt-0.5">
+                            Quét mã QR từ ứng dụng ngân hàng. <span class="text-amber-700 font-semibold">* Lưu ý: Với hình thức này, chủ trọ sẽ đối soát sao kê ngân hàng và chủ động bấm xác nhận gạch nợ cho bạn.</span>
+                        </p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-center pt-2">
+                    <!-- Mã QR -->
+                    <div class="md:col-span-4 flex flex-col items-center justify-center p-3.5 bg-white rounded-2xl border border-gray-200 shadow-xs">
+                        <img th:src="@{'https://img.vietqr.io/image/' + ${invoice.room.property.owner.effectiveBankCode} + '-' + ${invoice.room.property.owner.effectiveBankAccountNumber} + '-compact2.png(amount=' + ${#numbers.formatDecimal(invoice.remainingAmount, 0, 'POINT', 0, 'POINT')} + ',addInfo=' + ${invoice.invoiceCode} + ',accountName=' + ${invoice.room.property.owner.effectiveBankAccountName} + ')'}" 
+                             alt="Mã QR Chuyển Khoản" 
+                             class="w-48 h-auto rounded-xl object-contain shadow-xs border border-gray-100">
+                        <span class="text-xs text-gray-500 mt-2 flex items-center gap-1 font-medium">
+                            <i class="fa-solid fa-camera text-blue-600"></i> Quét mã từ app ngân hàng
+                        </span>
+                    </div>
+
+                    <!-- Thông tin chuyển khoản & nút sao chép -->
+                    <div class="md:col-span-8 space-y-3">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div class="p-3 bg-white rounded-xl border border-gray-200 shadow-2xs">
+                                <span class="text-xs text-gray-400 block mb-0.5">Ngân hàng thụ hưởng</span>
+                                <span class="font-bold text-gray-800 flex items-center gap-1.5" th:text="${invoice.room.property.owner.effectiveBankCode}">
+                                    MB
+                                </span>
+                            </div>
+                            <div class="p-3 bg-white rounded-xl border border-gray-200 shadow-2xs flex items-center justify-between">
+                                <div>
+                                    <span class="text-xs text-gray-400 block mb-0.5">Số tài khoản nhận</span>
+                                    <span class="font-mono font-bold text-gray-900 text-base" id="copy-acc" th:text="${invoice.room.property.owner.effectiveBankAccountNumber}">0975893248</span>
+                                </div>
+                                <button type="button" onclick="copyText('copy-acc')" class="px-2.5 py-1 text-xs font-semibold text-tm-blue hover:bg-blue-50 rounded-lg border border-blue-200 transition">
+                                    <i class="fa-regular fa-copy"></i> Chép
+                                </button>
+                            </div>
+                            <div class="p-3 bg-white rounded-xl border border-gray-200 shadow-2xs">
+                                <span class="text-xs text-gray-400 block mb-0.5">Chủ tài khoản</span>
+                                <span class="font-bold text-gray-800 uppercase" th:text="${invoice.room.property.owner.effectiveBankAccountName}">CHU NHA TRO</span>
+                            </div>
+                            <div class="p-3 bg-white rounded-xl border border-gray-200 shadow-2xs flex items-center justify-between">
+                                <div>
+                                    <span class="text-xs text-gray-400 block mb-0.5">Số tiền chuyển</span>
+                                    <span class="font-mono font-bold text-red-600 text-base" id="copy-amt" th:text="${#numbers.formatDecimal(invoice.remainingAmount, 0, 'POINT', 0, 'COMMA') + ' đ'}"></span>
+                                </div>
+                                <button type="button" th:data-raw="${#numbers.formatDecimal(invoice.remainingAmount, 0, 'POINT', 0, 'POINT')}" onclick="copyRaw(this.getAttribute('data-raw'))" class="px-2.5 py-1 text-xs font-semibold text-tm-blue hover:bg-blue-50 rounded-lg border border-blue-200 transition">
+                                    <i class="fa-regular fa-copy"></i> Chép
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="p-3 bg-blue-50/80 rounded-xl border border-blue-200 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                            <div>
+                                <span class="text-xs text-blue-700 font-semibold block">Nội dung chuyển khoản (bắt buộc):</span>
+                                <span class="font-mono font-extrabold text-blue-900 text-base" id="copy-code" th:text="${invoice.invoiceCode}"></span>
+                            </div>
+                            <button type="button" onclick="copyText('copy-code')" class="px-3 py-1.5 text-xs font-bold bg-white text-tm-blue hover:bg-blue-100 rounded-lg border border-blue-300 transition shadow-xs self-start sm:self-auto">
+                                <i class="fa-regular fa-copy mr-1"></i> Sao chép nội dung
+                            </button>
+                        </div>
+                        <!-- Hướng dẫn & Form báo đã chuyển khoản cho chủ trọ -->
+                        <div class="pt-3 border-t border-slate-200/80 space-y-2.5">
+                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                                <span class="text-xs text-gray-600 font-medium">
+                                    <i class="fa-solid fa-circle-info text-blue-600 mr-1"></i>
+                                    Sau khi chuyển khoản xong, nhập mã giao dịch / nội dung để báo chủ trọ kiểm tra ngay:
+                                </span>
+                                <a th:if="${invoice.room.property.owner.phone != null}" 
+                                   th:href="@{'tel:' + ${invoice.room.property.owner.phone}}" 
+                                   class="px-3 py-1.5 text-xs font-semibold rounded-lg bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 transition inline-flex items-center gap-1.5 shadow-2xs self-start sm:self-auto">
+                                    <i class="fa-solid fa-phone text-emerald-600"></i> Gọi chủ trọ
+                                </a>
+                            </div>
+                            <form th:action="@{'/tenant/invoices/' + ${invoice.id} + '/notify-transfer'}" method="post" class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                                <input type="text" name="transferNote" 
+                                       th:value="${invoice.transferNote}"
+                                       placeholder="Nhập mã giao dịch ngân hàng hoặc ghi chú chuyển khoản (tùy chọn)..."
+                                       class="flex-1 px-3 py-2 text-xs rounded-lg border border-gray-300 bg-white focus:outline-none focus:border-emerald-500">
+                                <button type="submit" 
+                                        class="px-4 py-2 text-xs font-bold rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white transition flex items-center justify-center gap-1.5 shadow-xs whitespace-nowrap cursor-pointer">
+                                    <i class="fa-solid fa-check-double"></i>
+                                    <span th:text="${invoice.transferNotifiedAt != null ? 'Cập nhật báo chuyển khoản' : 'Tôi đã chuyển khoản'}">Tôi đã chuyển khoản</span>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Lịch sử thanh toán -->
+        <div th:if="${invoice.payments != null and !invoice.payments.empty}">
+            <h3 class="text-sm font-bold text-gray-800 uppercase tracking-wider mb-3">Lịch sử thanh toán đã ghi nhận</h3>
+            <div class="border border-gray-200 rounded-xl overflow-hidden">
+                <table class="w-full text-left text-sm text-gray-600">
+                    <thead class="bg-gray-50 border-b border-gray-200 text-xs font-semibold uppercase text-gray-500">
+                        <tr>
+                            <th class="py-2.5 px-4">Thời gian</th>
+                            <th class="py-2.5 px-4 text-right">Số tiền</th>
+                            <th class="py-2.5 px-4 text-center">Phương thức</th>
+                            <th class="py-2.5 px-4">Ghi chú</th>
+                            <th class="py-2.5 px-4 text-center">Trạng thái</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100">
+                        <tr th:each="p : ${invoice.payments}">
+                            <td class="py-2.5 px-4 text-xs font-mono" th:text="${#temporals.format(p.paymentDate, 'dd/MM/yyyy HH:mm')}"></td>
+                            <td class="py-2.5 px-4 text-right font-bold text-emerald-600 font-mono" th:text="${#numbers.formatDecimal(p.amount, 0, 'POINT', 0, 'COMMA') + ' đ'}"></td>
+                            <td class="py-2.5 px-4 text-center text-xs" th:text="${p.paymentMethod != null ? p.paymentMethod.displayName : 'Khác'}"></td>
+                            <td class="py-2.5 px-4 text-xs text-gray-500" th:text="${p.note ?: '-'}"></td>
+                            <td class="py-2.5 px-4 text-center">
+                                <span class="inline-flex px-2 py-0.5 rounded-full text-xs font-semibold bg-green-100 text-green-700">Thành công</span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Smooth Copy Toast Notification -->
+    <div id="copyToastBox" class="hidden fixed bottom-6 right-6 z-50 px-4 py-3 rounded-xl bg-slate-900 text-white text-xs font-semibold shadow-lg flex items-center gap-2 no-print">
+        <i class="fa-solid fa-circle-check text-emerald-400"></i>
+        <span id="copyToastText">Đã sao chép vào bộ nhớ tạm</span>
+    </div>
+
+    <!-- Quick Copy Script -->
+    <script>
+        let copyToastTimer = null;
+
+        function showCopyToast(msg) {
+            if (window.Swal) {
+                Swal.fire({
+                    toast: true,
+                    position: 'top-end',
+                    icon: 'success',
+                    title: msg,
+                    showConfirmButton: false,
+                    timer: 1800
+                });
+                return;
+            }
+            const box = document.getElementById('copyToastBox');
+            const txt = document.getElementById('copyToastText');
+            if (!box || !txt) return;
+            txt.textContent = msg;
+            box.classList.remove('hidden');
+            clearTimeout(copyToastTimer);
+            copyToastTimer = setTimeout(function () {
+                box.classList.add('hidden');
+            }, 2200);
+        }
+
+        function copyText(elementId) {
+            const el = document.getElementById(elementId);
+            if (!el) return;
+            const text = el.innerText || el.textContent;
+            navigator.clipboard.writeText(text.trim()).then(() => {
+                showCopyToast('Đã sao chép: ' + text.trim());
+            }).catch(err => {
+                console.error('Không thể sao chép:', err);
+            });
+        }
+
+        function copyRaw(val) {
+            if (!val) return;
+            navigator.clipboard.writeText(val.toString().trim()).then(() => {
+                showCopyToast('Đã sao chép số tiền: ' + val);
+            }).catch(err => {
+                console.error('Không thể sao chép:', err);
+            });
+        }
+
+        function notifyPaid() {
+            showCopyToast('Đã ghi nhận! Chủ trọ sẽ đối soát tài khoản ngân hàng và cập nhật phiếu thu cho bạn.');
+        }
+    </script>
+</div>
+</body>
+</html>

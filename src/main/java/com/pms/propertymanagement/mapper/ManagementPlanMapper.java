@@ -35,7 +35,6 @@ public class ManagementPlanMapper {
         dto.setIsActive(entity.isActive());
         
         // Set computed properties
-        dto.setDisplayPrice(dto.getDisplayPrice());
         dto.setIsRecommended("PREMIUM".equals(entity.getCode()));
         
         return dto;

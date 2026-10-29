@@ -33,10 +33,10 @@ public class WalletTransaction {
     @Column(name = "balance_after", precision = 15, scale = 2, nullable = false)
     private BigDecimal balanceAfter;
     
-    @Column(columnDefinition = "nvarchar(500)")
+    @Column(length = 500)
     private String description;
     
-    @Column(name = "reference_id", columnDefinition = "nvarchar(100)")
+    @Column(name = "reference_id", length = 100)
     private String referenceId;
     
     @Enumerated(EnumType.STRING)
@@ -47,22 +47,22 @@ public class WalletTransaction {
     private LocalDateTime createdAt = LocalDateTime.now();
     
     // For VNPay integration
-    @Column(name = "vnpay_txn_ref", columnDefinition = "nvarchar(100)")
+    @Column(name = "vnpay_txn_ref", length = 100)
     private String vnpayTxnRef;
     
-    @Column(name = "vnpay_response_code", columnDefinition = "nvarchar(20)")
+    @Column(name = "vnpay_response_code", length = 20)
     private String vnpayResponseCode;
     
-    @Column(name = "vnpay_transaction_no", columnDefinition = "nvarchar(50)")
+    @Column(name = "vnpay_transaction_no", length = 50)
     private String vnpayTransactionNo;
     
-    @Column(name = "vnpay_bank_code", columnDefinition = "nvarchar(20)")
+    @Column(name = "vnpay_bank_code", length = 20)
     private String vnpayBankCode;
     
-    @Column(name = "vnpay_pay_date", columnDefinition = "nvarchar(20)")
+    @Column(name = "vnpay_pay_date", length = 20)
     private String vnpayPayDate;
     
-    @Column(name = "vnpay_raw_query", columnDefinition = "ntext")
+    @Column(name = "vnpay_raw_query", columnDefinition = "TEXT")
     private String vnpayRawQuery;
     
     @Column(name = "completed_at")

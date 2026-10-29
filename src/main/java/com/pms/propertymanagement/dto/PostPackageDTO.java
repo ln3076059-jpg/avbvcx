@@ -14,9 +14,7 @@ public class PostPackageDTO {
     private Boolean hasVipBadge;
     private Boolean hasSearchPriority;
     private Boolean isActive;
-    private String displayDuration;
     private Boolean isRecommended;
-    private String pricePerDay;
     
     public String getDisplayPrice() {
         return String.format("%,d VNĐ", price);

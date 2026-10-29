@@ -1,211 +1,104 @@
-<!doctype html>
-<div th:fragment="content" class="space-y-6">
-  <!-- Page Header -->
-  <div
-    class="bg-gradient-to-r from-orange-500 to-orange-600 rounded-xl p-6 text-white"
-  >
-    <div class="flex items-center justify-between">
-      <div>
-        <h1 class="text-2xl font-bold mb-2">
-          <i class="fa-solid fa-box mr-3"></i>
-          Gói đăng tin
-        </h1>
-        <p class="text-orange-100">
-          Chọn gói phù hợp để hiển thị tin đăng của bạn
-        </p>
-      </div>
-      <div class="text-right">
-        <p class="text-sm text-orange-200 mb-1">Tổng số gói</p>
-        <p
-          class="text-3xl font-bold"
-          th:text="${postPackages != null ? postPackages.size() : 0}"
-        >
-          0
-        </p>
-      </div>
-    </div>
-  </div>
-
-  <!-- Flash Messages -->
-  <div
-    th:if="${successMessage}"
-    class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative"
-    role="alert"
-  >
-    <i class="fa-solid fa-check-circle mr-2"></i>
-    <span th:text="${successMessage}"></span>
-  </div>
-
-  <div
-    th:if="${errorMessage}"
-    class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative"
-    role="alert"
-  >
-    <i class="fa-solid fa-exclamation-circle mr-2"></i>
-    <span th:text="${errorMessage}"></span>
-  </div>
-
-  <!-- Packages Grid -->
-  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-    <div
-      th:each="package : ${postPackages ?: {}}"
-      class="bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-lg transition-shadow overflow-hidden relative"
-    >
-      <!-- Popular Badge -->
-      <!-- Recommended Badge -->
-      <div th:if="${package.isRecommended}" class="absolute top-4 right-4 z-10">
-        <span
-          class="bg-yellow-400 text-yellow-900 text-xs font-bold px-2 py-1 rounded-full"
-        >
-          PHỔ BIẾN
-        </span>
-      </div>
-
-      <!-- VIP Badge -->
-      <div th:if="${package.hasVipBadge}" class="absolute top-4 left-4 z-10">
-        <span
-          class="bg-purple-500 text-white text-xs font-bold px-2 py-1 rounded-full flex items-center"
-        >
-          <i class="fa-solid fa-crown mr-1"></i>
-          VIP
-        </span>
-      </div>
-
-      <!-- Package Header -->
-      <div class="bg-gradient-to-r from-blue-50 to-blue-100 px-6 py-4">
-        <div class="flex items-center justify-between">
-          <h3 class="text-lg font-bold text-gray-900" th:text="${package.name}">
-            Gói 15 ngày
-          </h3>
-          <div class="flex items-center gap-2">
-            <span
-              class="text-xs bg-blue-600 text-white px-2 py-1 rounded-full font-medium"
-              th:text="${package.displayDuration}"
-            >
-              15 ngày
-            </span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Package Content -->
-      <div class="p-6">
-        <!-- Description -->
-        <p
-          class="text-gray-600 text-sm mb-4 leading-relaxed"
-          th:text="${package.description}"
-        >
-          Phù hợp cho chủ trọ mới bắt đầu với số lượng phòng ít
-        </p>
-
-        <!-- Features -->
-        <div class="mb-6">
-          <h4 class="text-sm font-semibold text-gray-700 mb-3">
-            Tính năng bao gồm:
-          </h4>
-          <ul class="space-y-2 text-sm text-gray-600">
-            <li class="flex items-center">
-              <i class="fa-solid fa-check text-green-500 mr-2 text-xs"></i>
-              <span
-                th:text="|Hiển thị tin đăng trong ${package.durationDays} ngày|"
-                >Hiển thị tin đăng trong 15 ngày</span
-              >
-            </li>
-            <li th:if="${package.freeBoosts > 0}" class="flex items-center">
-              <i class="fa-solid fa-check text-green-500 mr-2 text-xs"></i>
-              <span th:text="|${package.freeBoosts} lần đẩy tin miễn phí|"
-                >3 lần đẩy tin miễn phí</span
-              >
-            </li>
-            <li th:if="${package.hasVipBadge}" class="flex items-center">
-              <i class="fa-solid fa-check text-green-500 mr-2 text-xs"></i>
-              <span>Huy hiệu VIP nổi bật</span>
-            </li>
-            <li th:if="${package.hasSearchPriority}" class="flex items-center">
-              <i class="fa-solid fa-check text-green-500 mr-2 text-xs"></i>
-              <span>Ưu tiên hiển thị trong tìm kiếm</span>
-            </li>
-            <li class="flex items-center">
-              <i class="fa-solid fa-check text-green-500 mr-2 text-xs"></i>
-              <span>Hỗ trợ khách hàng 24/7</span>
-            </li>
-            <li class="flex items-center">
-              <i class="fa-solid fa-check text-green-500 mr-2 text-xs"></i>
-              <span>Quản lý tin đăng dễ dàng</span>
-            </li>
-          </ul>
+<div class="container-fluid" th:fragment="content">
+<!-- Page Heading -->
+        <div class="d-sm-flex align-items-center justify-content-between mb-4">
+            <div>
+                <h1 class="h3 mb-0 text-gray-800 font-weight-bold">
+                    <i class="fas fa-boxes text-success mr-2"></i>Gói Đăng Tin Marketplace
+                </h1>
+                <p class="text-muted small mb-0 mt-1">Chọn gói đăng tin phù hợp để tối ưu lượt xem và tiếp cận khách thuê nhanh nhất.</p>
+            </div>
+            <div class="d-flex flex-wrap align-items-center mt-3 mt-sm-0" style="gap: 10px;">
+                <div class="card py-2 px-3 bg-white d-flex flex-row align-items-center mb-0">
+                    <i class="fas fa-wallet text-success mr-2"></i>
+                    <span class="small text-muted mr-1">Số Dư Ví Hiện Tại:</span>
+                    <strong class="font-mono text-dark mr-3"
+                            th:text="${walletBalance != null ? #numbers.formatDecimal(walletBalance, 0, 'COMMA', 0, 'POINT') + ' đ' : (session.userWallet != null ? #numbers.formatDecimal(session.userWallet.balance, 0, 'COMMA', 0, 'POINT') + ' đ' : '0 đ')}">0 đ</strong>
+                    <a th:href="@{/owner/wallet/topup}" class="btn btn-xs btn-success font-weight-bold py-1 px-2">
+                        <i class="fas fa-plus-circle mr-1"></i>Nạp thêm
+                    </a>
+                </div>
+                <div class="card border-left-success shadow-sm py-2 px-3 bg-white mb-0">
+                    <div class="text-xs text-uppercase font-weight-bold text-muted">Tổng Số Gói</div>
+                    <div class="h5 mb-0 font-weight-bold text-success font-mono" th:text="${postPackages != null ? postPackages.size() : 0}">0</div>
+                </div>
+            </div>
         </div>
 
-        <!-- Pricing -->
-        <div class="mb-6 text-center">
-          <div
-            class="text-3xl font-bold text-orange-600"
-            th:text="${package.displayPrice}"
-          >
-            299,000 đ
-          </div>
-          <div
-            class="text-sm text-gray-500 mt-1"
-            th:text="${package.pricePerDay}"
-          >
-            ≈ 19,933 đ/ngày
-          </div>
+        <!-- Packages Grid -->
+        <div class="row">
+            <div th:each="pkg : ${postPackages ?: {}}" class="col-lg-4 col-md-6 mb-4">
+                <div class="card shadow h-100" th:classappend="${pkg.isRecommended} ? 'border-success' : ''">
+                    <div class="card-header py-3 bg-white d-flex justify-content-between align-items-center"
+                         th:classappend="${pkg.isRecommended} ? 'border-bottom-success' : 'border-bottom-primary'">
+                        <div>
+                            <h6 class="m-0 font-weight-bold text-gray-900" th:text="${pkg.name}">Gói 15 ngày</h6>
+                            <span class="badge badge-success mt-1" th:text="${pkg.displayDuration}">15 ngày</span>
+                        </div>
+                        <span th:if="${pkg.isRecommended}" class="badge badge-warning text-dark font-weight-bold px-2 py-1">PHỔ BIẾN</span>
+                        <span th:if="${pkg.hasVipBadge}" class="badge badge-primary font-weight-bold px-2 py-1"><i class="fas fa-crown mr-1"></i>VIP</span>
+                    </div>
+                    <div class="card-body d-flex flex-column">
+                        <p class="text-muted small mb-3" th:text="${pkg.description}">Phù hợp với chủ trọ mới</p>
+
+                        <!-- Price display -->
+                        <div class="text-center py-3 bg-light rounded mb-3">
+                            <div class="h3 font-weight-bold text-success mb-0" th:text="${pkg.displayPrice}">299,000 đ</div>
+                            <small class="text-muted" th:text="${pkg.pricePerDay}">≈ 19,933 đ/ngày</small>
+                        </div>
+
+                        <!-- Features list -->
+                        <ul class="list-unstyled small mb-4 flex-grow-1">
+                            <li class="mb-2 text-gray-700">
+                                <i class="fas fa-check-circle text-success mr-2"></i>
+                                <span th:text="|Hiển thị tin đăng trong ${pkg.durationDays} ngày|">Hiển thị tin 15 ngày</span>
+                            </li>
+                            <li th:if="${pkg.freeBoosts > 0}" class="mb-2 text-gray-700">
+                                <i class="fas fa-check-circle text-success mr-2"></i>
+                                <span th:text="|${pkg.freeBoosts} lần đẩy tin (Boost) miễn phí|">Đẩy tin miễn phí</span>
+                            </li>
+                            <li th:if="${pkg.hasVipBadge}" class="mb-2 text-gray-700">
+                                <i class="fas fa-check-circle text-success mr-2"></i>
+                                <span>Gắn huy hiệu VIP nổi bật sàn tin</span>
+                            </li>
+                            <li th:if="${pkg.hasSearchPriority}" class="mb-2 text-gray-700">
+                                <i class="fas fa-check-circle text-success mr-2"></i>
+                                <span>Ưu tiên xuất hiện đầu kết quả tìm kiếm</span>
+                            </li>
+                            <li class="mb-2 text-gray-700">
+                                <i class="fas fa-check-circle text-success mr-2"></i>
+                                <span>Hỗ trợ kỹ thuật vận hành 24/7</span>
+                            </li>
+                        </ul>
+
+                        <!-- Subscribe form -->
+                        <form th:action="@{/owner/post-packages/subscribe}" method="post" class="mt-auto">
+                            <input type="hidden" name="postPackageId" th:value="${pkg.id}" />
+                            <button type="submit" class="btn btn-success btn-block font-weight-bold py-2 shadow-sm">
+                                <i class="fas fa-shopping-cart mr-1"></i> Đăng Ký Gói Này
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Empty state -->
+            <div th:if="${postPackages == null || #lists.isEmpty(postPackages)}" class="col-12">
+                <div class="card shadow p-5 text-center text-muted">
+                    <i class="fas fa-box-open fa-3x text-gray-300 mb-3"></i>
+                    <h5 class="font-weight-bold text-gray-700">Hiện tại chưa có gói đăng tin khả dụng</h5>
+                    <p class="small mb-0">Vui lòng liên hệ ban quản trị để được hỗ trợ kích hoạt gói phù hợp.</p>
+                </div>
+            </div>
         </div>
 
-        <!-- Action Button -->
-        <form
-          th:action="@{/owner/post-packages/subscribe}"
-          method="post"
-          class="mb-0"
-        >
-          <input type="hidden" name="postPackageId" th:value="${package.id}" />
-          <button
-            type="submit"
-            class="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-3 rounded-lg transition-colors"
-          >
-            <i class="fa-solid fa-shopping-cart mr-2"></i>
-            Đăng ký gói ngay
-          </button>
-        </form>
-      </div>
-    </div>
-
-    <!-- Empty State -->
-    <div
-      th:if="${postPackages == null || #lists.isEmpty(postPackages)}"
-      class="col-span-full"
-    >
-      <div class="text-center py-16">
-        <div class="text-gray-400 mb-4">
-          <i class="fa-solid fa-box-open text-6xl"></i>
+        <!-- Info Note -->
+        <div class="alert alert-info border-left-info shadow-sm mt-3">
+            <h6 class="font-weight-bold mb-1"><i class="fas fa-info-circle mr-1"></i> Thông tin hỗ trợ đăng tin:</h6>
+            <ul class="small mb-0 pl-3">
+                <li>Gói dịch vụ được kích hoạt tự động ngay sau khi hoàn tất thanh toán từ ví Trọ Mới.</li>
+                <li>Thời gian hiển thị bài đăng bắt đầu tính từ lúc tin đăng được duyệt công khai trên hệ thống.</li>
+                <li>Bạn có thể mua gia hạn hoặc mua trước gói đăng tin bất cứ lúc nào.</li>
+            </ul>
         </div>
-        <h3 class="text-lg font-medium text-gray-900 mb-2">Chưa có gói nào</h3>
-        <p class="text-gray-600">
-          Hiện tại chưa có gói đăng tin nào có sẵn. Vui lòng liên hệ với quản
-          trị viên.
-        </p>
-      </div>
-    </div>
-  </div>
-
-  <!-- Info Section -->
-  <div class="bg-blue-50 border border-blue-200 rounded-xl p-6">
-    <div class="flex items-start">
-      <i class="fa-solid fa-info-circle text-blue-600 mt-1 mr-3"></i>
-      <div>
-        <h4 class="font-semibold text-blue-900 mb-2">Thông tin quan trọng</h4>
-        <ul class="text-sm text-blue-800 space-y-1">
-          <li>• Gói sẽ được kích hoạt ngay sau khi đăng ký thành công</li>
-          <li>• Thời gian hiển thị tin đăng sẽ bắt đầu tính từ lúc đăng tin</li>
-          <li>
-            • Bạn có thể đăng ký nhiều gói cùng lúc để tăng thời gian hiển thị
-          </li>
-          <li>
-            • Các tính năng VIP và ưu tiên sẽ áp dụng trong suốt thời gian gói
-          </li>
-          <li>• Mọi thắc mắc vui lòng liên hệ bộ phận hỗ trợ</li>
-        </ul>
-      </div>
-    </div>
-  </div>
 </div>
+

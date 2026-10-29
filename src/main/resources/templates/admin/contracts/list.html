@@ -1,0 +1,156 @@
+<div th:fragment="content" class="container-fluid">
+
+    <!-- Page Heading -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <div>
+            <h1 class="h3 mb-1 text-gray-800 font-weight-bold">Quản Lý Hợp Đồng Thuê Nhà</h1>
+            <p class="text-muted small mb-0">Theo dõi toàn bộ hợp đồng thuê trọ trên hệ thống giữa chủ nhà và khách thuê.</p>
+        </div>
+        <div class="d-flex align-items-center" style="gap: 8px;">
+            <a th:href="@{/admin/contracts/export}" class="btn btn-success btn-sm shadow-sm font-weight-bold">
+                <i class="fas fa-file-csv mr-1"></i> Xuất CSV / Excel
+            </a>
+            <span class="badge badge-primary px-3 py-2 font-weight-bold" th:text="${contracts != null ? contracts.size() + ' hợp đồng' : '0'}">0 hợp đồng</span>
+        </div>
+    </div>
+
+    <!-- Search & Filter Card -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 bg-white">
+            <h6 class="m-0 font-weight-bold text-primary">
+                <i class="fas fa-filter mr-1"></i> Bộ Lọc & Tìm Kiếm Hợp Đồng
+            </h6>
+        </div>
+        <div class="card-body">
+            <form th:action="@{/admin/contracts}" method="get" class="form-row align-items-center">
+                <div class="col-lg-6 col-md-6 mb-2">
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <div class="input-group-text bg-light"><i class="fas fa-search text-gray-400"></i></div>
+                        </div>
+                        <input type="text" class="form-control" id="keyword" name="keyword" 
+                               th:value="${keyword}" placeholder="Nhập mã hợp đồng, tên phòng, tên cơ sở trọ hoặc tên khách thuê...">
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-4 mb-2">
+                    <select class="form-control" id="status" name="status">
+                        <option value="">-- Tất cả trạng thái --</option>
+                        <option th:each="st : ${statuses}" 
+                                th:value="${st}" 
+                                th:text="${st.displayName}" 
+                                th:selected="${statusFilter == st.name()}">ACTIVE</option>
+                    </select>
+                </div>
+                <div class="col-lg-2 col-md-2 mb-2">
+                    <button type="submit" class="btn btn-primary btn-block font-weight-bold">
+                        <i class="fas fa-search mr-1"></i> Lọc
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- DataTales Example (Strictly 5 Columns) -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 d-flex align-items-center justify-content-between">
+            <h6 class="m-0 font-weight-bold text-primary">
+                <i class="fas fa-file-contract mr-1"></i> Danh Sách Hợp Đồng Thuê Toàn Hệ Thống
+            </h6>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover" id="dataTable" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th style="width: 100px;" class="text-center">Mã Hợp Đồng</th>
+                            <th>Phòng & Cơ Sở Nhà Trọ</th>
+                            <th>Khách Thuê Đại Diện</th>
+                            <th>Thời Hạn & Giá Thuê</th>
+                            <th style="width: 160px;" class="text-center">Chức Năng</th>
+                        </tr>
+                    </thead>
+                    <tfoot>
+                        <tr>
+                            <th class="text-center">Mã Hợp Đồng</th>
+                            <th>Phòng & Cơ Sở Nhà Trọ</th>
+                            <th>Khách Thuê Đại Diện</th>
+                            <th>Thời Hạn & Giá Thuê</th>
+                            <th class="text-center">Chức Năng</th>
+                        </tr>
+                    </tfoot>
+                    <tbody>
+                        <tr th:each="c : ${contracts}">
+                            <!-- Cột 1: Mã Hợp Đồng -->
+                            <td class="text-center font-weight-bold">
+                                <span class="badge badge-dark px-2 py-1" th:text="${c.code}">HD-001</span>
+                                <div class="small text-muted mt-1">ID: <span th:text="${c.id}">1</span></div>
+                            </td>
+
+                            <!-- Cột 2: Phòng & Cơ Sở -->
+                            <td>
+                                <div class="font-weight-bold text-primary" 
+                                     th:text="${c.room != null ? c.room.name : 'N/A'}">Phòng 101</div>
+                                <div class="small text-muted mt-1" th:if="${c.room != null and c.room.property != null}">
+                                    <i class="fas fa-hotel mr-1 text-gray-400"></i>
+                                    <span th:text="${c.room.property.name}">Nhà trọ A</span>
+                                </div>
+                            </td>
+
+                            <!-- Cột 3: Khách Thuê Đại Diện -->
+                            <td>
+                                <div class="font-weight-bold text-dark" 
+                                     th:text="${c.representative != null and c.representative.fullName != null ? c.representative.fullName : 'N/A'}">Khách thuê</div>
+                                <div class="small text-muted" th:if="${c.representative != null and c.representative.phone != null}">
+                                    <i class="fas fa-phone fa-xs mr-1 text-gray-400"></i>
+                                    <span th:text="${c.representative.phone}">0912345678</span>
+                                </div>
+                            </td>
+
+                            <!-- Cột 4: Thời Hạn & Giá Thuê -->
+                            <td>
+                                <div class="small text-gray-800 font-weight-bold">
+                                    <i class="far fa-calendar-alt text-primary mr-1"></i>
+                                    <span th:text="${c.startDate != null ? #temporals.format(c.startDate, 'dd/MM/yyyy') : ''}">01/01/2026</span> - 
+                                    <span th:text="${c.endDate != null ? #temporals.format(c.endDate, 'dd/MM/yyyy') : ''}">01/01/2027</span>
+                                </div>
+                                <div class="mt-1 d-flex align-items-center">
+                                    <span class="text-success font-weight-bold mr-2 small" 
+                                          th:text="${c.rentPrice != null ? #numbers.formatDecimal(c.rentPrice, 0, 'COMMA', 0, 'POINT') + ' đ/tháng' : '0 đ'}">2,500,000 đ</span>
+                                    <span class="badge" 
+                                          th:classappend="${c.status != null and c.status.name() == 'ACTIVE' ? 'badge-success' : (c.status != null and c.status.name() == 'EXPIRING_SOON' ? 'badge-warning' : 'badge-secondary')}"
+                                          th:text="${c.status != null ? c.status.displayName : 'ACTIVE'}">HIỆU LỰC</span>
+                                </div>
+                            </td>
+
+                            <!-- Cột 5: Chức Năng -->
+                            <td class="text-center action-btns">
+                                <a th:href="@{'/admin/contracts/' + ${c.id}}" 
+                                   class="btn btn-primary btn-sm btn-circle" title="Xem chi tiết hợp đồng">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+
+                                <form th:if="${c.status != null and c.status.name() == 'ACTIVE'}" 
+                                      th:action="@{'/admin/contracts/' + ${c.id} + '/terminate'}" method="post" class="d-inline"
+                                      data-confirm="Bạn có chắc chắn muốn thanh lý chấm dứt hợp đồng này không?">
+                                    <button type="submit" class="btn btn-warning btn-sm btn-circle" title="Thanh lý hợp đồng"
+                                            data-confirm="Bạn có chắc chắn muốn thanh lý chấm dứt hợp đồng này không?">
+                                        <i class="fas fa-handshake-slash"></i>
+                                    </button>
+                                </form>
+
+                                <form th:action="@{'/admin/contracts/' + ${c.id} + '/delete'}" method="post" class="d-inline"
+                                      data-confirm="Bạn có chắc chắn muốn xóa hợp đồng này khỏi hệ thống?">
+                                    <button type="submit" class="btn btn-danger btn-sm btn-circle" title="Xóa hợp đồng"
+                                            data-confirm="Bạn có chắc chắn muốn xóa hợp đồng này khỏi hệ thống?">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</div>

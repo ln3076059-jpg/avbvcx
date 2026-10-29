@@ -12,7 +12,6 @@ import com.pms.propertymanagement.enums.TransactionType;
 import com.pms.propertymanagement.exception.ResourceNotFoundException;
 import com.pms.propertymanagement.repository.PostRepository;
 import com.pms.propertymanagement.repository.PropertyRepository;
-import com.pms.propertymanagement.repository.UserRepository;
 import com.pms.propertymanagement.service.ManagementPlanService;
 import com.pms.propertymanagement.service.PostService;
 import com.pms.propertymanagement.service.SubscriptionManagementService;
@@ -44,7 +43,6 @@ public class PostServiceImpl implements PostService {
 
     private final PostRepository postRepository;
     private final PropertyRepository propertyRepository;
-    private final UserRepository userRepository;
     private final WalletService walletService;
     private final SubscriptionManagementService subscriptionManagementService;
     private final ManagementPlanService managementPlanService;
@@ -310,6 +308,18 @@ public class PostServiceImpl implements PostService {
 
     @Override
     @Transactional(readOnly = true)
+    public Post getPostByIdAndOwner(Long postId, Long ownerId) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new IllegalArgumentException("Bài đăng không tồn tại"));
+        if (post.getProperty() == null || post.getProperty().getOwner() == null
+                || !post.getProperty().getOwner().getId().equals(ownerId)) {
+            throw new IllegalArgumentException("Bạn không có quyền truy cập bài đăng này");
+        }
+        return post;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public Optional<Post> findPostByPropertyId(Long propertyId) {
         return postRepository.findByPropertyId(propertyId);
     }
@@ -439,6 +449,14 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
+    public List<Post> searchMarketplacePosts(String keyword) {
+        if (keyword == null || keyword.trim().isEmpty()) {
+            return getAllMarketplacePosts();
+        }
+        return postRepository.searchMarketplacePosts(keyword.trim(), LocalDateTime.now());
+    }
+
+    @Override
     @Transactional(readOnly = true)
     public List<Post> getMarketplacePostsByCategory(Long categoryId) {
         List<Post> livePosts = postRepository.findMarketplacePostsByCategory(categoryId, LocalDateTime.now());
@@ -460,23 +478,6 @@ public class PostServiceImpl implements PostService {
     }
 
     // === HELPER METHODS ===
-
-    /**
-     * Calculate duration from PostingPackage code
-     * Maps package codes to duration in days
-     */
-    private int calculateDurationFromPackage(PostingPackage postPackage) {
-        return switch (postPackage.getCode()) {
-            case "POST_NEW" -> 15;
-            case "POST_STANDARD" -> 30;
-            case "POST_PREMIUM" -> 60;
-            case "POST_ENTERPRISE" -> 90;
-            default -> {
-                log.warn("Unknown package code: {}, defaulting to 30 days", postPackage.getCode());
-                yield 30;
-            }
-        };
-    }
 
     /**
      * Convert Post entity to PostOwnerResponse DTO

@@ -1,75 +1,162 @@
-<div>
-    <div class="flex flex-wrap items-center gap-3 text-sm">
-        <a th:href="@{/tenant/rooms}" class="text-blue-600 hover:underline">&larr; Danh sách phòng</a>
-        <a th:href="@{/tenant/maintenance}" class="text-blue-600 hover:underline">Danh sách yêu cầu</a>
-    </div>
-    <h1 class="text-2xl font-semibold mt-2">Chi tiết yêu cầu bảo trì</h1>
+<div th:fragment="content">
 
-    <div th:if="${success}" class="mt-3 p-3 bg-green-100 text-green-800 rounded">
-        Thao tác thành công.
-    </div>
-    <div th:if="${errorAction != null}" class="mt-3 p-3 bg-red-100 text-red-800 rounded" th:text="${errorAction}"></div>
-    <script th:if="${success}">
-        (function () {
-            alert('Cập nhật yêu cầu bảo trì thành công!');
-            if (history.replaceState) {
-                const url = new URL(window.location.href);
-                url.searchParams.delete('success');
-                history.replaceState(null, '', url.toString());
-            }
-        })();
-    </script>
-
-    <div class="mt-4 border rounded p-4 space-y-2">
-        <p><span class="font-medium">Mã yêu cầu:</span> <span
-                th:text="${request.code != null ? request.code : request.id}"></span></p>
-        <p><span class="font-medium">Phòng:</span> <span th:text="${request.room.name}"></span></p>
-        <p><span class="font-medium">Danh mục:</span> <span th:text="${request.category.displayName}"></span></p>
-        <p><span class="font-medium">Mô tả:</span></p>
-        <p class="text-gray-700 whitespace-pre-line" th:text="${request.description}"></p>
-        <div th:if="${request.imageUrl != null}" class="mt-2">
-            <p class="font-medium mb-1">Ảnh đính kèm:</p>
-            <a th:href="${request.imageUrl}" target="_blank" rel="noopener noreferrer">
-                <img th:src="${request.imageUrl}" alt="Ảnh yêu cầu bảo trì"
-                    class="max-w-xs max-h-64 rounded border object-cover hover:opacity-90 transition-opacity" />
+    <!-- Page Heading -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <div>
+            <a th:href="@{/tenant/maintenance}" class="btn btn-sm btn-outline-secondary mb-2">
+                <i class="fas fa-arrow-left mr-1"></i> Quay lại danh sách bảo trì
             </a>
+            <h1 class="h3 mb-1 text-gray-800 font-weight-bold">
+                <i class="fas fa-tools text-primary mr-2"></i>Chi tiết yêu cầu bảo trì
+            </h1>
+            <p class="mb-0 text-muted small">Theo dõi tiến trình kỹ thuật và xác nhận nghiệm thu sửa chữa.</p>
         </div>
-        <div class="flex items-center gap-2">
-            <span class="font-medium">Trạng thái:</span>
-            <span
-                th:class="${request.status.name() == 'PENDING' ? 'bg-yellow-100 text-yellow-800' :
-                             request.status.name() == 'ASSIGNED' ? 'bg-blue-100 text-blue-800' :
-                             request.status.name() == 'IN_PROGRESS' ? 'bg-orange-100 text-orange-800' :
-                             request.status.name() == 'COMPLETED' ? 'bg-green-100 text-green-800' :
-                             request.status.name() == 'CONFIRMED' ? 'bg-gray-200 text-gray-800' :
-                             request.status.name() == 'REJECTED' ? 'bg-red-100 text-red-800' :
-                             request.status.name() == 'REOPENED' ? 'bg-purple-100 text-purple-800' : 'bg-gray-100 text-gray-800'} + ' px-2 py-1 rounded text-sm'"
-                th:text="${request.status.displayName}"></span>
+        <a th:href="@{/tenant/rooms}" class="btn btn-sm btn-primary shadow-sm font-weight-bold mt-2 mt-sm-0">
+            <i class="fas fa-door-open fa-sm text-white-50 mr-1"></i> Danh sách phòng của tôi
+        </a>
+    </div>
+
+    <!-- Flash Alerts -->
+    <div th:if="${success}" class="alert alert-success border-left-success shadow-sm mb-4">
+        <i class="fas fa-check-circle mr-2"></i> Cập nhật yêu cầu bảo trì thành công!
+    </div>
+    <div th:if="${errorAction != null}" class="alert alert-danger border-left-danger shadow-sm mb-4" th:text="${errorAction}"></div>
+
+    <!-- 4-Step Progress Card -->
+    <div class="card shadow mb-4"
+         th:with="stName=${request.status.name()},
+                  stepNum=${stName == 'PENDING' ? 1 : (stName == 'ASSIGNED' or stName == 'REOPENED' ? 2 : (stName == 'IN_PROGRESS' ? 3 : (stName == 'COMPLETED' or stName == 'CONFIRMED' ? 4 : 0)))}">
+        <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+            <h6 class="m-0 font-weight-bold text-primary">
+                <i class="fas fa-tasks mr-1"></i> Tiến trình xử lý kỹ thuật
+            </h6>
+            <span class="badge badge-primary px-3 py-2" th:text="${request.status.displayName}">Trạng thái</span>
         </div>
-        <div th:if="${request.status.name() == 'REJECTED'}">
-            <p><span class="font-medium">Lý do từ chối:</span> <span th:text="${request.rejectedReason}"></span></p>
-        </div>
-        <div th:if="${request.status.name() == 'REOPENED'}">
-            <p><span class="font-medium">Lý do mở lại:</span> <span th:text="${request.reopenedReason}"></span></p>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-3 mb-2 mb-md-0">
+                    <div class="p-3 rounded border d-flex align-items-center"
+                         th:classappend="${stepNum >= 1 ? 'border-primary bg-light text-primary font-weight-bold' : 'text-muted'}">
+                        <i class="fas fa-file-alt fa-lg mr-3"></i>
+                        <div>
+                            <div class="small font-weight-bold">1. Tiếp nhận</div>
+                            <div class="text-xs">PENDING</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-2 mb-md-0">
+                    <div class="p-3 rounded border d-flex align-items-center"
+                         th:classappend="${stepNum >= 2 ? 'border-info bg-light text-info font-weight-bold' : 'text-muted'}">
+                        <i class="fas fa-user-cog fa-lg mr-3"></i>
+                        <div>
+                            <div class="small font-weight-bold">2. Phân công thợ</div>
+                            <div class="text-xs">ASSIGNED</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-2 mb-md-0">
+                    <div class="p-3 rounded border d-flex align-items-center"
+                         th:classappend="${stepNum >= 3 ? 'border-warning bg-light text-warning font-weight-bold' : 'text-muted'}">
+                        <i class="fas fa-screwdriver fa-lg mr-3"></i>
+                        <div>
+                            <div class="small font-weight-bold">3. Đang sửa chữa</div>
+                            <div class="text-xs">IN_PROGRESS</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="p-3 rounded border d-flex align-items-center"
+                         th:classappend="${stepNum >= 4 ? 'border-success bg-light text-success font-weight-bold' : 'text-muted'}">
+                        <i class="fas fa-check-double fa-lg mr-3"></i>
+                        <div>
+                            <div class="small font-weight-bold">4. Hoàn tất</div>
+                            <div class="text-xs">COMPLETED / CONFIRMED</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
-    <div th:if="${request.status.name() == 'COMPLETED'}" class="mt-4 flex flex-col md:flex-row gap-4">
-        <form th:action="@{|/tenant/maintenance/${request.id}/confirm|}" method="post">
-            <button type="submit" class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">Xác nhận hoàn
-                thành</button>
-        </form>
-        <div th:if="${reopenCount != null and reopenCount >= 3}" class="flex-1 p-3 bg-yellow-100 text-yellow-800 rounded">
-            Bạn đã yêu cầu làm lại quá số lần cho phép, vui lòng liên hệ trực tiếp Owner
+    <!-- Details Card -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">
+                <i class="fas fa-clipboard-list mr-1"></i> Nội dung phiếu báo hỏng
+            </h6>
         </div>
-        <form th:if="${reopenCount == null or reopenCount < 3}" th:action="@{|/tenant/maintenance/${request.id}/reopen|}" method="post" class="flex-1">
-            <div>
-                <label class="block text-sm font-medium mb-1">Chưa xử lý xong - nhập lý do</label>
-                <textarea name="reason" rows="3" class="w-full border rounded px-3 py-2"></textarea>
-                <p class="text-red-600 text-sm mt-1" th:if="${errorReopen != null}" th:text="${errorReopen}"></p>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered mb-3">
+                    <tbody>
+                        <tr>
+                            <th class="bg-light" style="width: 220px;">Mã phiếu yêu cầu</th>
+                            <td class="font-mono font-weight-bold text-primary" th:text="${request.code != null ? request.code : ('#' + request.id)}">#MT-01</td>
+                        </tr>
+                        <tr>
+                            <th class="bg-light">Phòng</th>
+                            <td class="font-weight-bold text-gray-800" th:text="${request.room.name}">Phòng 101</td>
+                        </tr>
+                        <tr>
+                            <th class="bg-light">Hạng mục sự cố</th>
+                            <td><span class="badge badge-info px-2 py-1" th:text="${request.category.displayName}">Điện</span></td>
+                        </tr>
+                        <tr>
+                            <th class="bg-light">Mô tả chi tiết</th>
+                            <td style="white-space: pre-line;" th:text="${request.description}">Mô tả</td>
+                        </tr>
+                        <tr>
+                            <th class="bg-light">Trạng thái hiện tại</th>
+                            <td>
+                                <span class="badge px-3 py-1"
+                                      th:classappend="${request.status.name() == 'PENDING' ? 'badge-warning text-dark' :
+                                                       (request.status.name() == 'ASSIGNED' ? 'badge-info' :
+                                                       (request.status.name() == 'IN_PROGRESS' ? 'badge-primary' :
+                                                       (request.status.name() == 'COMPLETED' or request.status.name() == 'CONFIRMED' ? 'badge-success' : 'badge-danger')))}"
+                                      th:text="${request.status.displayName}"></span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
-            <button type="submit" class="mt-2 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700">Gửi yêu cầu làm
-                lại</button>
-        </form>
+
+            <div th:if="${request.imageUrl != null}" class="mb-3">
+                <label class="font-weight-bold small text-uppercase text-muted d-block">Ảnh hiện trạng đính kèm:</label>
+                <a th:href="${request.imageUrl}" target="_blank">
+                    <img th:src="${request.imageUrl}" alt="Ảnh yêu cầu bảo trì" class="img-thumbnail" style="max-height: 260px;">
+                </a>
+            </div>
+
+            <div th:if="${request.completionNote != null and !#strings.isEmpty(request.completionNote)}"
+                 class="alert alert-success border-left-success">
+                <div class="font-weight-bold mb-1"><i class="fas fa-clipboard-check mr-1"></i> Biên bản nghiệm thu kỹ thuật:</div>
+                <div style="white-space: pre-line;" th:text="${request.completionNote}"></div>
+            </div>
+
+            <!-- Confirm / Reopen when COMPLETED -->
+            <div th:if="${request.status.name() == 'COMPLETED'}" class="border-top pt-3 mt-3">
+                <div class="row">
+                    <div class="col-md-5 mb-3">
+                        <form th:action="@{|/tenant/maintenance/${request.id}/confirm|}" method="post">
+                            <button type="submit" class="btn btn-success font-weight-bold shadow-sm">
+                                <i class="fas fa-check mr-1"></i> Xác nhận đã khắc phục xong
+                            </button>
+                        </form>
+                    </div>
+                    <div class="col-md-7">
+                        <form th:if="${reopenCount == null or reopenCount < 3}" th:action="@{|/tenant/maintenance/${request.id}/reopen|}" method="post">
+                            <div class="form-group mb-2">
+                                <label class="small font-weight-bold text-danger">Chưa xử lý triệt để? Nhập lý do yêu cầu làm lại:</label>
+                                <textarea name="reason" rows="2" class="form-control form-control-sm" placeholder="Nhập lý do cần kỹ thuật kiểm tra lại..."></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-sm btn-danger font-weight-bold">
+                                <i class="fas fa-redo mr-1"></i> Gửi yêu cầu làm lại
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
+
 </div>

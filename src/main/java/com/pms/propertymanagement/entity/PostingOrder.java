@@ -34,7 +34,7 @@ public class PostingOrder {
     private int amount; // VND
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, columnDefinition = "nvarchar(20)")
+    @Column(nullable = false, length = 20)
     private PaymentStatus status = PaymentStatus.PENDING;
 
     @Column(nullable = false)
@@ -59,6 +59,6 @@ public class PostingOrder {
     @Column(name = "vnp_pay_date", length = 20)
     private String vnpPayDate;
 
-    @Column(name = "vnp_raw_query", columnDefinition = "nvarchar(2000)")
+    @Column(name = "vnp_raw_query", columnDefinition = "TEXT")
     private String vnpRawQuery;
 }

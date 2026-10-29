@@ -1,0 +1,224 @@
+<div class="container-fluid" th:fragment="content">
+<!-- Page Heading -->
+        <div class="d-sm-flex align-items-center justify-content-between mb-4">
+            <div>
+                <a th:href="@{/owner/invoices}" class="btn btn-sm btn-outline-secondary mb-2">
+                    <i class="fas fa-arrow-left fa-sm mr-1"></i> Quay lại danh sách hóa đơn
+                </a>
+                <h1 class="h3 mb-0 text-gray-800 font-weight-bold">
+                    <i class="fas fa-magic text-success mr-2"></i>Sinh Hóa Đơn Hàng Loạt
+                </h1>
+                <p class="text-muted small mb-0 mt-1">Hệ thống quét tự động toàn bộ phòng có hợp đồng đang hoạt động và khởi tạo hóa đơn theo kỳ.</p>
+            </div>
+        </div>
+
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3 bg-white border-bottom-success">
+                        <h6 class="m-0 font-weight-bold text-success">
+                            <i class="fas fa-sliders-h mr-2"></i>Cấu Hình Kỳ Thu Tiền Nhà
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <form th:action="@{/owner/invoices/batch-create}" th:object="${batchRequest}" method="post" id="batchInvoiceForm">
+                            <div class="form-group">
+                                <label class="font-weight-bold small text-gray-700">Áp Dụng Cho Cơ Sở Nhà Trọ</label>
+                                <select th:field="*{propertyId}" id="batchPropertyId" class="form-control">
+                                    <option value="">-- Tất cả nhà trọ của tôi --</option>
+                                    <option th:each="p : ${properties}" th:value="${p.id}" th:text="${p.name}"></option>
+                                </select>
+                                <small class="form-text text-muted">Để trống nếu bạn muốn lập hóa đơn đồng loạt cho toàn bộ các cơ sở.</small>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group col-md-6">
+                                    <label class="font-weight-bold small text-gray-700">Kỳ Tháng <span class="text-danger">*</span></label>
+                                    <select th:field="*{month}" id="batchMonth" class="form-control" required>
+                                        <option th:each="m : ${#numbers.sequence(1, 12)}" th:value="${m}" th:text="'Tháng ' + ${m}"></option>
+                                    </select>
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label class="font-weight-bold small text-gray-700">Năm Thu <span class="text-danger">*</span></label>
+                                    <input type="number" th:field="*{year}" id="batchYear" class="form-control" required min="2020" max="2030">
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="font-weight-bold small text-gray-700">Hạn Thanh Toán Chung <span class="text-danger">*</span></label>
+                                <input type="date" th:field="*{dueDate}" class="form-control" required>
+                                <small class="form-text text-muted">Hạn chót để khách thuê hoàn tất thanh toán tiền phòng trước khi quá hạn.</small>
+                            </div>
+
+                            <!-- Phân Tích & Kiểm Tra Thông Minh Trước Khi Sinh Hóa Đơn -->
+                            <div class="card border-left-primary my-4 bg-light" id="smartBatchPreviewCard">
+                                <div class="card-body py-3 px-3">
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <h6 class="m-0 font-weight-bold text-primary">
+                                            <i class="fas fa-check-circle mr-1"></i>Phân tích &amp; kiểm tra trước khi sinh hóa đơn
+                                        </h6>
+                                        <span id="batchPreviewSpinner" class="small text-primary" style="display: none;">
+                                            <i class="fas fa-spinner fa-spin mr-1"></i>Đang kiểm tra...
+                                        </span>
+                                    </div>
+
+                                    <!-- 4 Mini KPI Counters -->
+                                    <div class="row text-center mb-3">
+                                        <div class="col-6 col-md-3 mb-2 mb-md-0">
+                                            <div class="p-2 bg-white rounded border shadow-sm h-100">
+                                                <div class="text-xs text-muted font-weight-bold text-uppercase">Hợp đồng đang thuê</div>
+                                                <div id="kpiTotalActive" class="h5 mb-0 font-weight-bold text-dark font-mono mt-1">0</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-6 col-md-3 mb-2 mb-md-0">
+                                            <div class="p-2 bg-white rounded border shadow-sm h-100">
+                                                <div class="text-xs text-success font-weight-bold text-uppercase">Sẽ tạo mới</div>
+                                                <div id="kpiWillCreate" class="h5 mb-0 font-weight-bold text-success font-mono mt-1">0</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-6 col-md-3">
+                                            <div class="p-2 bg-white rounded border shadow-sm h-100">
+                                                <div class="text-xs text-secondary font-weight-bold text-uppercase">Đã có HĐ (bỏ qua)</div>
+                                                <div id="kpiAlreadyInvoiced" class="h5 mb-0 font-weight-bold text-secondary font-mono mt-1">0</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-6 col-md-3">
+                                            <div class="p-2 bg-white rounded border shadow-sm h-100">
+                                                <div class="text-xs text-primary font-weight-bold text-uppercase">Dự kiến tiền phòng</div>
+                                                <div id="kpiEstimatedRent" class="h6 mb-0 font-weight-bold text-primary font-mono mt-1">0 đ</div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Readiness Badge (When all rooms have meter readings and willCreateCount > 0) -->
+                                    <div id="batchReadyBadge" class="alert alert-success py-2 px-3 mb-0 small font-weight-bold" style="display: none;">
+                                        <i class="fas fa-check-circle mr-1"></i>Tất cả phòng cần lập hóa đơn đã có đủ chỉ số điện nước!
+                                    </div>
+
+                                    <!-- Warning Box for Missing Meter Readings -->
+                                    <div id="batchMissingMetersBox" class="alert alert-warning py-2 px-3 mb-0" style="display: none;">
+                                        <div class="font-weight-bold small text-dark mb-2">
+                                            <i class="fas fa-bolt text-warning mr-1"></i>Phát hiện <span id="missingMetersCount">0</span> phòng chưa ghi chỉ số điện nước trong kỳ này (hóa đơn sinh ra sẽ chưa bao gồm tiền điện nước):
+                                        </div>
+                                        <div id="missingMetersList" class="d-flex flex-column" style="gap: 6px; max-height: 180px; overflow-y: auto;"></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="alert alert-warning shadow-sm my-4 border-left-warning">
+                                <div class="font-weight-bold mb-1">
+                                    <i class="fas fa-exclamation-triangle mr-1"></i> Lưu ý quan trọng:
+                                </div>
+                                <ul class="small mb-0 pl-3">
+                                    <li>Những phòng đã lập hóa đơn trong tháng này sẽ tự động được bỏ qua (tránh trùng lặp).</li>
+                                    <li>Nên ghi chỉ số điện nước tháng này trước khi chạy để tự động tính tiền điện nước.</li>
+                                </ul>
+                            </div>
+
+                            <div class="d-flex justify-content-end">
+                                <a th:href="@{/owner/invoices}" class="btn btn-outline-secondary mr-2">
+                                    <i class="fas fa-times mr-1"></i> Hủy Bỏ
+                                </a>
+                                <button type="submit" class="btn btn-success shadow-sm font-weight-bold">
+                                    <i class="fas fa-magic mr-1"></i> Tiến Hành Sinh Hóa Đơn
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                const propEl = document.getElementById('batchPropertyId') || document.querySelector('[name="propertyId"]');
+                const monthEl = document.getElementById('batchMonth') || document.querySelector('[name="month"]');
+                const yearEl = document.getElementById('batchYear') || document.querySelector('[name="year"]');
+                const spinner = document.getElementById('batchPreviewSpinner');
+
+                const kpiTotalActive = document.getElementById('kpiTotalActive');
+                const kpiWillCreate = document.getElementById('kpiWillCreate');
+                const kpiAlreadyInvoiced = document.getElementById('kpiAlreadyInvoiced');
+                const kpiEstimatedRent = document.getElementById('kpiEstimatedRent');
+
+                const readyBadge = document.getElementById('batchReadyBadge');
+                const missingBox = document.getElementById('batchMissingMetersBox');
+                const missingCount = document.getElementById('missingMetersCount');
+                const missingList = document.getElementById('missingMetersList');
+
+                function loadBatchPreview() {
+                    const propId = propEl ? propEl.value : '';
+                    const month = monthEl ? monthEl.value : '';
+                    const year = yearEl ? yearEl.value : '';
+                    if (!month || !year) return;
+
+                    if (spinner) spinner.style.display = 'inline-block';
+
+                    const params = new URLSearchParams();
+                    if (propId) params.append('propertyId', propId);
+                    params.append('month', month);
+                    params.append('year', year);
+
+                    fetch('/owner/invoices/api/batch-preview?' + params.toString())
+                        .then(res => res.json())
+                        .then(data => {
+                            const totalActive = data.totalActiveContracts || 0;
+                            const willCreate = data.willCreateCount || 0;
+                            const alreadyInvoiced = data.alreadyInvoicedCount || 0;
+                            const estRent = data.estimatedRentTotal || 0;
+                            const missingRooms = Array.isArray(data.missingMetersRooms) ? data.missingMetersRooms : [];
+
+                            if (kpiTotalActive) kpiTotalActive.textContent = totalActive;
+                            if (kpiWillCreate) kpiWillCreate.textContent = willCreate;
+                            if (kpiAlreadyInvoiced) kpiAlreadyInvoiced.textContent = alreadyInvoiced;
+                            if (kpiEstimatedRent) kpiEstimatedRent.textContent = Number(estRent).toLocaleString('vi-VN') + ' đ';
+
+                            if (missingRooms.length > 0) {
+                                if (readyBadge) readyBadge.style.display = 'none';
+                                if (missingBox) missingBox.style.display = 'block';
+                                if (missingCount) missingCount.textContent = missingRooms.length;
+                                if (missingList) {
+                                    missingList.innerHTML = '';
+                                    missingRooms.forEach(r => {
+                                        const rId = r.roomId || r.id || '';
+                                        const rName = r.roomName || r.name || ('Phòng #' + rId);
+                                        const pName = r.propertyName ? (' (' + r.propertyName + ')') : '';
+                                        const row = document.createElement('div');
+                                        row.className = 'd-flex justify-content-between align-items-center bg-white px-2 py-1 rounded border small';
+                                        const info = document.createElement('span');
+                                        info.className = 'font-weight-bold text-dark';
+                                        info.textContent = rName + pName;
+                                        const link = document.createElement('a');
+                                        link.href = '/owner/meters/create?roomId=' + encodeURIComponent(rId);
+                                        link.className = 'btn btn-xs btn-sm btn-outline-primary font-weight-bold py-0 px-2';
+                                        link.innerHTML = '<i class="fas fa-tachometer-alt mr-1"></i>Ghi chỉ số ngay';
+                                        row.appendChild(info);
+                                        row.appendChild(link);
+                                        missingList.appendChild(row);
+                                    });
+                                }
+                            } else {
+                                if (missingBox) missingBox.style.display = 'none';
+                                if (readyBadge) {
+                                    readyBadge.style.display = willCreate > 0 ? 'block' : 'none';
+                                }
+                            }
+                        })
+                        .catch(() => {})
+                        .finally(() => {
+                            if (spinner) spinner.style.display = 'none';
+                        });
+                }
+
+                [propEl, monthEl, yearEl].forEach(el => {
+                    if (el) {
+                        el.addEventListener('change', loadBatchPreview);
+                        el.addEventListener('input', loadBatchPreview);
+                    }
+                });
+
+                loadBatchPreview();
+            });
+        </script>
+</div>
+

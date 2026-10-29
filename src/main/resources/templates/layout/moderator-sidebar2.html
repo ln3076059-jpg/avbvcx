@@ -1,8 +1,8 @@
 <div th:fragment="sidebar2" class="flex flex-col h-full">
   <!-- Panel header -->
-  <div class="px-5 py-4 border-b border-gray-100 flex items-center space-x-2">
-    <i class="fa-brands fa-aws text-2xl text-blue-700"></i>
-    <span class="font-bold text-blue-700 text-2xl uppercase">Trọ Mới</span>
+  <div class="px-5 py-4 border-b border-gray-200 flex items-center space-x-2">
+    <i class="fa-solid fa-building text-xl text-[#2eca6a]"></i>
+    <span class="font-bold text-[#1b1b1b] text-xl tracking-tight">Trọ Mới</span>
   </div>
 
   <!-- ── QUẢN LÝ section ── -->
@@ -13,13 +13,13 @@
     <!-- Tổng quan -->
     <a
       href="/moderator"
-      th:classappend="${activeMenu == ''} ? ' bg-blue-50 text-[#0054a5]' : ' text-gray-600 hover:bg-blue-50 hover:text-[#0054a5]'"
+      th:classappend="${activeMenu == ''} ? ' bg-[#e9f9f0] text-[#1b1b1b]' : ' text-gray-600 hover:bg-[#e9f9f0] hover:text-[#1b1b1b]'"
       class="flex items-center gap-3 p-3 rounded-lg transition"
     >
-      <i class="fa-solid fa-chart-pie w-5"></i>
+      <i class="fa-solid fa-chart-pie w-5 text-[#2eca6a]"></i>
       <span
         class="font-medium"
-        th:classappend="${activeMenu == ''} ? ' text-blue-500 font-semibold' : ''"
+        th:classappend="${activeMenu == ''} ? ' text-[#1b1b1b] font-semibold' : ''"
         >Tổng quan</span
       >
     </a>
@@ -27,10 +27,10 @@
     <!-- Bài đăng group -->
     <div class="pt-2">
       <button
-        class="w-full flex items-center justify-between p-3 text-[#0054a5] font-bold"
+        class="w-full flex items-center justify-between p-3 text-[#1b1b1b] font-bold"
       >
         <div class="flex items-center gap-3">
-          <i class="fa-solid fa-newspaper w-5"></i>
+          <i class="fa-solid fa-newspaper w-5 text-[#2eca6a]"></i>
           <span>Bài đăng</span>
         </div>
         <i class="fa-solid fa-chevron-down text-xs"></i>
@@ -39,28 +39,28 @@
       <div class="ml-11 space-y-1 mt-1">
         <a
           href="/moderator/posts/pending"
-          class="flex items-center justify-between p-2 pl-4 hover:text-[#0054a5]"
-          th:classappend="${activeMenu == 'posts' and activeTab == 'pending'} ? ' text-blue-500 font-semibold' : ' text-gray-500'"
+          class="flex items-center justify-between p-2 pl-4 hover:text-[#1b1b1b] rounded-md"
+          th:classappend="${activeMenu == 'posts' and activeTab == 'pending'} ? ' bg-[#e9f9f0] text-[#1b1b1b] font-semibold' : ' text-gray-600'"
         >
           <span>Chờ duyệt</span>
           <span
             th:if="${pendingCount > 0}"
             th:text="${pendingCount}"
-            class="bg-orange-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center"
+            class="bg-amber-600 text-white text-xs font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center"
           >
           </span>
         </a>
 
         <a
           href="/moderator/posts/re-review"
-          class="flex items-center justify-between p-2 pl-4 hover:text-[#0054a5]"
-          th:classappend="${activeMenu == 'posts' and activeTab == 're-review'} ? ' text-blue-500 font-semibold' : ' text-gray-500'"
+          class="flex items-center justify-between p-2 pl-4 hover:text-[#1b1b1b] rounded-md"
+          th:classappend="${activeMenu == 'posts' and activeTab == 're-review'} ? ' bg-[#e9f9f0] text-[#1b1b1b] font-semibold' : ' text-gray-600'"
         >
           <span>Duyệt lại</span>
           <span
             th:if="${reReviewCount > 0}"
             th:text="${reReviewCount}"
-            class="bg-blue-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center"
+            class="bg-[#2eca6a] text-[#111814] text-xs font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center"
           >
           </span>
         </a>
@@ -73,31 +73,31 @@
     th:if="${activeSection == 'chat'}"
     class="flex-1 px-4 py-4 overflow-y-auto"
   >
-    <p class="text-xs font-bold uppercase text-gray-400 tracking-wider mb-3">
+    <p class="text-xs font-bold uppercase text-gray-500 tracking-wider mb-3">
       Hội thoại
     </p>
-    <p class="text-sm text-gray-400 text-center mt-8">Chưa có hội thoại nào.</p>
+    <p class="text-sm text-gray-500 text-center mt-8">Chưa có hội thoại nào.</p>
   </div>
 
-  <!-- Bottom: user info (giống owner-sidebar) -->
-  <div class="p-4 border-t border-gray-100 bg-gray-50">
-    <p class="text-[10px] uppercase font-bold text-gray-400 mb-3">
+  <!-- Bottom: user info -->
+  <div class="p-4 border-t border-gray-200 bg-gray-50">
+    <p class="text-xs uppercase font-bold text-gray-500 mb-3">
       Kiểm duyệt viên
     </p>
     <div
-      class="flex items-center gap-3 p-2 bg-white rounded-xl shadow-sm border border-blue-100"
+      class="flex items-center gap-3 p-2 bg-white rounded-xl border border-gray-200"
     >
       <div
-        class="w-10 h-10 rounded-full bg-[#0054a5] text-white flex items-center justify-center font-bold text-sm"
+        class="w-10 h-10 rounded-full bg-[#2eca6a] text-[#111814] flex items-center justify-center font-bold text-sm"
         th:text="${session.user?.fullName?.substring(0,1)?.toUpperCase() ?: 'M'}"
       ></div>
       <div>
         <p
-          class="text-xs font-bold text-gray-700"
+          class="text-xs font-bold text-gray-800"
           th:text="${session.user?.fullName ?: 'Moderator'}"
         ></p>
         <p
-          class="text-[10px] text-blue-600"
+          class="text-xs text-gray-500"
           th:text="${session.user?.phone ?: ''}"
         ></p>
       </div>

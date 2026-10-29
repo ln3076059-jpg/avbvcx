@@ -8,22 +8,29 @@ import com.pms.propertymanagement.dto.DashboardActivityDTO;
 import com.pms.propertymanagement.dto.OwnerStatisticsDTO;
 import com.pms.propertymanagement.entity.Payment;
 import com.pms.propertymanagement.entity.PostingOrder;
+import com.pms.propertymanagement.entity.WalletTransaction;
 import com.pms.propertymanagement.enums.ContractStatus;
 import com.pms.propertymanagement.enums.PaymentStatus;
 import com.pms.propertymanagement.enums.RoomStatus;
+import com.pms.propertymanagement.enums.TransactionStatus;
+import com.pms.propertymanagement.enums.TransactionType;
 import com.pms.propertymanagement.repository.ApiLogRepository;
 import com.pms.propertymanagement.repository.ContractRepository;
 import com.pms.propertymanagement.repository.PaymentRepository;
 import com.pms.propertymanagement.repository.PostingOrderRepository;
 import com.pms.propertymanagement.repository.RoomRepository;
+import com.pms.propertymanagement.repository.WalletTransactionRepository;
 import com.pms.propertymanagement.service.StatisticsService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -37,6 +44,8 @@ public class StatisticsServiceImpl implements StatisticsService {
     private final ApiLogRepository apiLogRepository;
     private final RoomRepository roomRepository;
     private final com.pms.propertymanagement.repository.UserRepository userRepository;
+    private final com.pms.propertymanagement.repository.InvoiceRepository invoiceRepository;
+    private final WalletTransactionRepository walletTransactionRepository;
 
     @Override
     public List<ApiStatisticDTO> getApiStatistics() {
@@ -64,15 +73,44 @@ public class StatisticsServiceImpl implements StatisticsService {
             projectedIncome = 0.0;
         }
 
-        long rentedRooms = contractRepository.countContractsByOwnerAndStatus(ownerId, ContractStatus.ACTIVE);
-
         long totalRooms = roomRepository.countByOwnerId(ownerId);
         long availableRooms = roomRepository.countByOwnerIdAndStatus(ownerId, RoomStatus.AVAILABLE);
         long maintenanceRooms = roomRepository.countByOwnerIdAndStatus(ownerId, RoomStatus.MAINTENANCE);
-        
         long rentedRoomsFromStatus = roomRepository.countByOwnerIdAndStatus(ownerId, RoomStatus.RENTED);
 
-        return new OwnerStatisticsDTO(totalIncome, projectedIncome, rentedRoomsFromStatus, totalRooms, availableRooms, maintenanceRooms);
+        int currentMonth = LocalDate.now().getMonthValue();
+        int currentYear = LocalDate.now().getYear();
+
+        Double monthlyBilled = invoiceRepository.sumTotalAmountByOwnerAndMonthAndYear(ownerId, currentMonth, currentYear);
+        if (monthlyBilled == null) monthlyBilled = 0.0;
+
+        Double monthlyCollected = invoiceRepository.sumPaidRevenueByOwnerAndMonthAndYear(ownerId, currentMonth, currentYear);
+        if (monthlyCollected == null) monthlyCollected = 0.0;
+
+        Double totalDebt = invoiceRepository.sumRemainingDebtByOwner(ownerId);
+        if (totalDebt == null) totalDebt = 0.0;
+
+        long totalInvoices = invoiceRepository.countByOwnerId(ownerId);
+        long paidInvoices = invoiceRepository.countByOwnerIdAndStatus(ownerId, com.pms.propertymanagement.enums.InvoiceStatus.PAID);
+        long unpaidInvoices = invoiceRepository.countByOwnerIdAndStatus(ownerId, com.pms.propertymanagement.enums.InvoiceStatus.UNPAID)
+                + invoiceRepository.countByOwnerIdAndStatus(ownerId, com.pms.propertymanagement.enums.InvoiceStatus.PARTIALLY_PAID);
+        long overdueInvoices = invoiceRepository.countByOwnerIdAndStatus(ownerId, com.pms.propertymanagement.enums.InvoiceStatus.OVERDUE);
+
+        return OwnerStatisticsDTO.builder()
+                .totalIncome(totalIncome)
+                .projectedIncome(projectedIncome)
+                .rentedRooms(rentedRoomsFromStatus)
+                .totalRooms(totalRooms)
+                .availableRooms(availableRooms)
+                .maintenanceRooms(maintenanceRooms)
+                .totalDebt(totalDebt)
+                .monthlyBilledRevenue(monthlyBilled)
+                .monthlyCollectedRevenue(monthlyCollected)
+                .totalInvoices(totalInvoices)
+                .paidInvoices(paidInvoices)
+                .unpaidInvoices(unpaidInvoices)
+                .overdueInvoices(overdueInvoices)
+                .build();
     }
 
     @Override
@@ -148,9 +186,15 @@ public class StatisticsServiceImpl implements StatisticsService {
 
     @Override
     public AdminStatisticsDTO getAdminStatistics() {
+        List<TransactionType> revenueTypes = List.of(TransactionType.PURCHASE, TransactionType.EXTENSION);
+
         Double totalRevenue = postingOrderRepository.calculateTotalRevenueByStatus(PaymentStatus.PAID);
         if (totalRevenue == null) {
             totalRevenue = 0.0;
+        }
+        BigDecimal walletTotalRevenue = walletTransactionRepository.sumAmountByTypesAndStatus(revenueTypes, TransactionStatus.COMPLETED);
+        if (walletTotalRevenue != null) {
+            totalRevenue += walletTotalRevenue.doubleValue();
         }
 
         LocalDateTime startOfMonth = LocalDateTime.of(LocalDate.now().withDayOfMonth(1), LocalTime.MIN);
@@ -159,6 +203,11 @@ public class StatisticsServiceImpl implements StatisticsService {
         Double monthlyRevenue = postingOrderRepository.calculateTotalRevenueByStatusAndDateRange(PaymentStatus.PAID, startOfMonth, endOfMonth);
         if (monthlyRevenue == null) {
             monthlyRevenue = 0.0;
+        }
+        BigDecimal walletMonthlyRevenue = walletTransactionRepository.sumAmountByTypesAndStatusAndDateRange(
+                revenueTypes, TransactionStatus.COMPLETED, startOfMonth, endOfMonth);
+        if (walletMonthlyRevenue != null) {
+            monthlyRevenue += walletMonthlyRevenue.doubleValue();
         }
 
         // Hardcoded target for now, e.g., 50,000,000 VND
@@ -189,6 +238,12 @@ public class StatisticsServiceImpl implements StatisticsService {
             if (monthIncome == null) {
                 monthIncome = 0.0;
             }
+            BigDecimal walletMonthIncome = walletTransactionRepository.sumAmountByTypesAndStatusAndDateRange(
+                revenueTypes, TransactionStatus.COMPLETED, monthStart, monthEnd
+            );
+            if (walletMonthIncome != null) {
+                monthIncome += walletMonthIncome.doubleValue();
+            }
             
             String label = current.getMonthValue() + "/" + current.getYear();
             revenueChartData.add(new ChartDataDTO(label, monthIncome));
@@ -197,7 +252,9 @@ public class StatisticsServiceImpl implements StatisticsService {
         }
 
         long ownersPurchased = postingOrderRepository.countDistinctOwnersPurchasedPackagesByStatus(PaymentStatus.PAID);
-        long totalOwners = userRepository.countByRoles_Name("ROLE_OWNER");
+        long walletOwnersPurchased = walletTransactionRepository.countDistinctUsersByTypesAndStatus(revenueTypes, TransactionStatus.COMPLETED);
+        ownersPurchased = Math.max(ownersPurchased, walletOwnersPurchased);
+        long totalOwners = userRepository.countByRoles_Name("OWNER");
         
         long totalRooms = roomRepository.count();
         long rentedRooms = roomRepository.countByStatus(RoomStatus.RENTED);
@@ -215,6 +272,30 @@ public class StatisticsServiceImpl implements StatisticsService {
             ))
             .collect(Collectors.toList());
 
+        if (recentTransactions.size() < 5) {
+            List<WalletTransaction> recentWalletTxns = walletTransactionRepository.findRecentByTypesAndStatus(
+                    revenueTypes, TransactionStatus.COMPLETED, PageRequest.of(0, 5));
+            for (WalletTransaction wt : recentWalletTxns) {
+                String ownerName = (wt.getWallet() != null && wt.getWallet().getUser() != null)
+                        ? wt.getWallet().getUser().getFullName() : "Chủ trọ";
+                String pkgName = (wt.getDescription() != null && !wt.getDescription().isBlank())
+                        ? wt.getDescription() : wt.getType().getDisplayName();
+                double amount = wt.getAmount() != null ? wt.getAmount().doubleValue() : 0.0;
+                recentTransactions.add(new AdminActivityDTO(
+                        ownerName,
+                        pkgName,
+                        amount,
+                        wt.getCreatedAt(),
+                        "PAID"
+                ));
+            }
+            recentTransactions.sort(Comparator.comparing(
+                    AdminActivityDTO::getDate, Comparator.nullsLast(Comparator.reverseOrder())));
+            if (recentTransactions.size() > 5) {
+                recentTransactions = new ArrayList<>(recentTransactions.subList(0, 5));
+            }
+        }
+
         return new AdminStatisticsDTO(
             totalRevenue, 
             monthlyRevenue,
@@ -228,5 +309,10 @@ public class StatisticsServiceImpl implements StatisticsService {
             maintenanceRooms,
             recentTransactions
         );
+    }
+
+    @Override
+    public List<com.pms.propertymanagement.entity.Invoice> getTopDebtors(Long ownerId) {
+        return invoiceRepository.findTopDebtorsByOwner(ownerId, org.springframework.data.domain.PageRequest.of(0, 5));
     }
 }

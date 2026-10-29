@@ -1,0 +1,139 @@
+﻿<div class="container-fluid" th:fragment="content">
+<!-- Page Heading -->
+        <div class="d-sm-flex align-items-center justify-content-between mb-4">
+            <div>
+                <a th:href="@{/owner/meters}" class="btn btn-sm btn-outline-secondary mb-2">
+                    <i class="fas fa-arrow-left fa-sm mr-1"></i> Quay lại danh sách chỉ số
+                </a>
+                <h1 class="h3 mb-0 text-gray-800 font-weight-bold">
+                    <i class="fas fa-file-invoice text-primary mr-2"></i>Chi Tiết Chỉ Số Điện - Nước
+                </h1>
+                <p class="text-muted small mb-0 mt-1" th:text="${'Kỳ ghi nhận: Tháng ' + reading.month + '/' + reading.year}"></p>
+            </div>
+            <div>
+                <a th:href="@{'/owner/meters/' + ${reading.id} + '/edit'}" class="btn btn-warning shadow-sm">
+                    <i class="fas fa-edit fa-sm mr-1"></i> Chỉnh Sửa Chỉ Số
+                </a>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Cột trái: Chi tiết điện & nước -->
+            <div class="col-lg-8">
+                <!-- Thông tin phòng -->
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3 bg-white border-bottom-primary d-flex justify-content-between align-items-center">
+                        <h6 class="m-0 font-weight-bold text-primary">
+                            <i class="fas fa-door-open mr-2"></i>Thông Tin Phòng Trọ
+                        </h6>
+                        <span class="badge badge-success px-3 py-1 font-weight-bold" th:text="${'Kỳ: T' + reading.month + '/' + reading.year}">Kỳ thu</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col-md-7">
+                                <h4 class="font-weight-bold text-gray-900 mb-1" th:text="${reading.room.name}">Phòng 101</h4>
+                                <p class="text-muted mb-0">
+                                    <i class="fas fa-building mr-1"></i>
+                                    <span th:text="${'Nhà trọ: ' + reading.room.property.name}"></span>
+                                </p>
+                                <p class="text-muted small mb-0 mt-1">
+                                    <i class="fas fa-map-marker-alt mr-1 text-danger"></i>
+                                    <span th:text="${(reading.room.property.addressNumber ?: '') + ', ' + (reading.room.property.ward != null ? reading.room.property.ward.name : '')}"></span>
+                                </p>
+                            </div>
+                            <div class="col-md-5 text-md-right mt-3 mt-md-0 border-left">
+                                <span class="small text-muted text-uppercase font-weight-bold d-block">Tổng tạm tính điện nước</span>
+                                <span class="h4 font-weight-bold text-success" th:text="${#numbers.formatDecimal(reading.electricityUsage * reading.electricityPrice + reading.waterUsage * reading.waterPrice, 0, 'POINT', 0, 'COMMA') + ' đ'}">0 đ</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Điện & Nước Cards -->
+                <div class="row">
+                    <!-- Điện -->
+                    <div class="col-md-6 mb-4">
+                        <div class="card shadow h-100 border-left-warning">
+                            <div class="card-header py-3 bg-white d-flex justify-content-between align-items-center">
+                                <h6 class="m-0 font-weight-bold text-warning">
+                                    <i class="fas fa-bolt mr-2"></i>Điện Năng Tiêu Thụ
+                                </h6>
+                                <span class="badge badge-warning text-dark font-weight-bold" th:text="${#numbers.formatDecimal(reading.electricityUsage, 1, 1) + ' kWh'}">0 kWh</span>
+                            </div>
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between py-2 border-bottom">
+                                    <span class="text-muted small">Chỉ số cũ:</span>
+                                    <span class="font-weight-bold font-monospace" th:text="${#numbers.formatDecimal(reading.oldElectricityIndex, 1, 1) + ' kWh'}"></span>
+                                </div>
+                                <div class="d-flex justify-content-between py-2 border-bottom">
+                                    <span class="text-muted small">Chỉ số mới:</span>
+                                    <span class="font-weight-bold font-monospace text-warning" th:text="${#numbers.formatDecimal(reading.newElectricityIndex, 1, 1) + ' kWh'}"></span>
+                                </div>
+                                <div class="d-flex justify-content-between py-2 border-bottom">
+                                    <span class="text-muted small">Đơn giá điện:</span>
+                                    <span class="font-weight-bold" th:text="${#numbers.formatDecimal(reading.electricityPrice, 0, 'POINT', 0, 'COMMA') + ' đ/kWh'}"></span>
+                                </div>
+                                <div class="d-flex justify-content-between pt-3">
+                                    <span class="font-weight-bold text-gray-700">Thành tiền điện:</span>
+                                    <span class="h5 font-weight-bold text-warning mb-0" th:text="${#numbers.formatDecimal(reading.electricityUsage * reading.electricityPrice, 0, 'POINT', 0, 'COMMA') + ' đ'}"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Nước -->
+                    <div class="col-md-6 mb-4">
+                        <div class="card shadow h-100 border-left-info">
+                            <div class="card-header py-3 bg-white d-flex justify-content-between align-items-center">
+                                <h6 class="m-0 font-weight-bold text-info">
+                                    <i class="fas fa-tint mr-2"></i>Nước Năng Tiêu Thụ
+                                </h6>
+                                <span class="badge badge-info font-weight-bold" th:text="${#numbers.formatDecimal(reading.waterUsage, 1, 1) + ' m³'}">0 m³</span>
+                            </div>
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between py-2 border-bottom">
+                                    <span class="text-muted small">Chỉ số cũ:</span>
+                                    <span class="font-weight-bold font-monospace" th:text="${#numbers.formatDecimal(reading.oldWaterIndex, 1, 1) + ' m³'}"></span>
+                                </div>
+                                <div class="d-flex justify-content-between py-2 border-bottom">
+                                    <span class="text-muted small">Chỉ số mới:</span>
+                                    <span class="font-weight-bold font-monospace text-info" th:text="${#numbers.formatDecimal(reading.newWaterIndex, 1, 1) + ' m³'}"></span>
+                                </div>
+                                <div class="d-flex justify-content-between py-2 border-bottom">
+                                    <span class="text-muted small">Đơn giá nước:</span>
+                                    <span class="font-weight-bold" th:text="${#numbers.formatDecimal(reading.waterPrice, 0, 'POINT', 0, 'COMMA') + ' đ/m³'}"></span>
+                                </div>
+                                <div class="d-flex justify-content-between pt-3">
+                                    <span class="font-weight-bold text-gray-700">Thành tiền nước:</span>
+                                    <span class="h5 font-weight-bold text-info mb-0" th:text="${#numbers.formatDecimal(reading.waterUsage * reading.waterPrice, 0, 'POINT', 0, 'COMMA') + ' đ'}"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cột phải: Hướng dẫn & Liên kết hóa đơn -->
+            <div class="col-lg-4">
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3 bg-white border-bottom-success">
+                        <h6 class="m-0 font-weight-bold text-success">
+                            <i class="fas fa-lightbulb mr-2"></i>Hành Động Tiếp Theo
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <p class="small text-muted">
+                            Chỉ số đã được ghi nhận vào hệ thống. Bạn có thể sử dụng dữ liệu này để lập hóa đơn tiền phòng hàng tháng.
+                        </p>
+                        <a th:href="@{/owner/invoices/create(roomId=${reading.room.id}, month=${reading.month}, year=${reading.year})}" class="btn btn-success btn-block mb-2 font-weight-bold shadow-sm">
+                            <i class="fas fa-file-invoice-dollar mr-1"></i> Tạo Hóa Đơn Cho Phòng Này
+                        </a>
+                        <a th:href="@{/owner/meters}" class="btn btn-outline-secondary btn-block">
+                            <i class="fas fa-list mr-1"></i> Danh Sách Chỉ Số
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+</div>
+

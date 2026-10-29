@@ -4,6 +4,7 @@ import com.pms.propertymanagement.entity.*;
 import com.pms.propertymanagement.enums.*;
 import com.pms.propertymanagement.repository.*;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -14,6 +15,7 @@ import java.util.*;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class LargeScaleDataInitializer {
 
     private final UserRepository userRepository;
@@ -30,7 +32,7 @@ public class LargeScaleDataInitializer {
 
     @Transactional
     public void init() {
-        System.out.println("Starting Large Scale Data Initialization...");
+        log.info("Starting Large Scale Data Initialization...");
         
         // 1. Ensure we have owners to work with
         List<User> owners = userRepository.findByRoles_Name("OWNER");
@@ -54,7 +56,7 @@ public class LargeScaleDataInitializer {
         // 4. Generate Historical Revenue for Admin (Posting Orders)
         generateHistoricalPostingOrders(owners);
         
-        System.out.println("Large Scale Data Initialization Completed.");
+        log.info("Large Scale Data Initialization Completed.");
     }
 
     private void generateHistoricalPayments(User owner) {
@@ -98,7 +100,7 @@ public class LargeScaleDataInitializer {
             }
         }
         paymentRepository.saveAll(payments);
-        System.out.println("Generated " + payments.size() + " historical payments for owner1.");
+        log.info("Generated {} historical payments for owner1.", payments.size());
     }
 
     private void generateHistoricalPostingOrders(List<User> owners) {
@@ -145,7 +147,7 @@ public class LargeScaleDataInitializer {
             }
         }
         postingOrderRepository.saveAll(orders);
-        System.out.println("Generated " + orders.size() + " historical posting orders.");
+        log.info("Generated {} historical posting orders.", orders.size());
     }
 
     private void generatePropertiesForOwner(User owner) {
@@ -182,6 +184,22 @@ public class LargeScaleDataInitializer {
                 Collections.shuffle(amenities);
                 p.setAmenities(new HashSet<>(amenities.subList(0, Math.min(amenities.size(), 2 + random.nextInt(3)))));
             }
+
+            String[] sampleImages = {
+                "/images/rooms/room-1.jpg", "/images/rooms/room-2.jpg", "/images/rooms/room-3.jpg", "/images/rooms/room-4.jpg",
+                "/images/rooms/room-5.jpg", "/images/rooms/room-6.jpg", "/images/rooms/room-7.jpg", "/images/rooms/room-8.jpg",
+                "/images/rooms/room-9.jpg", "/images/rooms/room-10.jpg", "/images/rooms/room-11.jpg", "/images/rooms/room-12.jpg"
+            };
+            List<PropertyImage> propImages = new ArrayList<>();
+            int baseIdx = random.nextInt(sampleImages.length);
+            for (int imgIdx = 0; imgIdx < 4; imgIdx++) {
+                PropertyImage img = new PropertyImage();
+                img.setImageUrl(sampleImages[(baseIdx + imgIdx) % sampleImages.length]);
+                img.setIsPrimary(imgIdx == 0);
+                img.setProperty(p);
+                propImages.add(img);
+            }
+            p.setImages(propImages);
             
             properties.add(p);
         }
@@ -224,7 +242,7 @@ public class LargeScaleDataInitializer {
         }
         contractRepository.saveAll(contracts);
         
-        System.out.println("Generated properties and rooms for " + owner.getUsername());
+        log.info("Generated properties and rooms for {}", owner.getUsername());
     }
 
     private Contract createContractEntityForRoom(Room room, User owner) {

@@ -33,3 +33,5 @@ build/
 .vscode/
 .env
 deploy/ec2/app.env
+*.log
+

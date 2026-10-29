@@ -1,0 +1,109 @@
+<div th:fragment="content" class="container-fluid">
+
+    <!-- Page Heading -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <div>
+            <h1 class="h3 mb-1 text-gray-800 font-weight-bold">
+                Chi Tiết Tin Đăng: <span class="text-primary" th:text="${post.title}">Tiêu đề bài đăng</span>
+            </h1>
+            <p class="text-muted small mb-0">Xem xét nội dung bài viết, hình ảnh kiểm duyệt và trạng thái vận hành.</p>
+        </div>
+        <div>
+            <a th:href="@{'/admin/posts/' + ${post.id} + '/edit'}" class="btn btn-info btn-sm shadow-sm mr-2 font-weight-bold">
+                <i class="fas fa-edit mr-1"></i> Chỉnh Sửa
+            </a>
+            <a th:href="@{/admin/posts}" class="btn btn-secondary btn-sm shadow-sm font-weight-bold">
+                <i class="fas fa-arrow-left mr-1"></i> Quay Lại
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Nội dung tin đăng -->
+        <div class="col-lg-8 mb-4">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 bg-white border-bottom-primary d-flex align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-file-alt mr-1"></i> Nội Dung Bài Viết
+                    </h6>
+                    <span class="badge" 
+                          th:classappend="${post.status != null and post.status.name() == 'ACTIVE' ? 'badge-success' : 'badge-warning'}"
+                          th:text="${post.status}">ACTIVE</span>
+                </div>
+                <div class="card-body">
+                    <h4 class="font-weight-bold text-dark mb-3" th:text="${post.title}">Tiêu đề bài đăng</h4>
+                    
+                    <div class="mb-3 text-muted small">
+                        <span class="mr-3"><i class="fas fa-link mr-1"></i> Slug: <code th:text="${post.slug}">slug</code></span>
+                        <span class="mr-3"><i class="fas fa-eye mr-1"></i> <strong th:text="${post.viewCount}">0</strong> lượt xem</span>
+                        <span th:if="${post.createdAt != null}"><i class="far fa-calendar-alt mr-1"></i> <span th:text="${#temporals.format(post.createdAt, 'dd/MM/yyyy HH:mm')}">Ngày đăng</span></span>
+                    </div>
+
+                    <div class="p-3 bg-light rounded border text-gray-800 mb-4" style="line-height: 1.7;">
+                        <h6 class="font-weight-bold text-primary mb-2">Mô tả bài đăng:</h6>
+                        <div th:text="${post.description != null ? post.description : '(Chưa có nội dung mô tả chi tiết)'}" style="white-space: pre-line;">
+                            Nội dung chi tiết bài viết...
+                        </div>
+                    </div>
+
+                    <!-- Hành động phê duyệt -->
+                    <div class="d-flex justify-content-between align-items-center border-top pt-3">
+                        <span class="small text-muted font-weight-bold">Thao tác kiểm duyệt nhanh:</span>
+                        <div>
+                            <form th:if="${post.status != null and post.status.name() != 'ACTIVE'}" 
+                                  th:action="@{'/admin/posts/' + ${post.id} + '/approve'}" method="post" class="d-inline mr-2">
+                                <button type="submit" class="btn btn-success font-weight-bold">
+                                    <i class="fas fa-check-circle mr-1"></i> Phê Duyệt Ngay
+                                </button>
+                            </form>
+                            <form th:if="${post.status != null and post.status.name() == 'ACTIVE'}" 
+                                  th:action="@{'/admin/posts/' + ${post.id} + '/reject'}" method="post" class="d-inline">
+                                <button type="submit" class="btn btn-warning font-weight-bold">
+                                    <i class="fas fa-ban mr-1"></i> Hạ Bài Đăng Này
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Thông tin cơ sở liên kết -->
+        <div class="col-lg-4 mb-4">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 bg-white border-bottom-info">
+                    <h6 class="m-0 font-weight-bold text-info">
+                        <i class="fas fa-hotel mr-1"></i> Cơ Sở Trọ Liên Kết
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div th:if="${post.property != null}">
+                        <h5 class="font-weight-bold text-dark mb-1" th:text="${post.property.name}">Tên nhà trọ</h5>
+                        <p class="small text-muted mb-3" th:text="${post.property.originalAddress != null ? post.property.originalAddress : post.property.addressNumber}">Địa chỉ</p>
+                        
+                        <div class="mb-2">
+                            <span class="text-muted small">Chủ trọ:</span><br>
+                            <strong class="text-dark" th:text="${post.property.owner != null ? post.property.owner.fullName : 'N/A'}">Tên chủ trọ</strong>
+                        </div>
+                        <div class="mb-2">
+                            <span class="text-muted small">Giá chào thuê:</span><br>
+                            <strong class="text-success" th:text="${#numbers.formatDecimal(post.property.price, 0, 'COMMA', 0, 'POINT')} + ' đ/tháng'">3,000,000 đ</strong>
+                        </div>
+                        <div class="mb-2">
+                            <span class="text-muted small">Quy mô:</span><br>
+                            <span class="badge badge-info" th:text="${post.property.numberOfRooms} + ' phòng'">10 phòng</span>
+                        </div>
+                        <hr>
+                        <a th:href="@{'/admin/properties/' + ${post.property.id}}" class="btn btn-outline-info btn-block btn-sm">
+                            <i class="fas fa-external-link-alt mr-1"></i> Xem Hồ Sơ Cơ Sở Này
+                        </a>
+                    </div>
+                    <div th:unless="${post.property != null}" class="text-muted small">
+                        Chưa gắn cơ sở trọ liên kết.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>

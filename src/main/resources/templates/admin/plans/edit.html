@@ -1,0 +1,127 @@
+<div th:fragment="content" class="container-fluid">
+
+    <!-- Page Heading -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <div>
+            <h1 class="h3 mb-1 text-gray-800 font-weight-bold">
+                Chỉnh Sửa Gói Dịch Vụ: <span class="text-primary" th:text="${plan.name}">Tên gói</span>
+            </h1>
+            <p class="text-muted small mb-0">Cập nhật bảng giá, hạn mức tài nguyên hoặc trạng thái mở bán của gói.</p>
+        </div>
+        <a th:href="@{/admin/plans}" class="btn btn-secondary btn-icon-split shadow-sm">
+            <span class="icon text-white-50">
+                <i class="fas fa-arrow-left"></i>
+            </span>
+            <span class="text font-weight-bold">Quay Lại Danh Sách</span>
+        </a>
+    </div>
+
+    <!-- Form Card -->
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 bg-white border-bottom-primary d-flex align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-edit mr-1"></i> Thông Tin Gói Dịch Vụ
+                    </h6>
+                    <span class="badge badge-dark">Code: <span th:text="${plan.code}">PRO</span></span>
+                </div>
+                <div class="card-body p-4">
+                    <form th:action="@{'/admin/plans/' + ${plan.id} + '/edit'}" method="post">
+                        
+                        <div class="form-row">
+                            <div class="form-group col-md-6">
+                                <label class="font-weight-bold text-gray-700">Mã định danh gói (Code)</label>
+                                <input type="text" class="form-control bg-light" th:value="${plan.code}" readonly>
+                            </div>
+
+                            <div class="form-group col-md-6">
+                                <label for="name" class="font-weight-bold text-gray-700">
+                                    Tên gói dịch vụ <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" class="form-control" id="name" name="name" required 
+                                       th:value="${plan.name}">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="description" class="font-weight-bold text-gray-700">Mô tả tóm tắt tính năng</label>
+                            <textarea class="form-control" id="description" name="description" rows="2" 
+                                      th:text="${plan.description}"></textarea>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group col-md-6">
+                                <label for="monthlyPrice" class="font-weight-bold text-gray-700">
+                                    Giá niêm yết (VNĐ/tháng) <span class="text-danger">*</span>
+                                </label>
+                                <input type="number" class="form-control" id="monthlyPrice" name="monthlyPrice" required min="0" 
+                                       th:value="${plan.monthlyPrice}">
+                            </div>
+
+                            <div class="form-group col-md-6">
+                                <label for="postDurationDays" class="font-weight-bold text-gray-700">
+                                    Thời hạn hiển thị tin (Ngày) <span class="text-danger">*</span>
+                                </label>
+                                <input type="number" class="form-control" id="postDurationDays" name="postDurationDays" required min="1" 
+                                       th:value="${plan.postDurationDays}">
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group col-md-4">
+                                <label for="maxProperties" class="font-weight-bold text-gray-700">
+                                    Số cơ sở trọ tối đa <span class="text-danger">*</span>
+                                </label>
+                                <input type="number" class="form-control" id="maxProperties" name="maxProperties" required 
+                                       th:value="${plan.maxProperties}">
+                                <small class="form-text text-muted">-1 là không giới hạn.</small>
+                            </div>
+
+                            <div class="form-group col-md-4">
+                                <label for="maxRoomsPerProperty" class="font-weight-bold text-gray-700">
+                                    Số phòng / cơ sở <span class="text-danger">*</span>
+                                </label>
+                                <input type="number" class="form-control" id="maxRoomsPerProperty" name="maxRoomsPerProperty" required 
+                                       th:value="${plan.maxRoomsPerProperty}">
+                                <small class="form-text text-muted">-1 là không giới hạn.</small>
+                            </div>
+
+                            <div class="form-group col-md-4">
+                                <label for="maxPosts" class="font-weight-bold text-gray-700">
+                                    Số bài đăng cùng lúc <span class="text-danger">*</span>
+                                </label>
+                                <input type="number" class="form-control" id="maxPosts" name="maxPosts" required 
+                                       th:value="${plan.maxPosts}">
+                                <small class="form-text text-muted">-1 là không giới hạn.</small>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <div class="custom-control custom-switch mt-3">
+                                <input type="checkbox" class="custom-control-input" id="active" name="active" value="true"
+                                       th:checked="${plan.active}">
+                                <label class="custom-control-label font-weight-bold text-gray-800" for="active">
+                                    Mở bán gói dịch vụ này trên hệ thống
+                                </label>
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <div class="d-flex justify-content-end">
+                            <a th:href="@{/admin/plans}" class="btn btn-secondary mr-2">
+                                <i class="fas fa-times mr-1"></i> Hủy Bỏ
+                            </a>
+                            <button type="submit" class="btn btn-primary font-weight-bold">
+                                <i class="fas fa-save mr-1"></i> Cập Nhật Gói
+                            </button>
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>

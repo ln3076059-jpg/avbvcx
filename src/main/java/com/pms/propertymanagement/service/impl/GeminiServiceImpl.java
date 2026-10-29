@@ -29,14 +29,7 @@ import java.util.regex.Pattern;
 
 /**
  * Calls Google Gemini 1.5 Flash API to extract search params (Phase 1)
- * and detect user actions (Phase 2).
- *
- * API endpoint: POST {gemini.api.url}?key={gemini.api.key}
- * generationConfig.responseMimeType = "application/json" forces pure-JSON output,
- * eliminating the need to strip markdown code fences.
- *
- * Throws RuntimeException on API failure — caller (ChatController) should catch
- * and return a user-friendly error message.
+ * and detect user actions (Phase 2), with a deterministic local rule-based fallback.
  */
 @Service
 @Slf4j
@@ -61,7 +54,6 @@ public class GeminiServiceImpl implements GeminiService {
 
     public GeminiServiceImpl(GeminiProperties props) {
         this.props = props;
-        // Apply connect + read timeouts from application.properties
         HttpClient httpClient = HttpClient.newBuilder()
                 .connectTimeout(Duration.ofMillis(props.getTimeout().getConnect()))
                 .build();
@@ -121,10 +113,6 @@ public class GeminiServiceImpl implements GeminiService {
     // Gemini API call
     // =========================================================================
 
-    /**
-     * Sends a single-turn prompt to Gemini and returns the raw text response.
-     * responseMimeType="application/json" ensures clean JSON output with no markdown.
-     */
     private String callGemini(String prompt) {
         if (props.getApi().getKey() == null || props.getApi().getKey().isBlank()) {
             throw new RuntimeException("Gemini API key is missing");
@@ -169,7 +157,6 @@ public class GeminiServiceImpl implements GeminiService {
                     .path("parts").get(0)
                     .path("text").asText();
 
-            // Safety strip — responseMimeType should prevent this, but just in case
             text = text.trim();
             if (text.startsWith("```")) {
                 text = text.replaceAll("(?s)^```[a-z]*\\n?", "").replaceAll("\\n?```$", "").trim();
@@ -190,7 +177,7 @@ public class GeminiServiceImpl implements GeminiService {
                                       String surroundingsJson, String targetTenantsJson,
                                       String provincesJson) {
         return """
-                Bạn là trợ lý tìm phòng trọ tại Việt Nam.
+                Bạn là chuyên viên tư vấn tìm phòng trọ tại Việt Nam.
                 
                 === DỮ LIỆU HỆ THỐNG ===
                 LOẠI BĐS:   %s
@@ -258,7 +245,7 @@ public class GeminiServiceImpl implements GeminiService {
         String amenityListJson = toIdNameJson(allAmenities, Amenity::getId, Amenity::getName);
 
         return """
-                Bạn là trợ lý tìm phòng trọ.
+                Bạn là chuyên viên tư vấn tìm phòng trọ.
                 
                 === THÔNG TIN TÌM KIẾM HIỆN TẠI ===
                 Ngân sách: %s | Tỉnh/Thành: %s | Khu vực: %s | Tiện ích: %s
@@ -383,7 +370,7 @@ public class GeminiServiceImpl implements GeminiService {
 
         if (containsAny(normalizedMessage, EXIT_KEYWORDS)) {
             result.setAction("exit");
-            result.setReply("Cảm ơn bạn đã sử dụng trợ lý tìm phòng. Khi nào cần tìm thêm, cứ nhắn mình nhé!");
+            result.setReply("Cảm ơn bạn đã sử dụng dịch vụ tư vấn tìm phòng. Khi nào cần tìm thêm, cứ nhắn mình nhé!");
             return result;
         }
 
@@ -395,9 +382,13 @@ public class GeminiServiceImpl implements GeminiService {
             return result;
         }
 
-        if (containsAny(normalizedMessage, NEW_SEARCH_KEYWORDS)) {
+        if (containsAny(normalizedMessage, NEW_SEARCH_KEYWORDS)
+                || containsAny(normalizedMessage, List.of(
+                        "ha noi", "hn", "ho chi minh", "hcm", "sai gon", "da nang", "dn", "binh duong",
+                        "cau giay", "dong da", "thanh xuan", "binh thanh", "go vap", "thu duc", "quan 1", "quan 7"
+                ))) {
             result.setAction("new_search");
-            result.setReply("Mình chuyển sang lượt tìm kiếm mới cho bạn nhé.");
+            result.setReply("Mình chuyển sang tìm phòng theo khu vực mới cho bạn nhé.");
             return result;
         }
 
@@ -411,7 +402,7 @@ public class GeminiServiceImpl implements GeminiService {
 
         result.setAction("question");
         result.setReply(
-                "Mình đang bám theo danh sách hiện tại. Nếu bạn muốn lọc lại theo ngân sách, tiện nghi hoặc chọn số phòng trong danh sách thì cứ nói mình nhé."
+                "Mình đang hiển thị danh sách phòng phù hợp. Nếu bạn muốn đổi khu vực (ví dụ: Hà Nội, Hồ Chí Minh), điều chỉnh ngân sách hoặc chọn số thứ tự phòng thì cứ nhắn mình nhé!"
         );
         return result;
     }
@@ -456,20 +447,40 @@ public class GeminiServiceImpl implements GeminiService {
     }
 
     private Double parseBudget(String message) {
-        String normalizedMessage = normalizeText(message).replace("mot", "1");
+        if (message == null || message.isBlank()) {
+            return null;
+        }
+        String rawLower = Normalizer.normalize(message, Normalizer.Form.NFD)
+                .replaceAll("\\p{M}+", "")
+                .replace('đ', 'd')
+                .replace('Đ', 'd')
+                .toLowerCase(Locale.ROOT)
+                .replace('–', '-')
+                .replace('—', '-')
+                .replace("mot", "1");
 
-        Matcher rangeMatcher = RANGE_BUDGET_PATTERN.matcher(normalizedMessage);
+        if (rawLower.contains("tren 5") || rawLower.contains("tren 6") || rawLower.contains("tren 7") || rawLower.contains("cao cap")) {
+            return 35_000_000.0;
+        }
+
+        Matcher rangeMatcher = RANGE_BUDGET_PATTERN.matcher(rawLower);
         if (rangeMatcher.find()) {
             double upper = parseNumber(rangeMatcher.group(2));
             String unit = rangeMatcher.group(3);
-            return toCurrency(upper, unit);
+            Double val = toCurrency(upper, unit != null ? unit : "trieu");
+            if (val != null) return val;
         }
 
-        Matcher singleMatcher = SINGLE_BUDGET_PATTERN.matcher(normalizedMessage);
+        Matcher singleMatcher = SINGLE_BUDGET_PATTERN.matcher(rawLower);
         if (singleMatcher.find()) {
             double amount = parseNumber(singleMatcher.group(1));
             String unit = singleMatcher.group(2);
-            return toCurrency(amount, unit);
+            Double val = toCurrency(amount, unit);
+            if (val != null) return val;
+        }
+
+        if (rawLower.contains("gia re") || rawLower.contains("o ghep") || rawLower.contains("sinh vien")) {
+            return 2_500_000.0;
         }
 
         return null;
@@ -504,8 +515,8 @@ public class GeminiServiceImpl implements GeminiService {
         if (normalizedMessage.contains("can ho")) {
             return findCategoryIdByKeyword(categories, List.of("can ho"));
         }
-        if (normalizedMessage.contains("ktx") || normalizedMessage.contains("ky tuc xa")) {
-            return findCategoryIdByKeyword(categories, List.of("ktx", "ky tuc xa"));
+        if (normalizedMessage.contains("ktx") || normalizedMessage.contains("ky tuc xa") || normalizedMessage.contains("o ghep")) {
+            return findCategoryIdByKeyword(categories, List.of("ktx", "ky tuc xa", "o ghep"));
         }
         if (normalizedMessage.contains("nha tro") || normalizedMessage.contains("phong tro")) {
             return findCategoryIdByKeyword(categories, List.of("nha tro", "phong tro"));
@@ -540,13 +551,25 @@ public class GeminiServiceImpl implements GeminiService {
             }
 
             if (normalizedProvinceName.contains("ho chi minh")
-                    && (normalizedMessage.contains("hcm") || normalizedMessage.contains("sai gon"))) {
+                    && containsAny(normalizedMessage, List.of(
+                            "hcm", "sai gon", "tphcm", "binh thanh", "go vap", "tan binh",
+                            "phu nhuan", "thu duc", "quan 1", "quan 3", "quan 7", "quan 10"
+                    ))) {
                 return province.getCode();
             }
-            if (normalizedProvinceName.contains("ha noi") && normalizedMessage.contains("hn")) {
+            if (normalizedProvinceName.contains("ha noi")
+                    && containsAny(normalizedMessage, List.of(
+                            "hn", "cau giay", "dong da", "thanh xuan", "ba dinh", "hoan kiem",
+                            "hai ba trung", "hoang mai", "tu liem", "ha dong", "tay ho", "long bien", "gia lam"
+                    ))) {
                 return province.getCode();
             }
-            if (normalizedProvinceName.contains("da nang") && normalizedMessage.contains("dn")) {
+            if (normalizedProvinceName.contains("da nang")
+                    && containsAny(normalizedMessage, List.of("dn", "hai chau", "son tra", "ngu hanh son", "lien chieu"))) {
+                return province.getCode();
+            }
+            if (normalizedProvinceName.contains("binh duong")
+                    && containsAny(normalizedMessage, List.of("di an", "thuan an", "thu dau mot"))) {
                 return province.getCode();
             }
         }
@@ -620,7 +643,7 @@ public class GeminiServiceImpl implements GeminiService {
     private boolean looksLikeSearchRequest(String normalizedMessage) {
         return containsAny(
                 normalizedMessage,
-                List.of("tim", "thue", "phong", "tro", "can ho", "ktx", "nha tro", "nha nguyen can")
+                List.of("tim", "thue", "phong", "tro", "can ho", "ktx", "nha tro", "nha nguyen can", "o ghep", "gia re")
         );
     }
 
@@ -648,10 +671,6 @@ public class GeminiServiceImpl implements GeminiService {
     // Serialization helpers
     // =========================================================================
 
-    /**
-     * Serializes a list to JSON with only "id" and "name" keys.
-     * Used for amenities, categories, surroundings, targetTenants in Phase 1 prompt.
-     */
     private <T> String toIdNameJson(List<T> items,
                                      Function<T, Long> idFn,
                                      Function<T, String> nameFn) {
@@ -666,9 +685,6 @@ public class GeminiServiceImpl implements GeminiService {
         return writeJson(list);
     }
 
-    /**
-     * Serializes provinces to JSON with "code" and "name" keys (not "id").
-     */
     private String toCodeNameJson(List<Province> provinces) {
         List<Map<String, Object>> list = provinces.stream()
                 .map(p -> {
@@ -681,10 +697,6 @@ public class GeminiServiceImpl implements GeminiService {
         return writeJson(list);
     }
 
-    /**
-     * Serializes only the display-relevant fields of cachedResults for Phase 2 prompt.
-     * Excludes scoring fields (lat/lng/boosted/etc.) to reduce token usage.
-     */
     private String buildCachedResultsJson(List<PropertySummaryForChat> results) {
         List<Map<String, Object>> list = results.stream()
                 .map(r -> {

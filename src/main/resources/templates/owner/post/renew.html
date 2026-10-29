@@ -1,159 +1,106 @@
-<div th:fragment="content" class="space-y-6">
-  <div class="max-w-3xl">
-    <!-- Header -->
-    <div class="mb-8">
-      <a
-        href="/owner/posts"
-        class="text-blue-600 hover:text-blue-800 mb-4 inline-block"
-      >
-        <i class="fas fa-arrow-left"></i> Quay lại danh sách
-      </a>
-      <h1 class="text-3xl font-bold text-gray-900 mb-2">Gia hạn Bài Đăng</h1>
-      <p class="text-gray-600">Mua thêm thời gian hiển thị cho bài đăng</p>
-    </div>
-
-    <!-- Current Post Info -->
-    <div class="bg-white rounded-lg shadow p-6 mb-6">
-      <h2 class="text-xl font-semibold text-gray-900 mb-4">
-        Thông tin bài đăng
-      </h2>
-
-      <div class="space-y-3">
-        <div class="flex justify-between">
-          <span class="text-gray-600">Tiêu đề:</span>
-          <span class="font-medium text-gray-900" th:text="${analytics.title}"
-            >Post Title</span
-          >
-        </div>
-
-        <div class="flex justify-between">
-          <span class="text-gray-600">Trạng thái:</span>
-          <span
-            th:class="${analytics.statusColorClass} + ' px-3 py-1 rounded-full text-sm font-medium'"
-            th:text="${analytics.statusLabel}"
-            >Status</span
-          >
-        </div>
-
-        <div class="flex justify-between">
-          <span class="text-gray-600">Lượt xem:</span>
-          <span
-            class="font-medium text-gray-900"
-            th:text="${analytics.viewCount}"
-            >0</span
-          >
-        </div>
-
-        <div
-          class="flex justify-between"
-          th:if="${analytics.daysRemaining > 0}"
-        >
-          <span class="text-gray-600">Thời gian còn lại:</span>
-          <span
-            class="font-medium text-orange-600"
-            th:text="${analytics.daysRemaining} + ' ngày'"
-            >X ngày</span
-          >
-        </div>
-
-        <div
-          class="flex justify-between"
-          th:if="${analytics.daysRemaining <= 0}"
-        >
-          <span class="text-gray-600">Thời gian còn lại:</span>
-          <span class="font-medium text-red-600">Đã hết hạn</span>
-        </div>
-
-        <div class="flex justify-between">
-          <span class="text-gray-600">Hết hạn vào:</span>
-          <span class="text-gray-900" th:text="${analytics.formattedExpiry}"
-            >Date</span
-          >
-        </div>
-      </div>
-    </div>
-
-    <!-- Renew Form -->
-    <div class="bg-white rounded-lg shadow p-6 mb-6">
-      <h2 class="text-xl font-semibold text-gray-900 mb-4">Chọn gói gia hạn</h2>
-
-      <form
-        th:action="@{/owner/posts/{id}/renew(id=${analytics.postId})}"
-        method="post"
-      >
-        <!-- Duration Selection from DB -->
-        <div class="space-y-3 mb-6">
-          <label
-            th:each="pkg, iterStat : ${postPackages}"
-            th:class="${iterStat.index == 1 ? 'flex items-center p-4 border-2 border-blue-400 rounded-lg cursor-pointer bg-blue-50' : 'flex items-center p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-blue-400 transition-colors'}"
-          >
-            <input
-              type="radio"
-              name="postPackageId"
-              th:value="${pkg.id}"
-              th:checked="${iterStat.index == 1}"
-              class="h-4 w-4 text-blue-600"
-              required
-            />
-            <div class="ml-4 flex-1">
-              <p class="font-medium text-gray-900" th:text="${pkg.name}">
-                Gói 30 ngày
-              </p>
-              <p class="text-sm text-gray-600" th:text="${pkg.description}">
-                Phù hợp cho nhu cầu ngắn hạn
-              </p>
+<div class="container-fluid" th:fragment="content">
+<!-- Page Heading -->
+        <div class="d-sm-flex align-items-center justify-content-between mb-4">
+            <div>
+                <a th:href="@{/owner/posts}" class="btn btn-sm btn-outline-secondary mb-2">
+                    <i class="fas fa-arrow-left fa-sm mr-1"></i> Quay lại danh sách bài đăng
+                </a>
+                <h1 class="h3 mb-0 text-gray-800 font-weight-bold">
+                    <i class="fas fa-clock text-info mr-2"></i>Gia Hạn Bài Đăng Marketplace
+                </h1>
+                <p class="text-muted small mb-0 mt-1">Gia hạn thời gian hiển thị ưu tiên trên sàn cho bài đăng của bạn.</p>
             </div>
-            <span
-              class="text-lg font-bold text-blue-600"
-              th:text="${pkg.displayPrice}"
-              >240,000 ₫</span
-            >
-          </label>
+            <div class="d-flex align-items-center mt-3 mt-sm-0" style="gap: 8px;">
+                <div class="card py-2 px-3 bg-white d-flex flex-row align-items-center mb-0">
+                    <i class="fas fa-wallet text-success mr-2"></i>
+                    <span class="small text-muted mr-1">Số Dư Ví Hiện Tại:</span>
+                    <strong class="font-mono text-dark mr-3"
+                            th:text="${walletBalance != null ? #numbers.formatDecimal(walletBalance, 0, 'COMMA', 0, 'POINT') + ' đ' : (session.userWallet != null ? #numbers.formatDecimal(session.userWallet.balance, 0, 'COMMA', 0, 'POINT') + ' đ' : '0 đ')}">0 đ</strong>
+                    <a th:href="@{/owner/wallet/topup}" class="btn btn-xs btn-success font-weight-bold py-1 px-2">
+                        <i class="fas fa-plus-circle mr-1"></i>Nạp thêm
+                    </a>
+                </div>
+            </div>
         </div>
 
-        <!-- Note Section -->
-        <div class="p-4 bg-yellow-50 rounded-lg mb-6">
-          <p class="text-sm text-yellow-800">
-            <i class="fas fa-info-circle"></i>
-            <strong>Lưu ý:</strong> Thời gian gia hạn sẽ được cộng vào thời gian
-            hiển thị hiện tại. Nếu bài đăng đã hết hạn, thời gian sẽ tính từ hôm
-            nay. Số tiền sẽ được trừ từ ví của bạn.
-          </p>
-        </div>
+        <div class="row justify-content-center">
+            <!-- Thông tin bài đăng hiện tại -->
+            <div class="col-lg-5 mb-4">
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3 bg-white border-bottom-primary">
+                        <h6 class="m-0 font-weight-bold text-primary">
+                            <i class="fas fa-info-circle mr-2"></i>Thông Tin Bài Đăng Hiện Tại
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <span class="text-muted small d-block">Tiêu đề:</span>
+                            <span class="font-weight-bold text-gray-900" th:text="${analytics.title}">Tiêu đề bài đăng</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center py-2 border-top">
+                            <span class="text-muted small">Trạng thái:</span>
+                            <span th:class="${analytics.statusColorClass} + ' badge px-3 py-1 font-weight-bold'" th:text="${analytics.statusLabel}">Status</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center py-2 border-top">
+                            <span class="text-muted small">Lượt xem:</span>
+                            <span class="font-weight-bold text-primary" th:text="${analytics.viewCount}">0</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center py-2 border-top" th:if="${analytics.daysRemaining > 0}">
+                            <span class="text-muted small">Thời hạn còn lại:</span>
+                            <span class="badge badge-success px-2 py-1 font-weight-bold" th:text="${analytics.daysRemaining} + ' ngày'">X ngày</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center py-2 border-top" th:if="${analytics.daysRemaining <= 0}">
+                            <span class="text-muted small">Thời hạn:</span>
+                            <span class="badge badge-danger px-2 py-1 font-weight-bold">Đã hết hạn</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center py-2 border-top">
+                            <span class="text-muted small">Ngày kết thúc hiện tại:</span>
+                            <span class="font-weight-bold text-gray-700" th:text="${analytics.formattedExpiry}">Date</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-        <!-- Action Buttons -->
-        <div class="flex space-x-4">
-          <button
-            type="submit"
-            class="flex-1 bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-6 rounded-lg transition-colors"
-          >
-            <i class="fas fa-check"></i> Xác nhận gia hạn
-          </button>
-          <a
-            href="/owner/posts"
-            class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium py-3 px-6 rounded-lg text-center transition-colors"
-          >
-            <i class="fas fa-times"></i> Hủy
-          </a>
-        </div>
-      </form>
-    </div>
+            <!-- Form chọn gói gia hạn -->
+            <div class="col-lg-7 mb-4">
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3 bg-white border-bottom-success">
+                        <h6 class="m-0 font-weight-bold text-success">
+                            <i class="fas fa-layer-group mr-2"></i>Chọn Gói Gia Hạn
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <form th:action="@{/owner/posts/{id}/renew(id=${analytics.postId})}" method="post">
+                            <div class="form-group mb-4">
+                                <div th:each="pkg, iterStat : ${postPackages}" class="custom-control custom-radio p-3 mb-2 rounded border" style="background-color: #fafbfc;">
+                                    <input type="radio" th:id="${'pkg_' + pkg.id}" name="postPackageId" th:value="${pkg.id}"
+                                           th:checked="${iterStat.index == 1}" class="custom-control-input" required>
+                                    <label class="custom-control-label w-100 d-flex justify-content-between align-items-center cursor-pointer" th:for="${'pkg_' + pkg.id}">
+                                        <div>
+                                            <div class="font-weight-bold text-gray-900" th:text="${pkg.name}">Gói 30 ngày</div>
+                                            <div class="small text-muted" th:text="${pkg.description}">Phù hợp nhu cầu ngắn hạn</div>
+                                        </div>
+                                        <span class="h6 mb-0 font-weight-bold text-success" th:text="${pkg.displayPrice}">240,000 đ</span>
+                                    </label>
+                                </div>
+                            </div>
 
-    <!-- Purchase via Packages -->
-    <div class="bg-blue-50 rounded-lg p-6">
-      <h3 class="font-medium text-blue-900 mb-2">
-        <i class="fas fa-gift"></i> Mua gói PostPackage để tiết kiệm hơn
-      </h3>
-      <p class="text-sm text-blue-800 mb-4">
-        Mua gói PostPackage để có giá tốt hơn và nhiều tính năng bổ sung (boost,
-        priority display)
-      </p>
-      <a
-        href="/owner/packages/post-packages"
-        class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
-      >
-        <i class="fas fa-shopping-cart"></i> Xem các gói PostPackage
-      </a>
-    </div>
-  </div>
+                            <div class="alert alert-info border-left-info shadow-sm small mb-4">
+                                <i class="fas fa-info-circle mr-1"></i> Số ngày gia hạn sẽ được cộng dồn trực tiếp vào hạn hiển thị. Chi phí sẽ được trừ tự động từ số dư ví Trọ Mới của bạn.
+                            </div>
+
+                            <div class="d-flex justify-content-end">
+                                <a href="/owner/posts" class="btn btn-outline-secondary mr-2">
+                                    <i class="fas fa-times mr-1"></i> Hủy Bỏ
+                                </a>
+                                <button type="submit" class="btn btn-success shadow-sm font-weight-bold px-4">
+                                    <i class="fas fa-check mr-1"></i> Xác Nhận Gia Hạn
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
 </div>
+

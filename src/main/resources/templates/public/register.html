@@ -1,61 +1,260 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
-    <title>Đăng ký</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Đăng ký tài khoản Khách Thuê | TrọMới - Upside PMS</title>
+    <link th:href="@{/rhino/images/fevicon.png}" rel="icon" />
+    <link href="https://fonts.googleapis.com" rel="preconnect" />
+    <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link th:href="@{/assets/vendor/bootstrap/css/bootstrap.min.css}" rel="stylesheet" />
+    <link th:href="@{/assets/vendor/bootstrap-icons/bootstrap-icons.css}" rel="stylesheet" />
+    <link th:href="@{/assets/vendor/fontawesome-free/css/all.min.css}" rel="stylesheet" />
+    <link th:href="@{/rhino/css/style.css}" rel="stylesheet" />
+    <link th:href="@{/rhino/css/responsive.css}" rel="stylesheet" />
+    <script>
+      window.tailwind = { config: { corePlugins: { preflight: false } } };
+    </script>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://kit.fontawesome.com/a37ac37445.js" crossorigin="anonymous"></script>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+                    <style>
+      :root {
+        --default-font: "Be Vietnam Pro", sans-serif;
+        --heading-font: "Be Vietnam Pro", sans-serif;
+        --nav-font: "Be Vietnam Pro", sans-serif;
+      }
+      .container, .container-fluid, .container_staff {
+        max-width: 1280px;
+        padding-left: 20px !important;
+        padding-right: 20px !important;
+        margin-left: auto !important;
+        margin-right: auto !important;
+      }
+      body { font-family: var(--default-font) !important; font-size: 15px !important; background-color: #f8fafc !important; color: #334155; overflow-x: hidden; line-height: 1.65; }
+      h1, h2, h3, h4, h5, h6 { font-family: var(--heading-font) !important; color: #161825; letter-spacing: -0.015em; }
+      p { font-size: 15px; line-height: 1.65; margin: 0 0 12px 0; }
+      .light-background, .bg-light { background-color: #f8fafc !important; }
+      .bg-white { background-color: #ffffff !important; border: 1px solid #e2e8f0; box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06); }
+      .header_section { position: relative; z-index: 1000; width: 100%; }
+      .header { width: 100%; height: auto !important; }
+      .header_top { background-color: #161825; padding: 9px 0; }
+      ul.contat_infoma { display: flex !important; align-items: center; gap: 12px; margin: 0; padding: 0; list-style: none; }
+      ul.contat_infoma li { color: #ffffff; font-size: 13.5px; display: inline-flex; align-items: center; gap: 8px; }
+      ul.contat_infoma li i { color: #fe9901; }
+      ul.contat_infoma li a { color: #ffffff; display: inline-flex; align-items: center; gap: 8px; text-decoration: none; }
+      ul.contat_infoma li a:hover { color: #fe9901; }
+      ul.social_icon_top { display: flex; align-items: center; justify-content: center; gap: 8px; margin: 0; padding: 0; list-style: none; }
+      ul.social_icon_top li a { display: inline-flex; align-items: center; justify-content: center; border-radius: 50%; color: #161825; background: #ffffff; width: 28px; height: 28px; font-size: 13px; text-decoration: none; }
+      ul.social_icon_top li a:hover { background: #fe9901; color: #ffffff; }
+      .header_bottom { background-color: #ffffff; height: auto !important; padding: 12px 0 !important; border-bottom: 1px solid #e2e8f0; box-shadow: 0 4px 20px rgba(15, 23, 42, 0.04); }
+      .logo { flex-shrink: 0; }
+      .logo a { font-family: var(--heading-font) !important; font-size: 22px !important; line-height: 1.2 !important; color: #161825 !important; font-weight: 800 !important; text-transform: uppercase; text-decoration: none; display: inline-flex; align-items: center; gap: 10px; white-space: nowrap; }
+      .navigation.navbar { float: none !important; padding: 0; width: 100%; }
+      @media (min-width: 992px) {
+        .navigation.navbar { flex-wrap: nowrap !important; }
+        .navigation .navbar-collapse { flex-basis: auto !important; flex-grow: 0 !important; display: flex !important; align-items: center !important; }
+      }
+      .navigation .navbar-nav .nav-link { padding: 8px 12px !important; color: #1e293b !important; font-size: 13.5px !important; font-weight: 600; text-transform: uppercase; border-radius: 8px; margin: 0 1px; white-space: nowrap; transition: all 0.2s ease; }
+      .navigation .navbar-nav .nav-link:focus,
+      .navigation .navbar-nav .nav-link:hover,
+      .navigation .navbar-nav .active > .nav-link,
+      .navigation .navbar-nav .nav-link.active { background: linear-gradient(135deg, #f97316 0%, #ea580c 100%) !important; color: #ffffff !important; border-radius: 8px; box-shadow: 0 4px 12px rgba(254, 153, 1, 0.28); }
+      .navigation .nav-item.dropdown:hover > .dropdown-menu { display: block; }
+      .btn-estate {
+        font-family: var(--default-font); font-weight: 700; font-size: 14px !important; text-transform: uppercase;
+        display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+        padding: 11px 22px; border-radius: 8px; white-space: nowrap !important;
+        color: #ffffff !important; background: linear-gradient(135deg, #f97316 0%, #ea580c 100%) !important; border: 0; text-decoration: none; cursor: pointer;
+        box-shadow: 0 4px 14px rgba(254, 153, 1, 0.3); transition: all 0.22s ease;
+      }
+      .btn-estate:hover { background-color: #e08200 !important; color: #ffffff !important; transform: translateY(-1px); }
+      .btn-estate-nav {
+        font-family: var(--default-font); font-weight: 700; font-size: 13.5px !important; text-transform: uppercase;
+        padding: 8px 16px !important; border-radius: 8px; white-space: nowrap !important;
+        background: linear-gradient(135deg, #f97316 0%, #ea580c 100%) !important; color: #ffffff !important; border: 0;
+        display: inline-flex !important; align-items: center; gap: 6px; flex-shrink: 0;
+        box-shadow: 0 4px 12px rgba(254, 153, 1, 0.28);
+      }
+      .btn-estate-nav:hover { background-color: #161825 !important; color: #ffffff !important; }
+      .page-title, .back_re { background: linear-gradient(135deg, #f59e0b 0%, #ea580c 100%) !important; padding: 36px 0 30px 0 !important; border: none !important; color: #ffffff; }
+      .page-title .heading h1 { font-family: var(--heading-font) !important; font-weight: 800 !important; font-size: 30px !important; line-height: 1.25 !important; color: #ffffff !important; text-transform: uppercase; }
+      .page-title .heading h1 span { color: #ffffff !important; }
+      .page-title .heading p { color: rgba(255, 255, 255, 0.95) !important; }
+      .page-title .breadcrumbs ol { display: flex; justify-content: center; list-style: none; padding: 12px 0 0 0; margin: 0; gap: 8px; font-weight: 600; font-size: 14px; color: rgba(255, 255, 255, 0.9); }
+      .page-title .breadcrumbs ol li + li::before { content: "/"; padding-right: 8px; color: rgba(255, 255, 255, 0.7); }
+      .page-title .breadcrumbs ol li a { color: #ffffff !important; text-decoration: underline; }
+    </style>
 </head>
-<body class="min-h-screen flex items-center justify-center bg-gray-100">
-<div class="w-full max-w-md bg-white p-8 rounded-xl shadow-lg">
-    <h1 class="text-3xl font-bold text-center mb-6">Đăng ký</h1>
+<body class="d-flex flex-column min-vh-100" x-data="{ showPass: false }">
 
-    <form th:action="@{/register}" method="post" th:object="${registerForm}" class="space-y-4">
-        <div>
-            <label class="block text-sm font-medium text-gray-700">Username</label>
-            <input type="text" name="username" th:field="*{username}"
-                   class="mt-1 w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-            <p class="text-red-600 text-sm mt-1" th:if="${errorUsername != null}" th:text="${errorUsername}"></p>
+    <div th:replace="~{layout/header :: header-main}"></div>
+
+    <main class="main flex-grow-1">
+        <div class="page-title">
+            <div class="heading">
+                <div class="container text-center">
+                    <h1>Đăng Ký <span style="color: #fef3c7;">Khách Thuê</span></h1>
+                    <p class="mb-0" style="color: rgba(255,255,255,0.95);">Tạo tài khoản để tìm phòng, đặt lịch xem và quản lý hợp đồng lưu trú trực tuyến</p>
+                </div>
+            </div>
+            <nav class="breadcrumbs">
+                <div class="container">
+                    <ol class="justify-content-center">
+                        <li><a th:href="@{/}">Trang chủ</a></li>
+                        <li class="current">Đăng ký Khách thuê</li>
+                    </ol>
+                </div>
+            </nav>
         </div>
 
-        <div>
-            <label class="block text-sm font-medium text-gray-700">Password</label>
-            <input type="password" name="password" th:field="*{password}"
-                   class="mt-1 w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-            <p class="text-red-600 text-sm mt-1" th:if="${errorPassword != null}" th:text="${errorPassword}"></p>
-        </div>
+        <section class="py-5">
+            <div class="container">
+                <div class="row justify-content-center">
+                    <div class="col-lg-5 col-md-8">
+                        <div class="bg-white p-4 p-md-5 rounded-3">
 
-        <div>
-            <label class="block text-sm font-medium text-gray-700">Họ và tên</label>
-            <input type="text" name="fullName" th:field="*{fullName}"
-                   class="mt-1 w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-        </div>
+                            <!-- Role Selector Tabs -->
+                            <div class="bg-light p-1.5 rounded d-grid gap-1 mb-4 text-center" style="grid-template-columns: 1fr 1fr;">
+                                <a href="/register" class="py-2 rounded bg-[#fe9901] text-white shadow-sm fw-bold small text-decoration-none d-flex align-items-center justify-content-center gap-1.5 text-uppercase">
+                                    <i class="fa-solid fa-user"></i>
+                                    <span>Khách thuê</span>
+                                </a>
+                                <a href="/register/owner" class="py-2 rounded text-dark fw-bold small text-decoration-none d-flex align-items-center justify-content-center gap-1.5 text-uppercase">
+                                    <i class="fa-solid fa-building-user"></i>
+                                    <span>Chủ nhà trọ</span>
+                                </a>
+                            </div>
 
-        <div>
-            <label class="block text-sm font-medium text-gray-700">Email</label>
-            <input type="text" name="email" th:field="*{email}"
-                   class="mt-1 w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-            <p class="text-red-600 text-sm mt-1" th:if="${errorEmail != null}" th:text="${errorEmail}"></p>
-        </div>
+                            <!-- Register Form -->
+                            <form th:action="@{/register}" method="post" th:object="${registerForm}" class="d-flex flex-column gap-3">
 
-        <div>
-            <label class="block text-sm font-medium text-gray-700">Số điện thoại</label>
-            <input type="text" name="phone" th:field="*{phone}"
-                   class="mt-1 w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-            <p class="text-red-600 text-sm mt-1" th:if="${errorPhone != null}" th:text="${errorPhone}"></p>
-        </div>
+                                <div>
+                                    <label for="usernameInput" class="form-label small fw-bold text-dark mb-1">Tên đăng nhập *</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light"><i class="fa-solid fa-at text-muted small"></i></span>
+                                        <input type="text" id="usernameInput" name="username" th:field="*{username}" required placeholder="VD: nguyenvana" class="form-control py-2" />
+                                    </div>
+                                    <p class="text-danger small fw-semibold mt-1 mb-0" th:if="${errorUsername != null}">
+                                        <i class="fa-solid fa-circle-exclamation me-1"></i><span th:text="${errorUsername}"></span>
+                                    </p>
+                                </div>
 
-        <button type="submit" class="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition">
-            Tạo tài khoản
-        </button>
-    </form>
+                                <div>
+                                    <label for="passwordInput" class="form-label small fw-bold text-dark mb-1">Mật khẩu *</label>
+                                    <div class="position-relative">
+                                        <div class="input-group">
+                                            <span class="input-group-text bg-light"><i class="fa-solid fa-lock text-muted small"></i></span>
+                                            <input type="password" id="passwordInput" :type="showPass ? 'text' : 'password'" name="password" th:field="*{password}" required
+                                                   oninput="evaluatePasswordStrength(this.value)" placeholder="Ít nhất 6 ký tự" class="form-control py-2 pe-5" />
+                                        </div>
+                                        <button type="button" @click="showPass = !showPass"
+                                                title="Hiển thị/Ẩn mật khẩu" aria-label="Hiển thị hoặc ẩn mật khẩu"
+                                                class="position-absolute top-50 end-0 translate-middle-y me-2 border-0 bg-transparent text-muted cursor-pointer" style="z-index: 5;">
+                                            <i class="fa-solid fa-eye small" :class="showPass ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye'"></i>
+                                        </button>
+                                    </div>
+                                    <div class="mt-2">
+                                        <div class="w-100 bg-light rounded-pill overflow-hidden" style="height: 6px;">
+                                            <div id="passwordStrengthBar" class="h-100 bg-secondary transition-colors duration-200" style="width: 0%;"></div>
+                                        </div>
+                                        <div class="d-flex align-items-center justify-content-between small text-muted mt-1">
+                                            <span>Độ mạnh mật khẩu:</span>
+                                            <span id="passwordStrengthText" class="fw-semibold">Chưa nhập</span>
+                                        </div>
+                                    </div>
+                                    <p class="text-danger small fw-semibold mt-1 mb-0" th:if="${errorPassword != null}">
+                                        <i class="fa-solid fa-circle-exclamation me-1"></i><span th:text="${errorPassword}"></span>
+                                    </p>
+                                </div>
 
-    <p class="text-sm text-center text-gray-600 mt-4">
-        Đã có tài khoản?
-        <a href="/login" class="text-blue-600 hover:underline">Đăng nhập</a>
-    </p>
-</div>
+                                <div>
+                                    <label for="fullNameInput" class="form-label small fw-bold text-dark mb-1">Họ và tên *</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light"><i class="fa-solid fa-user text-muted small"></i></span>
+                                        <input type="text" id="fullNameInput" name="fullName" th:field="*{fullName}" required placeholder="VD: Nguyễn Văn A" class="form-control py-2" />
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label for="emailInput" class="form-label small fw-bold text-dark mb-1">Email *</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light"><i class="fa-solid fa-envelope text-muted small"></i></span>
+                                        <input type="email" id="emailInput" name="email" th:field="*{email}" required placeholder="nguyenvana@gmail.com" class="form-control py-2" />
+                                    </div>
+                                    <p class="text-danger small fw-semibold mt-1 mb-0" th:if="${errorEmail != null}">
+                                        <i class="fa-solid fa-circle-exclamation me-1"></i><span th:text="${errorEmail}"></span>
+                                    </p>
+                                </div>
+
+                                <div>
+                                    <label for="phoneInput" class="form-label small fw-bold text-dark mb-1">Số điện thoại *</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light"><i class="fa-solid fa-phone text-muted small"></i></span>
+                                        <input type="tel" id="phoneInput" name="phone" th:field="*{phone}" required placeholder="0912 345 678" class="form-control py-2" />
+                                    </div>
+                                    <p class="text-danger small fw-semibold mt-1 mb-0" th:if="${errorPhone != null}">
+                                        <i class="fa-solid fa-circle-exclamation me-1"></i><span th:text="${errorPhone}"></span>
+                                    </p>
+                                </div>
+
+                                <button type="submit" class="btn-estate w-100 mt-2">
+                                    <i class="fa-solid fa-user-plus small"></i>
+                                    <span>Đăng ký tài khoản</span>
+                                </button>
+                            </form>
+
+                            <div class="mt-4 text-center small text-muted">
+                                Đã có tài khoản?
+                                <a href="/login" class="fw-bold text-decoration-none ms-1" style="color: #ea580c;">Đăng nhập ngay</a>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <div th:replace="~{layout/footer :: footer-main}"></div>
+
+    <script th:src="@{/assets/vendor/bootstrap/js/bootstrap.bundle.min.js}"></script>
+    <script>
+        function evaluatePasswordStrength(val) {
+            const bar = document.getElementById('passwordStrengthBar');
+            const txt = document.getElementById('passwordStrengthText');
+            if (!bar || !txt) return;
+            const v = (val || '').trim();
+            if (!v) {
+                bar.style.width = '0%';
+                bar.className = 'h-100 bg-secondary transition-colors duration-200';
+                txt.textContent = 'Chưa nhập';
+                txt.className = 'fw-semibold text-muted';
+                return;
+            }
+            let score = 0;
+            if (v.length >= 6) score++;
+            if (v.length >= 8) score++;
+            if (/[A-Z]/.test(v) || /[0-9]/.test(v)) score++;
+            if (/[^A-Za-z0-9]/.test(v)) score++;
+
+            if (score <= 1) {
+                bar.style.width = '33%';
+                bar.className = 'h-100 bg-danger transition-colors duration-200';
+                txt.textContent = 'Yếu';
+                txt.className = 'fw-semibold text-danger';
+            } else if (score === 2) {
+                bar.style.width = '66%';
+                bar.className = 'h-100 bg-warning transition-colors duration-200';
+                txt.textContent = 'Trung bình';
+                txt.className = 'fw-semibold text-warning';
+            } else {
+                bar.style.width = '100%';
+                bar.className = 'h-100 bg-success transition-colors duration-200';
+                txt.textContent = 'Mạnh';
+                txt.className = 'fw-semibold text-success';
+            }
+        }
+    </script>
 </body>
 </html>
-

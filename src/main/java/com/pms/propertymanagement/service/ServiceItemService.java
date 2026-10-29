@@ -10,5 +10,8 @@ public interface ServiceItemService {
     List<ServiceItemResponse> getAllServicesByOwner(User owner);
     List<ServiceItemResponse> getServicesByPropertyId(Long propertyId);
     void createService(ServiceItemRequest request);
+    void createService(ServiceItemRequest request, User owner);
+    void updateService(Long id, String name, Double price, String unit, String type, User owner);
     void deleteService(Long id);
+    void deleteService(Long id, User owner);
 }

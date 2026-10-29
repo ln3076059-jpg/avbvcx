@@ -1,25 +1,143 @@
-<div>
-    <div th:if="${rentSuccess}" class="mb-4 p-3 bg-green-100 text-green-800 rounded">
-        Đã gửi yêu cầu thuê. Chủ trọ sẽ liên hệ với bạn sớm.
+<div th:fragment="content">
+
+    <!-- Flash Banners -->
+    <div th:if="${rentSuccess}" class="alert alert-success d-flex align-items-center" role="alert">
+        <i class="fas fa-check-circle mr-2"></i>
+        <span>Đã gửi yêu cầu thuê phòng thành công! Chủ nhà trọ sẽ sớm liên hệ với bạn.</span>
     </div>
-    <div th:if="${rentError != null}" class="mb-4 p-3 bg-red-100 text-red-800 rounded" th:text="${rentError}"></div>
-    <h1 class="text-2xl font-semibold mb-4">Phòng đang trống</h1>
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div th:each="r : ${rooms}" class="border rounded-lg p-4 shadow">
-            <div class="flex items-center justify-between">
-                <h2 class="text-lg font-bold" th:text="${r.name}">Phòng A1</h2>
-                <span class="text-sm px-2 py-1 rounded bg-gray-100" th:text="${r.status.displayName}">Trạng thái</span>
-            </div>
-            <p class="text-sm text-gray-600 mt-1" th:text="'Tòa: ' + ${r.property != null ? r.property.name : 'N/A'}"></p>
-            <p class="text-sm text-gray-600 mt-1" th:text="'Giá: ' + ${#numbers.formatDecimal(r.price, 0, 'COMMA', 0, 'POINT')}"></p>
-            <div class="mt-3 flex flex-wrap gap-2">
-                <a th:href="@{|/tenant/rooms/${r.id}|}" class="px-4 py-2 border rounded hover:bg-gray-50">Xem chi tiết</a>
-                <form th:action="@{|/tenant/rooms/${r.id}/rent|}" method="post">
-                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
-                        Thuê
-                    </button>
-                </form>
+    <div th:if="${rentError != null}" class="alert alert-danger d-flex align-items-center" role="alert">
+        <i class="fas fa-exclamation-circle mr-2"></i>
+        <span th:text="${rentError}">Có lỗi xảy ra khi gửi yêu cầu thuê.</span>
+    </div>
+
+    <!-- Page Heading -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <div>
+            <h1 class="h3 mb-1 text-gray-800 font-weight-bold">
+                <i class="fas fa-search-location text-primary mr-2"></i>Khám Phá Phòng Trống Sẵn Sàng Vào Ở
+            </h1>
+            <p class="mb-0 text-muted small">Tham khảo các phòng trọ đang còn trống trên hệ thống và gửi yêu cầu đăng ký thuê trực tiếp.</p>
+        </div>
+        <a th:href="@{/tenant/rooms}" class="btn btn-sm btn-secondary shadow-sm font-weight-bold mt-2 mt-sm-0">
+            <i class="fas fa-key mr-1"></i> Phòng đang thuê của tôi
+        </a>
+    </div>
+
+    <!-- Filter Bar Card (SB Admin 2) -->
+    <div th:unless="${#lists.isEmpty(rooms)}" class="card shadow mb-4">
+        <div class="card-body py-3">
+            <div class="row align-items-center">
+                <div class="col-md-6 mb-2 mb-md-0">
+                    <div class="input-group input-group-sm">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text bg-light"><i class="fas fa-search text-muted"></i></span>
+                        </div>
+                        <input type="text"
+                               id="availRoomSearch"
+                               oninput="filterAvailableRooms()"
+                               placeholder="Tìm kiếm tên phòng, khu trọ, địa chỉ..."
+                               class="form-control" />
+                    </div>
+                </div>
+                <div class="col-md-6 d-flex flex-wrap align-items-center justify-content-md-end" style="gap: 10px;">
+                    <div class="d-flex align-items-center">
+                        <label for="availRoomMaxPrice" class="small font-weight-bold text-gray-700 mb-0 mr-2 text-nowrap">Mức giá tối đa:</label>
+                        <select id="availRoomMaxPrice" onchange="filterAvailableRooms()" class="custom-select custom-select-sm font-weight-bold" style="width: auto;">
+                            <option value="0">Tất cả mức giá</option>
+                            <option value="2000000">Dưới 2.000.000 đ</option>
+                            <option value="3000000">Dưới 3.000.000 đ</option>
+                            <option value="4500000">Dưới 4.500.000 đ</option>
+                            <option value="6000000">Dưới 6.000.000 đ</option>
+                        </select>
+                    </div>
+                    <span class="small font-weight-bold text-muted">
+                        Hiển thị <strong id="availRoomVisibleCount" class="text-primary tabular-nums" th:text="${rooms.size()}">0</strong>/<span class="tabular-nums" th:text="${rooms.size()}">0</span> phòng
+                    </span>
+                </div>
             </div>
         </div>
     </div>
+
+    <!-- Empty State -->
+    <div th:if="${#lists.isEmpty(rooms)}" class="card shadow mb-4">
+        <div class="card-body py-5 text-center text-muted">
+            <i class="fas fa-building fa-3x mb-3 text-gray-300"></i>
+            <h5 class="font-weight-bold text-gray-700">Hiện chưa có phòng trống nào</h5>
+            <p class="small mb-3">Tất cả các phòng hiện đã được thuê kín. Vui lòng quay lại sau hoặc khám phá tin đăng trên trang chủ.</p>
+            <a th:href="@{/}" class="btn btn-sm btn-primary font-weight-bold">
+                <i class="fas fa-globe mr-1"></i> Khám phá sàn tin đăng
+            </a>
+        </div>
+    </div>
+
+    <!-- Available Rooms Grid (SB Admin 2 Cards) -->
+    <div th:unless="${#lists.isEmpty(rooms)}" id="availRoomsGrid" class="row">
+        <div th:each="r : ${rooms}"
+             th:attr="data-name=${(r.name != null ? r.name : '') + ' ' + (r.property != null and r.property.name != null ? r.property.name : '') + ' ' + (r.property != null and r.property.addressNumber != null ? r.property.addressNumber : '')},
+                      data-price=${r.price != null ? r.price : 0}"
+             class="avail-room-card col-xl-4 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100">
+                <div class="card-header py-2 d-flex align-items-center justify-content-between bg-white">
+                    <span class="badge badge-info px-2 py-1">
+                        <i class="fas fa-building mr-1"></i>
+                        <span th:text="${r.property != null ? r.property.name : 'Cơ sở nhà trọ'}">Cơ sở nhà trọ</span>
+                    </span>
+                    <span class="badge badge-success px-2 py-1"
+                          th:text="${r.status != null ? r.status.displayName : 'Phòng trống'}">Phòng trống</span>
+                </div>
+                <div class="card-body">
+                    <h5 class="font-weight-bold text-gray-800 mb-1" th:text="${r.name}">Phòng A1</h5>
+                    <p class="small text-muted mb-3">
+                        <i class="fas fa-map-marker-alt text-danger mr-1"></i>
+                        <span th:text="${r.property != null and r.property.addressNumber != null ? r.property.addressNumber : 'Liên hệ chủ nhà để xem địa chỉ'}">Địa chỉ</span>
+                    </p>
+                    <div class="p-2 px-3 bg-light rounded border d-flex align-items-center justify-content-between">
+                        <div>
+                            <div class="text-xs text-muted text-uppercase font-weight-bold">Giá thuê / tháng</div>
+                            <div class="font-weight-bold text-success tabular-nums"
+                                 th:text="${#numbers.formatDecimal(r.price != null ? r.price : 0, 0, 'COMMA', 0, 'POINT') + ' đ'}">2.500.000 đ</div>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-xs text-muted text-uppercase font-weight-bold">Mã phòng</div>
+                            <div class="font-weight-bold text-gray-800 tabular-nums" th:text="${'#' + r.id}">#1</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer bg-light py-2 d-flex align-items-center justify-content-between">
+                    <a th:href="@{|/tenant/rooms/${r.id}|}" class="btn btn-sm btn-outline-primary font-weight-bold">
+                        <i class="fas fa-eye mr-1"></i> Xem chi tiết
+                    </a>
+                    <form th:action="@{|/tenant/rooms/${r.id}/rent|}" method="post" class="m-0">
+                        <button type="submit" class="btn btn-sm btn-success font-weight-bold shadow-sm">
+                            <i class="fas fa-file-signature mr-1"></i> Đăng ký thuê
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function filterAvailableRooms() {
+            const q = (document.getElementById('availRoomSearch')?.value || '').trim().toLowerCase();
+            const maxPrice = parseFloat(document.getElementById('availRoomMaxPrice')?.value || '0') || 0;
+            const cards = document.querySelectorAll('.avail-room-card');
+            let visible = 0;
+            cards.forEach(card => {
+                const name = (card.getAttribute('data-name') || '').toLowerCase();
+                const price = parseFloat(card.getAttribute('data-price') || '0') || 0;
+                const matchText = !q || name.includes(q);
+                const matchPrice = maxPrice <= 0 || price <= maxPrice;
+                if (matchText && matchPrice) {
+                    card.style.display = '';
+                    visible++;
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+            const countEl = document.getElementById('availRoomVisibleCount');
+            if (countEl) countEl.textContent = String(visible);
+        }
+    </script>
+
 </div>

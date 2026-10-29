@@ -7,6 +7,7 @@ import com.pms.propertymanagement.dto.response.PropertyOwnerResponse;
 import com.pms.propertymanagement.dto.response.PropertyResponse;
 import com.pms.propertymanagement.enums.RoomStatus;
 import com.pms.propertymanagement.entity.*;
+import com.pms.propertymanagement.exception.ForbiddenException;
 import com.pms.propertymanagement.exception.ResourceNotFoundException;
 import com.pms.propertymanagement.repository.*;
 import com.pms.propertymanagement.service.PropertyManagementService;
@@ -146,8 +147,17 @@ public class PropertyServiceImpl implements PropertyService {
 
     @Override
     public PropertyRequest getPropertyForEdit(Long id) {
+        return getPropertyForEdit(id, null);
+    }
+
+    @Override
+    public PropertyRequest getPropertyForEdit(Long id, Long ownerId) {
         Property p = propertyRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Property not found"));
+
+        if (ownerId != null && (p.getOwner() == null || !p.getOwner().getId().equals(ownerId))) {
+            throw new ForbiddenException("Bạn không có quyền chỉnh sửa nhà trọ này!");
+        }
 
         PropertyRequest req = new PropertyRequest();
         req.setName(p.getName());
@@ -177,9 +187,20 @@ public class PropertyServiceImpl implements PropertyService {
     }
 
     @Override
+    @Transactional
     public void updateProperty(Long id, PropertyRequest request) {
+        updateProperty(id, request, null);
+    }
+
+    @Override
+    @Transactional
+    public void updateProperty(Long id, PropertyRequest request, Long ownerId) {
         Property property = propertyRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Property not found"));
+
+        if (ownerId != null && (property.getOwner() == null || !property.getOwner().getId().equals(ownerId))) {
+            throw new ForbiddenException("Bạn không có quyền cập nhật nhà trọ này!");
+        }
 
         // Update property real estate data
         property.setName(request.getName());
@@ -271,7 +292,29 @@ public class PropertyServiceImpl implements PropertyService {
 
     @Override
     public void deleteProperty(Long id) {
-        propertyRepository.deleteById(id);
+        deleteProperty(id, null);
+    }
+
+    @Override
+    @Transactional
+    public void deleteProperty(Long id, Long ownerId) {
+        Property property = propertyRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy bất động sản có ID: " + id));
+
+        if (ownerId != null && (property.getOwner() == null || !property.getOwner().getId().equals(ownerId))) {
+            throw new IllegalArgumentException("Bạn không có quyền xóa bất động sản này!");
+        }
+
+        // Ràng buộc nghiệp vụ: Không cho phép xóa nhà trọ khi vẫn còn phòng đang có khách thuê
+        if (property.getRooms() != null) {
+            boolean hasRentedRoom = property.getRooms().stream()
+                    .anyMatch(r -> r.getStatus() == RoomStatus.RENTED);
+            if (hasRentedRoom) {
+                throw new IllegalStateException("Không thể xóa nhà trọ khi vẫn còn phòng đang có người thuê!");
+            }
+        }
+
+        propertyRepository.delete(property);
     }
 
     @Override

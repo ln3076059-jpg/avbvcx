@@ -10,8 +10,10 @@ import java.util.Optional;
 @Repository
 public interface TenantRepository extends JpaRepository<Tenant, Long> {
     List<Tenant> findByOwner_Username(String username);
-    List<Tenant> findByOwner_Id(Long ownerId); // Changed to underscore for JPA relationship safety
+    List<Tenant> findByOwner_Id(Long ownerId);
     boolean existsByCitizenId(String citizenId);
+    Optional<Tenant> findFirstByAccount_Id(Long accountId);
+    Optional<Tenant> findFirstByOwner_IdAndPhone(Long ownerId, String phone);
     Optional<Tenant> findFirstByPhone(String phone);
     Optional<Tenant> findFirstByEmail(String email);
 }

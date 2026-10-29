@@ -1,0 +1,191 @@
+<div th:fragment="content" class="container-fluid">
+
+    <!-- Page Heading -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <div>
+            <h1 class="h3 mb-1 text-gray-800 font-weight-bold">Quản Lý Yêu Cầu Sửa Chữa & Bảo Trì</h1>
+            <p class="text-muted small mb-0">Giám sát các sự cố hỏng hóc, phân công nhân viên kỹ thuật và tiến độ xử lý toàn hệ thống.</p>
+        </div>
+        <span class="badge badge-primary px-3 py-2 font-weight-bold" th:text="${requests != null ? requests.size() + ' yêu cầu' : '0'}">0 yêu cầu</span>
+    </div>
+
+    <!-- 3-Card KPI Summary Strip -->
+    <div class="row mb-4">
+        <div class="col-md-4 mb-3 mb-md-0">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body py-2">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Tổng yêu cầu bảo trì</div>
+                            <div class="h4 mb-0 font-weight-bold text-gray-800" th:text="${requests != null ? requests.size() : 0}">0</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-clipboard-list fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3 mb-md-0">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body py-2">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Chờ xử lý &amp; Đang sửa</div>
+                            <div class="h4 mb-0 font-weight-bold text-gray-800"
+                                 th:text="${requests != null ? requests.?[status != null and (status.name() == 'PENDING' or status.name() == 'ASSIGNED' or status.name() == 'IN_PROGRESS' or status.name() == 'REOPENED')].size() : 0}">0</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-wrench fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body py-2">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Đã hoàn thành</div>
+                            <div class="h4 mb-0 font-weight-bold text-gray-800"
+                                 th:text="${requests != null ? requests.?[status != null and (status.name() == 'COMPLETED' or status.name() == 'CONFIRMED')].size() : 0}">0</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-check-circle fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search & Filter Card -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 bg-white">
+            <h6 class="m-0 font-weight-bold text-primary">
+                <i class="fas fa-filter mr-1"></i> Bộ Lọc & Tìm Kiếm Sự Cố
+            </h6>
+        </div>
+        <div class="card-body">
+            <form th:action="@{/admin/maintenance}" method="get" class="form-row align-items-center">
+                <div class="col-lg-6 col-md-6 mb-2">
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <div class="input-group-text bg-light"><i class="fas fa-search text-gray-400"></i></div>
+                        </div>
+                        <input type="text" class="form-control" id="keyword" name="keyword" 
+                               th:value="${keyword}" placeholder="Nhập mã sự cố, tên phòng hoặc mô tả sự cố...">
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-4 mb-2">
+                    <select class="form-control" id="status" name="status">
+                        <option value="">-- Tất cả trạng thái --</option>
+                        <option th:each="st : ${statuses}" 
+                                th:value="${st}" 
+                                th:text="${st.displayName}" 
+                                th:selected="${statusFilter == st.name()}">PENDING</option>
+                    </select>
+                </div>
+                <div class="col-lg-2 col-md-2 mb-2">
+                    <button type="submit" class="btn btn-primary btn-block font-weight-bold">
+                        <i class="fas fa-search mr-1"></i> Lọc
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- DataTales Example (Strictly 5 Columns) -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 d-flex align-items-center justify-content-between">
+            <h6 class="m-0 font-weight-bold text-primary">
+                <i class="fas fa-tools mr-1"></i> Danh Sách Yêu Cầu Sửa Chữa Toàn Hệ Thống
+            </h6>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover" id="dataTable" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th style="width: 100px;" class="text-center">Mã Sự Cố</th>
+                            <th>Cơ Sở & Phòng Thuê</th>
+                            <th>Người Báo & Kỹ Thuật</th>
+                            <th>Hạng Mục & Trạng Thái</th>
+                            <th style="width: 140px;" class="text-center">Chức Năng</th>
+                        </tr>
+                    </thead>
+                    <tfoot>
+                        <tr>
+                            <th class="text-center">Mã Sự Cố</th>
+                            <th>Cơ Sở & Phòng Thuê</th>
+                            <th>Người Báo & Kỹ Thuật</th>
+                            <th>Hạng Mục & Trạng Thái</th>
+                            <th class="text-center">Chức Năng</th>
+                        </tr>
+                    </tfoot>
+                    <tbody>
+                        <tr th:each="r : ${requests}">
+                            <!-- Cột 1: Mã Sự Cố -->
+                            <td class="text-center font-weight-bold">
+                                <span class="badge badge-dark px-2 py-1" th:text="${r.code != null ? r.code : 'YC-' + r.id}">YC-001</span>
+                                <div class="small text-muted mt-1">ID: <span th:text="${r.id}">1</span></div>
+                            </td>
+
+                            <!-- Cột 2: Cơ Sở & Phòng -->
+                            <td>
+                                <div class="font-weight-bold text-primary" 
+                                     th:text="${r.room != null ? r.room.name : 'N/A'}">Phòng 101</div>
+                                <div class="small text-muted mt-1" th:if="${r.room != null and r.room.property != null}">
+                                    <i class="fas fa-hotel mr-1 text-gray-400"></i>
+                                    <span th:text="${r.room.property.name}">Nhà trọ A</span>
+                                </div>
+                            </td>
+
+                            <!-- Cột 3: Người Báo & Kỹ Thuật -->
+                            <td>
+                                <div>
+                                    <i class="fas fa-user mr-1 text-gray-400"></i>
+                                    <strong class="text-dark" th:text="${r.tenant != null ? r.tenant.fullName : 'Khách thuê'}">Khách thuê</strong>
+                                </div>
+                                <div class="small text-muted mt-1">
+                                    <i class="fas fa-wrench mr-1 text-info"></i>
+                                    Kỹ thuật: <span class="font-weight-bold text-info" th:text="${r.staff != null ? r.staff.fullName : 'Chưa phân công'}">Chưa phân công</span>
+                                </div>
+                            </td>
+
+                            <!-- Cột 4: Hạng Mục & Trạng Thái -->
+                            <td>
+                                <div class="font-weight-bold text-dark small mb-1">
+                                    <span class="badge badge-light border" th:text="${r.category != null ? r.category.displayName : 'Bảo trì chung'}">ĐIỆN NƯỚC</span>
+                                </div>
+                                <div>
+                                    <span class="badge" 
+                                          th:classappend="${r.status != null and (r.status.name() == 'COMPLETED' or r.status.name() == 'CONFIRMED') ? 'badge-success' : (r.status != null and r.status.name() == 'IN_PROGRESS' ? 'badge-info' : 'badge-warning')}"
+                                          th:text="${r.status != null ? r.status.displayName : 'PENDING'}">ĐANG XỬ LÝ</span>
+                                </div>
+                            </td>
+
+                            <!-- Cột 5: Chức Năng -->
+                            <td class="text-center action-btns">
+                                <a th:href="@{'/admin/maintenance/' + ${r.id}}" 
+                                   class="btn btn-primary btn-sm btn-circle" title="Xem chi tiết sự cố">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+
+                                <form th:action="@{'/admin/maintenance/' + ${r.id} + '/delete'}" method="post" class="d-inline"
+                                      data-confirm="Bạn có chắc chắn muốn xóa yêu cầu sửa chữa này không?">
+                                    <button type="submit" class="btn btn-danger btn-sm btn-circle" title="Xóa yêu cầu"
+                                            data-confirm="Bạn có chắc chắn muốn xóa yêu cầu sửa chữa này không?">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</div>

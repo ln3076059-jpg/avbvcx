@@ -1,188 +1,267 @@
-<div th:fragment="content" class="bg-gray-50 min-h-screen py-8">
-  <div class="max-w-4xl mx-auto">
-    <form
-      th:action="@{/owner/tenants/create}"
-      th:object="${tenantRequest}"
-      method="POST"
-      class="bg-white p-8 rounded-xl shadow-sm border border-gray-100"
-    >
-      <div
-        class="flex justify-between items-center mb-8 pb-4 border-b border-gray-100"
-      >
-        <h2
-          class="text-xl font-bold text-gray-800 uppercase tracking-wide flex items-center gap-3"
-        >
-          <span class="w-1.5 h-6 bg-blue-600 rounded-full"></span>
-          Thêm Khách Thuê Mới
-        </h2>
-        <a
-          th:href="@{/owner/tenants}"
-          class="text-gray-500 hover:text-gray-700 text-sm font-medium transition-colors"
-        >
-          <i class="fa-solid fa-arrow-left mr-1"></i> Quay lại
-        </a>
-      </div>
-
-      <div class="space-y-8">
-        <!-- Nhóm 1: Thông tin cá nhân -->
+<div th:fragment="content" class="container-fluid mb-4">
+    <!-- Page Heading -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
         <div>
-          <h3
-            class="text-lg font-semibold text-gray-700 mb-4 flex items-center gap-2"
-          >
-            <i class="fa-solid fa-user-circle text-blue-500"></i> Thông tin cá
-            nhân
-          </h3>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label class="block text-sm font-bold text-gray-700 mb-2"
-                >Họ và tên <span class="text-red-500">*</span></label
-              >
-              <input
-                type="text"
-                th:field="*{fullName}"
-                placeholder="Nhập họ tên đầy đủ"
-                required
-                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm"
-              />
-            </div>
-            <div>
-              <label class="block text-sm font-bold text-gray-700 mb-2"
-                >Giới tính <span class="text-red-500">*</span></label
-              >
-              <select
-                th:field="*{gender}"
-                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
-              >
-                <option value="MALE">Nam</option>
-                <option value="FEMALE">Nữ</option>
-                <option value="OTHER">Khác</option>
-              </select>
-            </div>
-            <div>
-              <label class="block text-sm font-bold text-gray-700 mb-2"
-                >Ngày sinh <span class="text-red-500">*</span></label
-              >
-              <input
-                type="date"
-                th:field="*{birthday}"
-                required
-                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm"
-              />
-            </div>
-            <div>
-              <label class="block text-sm font-bold text-gray-700 mb-2"
-                >Nghề nghiệp</label
-              >
-              <input
-                type="text"
-                th:field="*{career}"
-                placeholder="Sinh viên, Nhân viên văn phòng..."
-                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm"
-              />
-            </div>
-            <div>
-              <label class="block text-sm font-bold text-gray-700 mb-2"
-                >Số điện thoại <span class="text-red-500">*</span></label
-              >
-              <input
-                type="tel"
-                th:field="*{phone}"
-                placeholder="Ví dụ: 0987654321"
-                required
-                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm"
-              />
-            </div>
-            <div>
-              <label class="block text-sm font-bold text-gray-700 mb-2"
-                >Email</label
-              >
-              <input
-                type="email"
-                th:field="*{email}"
-                placeholder="example@email.com"
-                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm"
-              />
-            </div>
-          </div>
+            <h1 class="h3 mb-0 text-gray-800 font-weight-bold">
+                <i class="fas fa-user-plus text-success mr-2"></i>Thêm Mới Hồ Sơ Khách Thuê
+            </h1>
+            <p class="text-muted small mb-0 mt-1">Lưu trữ thông tin liên lạc, căn cước công dân và nơi cư trú của khách thuê</p>
         </div>
-
-        <hr class="border-gray-100" />
-
-        <!-- Nhóm 2: Thông tin định danh -->
-        <div>
-          <h3
-            class="text-lg font-semibold text-gray-700 mb-4 flex items-center gap-2"
-          >
-            <i class="fa-solid fa-id-card text-green-500"></i> Giấy tờ tùy thân
-            (CCCD/CMND)
-          </h3>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div class="md:col-span-2">
-              <label class="block text-sm font-bold text-gray-700 mb-2"
-                >Số CCCD/CMND <span class="text-red-500">*</span></label
-              >
-              <input
-                type="text"
-                th:field="*{citizenId}"
-                placeholder="Nhập số CCCD/CMND"
-                required
-                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm uppercase"
-              />
-            </div>
-            <div>
-              <label class="block text-sm font-bold text-gray-700 mb-2"
-                >Ngày cấp <span class="text-red-500">*</span></label
-              >
-              <input
-                type="date"
-                th:field="*{issueDate}"
-                required
-                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm"
-              />
-            </div>
-            <div>
-              <label class="block text-sm font-bold text-gray-700 mb-2"
-                >Nơi cấp <span class="text-red-500">*</span></label
-              >
-              <input
-                type="text"
-                th:field="*{placeOfIssue}"
-                placeholder="Ví dụ: Cục CS QLHC về TTXH"
-                required
-                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm"
-              />
-            </div>
-            <div class="md:col-span-2">
-              <label class="block text-sm font-bold text-gray-700 mb-2"
-                >Địa chỉ thường trú <span class="text-red-500">*</span></label
-              >
-              <textarea
-                th:field="*{permanentAddress}"
-                rows="2"
-                placeholder="Nhập địa chỉ theo hộ khẩu..."
-                required
-                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm"
-              ></textarea>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Action Buttons -->
-      <div class="flex justify-end gap-4 mt-8 pt-6 border-t border-gray-100">
-        <a
-          th:href="@{/owner/tenants}"
-          class="px-6 py-3 bg-white border border-gray-300 text-gray-700 font-bold rounded-lg hover:bg-gray-50 transition-colors"
-        >
-          Hủy bỏ
+        <a th:href="@{/owner/tenants}" class="btn btn-secondary btn-sm shadow-sm font-weight-bold">
+            <i class="fas fa-arrow-left mr-1"></i>Quay lại danh sách
         </a>
-        <button
-          type="submit"
-          class="px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg shadow-lg shadow-blue-200 transition-all flex items-center gap-2"
-        >
-          <i class="fa-solid fa-save"></i> Lưu hồ sơ
-        </button>
-      </div>
+    </div>
+
+    <!-- Thông báo tạo nhanh từ yêu cầu liên hệ -->
+    <div th:if="${contactId != null}" class="alert alert-info border-left-info shadow-sm mb-4 d-flex align-items-center">
+        <i class="fas fa-bolt fa-lg text-info mr-3"></i>
+        <div>
+            <strong>Chuyển đổi nhanh từ Liên hệ:</strong>
+            <span>Đang tạo nhanh hồ sơ khách thuê từ yêu cầu liên hệ — hệ thống sẽ tự động đánh dấu Đã liên hệ sau khi lưu.</span>
+        </div>
+    </div>
+
+    <!-- Quét Nhanh CCCD Gắn Chip / Trích Xuất Thông Minh -->
+    <div class="card shadow-sm mb-4 border-left-primary">
+        <div class="card-body py-3">
+            <div class="d-flex flex-wrap justify-content-between align-items-center mb-2">
+                <div>
+                    <h6 class="font-weight-bold text-primary mb-0">
+                        <i class="fas fa-qrcode mr-1"></i>Quét Nhanh CCCD Gắn Chip / Trích Xuất Thông Minh
+                    </h6>
+                    <small class="text-muted">Dán chuỗi mã QR trên thẻ CCCD gắn chip (ngăn cách bởi dấu <code>|</code>) hoặc văn bản thông tin khách để tự động điền biểu mẫu</small>
+                </div>
+                <button type="button" onclick="fillSampleCccdData()" class="btn btn-outline-info btn-sm font-weight-bold mt-2 mt-sm-0">
+                    <i class="fas fa-magic mr-1"></i>Dùng dữ liệu mẫu CCCD
+                </button>
+            </div>
+            <div class="input-group">
+                <input type="text" id="cccdRawInput" class="form-control font-mono small"
+                       placeholder="Ví dụ: 079203001234||Nguyễn Văn Minh|15082001|Nam|Số 12 Nguyễn Trãi, Quận 1, TP.HCM|10052022|0912345678">
+                <div class="input-group-append">
+                    <button type="button" onclick="parseSmartCccd()" class="btn btn-primary font-weight-bold">
+                        <i class="fas fa-bolt mr-1"></i>Tự động bóc tách
+                    </button>
+                </div>
+            </div>
+            <div id="cccdParseStatus" class="small font-weight-bold mt-2" style="display: none;"></div>
+        </div>
+    </div>
+
+    <form th:action="@{/owner/tenants/create}" th:object="${tenantRequest}" method="POST" class="card shadow mb-4">
+        <input th:if="${contactId != null}" type="hidden" name="contactId" th:value="${contactId}">
+        <input th:if="${roomId != null}" type="hidden" name="roomId" th:value="${roomId}">
+        <div class="card-header py-3 bg-white border-bottom-success">
+            <h6 class="m-0 font-weight-bold text-success">
+                <i class="fas fa-id-card mr-1"></i>Khai Báo Thông Tin Khách Thuê
+            </h6>
+        </div>
+        <div class="card-body">
+            <!-- Nhóm 1: Thông tin cá nhân -->
+            <div class="mb-4">
+                <h6 class="font-weight-bold text-primary mb-3">
+                    <i class="fas fa-user-circle mr-1"></i>1. Thông Tin Cá Nhân
+                </h6>
+                <div class="form-row">
+                    <div class="form-group col-md-6">
+                        <label class="font-weight-bold small text-gray-700">Họ và tên <span class="text-danger">*</span></label>
+                        <input type="text" th:field="*{fullName}" class="form-control" placeholder="Ví dụ: Nguyễn Văn An" required>
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label class="font-weight-bold small text-gray-700">Giới tính <span class="text-danger">*</span></label>
+                        <select th:field="*{gender}" class="form-control custom-select" required>
+                            <option value="MALE">Nam</option>
+                            <option value="FEMALE">Nữ</option>
+                            <option value="OTHER">Khác</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group col-md-6">
+                        <label class="font-weight-bold small text-gray-700">Ngày sinh <span class="text-danger">*</span></label>
+                        <input type="date" th:field="*{birthday}" class="form-control" required>
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label class="font-weight-bold small text-gray-700">Nghề nghiệp</label>
+                        <input type="text" th:field="*{career}" class="form-control" placeholder="Ví dụ: Sinh viên, Lập trình viên...">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group col-md-6">
+                        <label class="font-weight-bold small text-gray-700">Số điện thoại <span class="text-danger">*</span></label>
+                        <input type="tel" th:field="*{phone}" class="form-control font-mono" placeholder="Ví dụ: 0987654321" required>
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label class="font-weight-bold small text-gray-700">Email</label>
+                        <input type="email" th:field="*{email}" class="form-control" placeholder="Ví dụ: khachthue@gmail.com">
+                    </div>
+                </div>
+            </div>
+
+            <hr class="my-4">
+
+            <!-- Nhóm 2: Thông tin định danh -->
+            <div class="mb-3">
+                <h6 class="font-weight-bold text-success mb-3">
+                    <i class="fas fa-id-badge mr-1"></i>2. Giấy Tờ Tùy Thân (CCCD / CMND)
+                </h6>
+                <div class="form-row">
+                    <div class="form-group col-md-4">
+                        <label class="font-weight-bold small text-gray-700">Số CCCD / CMND <span class="text-danger">*</span></label>
+                        <input type="text" th:field="*{citizenId}" class="form-control font-mono" placeholder="Nhập 12 số CCCD" required>
+                    </div>
+                    <div class="form-group col-md-4">
+                        <label class="font-weight-bold small text-gray-700">Ngày cấp <span class="text-danger">*</span></label>
+                        <input type="date" th:field="*{issueDate}" class="form-control" required>
+                    </div>
+                    <div class="form-group col-md-4">
+                        <label class="font-weight-bold small text-gray-700">Nơi cấp <span class="text-danger">*</span></label>
+                        <input type="text" th:field="*{placeOfIssue}" class="form-control" placeholder="Ví dụ: Cục CSQLHC về TTXH" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="font-weight-bold small text-gray-700">Địa chỉ thường trú theo hộ khẩu <span class="text-danger">*</span></label>
+                    <textarea th:field="*{permanentAddress}" rows="2" class="form-control" placeholder="Ví dụ: Số 123 Đường Giải Phóng, Phường Đồng Tâm, Quận Hai Bà Trưng, Hà Nội" required></textarea>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="d-flex justify-content-end mt-4 pt-3 border-top">
+                <a th:href="@{/owner/tenants}" class="btn btn-secondary font-weight-bold mr-2 shadow-sm">
+                    <i class="fas fa-times mr-1"></i>Hủy Bỏ
+                </a>
+                <button type="submit" class="btn btn-success font-weight-bold px-4 shadow-sm">
+                    <i class="fas fa-save mr-1"></i>Lưu Hồ Sơ Khách Thuê
+                </button>
+            </div>
+        </div>
     </form>
-  </div>
+
+    <script>
+    function parseCompactDate(str) {
+        if (!str) return '';
+        var clean = str.trim();
+        if (/^\d{8}$/.test(clean)) {
+            var d = clean.substring(0, 2);
+            var m = clean.substring(2, 4);
+            var y = clean.substring(4, 8);
+            return y + '-' + m + '-' + d;
+        }
+        if (/^\d{2}\/\d{2}\/\d{4}$/.test(clean)) {
+            var parts = clean.split('/');
+            return parts[2] + '-' + parts[1] + '-' + parts[0];
+        }
+        if (/^\d{4}-\d{2}-\d{2}$/.test(clean)) {
+            return clean;
+        }
+        return '';
+    }
+
+    function clientSideParseCccd(raw) {
+        var result = {};
+        if (!raw) return result;
+        if (raw.includes('|')) {
+            var parts = raw.split('|');
+            if (parts[0]) result.citizenId = parts[0].trim();
+            if (parts[2]) result.fullName = parts[2].trim();
+            if (parts[3]) result.birthday = parseCompactDate(parts[3]);
+            if (parts[4]) {
+                var g = parts[4].trim().toLowerCase();
+                result.gender = (g === 'nữ' || g === 'nu' || g === 'female') ? 'FEMALE' : (g === 'nam' || g === 'male' ? 'MALE' : 'OTHER');
+            }
+            if (parts[5]) result.permanentAddress = parts[5].trim();
+            if (parts[6]) result.issueDate = parseCompactDate(parts[6]);
+            if (parts[7]) result.phone = parts[7].trim();
+            result.placeOfIssue = 'Cục Cảnh sát QLHC về TTXH';
+        } else {
+            var cccdMatch = raw.match(/\b(\d{12}|\d{9})\b/);
+            if (cccdMatch) result.citizenId = cccdMatch[1];
+            var phoneMatch = raw.match(/\b(0\d{9})\b/);
+            if (phoneMatch) result.phone = phoneMatch[1];
+        }
+        return result;
+    }
+
+    function applyParsedCccdData(data) {
+        var setVal = function(id, val) {
+            var el = document.getElementById(id) || document.querySelector('[name="' + id + '"]');
+            if (el && val) {
+                el.value = val;
+            }
+        };
+        setVal('fullName', data.fullName);
+        setVal('citizenId', data.citizenId);
+        setVal('birthday', data.birthday);
+        setVal('gender', data.gender);
+        setVal('permanentAddress', data.permanentAddress);
+        setVal('phone', data.phone);
+        setVal('issueDate', data.issueDate || '2022-05-10');
+        setVal('placeOfIssue', data.placeOfIssue || 'Cục Cảnh sát QLHC về TTXH');
+    }
+
+    function fillSampleCccdData() {
+        var sample = '079203001234|025489123|Nguyễn Văn Minh|15082001|Nam|Số 12 Nguyễn Trãi, Phường Bến Thành, Quận 1, TP.HCM|10052022|0918273645';
+        var input = document.getElementById('cccdRawInput');
+        if (input) {
+            input.value = sample;
+            parseSmartCccd();
+        }
+    }
+
+    function parseSmartCccd() {
+        var input = document.getElementById('cccdRawInput');
+        var statusEl = document.getElementById('cccdParseStatus');
+        var raw = input ? input.value.trim() : '';
+
+        if (!raw) {
+            if (statusEl) {
+                statusEl.style.display = 'block';
+                statusEl.className = 'small font-weight-bold mt-2 text-danger';
+                statusEl.innerHTML = '<i class="fas fa-exclamation-circle mr-1"></i>Vui lòng dán chuỗi QR CCCD hoặc nhấn "Dùng dữ liệu mẫu CCCD" trước khi bóc tách.';
+            }
+            if (window.showUxToast) {
+                window.showUxToast('Vui lòng dán chuỗi QR CCCD trước khi bóc tách.', 'warning');
+            }
+            return;
+        }
+
+        var fallbackData = clientSideParseCccd(raw);
+
+        fetch('/owner/tenants/api/parse-cccd?rawText=' + encodeURIComponent(raw) + '&qrText=' + encodeURIComponent(raw), {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ rawText: raw, qrText: raw })
+        })
+        .then(function(res) {
+            if (!res.ok) throw new Error('Fallback to client');
+            return res.json();
+        })
+        .then(function(serverData) {
+            var merged = Object.assign({}, fallbackData, serverData || {});
+            applyParsedCccdData(merged);
+            if (statusEl) {
+                statusEl.style.display = 'block';
+                statusEl.className = 'small font-weight-bold mt-2 text-success';
+                statusEl.innerHTML = '<i class="fas fa-check-circle mr-1"></i>Đã trích xuất và điền tự động thông tin CCCD của khách thuê!';
+            }
+            if (window.showUxToast) {
+                window.showUxToast('Đã trích xuất và điền tự động thông tin CCCD!', 'success');
+            }
+        })
+        .catch(function() {
+            applyParsedCccdData(fallbackData);
+            if (statusEl) {
+                statusEl.style.display = 'block';
+                statusEl.className = 'small font-weight-bold mt-2 text-success';
+                statusEl.innerHTML = '<i class="fas fa-check-circle mr-1"></i>Đã tự động bóc tách thông tin CCCD vào biểu mẫu!';
+            }
+            if (window.showUxToast) {
+                window.showUxToast('Đã tự động bóc tách thông tin CCCD vào biểu mẫu!', 'success');
+            }
+        });
+    }
+    </script>
 </div>

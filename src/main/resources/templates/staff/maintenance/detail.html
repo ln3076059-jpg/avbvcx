@@ -1,43 +1,231 @@
-<div>
-    <div class="flex flex-wrap items-center gap-3 text-sm">
-        <a th:href="@{/staff/maintenance}" class="text-blue-600 hover:underline">&larr; Danh sách việc</a>
-    </div>
-    <h1 class="text-2xl font-semibold mt-2">Chi tiết yêu cầu</h1>
+<div class="container-fluid" th:fragment="content">
 
-    <div th:if="${success}" class="mt-3 p-3 bg-green-100 text-green-800 rounded">
-        Thao tác thành công.
-    </div>
-
-    <div class="mt-4 border rounded p-4 space-y-2">
-        <p><span class="font-medium">Mã yêu cầu:</span> <span th:text="${request.code != null ? request.code : request.id}"></span></p>
-        <p><span class="font-medium">Phòng:</span> <span th:text="${request.room != null ? request.room.name : 'N/A'}"></span></p>
-        <p><span class="font-medium">Danh mục:</span> <span th:text="${request.category.displayName}"></span></p>
-        <p><span class="font-medium">Mô tả:</span></p>
-        <p class="text-gray-700 whitespace-pre-line" th:text="${request.description}"></p>
-        <p><span class="font-medium">Trạng thái:</span> <span th:text="${request.status.displayName}"></span></p>
-        <p><span class="font-medium">Phân công lúc:</span> <span th:text="${request.assignedAt != null ? #temporals.format(request.assignedAt, 'dd/MM/yyyy HH:mm') : '-'}"></span></p>
-        <p><span class="font-medium">Bắt đầu lúc:</span> <span th:text="${request.startedAt != null ? #temporals.format(request.startedAt, 'dd/MM/yyyy HH:mm') : '-'}"></span></p>
-        <p><span class="font-medium">Hoàn thành lúc:</span> <span th:text="${request.completedAt != null ? #temporals.format(request.completedAt, 'dd/MM/yyyy HH:mm') : '-'}"></span></p>
-        <div th:if="${request.completionNote != null}">
-            <p><span class="font-medium">Ghi chú hoàn thành:</span></p>
-            <p class="text-gray-700 whitespace-pre-line" th:text="${request.completionNote}"></p>
+    <!-- Page Heading -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <div>
+            <h1 class="h3 mb-0 text-gray-800 font-weight-bold">
+                <i class="fas fa-tools text-info mr-2"></i>Chi Tiết Yêu Cầu Sửa Chữa
+            </h1>
+            <p class="text-muted small mb-0 mt-1">Thông tin sự cố, người báo và biểu mẫu cập nhật tiến độ kỹ thuật</p>
         </div>
+        <a th:href="@{/staff/maintenance}" class="btn btn-secondary btn-sm shadow-sm font-weight-bold">
+            <i class="fas fa-arrow-left mr-1"></i>Quay lại danh sách việc
+        </a>
     </div>
 
-    <div class="mt-4">
-        <div th:if="${request.status.name() == 'ASSIGNED'}">
-            <form th:action="@{|/staff/maintenance/${request.id}/start|}" method="post">
-                <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Bắt đầu xử lý</button>
-            </form>
+    <!-- Alert Messages -->
+    <div th:if="${success}" class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+        <i class="fas fa-check-circle mr-2"></i>Thao tác cập nhật công việc kỹ thuật thành công!
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    <div th:if="${errorComplete != null}" class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
+        <i class="fas fa-exclamation-triangle mr-2"></i><span th:text="${errorComplete}">Lỗi</span>
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+
+    <div class="row">
+
+        <!-- Column 1: Thông tin sự cố -->
+        <div class="col-lg-7">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 bg-white border-bottom-info d-flex justify-content-between align-items-center">
+                    <h6 class="m-0 font-weight-bold text-info">
+                        <i class="fas fa-info-circle mr-1"></i>Thông Tin Sự Cố & Phòng Trọ
+                    </h6>
+                    <span th:class="${request.status.name() == 'PENDING' ? 'badge badge-warning' :
+                                     request.status.name() == 'ASSIGNED' ? 'badge badge-primary' :
+                                     request.status.name() == 'IN_PROGRESS' ? 'badge badge-info' :
+                                     request.status.name() == 'COMPLETED' ? 'badge badge-success' :
+                                     request.status.name() == 'CONFIRMED' ? 'badge badge-secondary' :
+                                     request.status.name() == 'REJECTED' ? 'badge badge-danger' :
+                                     request.status.name() == 'REOPENED' ? 'badge badge-dark' : 'badge badge-light'} + ' px-3 py-2 font-weight-bold'"
+                          th:text="${request.status.displayName}">Trạng thái</span>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-borderless text-dark mb-0">
+                            <tbody>
+                                <tr>
+                                    <th style="width: 35%;" class="text-gray-600 font-weight-bold">Mã Yêu Cầu:</th>
+                                    <td><strong class="text-info" th:text="${request.code != null ? request.code : ('#MR-' + request.id)}">MR-001</strong></td>
+                                </tr>
+                                <tr>
+                                    <th class="text-gray-600 font-weight-bold">Cơ Sở & Phòng Trọ:</th>
+                                    <td>
+                                        <div class="font-weight-bold text-dark" th:text="${request.room != null ? request.room.name : 'N/A'}">Phòng 101</div>
+                                        <div class="small text-muted" th:text="${request.room != null and request.room.property != null ? request.room.property.name : ''}">Tòa nhà A</div>
+                                        <div class="small text-gray-500" th:if="${request.room != null and request.room.property != null and request.room.property.addressNumber != null}"
+                                             th:text="${request.room.property.addressNumber}">Địa chỉ</div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th class="text-gray-600 font-weight-bold">Hạng Mục Sửa Chữa:</th>
+                                    <td>
+                                        <span class="badge badge-light border text-dark font-weight-bold px-2 py-1" 
+                                              th:text="${request.category != null ? request.category.displayName : 'Hư hỏng chung'}">
+                                            Điện nước
+                                        </span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th class="text-gray-600 font-weight-bold">Khách Báo Sự Cố:</th>
+                                    <td>
+                                        <span class="font-weight-bold" th:text="${request.tenant != null ? (request.tenant.fullName != null ? request.tenant.fullName : request.tenant.username) : 'Khách thuê'}">Anh B</span>
+                                        <div class="small text-muted" th:if="${request.tenant != null and request.tenant.phone != null}">
+                                            <i class="fas fa-phone-alt text-success mr-1"></i>
+                                            <a th:href="'tel:' + ${request.tenant.phone}" class="text-success font-weight-bold" th:text="${request.tenant.phone}">0912345678</a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th class="text-gray-600 font-weight-bold">Thời Gian Báo:</th>
+                                    <td class="small text-muted" th:text="${request.createdAt != null ? #temporals.format(request.createdAt, 'dd/MM/yyyy HH:mm') : '-'}">01/01/2026</td>
+                                </tr>
+                                <tr>
+                                    <th class="text-gray-600 font-weight-bold align-top">Mô Tả Chi Tiết:</th>
+                                    <td class="bg-light p-3 rounded text-dark" style="white-space: pre-line;" th:text="${request.description}">
+                                        Chi tiết hỏng hóc...
+                                    </td>
+                                </tr>
+                                <tr th:if="${request.completionNote != null and !#strings.isEmpty(request.completionNote)}">
+                                    <th class="text-gray-600 font-weight-bold align-top">Ghi Chú Hoàn Thành:</th>
+                                    <td class="bg-success text-white p-3 rounded" style="white-space: pre-line;" th:text="${request.completionNote}">
+                                        Đã thay xong linh kiện...
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <div th:if="${request.status.name() == 'IN_PROGRESS'}" class="mt-3">
-            <p class="text-sm text-red-600 mb-2" th:if="${errorComplete != null}" th:text="${errorComplete}"></p>
-            <form th:action="@{|/staff/maintenance/${request.id}/complete|}" method="post">
-                <label class="block text-sm font-medium mb-1">Hoàn thành - ghi chú</label>
-                <textarea name="note" rows="3" class="w-full border rounded px-3 py-2" th:text="${completeNote}"></textarea>
-                <button type="submit" class="mt-2 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">Hoàn thành</button>
-            </form>
+        <!-- Column 2: Thao tác & Tiến trình -->
+        <div class="col-lg-5">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 bg-white border-bottom-info">
+                    <h6 class="m-0 font-weight-bold text-info">
+                        <i class="fas fa-tasks mr-1"></i>Tiến Trình & Thao Tác Kỹ Thuật
+                    </h6>
+                </div>
+                <div class="card-body">
+                    
+                    <!-- Mốc thời gian -->
+                    <div class="mb-4">
+                        <div class="small mb-2">
+                            <span class="font-weight-bold text-gray-700"><i class="far fa-calendar-alt mr-1 text-primary"></i>Phân công:</span>
+                            <span class="text-muted ml-1" th:text="${request.assignedAt != null ? #temporals.format(request.assignedAt, 'dd/MM/yyyy HH:mm') : 'Chưa phân công'}">-</span>
+                        </div>
+                        <div class="small mb-2">
+                            <span class="font-weight-bold text-gray-700"><i class="fas fa-hourglass-start mr-1 text-info"></i>Bắt đầu xử lý:</span>
+                            <span class="text-muted ml-1" th:text="${request.startedAt != null ? #temporals.format(request.startedAt, 'dd/MM/yyyy HH:mm') : 'Chưa bắt đầu'}">-</span>
+                        </div>
+                        <div class="small">
+                            <span class="font-weight-bold text-gray-700"><i class="fas fa-check-circle mr-1 text-success"></i>Hoàn thành:</span>
+                            <span class="text-muted ml-1" th:text="${request.completedAt != null ? #temporals.format(request.completedAt, 'dd/MM/yyyy HH:mm') : 'Chưa hoàn thành'}">-</span>
+                        </div>
+                    </div>
+
+                    <hr class="sidebar-divider">
+
+                    <!-- Actions Form: Bắt đầu xử lý -->
+                    <div th:if="${request.status.name() == 'ASSIGNED' or request.status.name() == 'REOPENED'}" class="text-center py-3">
+                        <div class="alert alert-info small text-left mb-3">
+                            <i class="fas fa-info-circle mr-1"></i>
+                            Yêu cầu đã được giao cho bạn. Nhấn <strong>"Bắt đầu xử lý"</strong> khi bạn tiến hành kiểm tra hoặc sửa chữa.
+                        </div>
+                        <form th:action="@{|/staff/maintenance/${request.id}/start|}" method="post">
+                            <button type="submit" class="btn btn-primary btn-block py-2 font-weight-bold shadow-sm">
+                                <i class="fas fa-play mr-2"></i>BẮT ĐẦU XỬ LÝ SỰ CỐ
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Actions Form: Báo cáo hoàn thành -->
+                    <div th:if="${request.status.name() == 'IN_PROGRESS'}" class="py-2">
+                        <div class="alert alert-warning small mb-3">
+                            <i class="fas fa-exclamation-circle mr-1"></i>
+                            Bạn đang trong quá trình sửa chữa. Sau khi hoàn tất, hãy nhập biên bản/ghi chú công việc và nhấn Hoàn Thành.
+                        </div>
+                        <form th:action="@{|/staff/maintenance/${request.id}/complete|}" method="post" onsubmit="appendMaterialCostToStaffNote()">
+                            <div class="form-group mb-2">
+                                <label class="font-weight-bold text-gray-700 small d-block mb-1">
+                                    Mẫu ghi chú nghiệm thu nhanh:
+                                </label>
+                                <div class="d-flex flex-wrap" style="gap: 6px;">
+                                    <button type="button" onclick="fillStaffCompletionTag('Đã thay thế linh kiện mới')" class="btn btn-outline-info btn-sm py-1 px-2 small">
+                                        Đã thay thế linh kiện mới
+                                    </button>
+                                    <button type="button" onclick="fillStaffCompletionTag('Đã vệ sinh & bảo dưỡng định kỳ')" class="btn btn-outline-info btn-sm py-1 px-2 small">
+                                        Đã vệ sinh &amp; bảo dưỡng định kỳ
+                                    </button>
+                                    <button type="button" onclick="fillStaffCompletionTag('Hoàn tất kiểm tra an toàn điện/nước')" class="btn btn-outline-info btn-sm py-1 px-2 small">
+                                        Hoàn tất kiểm tra an toàn điện/nước
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="font-weight-bold text-gray-700 small" for="staffMaterialCostInput">
+                                    <i class="fas fa-coins mr-1 text-warning"></i>Chi phí vật tư phát sinh (đ) <span class="text-muted font-weight-normal">(Tùy chọn)</span>:
+                                </label>
+                                <input type="number" id="staffMaterialCostInput" min="0" step="1000" class="form-control form-control-sm" placeholder="VD: 150000" />
+                            </div>
+                            <div class="form-group">
+                                <label class="font-weight-bold text-gray-700 small">
+                                    <i class="fas fa-edit mr-1 text-success"></i>Ghi Chú Hoàn Thành &amp; Vật Tư (Bắt buộc):
+                                </label>
+                                <textarea id="staffCompletionNote" name="note" rows="4" class="form-control" required
+                                          placeholder="Mô tả công việc đã làm: thay bóng đèn 20W, sửa đường ống nước..."></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-success btn-block py-2 font-weight-bold shadow-sm">
+                                <i class="fas fa-check-circle mr-2"></i>BÁO CÁO HOÀN THÀNH
+                            </button>
+                        </form>
+                    </div>
+
+                    <script>
+                        function fillStaffCompletionTag(text) {
+                            var el = document.getElementById('staffCompletionNote');
+                            if (!el) return;
+                            if (el.value && el.value.trim().length > 0) {
+                                if (el.value.indexOf(text) === -1) {
+                                    el.value = el.value.trim() + '; ' + text;
+                                }
+                            } else {
+                                el.value = text;
+                            }
+                            el.focus();
+                        }
+
+                        function appendMaterialCostToStaffNote() {
+                            var costEl = document.getElementById('staffMaterialCostInput');
+                            var noteEl = document.getElementById('staffCompletionNote');
+                            if (!costEl || !noteEl) return;
+                            var costVal = parseInt(costEl.value || '0', 10);
+                            if (costVal > 0 && noteEl.value.indexOf('[Chi phí vật tư phát sinh:') === -1) {
+                                var formatted = costVal.toLocaleString('vi-VN') + ' đ';
+                                noteEl.value = (noteEl.value ? noteEl.value.trim() + '\n' : '') + '[Chi phí vật tư phát sinh: ' + formatted + ']';
+                            }
+                        }
+                    </script>
+
+                    <!-- Trạng thái đã hoàn thành hoặc các trạng thái khác -->
+                    <div th:if="${request.status.name() == 'COMPLETED' or request.status.name() == 'CONFIRMED'}" class="text-center py-4">
+                        <div class="text-success mb-2">
+                            <i class="fas fa-check-double fa-3x"></i>
+                        </div>
+                        <h6 class="font-weight-bold text-success">Công Việc Đã Hoàn Thành</h6>
+                        <p class="text-muted small">Yêu cầu đã được kỹ thuật xử lý xong và đang chờ khách thuê hoặc chủ trọ nghiệm thu.</p>
+                    </div>
+
+                </div>
+            </div>
         </div>
+
     </div>
+
 </div>

@@ -27,6 +27,8 @@ public interface PostRepository extends JpaRepository<Post, Long> {
      */
     Optional<Post> findByPropertyId(Long propertyId);
 
+    List<Post> findByProperty_IdIn(java.util.Collection<Long> propertyIds);
+
     /**
      * Check if post exists for property
      */
@@ -119,6 +121,24 @@ public interface PostRepository extends JpaRepository<Post, Long> {
            "p.postExpiredAt DESC")
     List<Post> findMarketplacePostsByCategory(@Param("categoryId") Long categoryId,
                                              @Param("currentTime") LocalDateTime currentTime);
+
+    /**
+     * Search marketplace posts with database-level keyword filtering
+     */
+    @Query("SELECT p FROM Post p JOIN p.property prop " +
+           "LEFT JOIN prop.ward w " +
+           "LEFT JOIN w.province prov " +
+           "WHERE p.status = 'ACTIVE' AND p.postExpiredAt > :currentTime " +
+           "AND (:keyword IS NULL OR LOWER(p.title) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
+           "     OR LOWER(prop.addressNumber) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
+           "     OR LOWER(w.name) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
+           "     OR LOWER(prov.name) LIKE LOWER(CONCAT('%', :keyword, '%'))) " +
+           "ORDER BY " +
+           "CASE WHEN p.boostExpiredAt IS NOT NULL AND p.boostExpiredAt > :currentTime THEN 0 ELSE 1 END, " +
+           "p.boostExpiredAt DESC NULLS LAST, " +
+           "p.postExpiredAt DESC")
+    List<Post> searchMarketplacePosts(@Param("keyword") String keyword,
+                                      @Param("currentTime") LocalDateTime currentTime);
 
     // === OWNER MANAGEMENT QUERIES ===
 

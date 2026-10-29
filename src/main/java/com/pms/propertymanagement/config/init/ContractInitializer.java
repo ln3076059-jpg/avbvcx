@@ -5,6 +5,7 @@ import com.pms.propertymanagement.enums.ContractStatus;
 import com.pms.propertymanagement.enums.RoomStatus;
 import com.pms.propertymanagement.repository.*;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,6 +20,7 @@ import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class ContractInitializer {
 
     private final ContractRepository contractRepository;
@@ -60,16 +62,18 @@ public class ContractInitializer {
                 if (!assignedFirstTenant) {
                     representative = tenants.get(0);
                     assignedFirstTenant = true;
+                } else if (tenants.size() > 1) {
+                    representative = tenants.get(1 + random.nextInt(tenants.size() - 1));
                 } else {
-                    representative = tenants.get(random.nextInt(tenants.size()));
+                    representative = tenants.get(0);
                 }
                 contract.setRepresentative(representative);
 
                 Set<Tenant> contractTenants = new HashSet<>();
                 contractTenants.add(representative);
 
-                if (room.getMaxOccupancy() > 1 && tenants.size() > 1 && random.nextBoolean()) {
-                    Tenant another = tenants.get(random.nextInt(tenants.size()));
+                if (room.getMaxOccupancy() > 1 && tenants.size() > 2 && random.nextBoolean()) {
+                    Tenant another = tenants.get(1 + random.nextInt(tenants.size() - 1));
                     if (!another.getId().equals(representative.getId())) {
                         contractTenants.add(another);
                     }
@@ -108,7 +112,7 @@ public class ContractInitializer {
                 contractRepository.save(contract);
             }
 
-            System.out.println("Generated " + rentedRooms.size() + " contracts for owner1.");
+            log.info("Generated {} contracts for owner1.", rentedRooms.size());
         }
 
         ensureTenant1HasActiveContract(owner);

@@ -1,0 +1,705 @@
+<div th:fragment="content">
+
+  <!-- Compact Breadcrumbs -->
+  <div class="bg-light border-bottom py-2">
+    <div class="container">
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb mb-0 small d-flex align-items-center gap-1">
+          <li class="breadcrumb-item"><a th:href="@{/}" class="text-decoration-none" style="color: #ea580c;"><i class="fa-solid fa-house me-1"></i>Trang chủ</a></li>
+          <li class="breadcrumb-item"><a th:href="@{/properties}" class="text-decoration-none" style="color: #ea580c;">Khách hàng</a></li>
+          <li class="breadcrumb-item active text-dark fw-semibold" aria-current="page">Giỏ hàng &amp; Đơn đặt phòng</li>
+        </ol>
+      </nav>
+    </div>
+  </div>
+
+  <!-- E-Commerce My Orders / My Bookings Section -->
+  <section class="py-4" style="background-color: #f5f5f5; min-height: 78vh;">
+    <div class="container">
+      <div class="row g-4">
+
+        <!-- LEFT SIDEBAR: E-Commerce Customer Account Menu (col-lg-3) -->
+        <div class="col-lg-3">
+          <div class="bg-white rounded-3 p-3">
+            <div class="d-flex align-items-center gap-3 pb-3 mb-3">
+              <div class="d-flex align-items-center justify-content-center text-white fw-bold flex-shrink-0"
+                   style="width: 48px; height: 48px; border-radius: 12px; background: #fe9901; font-size: 18px;">
+                <span th:text="${customerName != null and !customerName.isEmpty() ? #strings.substring(customerName, 0, 1).toUpperCase() : 'K'}">N</span>
+              </div>
+              <div>
+                <div class="fw-bold text-dark" th:text="${customerName != null and !customerName.isEmpty() ? customerName : 'Nguyễn Văn An'}">Nguyễn Văn An</div>
+                <div class="small text-muted tabular-nums" th:text="${customerPhone != null and !customerPhone.isEmpty() ? customerPhone : '0901234567'}">0901234567</div>
+              </div>
+            </div>
+
+            <div class="d-flex flex-column gap-1 small">
+              <a th:href="@{/my-bookings}" class="d-flex align-items-center justify-content-between px-3 py-2.5 rounded text-decoration-none fw-bold"
+                 style="background-color: #fff3e0; color: #ea580c;">
+                <span><i class="fa-solid fa-cart-shopping me-2"></i>Giỏ hàng / Đơn đặt phòng</span>
+                <span class="badge rounded-pill text-white" style="background-color: #fe9901;"
+                      th:text="${myBookings != null ? myBookings.size() : 1}">1</span>
+              </a>
+              <a th:href="@{/properties}" class="d-flex align-items-center px-3 py-2.5 rounded text-decoration-none text-secondary fw-semibold">
+                <i class="fa-solid fa-magnifying-glass me-2"></i>Tìm &amp; Đặt thêm phòng
+              </a>
+              <a th:href="@{/saved-posts}" class="d-flex align-items-center px-3 py-2.5 rounded text-decoration-none text-secondary fw-semibold">
+                <i class="fa-regular fa-heart me-2"></i>Phòng trọ đã lưu
+              </a>
+              <!-- Secure Order Lookup Form -->
+              <form method="post" th:action="@{/my-bookings/lookup}" class="mb-3 p-2.5 rounded text-start" style="background: #f8fafc; border: 1px solid #e2e8f0;">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                  <span class="small fw-bold text-dark"><i class="fa-solid fa-shield-halved text-success me-1"></i>Tra cứu bảo mật</span>
+                </div>
+                <div class="mb-2">
+                  <label for="lookupBookingId" class="form-label mb-1 text-muted" style="font-size: 11.5px; font-weight: 600;">MÃ ĐƠN PHÒNG</label>
+                  <input type="number" id="lookupBookingId" name="bookingId" class="form-control form-control-sm tabular-nums"
+                         placeholder="Ví dụ: 48" required style="border-radius: 6px; font-size: 12.5px;" />
+                </div>
+                <div class="mb-2">
+                  <label for="lookupPhone" class="form-label mb-1 text-muted" style="font-size: 11.5px; font-weight: 600;">SỐ ĐIỆN THOẠI</label>
+                  <div class="input-group input-group-sm">
+                    <input type="text" id="lookupPhone" name="phone" class="form-control tabular-nums"
+                           th:value="${customerPhone}" placeholder="0901234567" required style="border-radius: 6px 0 0 6px; font-size: 12.5px;" />
+                    <button type="submit" class="btn text-white fw-bold" style="background-color: #ea580c; border-radius: 0 6px 6px 0;" aria-label="Tra cứu đơn đặt phòng">
+                      <i class="fa-solid fa-magnifying-glass"></i>
+                    </button>
+                  </div>
+                </div>
+                <div class="text-muted" style="font-size: 11px; line-height: 1.3;">
+                  <i class="fa-solid fa-lock me-1"></i>Xác thực 2 yếu tố (Mã đơn + SĐT) bảo vệ quyền riêng tư.
+                </div>
+              </form>
+              <a th:href="@{/tenant/dashboard}" class="d-flex align-items-center px-3 py-2.5 rounded text-decoration-none fw-bold text-white text-center justify-content-center"
+                 style="background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); border-radius: 8px; box-shadow: 0 4px 12px rgba(234, 88, 12, 0.25);">
+                <i class="fa-solid fa-house-chimney-user me-2"></i>Vào Cổng Cư Dân
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGHT MAIN PANEL: E-Commerce Order Tracking (col-lg-9) -->
+        <div class="col-lg-9" id="rentRegistrationSection">
+
+          <!-- Notice when unauthenticated -->
+          <div th:if="${session.user == null}" class="alert alert-warning py-3 px-3.5 mb-3 d-flex flex-wrap align-items-center justify-content-between gap-3 shadow-sm" style="border-radius: 10px; border-left: 5px solid #fe9901 !important;" role="alert">
+            <div class="d-flex align-items-center gap-2.5">
+              <i class="fa-solid fa-user-lock fs-4 text-warning"></i>
+              <div>
+                <strong class="d-block text-dark small">Bạn chưa đăng nhập tài khoản khách hàng</strong>
+                <span class="text-secondary small">Vui lòng đăng nhập để đồng bộ đầy đủ các đơn đặt thuê phòng, tiến hành thanh toán tiền cọc và ký hợp đồng điện tử.</span>
+              </div>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+              <a th:href="@{/login}" class="btn btn-sm btn-warning text-dark fw-bold px-3 py-1.5">Đăng Nhập</a>
+              <a th:href="@{/register}" class="btn btn-sm btn-outline-secondary fw-semibold px-3 py-1.5">Đăng Ký</a>
+            </div>
+          </div>
+
+          <!-- Flash Alerts for Payment / Lookup / Cancel -->
+          <div th:if="${paymentSuccess}" class="alert alert-success py-2.5 px-3.5 small d-flex align-items-center mb-3 shadow-sm" style="border-radius: 8px; border-left: 5px solid #16a34a !important;" role="alert">
+            <i class="fa-solid fa-circle-check fs-4 text-success me-2.5"></i>
+            <div>
+              <strong class="d-block text-success">Thanh toán cọc giữ phòng thành công!</strong>
+              <span th:text="${paymentSuccess}">Đơn đặt phòng đã được xác nhận thanh toán và phê duyệt.</span>
+            </div>
+          </div>
+          <div th:if="${lookupError}" class="alert alert-danger py-2 px-3 small d-flex align-items-center mb-3" style="border-radius: 8px;" role="alert">
+            <i class="fa-solid fa-circle-exclamation me-2"></i>
+            <span th:text="${lookupError}">Lỗi tra cứu</span>
+          </div>
+          <div th:if="${lookupSuccess}" class="alert alert-success py-2 px-3 small d-flex align-items-center mb-3" style="border-radius: 8px;" role="alert">
+            <i class="fa-solid fa-circle-check me-2"></i>
+            <span th:text="${lookupSuccess}">Tra cứu thành công</span>
+          </div>
+          <div th:if="${cancelBookingError}" class="alert alert-danger py-2 px-3 small d-flex align-items-center mb-3" style="border-radius: 8px;" role="alert">
+            <i class="fa-solid fa-circle-exclamation me-2"></i>
+            <span th:text="${cancelBookingError}">Lỗi hủy đơn</span>
+          </div>
+          <div th:if="${cancelBookingSuccess}" class="alert alert-success py-2 px-3 small d-flex align-items-center mb-3" style="border-radius: 8px;" role="alert">
+            <i class="fa-solid fa-circle-check me-2"></i>
+            <span th:text="${cancelBookingSuccess}">Hủy đơn thành công</span>
+          </div>
+
+          <!-- 1. Order Status Tabs (Interactive) -->
+          <div class="bg-white rounded-top d-flex flex-wrap align-items-center justify-content-between px-3 pt-1 border-bottom">
+            <div class="d-flex flex-wrap align-items-center">
+              <a th:href="@{/my-bookings(status='ALL')}"
+                 class="px-3 py-2.5 small text-decoration-none"
+                 th:style="${activeTab == null or activeTab == 'ALL' ? 'color: #ea580c; font-weight: 700; border-bottom: 3px solid #ea580c;' : 'color: #64748b; font-weight: 600;'}">
+                Tất cả (<span th:text="${totalBookingsCount != null ? totalBookingsCount : (myBookings != null ? myBookings.size() : 1)}">1</span>)
+              </a>
+              <a th:href="@{/my-bookings(status='PENDING')}"
+                 class="px-3 py-2.5 small text-decoration-none"
+                 th:style="${activeTab == 'PENDING' ? 'color: #ea580c; font-weight: 700; border-bottom: 3px solid #ea580c;' : 'color: #64748b; font-weight: 600;'}">
+                <i class="fa-solid fa-clock me-1"></i>Chờ xác nhận / Chờ duyệt (<span th:text="${pendingCount != null ? pendingCount : 1}">1</span>)
+              </a>
+              <a th:href="@{/my-bookings(status='APPROVED')}"
+                 class="px-3 py-2.5 small text-decoration-none"
+                 th:style="${activeTab == 'APPROVED' ? 'color: #ea580c; font-weight: 700; border-bottom: 3px solid #ea580c;' : 'color: #64748b; font-weight: 600;'}">
+                <i class="fa-solid fa-file-signature me-1"></i>Đã duyệt &amp; Chờ ký HĐ (<span th:text="${approvedCount != null ? approvedCount : 0}">0</span>)
+              </a>
+              <a th:href="@{/my-bookings(status='CANCELLED')}"
+                 class="px-3 py-2.5 small text-decoration-none"
+                 th:style="${activeTab == 'CANCELLED' ? 'color: #ea580c; font-weight: 700; border-bottom: 3px solid #ea580c;' : 'color: #64748b; font-weight: 600;'}">
+                <i class="fa-solid fa-ban me-1"></i>Đã hủy (<span th:text="${cancelledCount != null ? cancelledCount : 0}">0</span>)
+              </a>
+              <a th:href="@{/tenant/dashboard}"
+                 class="px-3 py-2.5 small fw-semibold text-secondary text-decoration-none">
+                <i class="fa-solid fa-house-chimney-user me-1"></i>Đang thuê (Cổng Cư Dân)
+              </a>
+            </div>
+            <span class="small fw-bold py-2" style="color: #ea580c;">
+              <i class="fa-solid fa-cart-shopping me-1"></i>GIỎ HÀNG &amp; ĐƠN ĐẶT THUÊ PHÒNG
+            </span>
+          </div>
+
+          <!-- 2. 4-Step Horizontal Order Progress Bar (Dynamic) -->
+          <div class="bg-white px-4 py-3 mb-3 rounded-bottom">
+            <div class="row text-center g-2">
+              <div class="col-3">
+                <div class="mx-auto rounded-circle d-flex align-items-center justify-content-center text-white mb-1.5"
+                     style="width: 40px; height: 40px; background-color: #16a34a;">
+                  <i class="fa-solid fa-check"></i>
+                </div>
+                <div class="fw-bold small" style="color: #16a34a;">1. Đã Đặt Thuê Phòng</div>
+                <div class="text-muted" style="font-size: 12px;">Đã gửi đơn đặt phòng</div>
+              </div>
+              <div class="col-3">
+                <div class="mx-auto rounded-circle d-flex align-items-center justify-content-center text-white mb-1.5"
+                     th:style="${hasApprovedBooking ? 'width: 40px; height: 40px; background-color: #16a34a;' : 'width: 40px; height: 40px; background-color: #fe9901;'}">
+                  <i th:class="${hasApprovedBooking ? 'fa-solid fa-check' : 'fa-solid fa-hourglass-half'}"></i>
+                </div>
+                <div class="fw-bold small" th:style="${hasApprovedBooking ? 'color: #16a34a;' : 'color: #ea580c;'}">2. Chờ Chủ Trọ Duyệt</div>
+                <div class="text-muted" style="font-size: 12px;" th:text="${hasApprovedBooking ? 'Chủ trọ đã phê duyệt' : 'Đang xét duyệt giữ phòng'}">Đang xét duyệt giữ phòng</div>
+              </div>
+              <div class="col-3">
+                <div class="mx-auto rounded-circle d-flex align-items-center justify-content-center mb-1.5"
+                     th:style="${hasApprovedBooking ? 'width: 40px; height: 40px; background-color: #16a34a; color: #fff;' : 'width: 40px; height: 40px; background-color: #f1f5f9; color: #64748b;'}">
+                  <i class="fa-solid fa-file-signature"></i>
+                </div>
+                <div class="fw-semibold small" th:style="${hasApprovedBooking ? 'color: #16a34a; font-weight: 700;' : 'color: #64748b;'}">3. Duyệt &amp; Ký Hợp Đồng</div>
+                <div class="text-muted" style="font-size: 12px;">Chủ trọ cấp hợp đồng thuê</div>
+              </div>
+              <div class="col-3">
+                <div class="mx-auto rounded-circle d-flex align-items-center justify-content-center mb-1.5"
+                     th:style="${hasApprovedBooking ? 'width: 40px; height: 40px; background-color: #fe9901; color: #fff;' : 'width: 40px; height: 40px; background-color: #f1f5f9; color: #64748b;'}">
+                  <i class="fa-solid fa-key"></i>
+                </div>
+                <div class="fw-semibold small" th:style="${hasApprovedBooking ? 'color: #ea580c; font-weight: 700;' : 'color: #64748b;'}">4. Nhận Phòng Vào Ở</div>
+                <div class="text-muted" style="font-size: 12px;">Kích hoạt Cổng Cư Dân</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Flash Notification when redirected from Đặt Thuê Phòng Ngay or Cancel -->
+          <div th:if="${registerRentSuccess}" class="p-3 mb-3 rounded bg-white d-flex align-items-center justify-content-between gap-2"
+               style="border-left: 4px solid #16a34a !important;">
+            <div class="small">
+              <span class="badge bg-success text-white me-2 px-2 py-1"><i class="fa-solid fa-check me-1"></i>ĐẶT PHÒNG THÀNH CÔNG</span>
+              <strong class="text-dark">Đơn đặt thuê <span th:text="${registeredRoomName}">Phòng</span> đã được tạo!</strong>
+              <span class="text-muted ms-1">Đơn hàng đang ở trạng thái <strong>Chờ xác nhận / Chờ chủ trọ duyệt</strong>.</span>
+            </div>
+          </div>
+          <div th:if="${cancelBookingSuccess}" class="p-3 mb-3 rounded bg-white d-flex align-items-center justify-content-between gap-2"
+               style="border-left: 4px solid #fe9901 !important;">
+            <div class="small text-dark fw-semibold">
+              <i class="fa-solid fa-circle-check text-primary me-1"></i>
+              <span th:text="${cancelBookingSuccess}">Đã hủy đơn đặt phòng thành công.</span>
+            </div>
+          </div>
+          <div th:if="${cancelBookingError}" class="p-3 mb-3 rounded bg-white d-flex align-items-center justify-content-between gap-2"
+               style="border-left: 4px solid #dc2626 !important;">
+            <div class="small text-danger fw-semibold">
+              <i class="fa-solid fa-triangle-exclamation me-1"></i>
+              <span th:text="${cancelBookingError}">Lỗi hủy đơn.</span>
+            </div>
+          </div>
+
+          <!-- 3. List of E-Commerce Order Cards -->
+          <div th:if="${myBookings != null and !myBookings.isEmpty()}">
+            <div th:each="req : ${myBookings}"
+                 class="bg-white rounded-3 mb-3 overflow-hidden">
+              <!-- Order Card Shop Header -->
+              <div class="px-3 py-2.5 d-flex flex-wrap align-items-center justify-content-between gap-2" style="background: #f8fafc;">
+                <div class="d-flex align-items-center gap-2 small">
+                  <span class="badge px-1.5 py-1 text-white" style="background-color: #fe9901; font-size: 11px;">Yêu thích+</span>
+                  <strong class="text-dark">
+                    <i class="fa-solid fa-store me-1 text-secondary"></i>
+                    <span th:text="${req.property != null ? req.property.name : 'Khu nhà trọ'}">Nhà trọ cạnh ĐHQG BD</span>
+                  </strong>
+                  <span class="text-muted">·</span>
+                  <span class="text-muted">Chủ trọ: <strong class="text-dark" th:text="${req.owner != null ? (req.owner.fullName ?: req.owner.username) : 'owner1'}">owner1</strong></span>
+                </div>
+                <div class="d-flex align-items-center gap-2 small">
+                  <span class="text-success"><i class="fa-solid fa-truck-fast me-1"></i>Hồ sơ đặt phòng đã gửi tới chủ trọ</span>
+                  <span class="text-muted">|</span>
+                  <span th:if="${req.bookingStatus == 'CANCELLED' or req.bookingStatus == 'REJECTED'}" class="fw-bold text-uppercase text-secondary">
+                    <i class="fa-solid fa-ban me-1"></i>ĐÃ HỦY ĐƠN
+                  </span>
+                  <span th:if="${req.isChecked and req.bookingStatus != 'CANCELLED'}" class="fw-bold text-uppercase" style="color: #16a34a;">
+                    <i class="fa-solid fa-circle-check me-1"></i>ĐÃ XÁC NHẬN &amp; DUYỆT
+                  </span>
+                  <span th:if="${!req.isChecked and req.bookingStatus != 'CANCELLED' and req.bookingStatus != 'REJECTED'}" class="fw-bold text-uppercase" style="color: #ea580c;">
+                    <i class="fa-solid fa-hourglass-half me-1"></i>CHỜ XÁC NHẬN (CHỜ DUYỆT)
+                  </span>
+                </div>
+              </div>
+
+              <!-- Order Card Item Row -->
+              <div class="p-3 d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
+                <div class="d-flex align-items-start gap-3">
+                  <img th:src="${'/images/rooms/room-' + (((req.property != null ? req.property.id : 1) % 12) + 1) + '.jpg'}"
+                       alt="Ảnh phòng đặt thuê"
+                       class="rounded flex-shrink-0"
+                       style="width: 88px; height: 88px; object-fit: cover;" />
+                  <div>
+                    <div class="fw-bold mb-1" style="color: #161825; font-size: 16px;">
+                      <span class="badge bg-light text-dark me-1" th:text="${'#ĐƠN-' + req.id}">#ĐƠN-48</span>
+                      <span th:text="${req.property != null ? 'Đặt thuê phòng tại ' + req.property.name : 'Đặt thuê phòng trực tuyến'}">Đặt thuê phòng tại Nhà trọ cạnh ĐHQG BD</span>
+                    </div>
+                    <div class="small text-muted mb-2">
+                      <span><i class="fa-regular fa-user me-1 text-secondary"></i>Người đặt: <strong class="text-dark" th:text="${req.name}">Nguyễn Văn An</strong></span>
+                      <span class="mx-2">·</span>
+                      <span><i class="fa-solid fa-phone me-1 text-secondary"></i>SĐT: <strong class="text-dark tabular-nums" th:text="${req.phone}">0901234567</strong></span>
+                      <span class="mx-2">·</span>
+                      <span class="badge px-2 py-0.5" style="background-color: #fff3e0; color: #c97a05;">Giữ phòng ưu tiên 24h</span>
+                    </div>
+
+                    <!-- THÔNG TIN ĐẶT PHÒNG (TRONG PHẦN GIỎ HÀNG) -->
+                    <div class="p-3 rounded-2" style="background-color: #fffaf5; border: 1.5px solid #fed7aa;">
+                      <div class="d-flex align-items-center justify-content-between mb-2 pb-1.5 border-bottom border-warning-subtle">
+                        <span class="fw-bold small text-uppercase" style="color: #9a3412;">
+                          <i class="fa-solid fa-clipboard-check me-1.5" style="color: #ea580c;"></i>Thông Tin Đặt Phòng
+                        </span>
+                        <span class="badge px-2 py-0.5 fw-semibold" style="background-color: #ffedd5; color: #c2410c; font-size: 11px;">
+                          <i class="fa-regular fa-calendar-check me-1"></i>Hồ sơ giữ phòng trực tuyến
+                        </span>
+                      </div>
+                      <div class="row g-2">
+                        <div class="col-6 col-lg-3">
+                          <div class="p-2 rounded bg-white border border-warning-subtle h-100">
+                            <span class="text-muted d-block" style="font-size: 11.5px;"><i class="fa-regular fa-calendar-check me-1" style="color: #ea580c;"></i>Nhận phòng:</span>
+                            <strong class="d-block tabular-nums" style="color: #ea580c; font-size: 14px; font-weight: 800; white-space: nowrap;"
+                                    th:text="${req.moveInDate != null ? #temporals.format(req.moveInDate, 'dd/MM/yyyy') : (req.note != null and req.note.contains('Nhận phòng:') ? #strings.substring(#strings.substringAfter(req.note, 'Nhận phòng:'), 0, 10).trim() : '01/11/2026')}">
+                              01/11/2026
+                            </strong>
+                          </div>
+                        </div>
+                        <div class="col-6 col-lg-3">
+                          <div class="p-2 rounded bg-white border border-warning-subtle h-100">
+                            <span class="text-muted d-block" style="font-size: 11.5px;">Thời hạn thuê:</span>
+                            <strong class="text-dark d-block fw-bold" style="font-size: 13.5px;"
+                                    th:text="${req.durationMonths != null ? req.durationMonths + ' tháng' : (req.note != null and req.note.contains('Thời hạn:') ? #strings.substring(#strings.substringAfter(req.note, 'Thời hạn:'), 0, 9).replace('|','').trim() : '12 tháng')}">
+                              12 tháng
+                            </strong>
+                          </div>
+                        </div>
+                        <div class="col-6 col-lg-3">
+                          <div class="p-2 rounded bg-white border border-warning-subtle h-100">
+                            <span class="text-muted d-block" style="font-size: 11.5px;">Số người ở:</span>
+                            <strong class="text-dark d-block fw-bold" style="font-size: 13.5px;"
+                                    th:text="${req.occupants != null ? req.occupants + ' người' : (req.note != null and req.note.contains('Số người:') ? #strings.substring(#strings.substringAfter(req.note, 'Số người:'), 0, 3).replace('|','').trim() + ' người' : '2 người')}">
+                              2 người
+                            </strong>
+                          </div>
+                        </div>
+                        <div class="col-6 col-lg-3">
+                          <div class="p-2 rounded bg-white border border-warning-subtle h-100">
+                            <span class="text-muted d-block" style="font-size: 11.5px;">Tiền cọc giữ phòng:</span>
+                            <strong class="d-block tabular-nums fw-bold" style="color: #ea580c; font-size: 13.5px;"
+                                    th:text="${#numbers.formatDecimal(req.depositAmount != null and req.depositAmount > 0 ? req.depositAmount : (req.property != null and req.property.price != null ? req.property.price : 1800000), 0, 'POINT', 0, 'COMMA') + ' ₫'}">
+                              1.800.000 ₫
+                            </strong>
+                          </div>
+                        </div>
+                      </div>
+                      <div th:if="${req.note != null and !req.note.isEmpty()}" class="mt-2 pt-1.5 border-top border-warning-subtle small text-muted">
+                        <span class="fw-semibold text-secondary">Chi tiết yêu cầu:</span>
+                        <span th:text="${req.note}">[ĐĂNG KÝ THUÊ PHÒNG]</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="text-md-end flex-shrink-0">
+                  <div class="text-muted text-decoration-line-through small tabular-nums"
+                       th:text="${#numbers.formatDecimal((req.property != null and req.property.price != null ? req.property.price : 1800000) * 1.15, 0, 'POINT', 0, 'COMMA') + ' ₫'}">2.070.000 ₫</div>
+                  <div class="fw-bold tabular-nums" style="color: #ea580c; font-size: 16px;"
+                       th:text="${#numbers.formatDecimal(req.property != null and req.property.price != null ? req.property.price : 1800000, 0, 'POINT', 0, 'COMMA') + ' ₫/tháng'}">1.800.000 ₫/tháng</div>
+                  <div class="small text-muted">Số lượng: 1 phòng</div>
+                </div>
+              </div>
+
+              <!-- ========================================================================= -->
+              <!-- KHỐI THANH TOÁN TIỀN CỌC GIỮ PHÒNG (E-COMMERCE CHECKOUT & PAYMENT FLOW)    -->
+              <!-- ========================================================================= -->
+              <div class="px-3 pb-3 pt-1 border-top" style="background-color: #fbfcfe;">
+                <!-- Trạng thái: Đã thanh toán / Đã duyệt -->
+                <div th:if="${req.isChecked and req.bookingStatus != 'CANCELLED'}" class="p-3 rounded-3" style="background: #f0fdf4; border: 1.5px solid #bbf7d0;">
+                  <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+                    <div class="d-flex align-items-center gap-2.5">
+                      <div class="rounded-circle d-flex align-items-center justify-content-center text-white" style="width: 36px; height: 36px; background: #16a34a; font-size: 16px;">
+                        <i class="fa-solid fa-check"></i>
+                      </div>
+                      <div>
+                        <strong class="d-block text-success" style="font-size: 14px;">ĐÃ XÁC NHẬN &amp; THANH TOÁN TIỀN CỌC GIỮ PHÒNG</strong>
+                        <span class="text-muted small">Hồ sơ đã được lưu giữ ưu tiên. Hợp đồng điện tử đã được liên kết với Cổng Cư Dân.</span>
+                      </div>
+                    </div>
+                    <div class="d-flex align-items-center gap-2">
+                      <a th:href="@{/tenant/dashboard}" class="btn btn-sm btn-success fw-bold px-3 py-1.5 shadow-sm">
+                        <i class="fa-solid fa-house-chimney-user me-1.5"></i>Vào Cổng Cư Dân Ký HĐ
+                      </a>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Trạng thái: Chờ thanh toán tiền cọc / Chờ duyệt (E-Commerce Checkout) -->
+                <div th:if="${!req.isChecked and req.bookingStatus != 'CANCELLED' and req.bookingStatus != 'REJECTED'}">
+                  <!-- Header của khối thanh toán giỏ hàng -->
+                  <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-2.5 pb-2 border-bottom">
+                    <div class="d-flex align-items-center gap-2">
+                      <div class="rounded text-white d-flex align-items-center justify-content-center" style="width: 28px; height: 28px; background: #fe9901;">
+                        <i class="fa-solid fa-credit-card small"></i>
+                      </div>
+                      <strong class="text-dark small text-uppercase">Thanh Toán Tiền Cọc Giữ Phòng (Quy Trình Giỏ Hàng &amp; Đặt Mua)</strong>
+                    </div>
+                    <span class="badge px-2.5 py-1 text-white fw-bold" style="background-color: #ea580c; font-size: 11px;">
+                      <i class="fa-solid fa-clock-rotate-left me-1"></i>Hạn giữ chỗ: 24 giờ
+                    </span>
+                  </div>
+
+                  <!-- 2 Cột: Bảng kê chi phí & Chọn phương thức thanh toán -->
+                  <div class="row g-3">
+                    <!-- Cột 1: Bảng kê chi phí đơn đặt thuê (Cart Summary) -->
+                    <div class="col-md-5">
+                      <div class="p-3 rounded-3 h-100 bg-white border" style="border-color: #fed7aa !important;">
+                        <h6 class="small fw-bold text-dark mb-2.5 pb-1 border-bottom">
+                          <i class="fa-solid fa-receipt me-1.5" style="color: #ea580c;"></i>Bảng Kê Chi Phí Đơn Thuê
+                        </h6>
+                        <div class="d-flex justify-content-between small text-secondary mb-1.5">
+                          <span>Tiền thuê tháng đầu:</span>
+                          <span class="fw-semibold tabular-nums text-dark" th:text="${#numbers.formatDecimal(req.property != null and req.property.price != null ? req.property.price : 1800000, 0, 'POINT', 0, 'COMMA') + ' ₫'}">1.800.000 ₫</span>
+                        </div>
+                        <div class="d-flex justify-content-between small text-secondary mb-1.5">
+                          <span>Tiền cọc giữ chỗ (bảo toàn):</span>
+                          <span class="fw-bold tabular-nums" style="color: #ea580c;" th:text="${#numbers.formatDecimal(req.depositAmount != null and req.depositAmount > 0 ? req.depositAmount : (req.property != null and req.property.price != null ? req.property.price : 1800000), 0, 'POINT', 0, 'COMMA') + ' ₫'}">1.800.000 ₫</span>
+                        </div>
+                        <div class="d-flex justify-content-between small text-secondary mb-2 pb-2 border-bottom">
+                          <span>Phí nền tảng TrọMới:</span>
+                          <span class="badge bg-success-subtle text-success fw-bold">Miễn phí 0 ₫</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center pt-1">
+                          <span class="fw-bold small text-dark">TỔNG CỌC CẦN TRẢ:</span>
+                          <span class="fw-bold tabular-nums fs-5" style="color: #ea580c;" th:text="${#numbers.formatDecimal(req.depositAmount != null and req.depositAmount > 0 ? req.depositAmount : (req.property != null and req.property.price != null ? req.property.price : 1800000), 0, 'POINT', 0, 'COMMA') + ' ₫'}">1.800.000 ₫</span>
+                        </div>
+                        <div class="mt-2 text-muted" style="font-size: 11px; line-height: 1.35;">
+                          <i class="fa-solid fa-shield-halved text-success me-1"></i>Tiền cọc được bảo lưu nguyên vẹn và khấu trừ vào hợp đồng thuê phòng khi nhận phòng.
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Cột 2: Lựa chọn Phương thức thanh toán (Payment Options) -->
+                    <div class="col-md-7">
+                      <div class="p-3 rounded-3 h-100 bg-white border">
+                        <h6 class="small fw-bold text-dark mb-2 pb-1 border-bottom">
+                          <i class="fa-solid fa-wallet me-1.5 text-secondary"></i>Chọn Phương Thức Thanh Toán
+                        </h6>
+
+                        <!-- Nav tabs chọn hình thức: VietQR / VNPay / Tiền mặt -->
+                        <ul class="nav nav-pills nav-fill gap-1 mb-2.5 p-1 rounded bg-light" th:id="${'payTabs-' + req.id}" role="tablist">
+                          <li class="nav-item" role="presentation">
+                            <button class="nav-link active py-1.5 px-2 small fw-bold" th:id="${'tab-qr-btn-' + req.id}" data-bs-toggle="pill" th:data-bs-target="${'#tab-qr-' + req.id}" type="button" role="tab">
+                              <i class="fa-solid fa-qrcode me-1 text-primary"></i>VietQR Chuyển Khoản
+                            </button>
+                          </li>
+                          <li class="nav-item" role="presentation">
+                            <button class="nav-link py-1.5 px-2 small fw-bold" th:id="${'tab-vnpay-btn-' + req.id}" data-bs-toggle="pill" th:data-bs-target="${'#tab-vnpay-' + req.id}" type="button" role="tab">
+                              <i class="fa-solid fa-credit-card me-1 text-danger"></i>VNPAY / Thẻ
+                            </button>
+                          </li>
+                          <li class="nav-item" role="presentation">
+                            <button class="nav-link py-1.5 px-2 small fw-bold" th:id="${'tab-cash-btn-' + req.id}" data-bs-toggle="pill" th:data-bs-target="${'#tab-cash-' + req.id}" type="button" role="tab">
+                              <i class="fa-solid fa-money-bill-wave me-1 text-success"></i>Tiền Mặt Khi Nhận
+                            </button>
+                          </li>
+                        </ul>
+
+                        <div class="tab-content" th:id="${'payTabContent-' + req.id}">
+                          <!-- Tab 1: VietQR Napas 247 -->
+                          <div class="tab-pane fade show active" th:id="${'tab-qr-' + req.id}" role="tabpanel">
+                            <form th:action="@{|/my-bookings/${req.id}/pay-deposit|}" method="post">
+                              <input type="hidden" name="paymentMethod" value="VIETQR" />
+                              <div class="d-flex flex-column flex-sm-row align-items-center gap-2.5 p-2 rounded bg-light border mb-2">
+                                <div class="text-center flex-shrink-0 bg-white p-1.5 rounded border shadow-sm">
+                                  <img th:src="${'https://img.vietqr.io/image/MB-0988123456-compact2.png?amount=' + (req.depositAmount != null and req.depositAmount > 0 ? #numbers.formatDecimal(req.depositAmount, 0, 0) : (req.property != null and req.property.price != null ? #numbers.formatDecimal(req.property.price, 0, 0) : '1800000')) + '&addInfo=DATPHONG%20DON%20' + req.id + '&accountName=TRO%20MOI%20PMS'}"
+                                       alt="Mã QR Chuyển Khoản Napas 247"
+                                       style="width: 110px; height: 110px; object-fit: contain;" />
+                                  <span class="d-block text-muted" style="font-size: 10px;"><i class="fa-solid fa-camera me-1"></i>Quét mã app ngân hàng</span>
+                                </div>
+                                <div class="small w-100" style="font-size: 12px;">
+                                  <div class="d-flex justify-content-between py-1 border-bottom">
+                                    <span class="text-muted">Ngân hàng:</span>
+                                    <strong class="text-dark">MBBank (Quân Đội)</strong>
+                                  </div>
+                                  <div class="d-flex justify-content-between py-1 border-bottom">
+                                    <span class="text-muted">Số tài khoản:</span>
+                                    <strong class="text-primary tabular-nums">0988 123 456</strong>
+                                  </div>
+                                  <div class="d-flex justify-content-between py-1 border-bottom">
+                                    <span class="text-muted">Số tiền cọc:</span>
+                                    <strong class="text-danger tabular-nums" th:text="${#numbers.formatDecimal(req.depositAmount != null and req.depositAmount > 0 ? req.depositAmount : (req.property != null and req.property.price != null ? req.property.price : 1800000), 0, 'POINT', 0, 'COMMA') + ' ₫'}">1.800.000 ₫</strong>
+                                  </div>
+                                  <div class="d-flex justify-content-between py-1">
+                                    <span class="text-muted">Nội dung CK:</span>
+                                    <strong class="badge bg-warning text-dark tabular-nums" th:text="${'DATPHONG DON ' + req.id}">DATPHONG DON 48</strong>
+                                  </div>
+                                </div>
+                              </div>
+                              <div class="row g-2">
+                                <div class="col-8">
+                                  <input type="text" name="transactionCode" placeholder="Mã giao dịch ngân hàng (nếu có)..." class="form-control form-control-sm" style="font-size: 12px;" />
+                                </div>
+                                <div class="col-4">
+                                  <button type="submit" class="btn btn-sm btn-success fw-bold w-100 py-1.5" style="font-size: 12px;">
+                                    <i class="fa-solid fa-check me-1"></i>Đã Chuyển Khoản
+                                  </button>
+                                </div>
+                              </div>
+                            </form>
+                          </div>
+
+                          <!-- Tab 2: VNPAY -->
+                          <div class="tab-pane fade" th:id="${'tab-vnpay-' + req.id}" role="tabpanel">
+                            <form th:action="@{|/my-bookings/${req.id}/pay-deposit|}" method="post">
+                              <input type="hidden" name="paymentMethod" value="VNPAY" />
+                              <div class="p-2.5 rounded bg-light border text-center mb-2">
+                                <div class="mb-1.5">
+                                  <span class="badge bg-primary px-2.5 py-1 fw-bold" style="font-size: 12px;">VNPAY QR · ATM · VISA / MASTERCARD</span>
+                                </div>
+                                <p class="text-muted mb-0" style="font-size: 11.5px;">Thanh toán tức thì và tự động xác nhận đơn qua cổng kết nối bảo mật VNPAY.</p>
+                              </div>
+                              <button type="submit" class="btn btn-sm text-white fw-bold w-100 py-2" style="background-color: #005baa; font-size: 12.5px;">
+                                <i class="fa-solid fa-credit-card me-1.5"></i>Thanh Toán Tiền Cọc Qua VNPay (<span th:text="${#numbers.formatDecimal(req.depositAmount != null and req.depositAmount > 0 ? req.depositAmount : (req.property != null and req.property.price != null ? req.property.price : 1800000), 0, 'POINT', 0, 'COMMA') + ' ₫'}">1.800.000 ₫</span>)
+                              </button>
+                            </form>
+                          </div>
+
+                          <!-- Tab 3: Tiền Mặt -->
+                          <div class="tab-pane fade" th:id="${'tab-cash-' + req.id}" role="tabpanel">
+                            <form th:action="@{|/my-bookings/${req.id}/pay-deposit|}" method="post">
+                              <input type="hidden" name="paymentMethod" value="CASH" />
+                              <div class="p-2.5 rounded bg-light border mb-2" style="font-size: 11.5px;">
+                                <strong class="d-block text-dark mb-1"><i class="fa-solid fa-hand-holding-dollar text-success me-1"></i>Thanh toán tiền mặt khi đến nhận phòng</strong>
+                                <span class="text-muted d-block mb-1">Bạn sẽ thanh toán tiền cọc trực tiếp cho chủ trọ vào ngày nhận phòng (<strong th:text="${req.moveInDate != null ? #temporals.format(req.moveInDate, 'dd/MM/yyyy') : '01/11/2026'}">01/11/2026</strong>).</span>
+                                <span class="text-secondary"><i class="fa-solid fa-circle-exclamation text-warning me-1"></i>Vui lòng đến đúng hẹn để giữ quyền ưu tiên nhận phòng.</span>
+                              </div>
+                              <button type="submit" class="btn btn-sm btn-outline-success fw-bold w-100 py-1.5" style="font-size: 12.5px;">
+                                <i class="fa-solid fa-clipboard-check me-1.5"></i>Xác Nhận Giữ Phòng - Trả Tiền Mặt Khi Nhận
+                              </button>
+                            </form>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="px-3 py-2.5 d-flex flex-wrap align-items-center justify-content-between gap-2"
+                   style="background-color: #f8fbff;">
+                <div class="small text-muted">
+                  <i class="fa-solid fa-circle-info me-1" style="color: #ea580c;"></i>
+                  <span th:unless="${req.isChecked}">Đơn đặt phòng đang chờ chủ nhà trọ xác nhận. Sau khi duyệt, hợp đồng sẽ được kích hoạt trong Cổng Cư Dân.</span>
+                  <span th:if="${req.isChecked}" class="text-success fw-semibold">Đơn đặt thuê đã được chủ trọ phê duyệt!</span>
+                </div>
+                <div class="d-flex flex-wrap align-items-center gap-3">
+                  <div class="small">
+                    <span class="text-secondary">Tiền cọc giữ phòng dự kiến:</span>
+                    <span class="fw-bold ms-1 tabular-nums" style="color: #ea580c; font-size: 18px;"
+                          th:text="${#numbers.formatDecimal(req.property != null and req.property.price != null ? req.property.price : 1800000, 0, 'POINT', 0, 'COMMA') + ' ₫'}">1.800.000 ₫</span>
+                  </div>
+                  <div class="d-flex align-items-center gap-2">
+                    <form th:if="${!req.isChecked and req.bookingStatus != 'CANCELLED' and req.bookingStatus != 'REJECTED'}"
+                          th:action="@{|/my-bookings/${req.id}/cancel|}" method="post" class="d-inline"
+                          onsubmit="return confirm('Bạn chắc chắn muốn hủy đơn đặt phòng này?');">
+                      <input type="hidden" name="phone" th:value="${customerPhone}" />
+                      <button type="submit" class="btn btn-sm px-3 py-1.5 fw-semibold border bg-white text-danger">
+                        <i class="fa-solid fa-xmark me-1"></i>Hủy Đơn Đặt
+                      </button>
+                    </form>
+                    <a th:href="@{/properties}"
+                       class="btn btn-sm px-3 py-1.5 fw-semibold border bg-white text-dark">
+                      Xem Phòng Khác
+                    </a>
+                    <a th:href="@{/tenant/dashboard}"
+                       class="btn btn-sm px-3 py-1.5 fw-bold text-white"
+                       style="background-color: #fe9901; border: none;">
+                      <i class="fa-solid fa-house-chimney-user me-1"></i>Theo Dõi Trên Cổng Cư Dân
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ========================================================================= -->
+          <!-- SENIOR BA ENHANCEMENT: DỰ TOÁN NGÂN SÁCH SINH HOẠT HÀNG THÁNG TRONG GIỎ   -->
+          <!-- ========================================================================= -->
+          <div class="bg-white rounded-3 p-4 mb-4" style="border: 1.5px solid #fed7aa; box-shadow: 0 4px 16px rgba(15, 23, 42, 0.04);">
+            <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3 pb-2 border-bottom">
+              <div class="d-flex align-items-center gap-2.5">
+                <div class="d-flex align-items-center justify-content-center rounded text-white" style="width: 40px; height: 40px; background: #fe9901; font-size: 18px;">
+                  <i class="fa-solid fa-calculator"></i>
+                </div>
+                <div>
+                  <h4 class="h6 fw-bold mb-0 text-dark">Kế Hoạch Dự Toán Ngân Sách Sinh Hoạt Hàng Tháng</h4>
+                  <span class="text-muted small">Tính toán dự trù tổng chi phí (tiền phòng + điện, nước, dịch vụ) trước khi nhận phòng</span>
+                </div>
+              </div>
+              <span class="badge px-2.5 py-1 text-white fw-bold" style="background-color: #16a34a; font-size: 11.5px;">
+                <i class="fa-solid fa-shield-check me-1"></i>Hỗ trợ cư dân tương lai
+              </span>
+            </div>
+
+            <div class="row g-3 mb-3">
+              <!-- Tiền phòng dự kiến -->
+              <div class="col-md-3 col-6">
+                <div class="p-2.5 rounded bg-light border h-100">
+                  <span class="text-muted d-block small mb-1">Tiền phòng / tháng:</span>
+                  <div class="input-group input-group-sm">
+                    <input type="number" id="mbCalcRent" class="form-control text-end fw-bold tabular-nums"
+                           th:value="${myBookings != null and !myBookings.isEmpty() and myBookings[0].property != null and myBookings[0].property.price != null ? myBookings[0].property.price.longValue() : 1800000}"
+                           step="100000" oninput="calculateMyBookingBudget()" />
+                    <span class="input-group-text">₫</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Điện sinh hoạt -->
+              <div class="col-md-3 col-6">
+                <div class="p-2.5 rounded bg-light border h-100">
+                  <div class="d-flex justify-content-between text-muted small mb-1">
+                    <span>Điện sinh hoạt:</span>
+                    <span id="mbElecTotalLabel" class="fw-bold text-dark tabular-nums">280.000 ₫</span>
+                  </div>
+                  <div class="d-flex align-items-center gap-2">
+                    <input type="range" id="mbCalcElec" min="0" max="300" value="80" class="form-range flex-grow-1" oninput="calculateMyBookingBudget()" />
+                    <span id="mbElecKwhLabel" class="small fw-bold text-secondary tabular-nums" style="width: 52px; text-align: right;">80 kWh</span>
+                  </div>
+                  <span class="text-muted" style="font-size: 10.5px;">Đơn giá: 3.500 đ/kWh</span>
+                </div>
+              </div>
+
+              <!-- Nước sinh hoạt -->
+              <div class="col-md-3 col-6">
+                <div class="p-2.5 rounded bg-light border h-100">
+                  <div class="d-flex justify-content-between text-muted small mb-1">
+                    <span>Nước sinh hoạt:</span>
+                    <span id="mbWaterTotalLabel" class="fw-bold text-dark tabular-nums">80.000 ₫</span>
+                  </div>
+                  <div class="d-flex align-items-center gap-2">
+                    <input type="range" id="mbCalcWater" min="0" max="20" value="4" class="form-range flex-grow-1" oninput="calculateMyBookingBudget()" />
+                    <span id="mbWaterM3Label" class="small fw-bold text-secondary tabular-nums" style="width: 44px; text-align: right;">4 m³</span>
+                  </div>
+                  <span class="text-muted" style="font-size: 10.5px;">Đơn giá: 20.000 đ/m³</span>
+                </div>
+              </div>
+
+              <!-- Phí dịch vụ chung -->
+              <div class="col-md-3 col-6">
+                <div class="p-2.5 rounded bg-light border h-100">
+                  <span class="text-muted d-block small mb-1">Phí dịch vụ chung:</span>
+                  <div class="input-group input-group-sm">
+                    <input type="number" id="mbCalcService" class="form-control text-end fw-bold tabular-nums"
+                           value="150000" step="10000" oninput="calculateMyBookingBudget()" />
+                    <span class="input-group-text">₫</span>
+                  </div>
+                  <span class="text-muted" style="font-size: 10.5px;">Wifi, rác, vệ sinh</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Tổng chi phí dự trù & Chia theo đầu người -->
+            <div class="p-3 rounded-3 d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3" style="background: #fffaf5; border: 1px solid #fed7aa;">
+              <div class="d-flex align-items-center gap-2">
+                <span class="small fw-bold text-dark">Số người cùng chia sẻ:</span>
+                <div class="btn-group btn-group-sm" role="group">
+                  <button type="button" onclick="setMyBookingRoommates(1)" id="mbBtnOcc1" class="btn btn-sm btn-outline-secondary">1 người</button>
+                  <button type="button" onclick="setMyBookingRoommates(2)" id="mbBtnOcc2" class="btn btn-sm text-white fw-bold" style="background-color: #fe9901; border-color: #fe9901;">2 người</button>
+                  <button type="button" onclick="setMyBookingRoommates(3)" id="mbBtnOcc3" class="btn btn-sm btn-outline-secondary">3 người</button>
+                  <button type="button" onclick="setMyBookingRoommates(4)" id="mbBtnOcc4" class="btn btn-sm btn-outline-secondary">4 người</button>
+                </div>
+              </div>
+
+              <div class="d-flex flex-wrap align-items-center gap-3">
+                <div class="text-md-end">
+                  <span class="text-muted small d-block">Tổng chi phí dự kiến / tháng:</span>
+                  <strong id="mbGrandTotalLabel" class="tabular-nums" style="color: #ea580c; font-size: 20px;">2.310.000 ₫</strong>
+                </div>
+                <div class="px-3 py-1.5 rounded text-white" style="background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);">
+                  <span class="small d-block" style="font-size: 11px;">Bình quân mỗi bạn:</span>
+                  <strong id="mbPerPersonLabel" class="tabular-nums" style="font-size: 16px;">1.155.000 ₫</strong>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <script>
+            var mbRoommates = 2;
+            function setMyBookingRoommates(occ) {
+              mbRoommates = occ;
+              for (var i = 1; i <= 4; i++) {
+                var btn = document.getElementById('mbBtnOcc' + i);
+                if (btn) {
+                  if (i === occ) {
+                    btn.className = 'btn btn-sm text-white fw-bold';
+                    btn.style.backgroundColor = '#fe9901';
+                    btn.style.borderColor = '#fe9901';
+                  } else {
+                    btn.className = 'btn btn-sm btn-outline-secondary';
+                    btn.style.backgroundColor = '';
+                    btn.style.borderColor = '';
+                  }
+                }
+              }
+              calculateMyBookingBudget();
+            }
+
+            function calculateMyBookingBudget() {
+              var rent = parseFloat(document.getElementById('mbCalcRent')?.value || '1800000') || 0;
+              var elecKwh = parseFloat(document.getElementById('mbCalcElec')?.value || '80') || 0;
+              var waterM3 = parseFloat(document.getElementById('mbCalcWater')?.value || '4') || 0;
+              var service = parseFloat(document.getElementById('mbCalcService')?.value || '150000') || 0;
+
+              var elecCost = elecKwh * 3500;
+              var waterCost = waterM3 * 20000;
+              var grandTotal = rent + elecCost + waterCost + service;
+              var perPerson = Math.round(grandTotal / (mbRoommates || 1));
+
+              var elecKwhLbl = document.getElementById('mbElecKwhLabel');
+              if (elecKwhLbl) elecKwhLbl.textContent = elecKwh + ' kWh';
+              var elecTotalLbl = document.getElementById('mbElecTotalLabel');
+              if (elecTotalLbl) elecTotalLbl.textContent = elecCost.toLocaleString('vi-VN') + ' ₫';
+
+              var waterM3Lbl = document.getElementById('mbWaterM3Label');
+              if (waterM3Lbl) waterM3Lbl.textContent = waterM3 + ' m³';
+              var waterTotalLbl = document.getElementById('mbWaterTotalLabel');
+              if (waterTotalLbl) waterTotalLbl.textContent = waterCost.toLocaleString('vi-VN') + ' ₫';
+
+              var grandLbl = document.getElementById('mbGrandTotalLabel');
+              if (grandLbl) grandLbl.textContent = grandTotal.toLocaleString('vi-VN') + ' ₫';
+              var perPersonLbl = document.getElementById('mbPerPersonLabel');
+              if (perPersonLbl) perPersonLbl.textContent = perPerson.toLocaleString('vi-VN') + ' ₫';
+            }
+
+            document.addEventListener('DOMContentLoaded', function() {
+              calculateMyBookingBudget();
+            });
+          </script>
+
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+</div>

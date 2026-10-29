@@ -5,6 +5,7 @@ import com.pms.propertymanagement.entity.Role;
 import com.pms.propertymanagement.entity.User;
 import com.pms.propertymanagement.repository.RoleRepository;
 import com.pms.propertymanagement.repository.UserRepository;
+import com.pms.propertymanagement.utils.PasswordUtil;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
@@ -73,12 +74,16 @@ public class RegisterController {
         Role userRole = roleRepository.findByName("USER")
                 .orElseThrow(() -> new RuntimeException("Role USER chưa tồn tại"));
 
+        String normalizedFullName = fullName != null && !fullName.trim().isEmpty() ? fullName.trim() : null;
+        String normalizedEmail = email != null && !email.trim().isEmpty() ? email.trim() : null;
+        String normalizedPhone = phone != null && !phone.trim().isEmpty() ? phone.trim() : null;
+
         User user = new User();
         user.setUsername(username.trim());
-        user.setPassword(password);
-        user.setFullName(fullName);
-        user.setEmail(email);
-        user.setPhone(phone);
+        user.setPassword(PasswordUtil.encode(password));
+        user.setFullName(normalizedFullName);
+        user.setEmail(normalizedEmail);
+        user.setPhone(normalizedPhone);
         user.getRoles().add(userRole);
 
         userRepository.save(user);
@@ -136,14 +141,18 @@ public class RegisterController {
         if (hasError) return "redirect:/register/owner";
 
         Role ownerRole = roleRepository.findByName("OWNER")
-                .orElseThrow(() -> new RuntimeException("Role  chưa tồn tại"));
+                .orElseThrow(() -> new RuntimeException("Role OWNER chưa tồn tại"));
+
+        String normalizedFullName = fullName != null && !fullName.trim().isEmpty() ? fullName.trim() : null;
+        String normalizedEmail = email != null && !email.trim().isEmpty() ? email.trim() : null;
+        String normalizedPhone = phone != null && !phone.trim().isEmpty() ? phone.trim() : null;
 
         User user = new User();
         user.setUsername(username.trim());
-        user.setPassword(password);
-        user.setFullName(fullName);
-        user.setEmail(email);
-        user.setPhone(phone);
+        user.setPassword(PasswordUtil.encode(password));
+        user.setFullName(normalizedFullName);
+        user.setEmail(normalizedEmail);
+        user.setPhone(normalizedPhone);
         user.getRoles().add(ownerRole);
 
         userRepository.save(user);
@@ -151,4 +160,3 @@ public class RegisterController {
         return "redirect:/ekyc?next=/owner";
     }
 }
-

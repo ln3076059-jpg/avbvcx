@@ -1,0 +1,108 @@
+<div th:fragment="content">
+
+    <!-- Page Heading -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <div>
+            <h1 class="h3 mb-1 text-gray-800 font-weight-bold">
+                <i class="fas fa-file-invoice-dollar text-primary mr-2"></i>Hóa Đơn Tiền Phòng &amp; Dịch Vụ
+            </h1>
+            <p class="mb-0 text-muted small">Danh sách tất cả các kỳ hóa đơn hàng tháng và tình trạng thanh toán của bạn.</p>
+        </div>
+
+        <!-- Filter Bar -->
+        <div class="d-flex flex-wrap align-items-center mt-2 mt-sm-0" style="gap: 6px;">
+            <a th:href="@{/tenant/invoices(roomId=${selectedRoomId})}"
+               class="btn btn-sm font-weight-bold"
+               th:classappend="${selectedStatus == null or selectedStatus == '' ? 'btn-primary shadow-sm' : 'btn-light border text-gray-700'}">
+                Tất cả
+            </a>
+            <a th:href="@{/tenant/invoices(roomId=${selectedRoomId}, status='UNPAID')}"
+               class="btn btn-sm font-weight-bold"
+               th:classappend="${selectedStatus == 'UNPAID' ? 'btn-danger shadow-sm' : 'btn-outline-danger'}">
+                <i class="fas fa-exclamation-circle mr-1"></i> Còn nợ
+            </a>
+            <a th:href="@{/tenant/invoices(roomId=${selectedRoomId}, status='PAID')}"
+               class="btn btn-sm font-weight-bold"
+               th:classappend="${selectedStatus == 'PAID' ? 'btn-success shadow-sm' : 'btn-outline-success'}">
+                <i class="fas fa-check-circle mr-1"></i> Đã hoàn tất
+            </a>
+
+            <!-- Room dropdown if tenant has multiple rooms -->
+            <div th:if="${rentedRooms != null and rentedRooms.size() > 1}">
+                <select onchange="window.location.href=this.value" class="custom-select custom-select-sm font-weight-bold">
+                    <option th:value="@{/tenant/invoices(status=${selectedStatus})}" th:selected="${selectedRoomId == null}">-- Tất cả phòng --</option>
+                    <option th:each="rm : ${rentedRooms}"
+                            th:value="@{/tenant/invoices(roomId=${rm.id}, status=${selectedStatus})}"
+                            th:text="${'Phòng: ' + rm.name}"
+                            th:selected="${selectedRoomId == rm.id}">Phòng 101</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <!-- Invoices Table Card (SB Admin 2) -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+            <h6 class="m-0 font-weight-bold text-primary">
+                <i class="fas fa-list mr-1"></i> Danh Sách Hóa Đơn Hàng Tháng
+            </h6>
+            <span class="badge badge-primary px-2 py-1" th:text="${(invoices != null ? invoices.size() : 0) + ' hóa đơn'}">0 hóa đơn</span>
+        </div>
+        <div class="card-body">
+            <div th:if="${invoices == null or invoices.empty}" class="text-center py-5 text-muted">
+                <i class="fas fa-receipt fa-3x mb-3 text-gray-300"></i>
+                <h6 class="font-weight-bold text-gray-700">Chưa có hóa đơn phát sinh</h6>
+                <p class="small mb-0">Các hóa đơn hàng tháng sẽ tự động hiển thị tại đây khi chủ trọ chốt kỳ thanh toán.</p>
+            </div>
+
+            <div th:if="${invoices != null and !invoices.empty}" class="table-responsive">
+                <table class="table table-bordered table-hover table-sm mb-0" width="100%" cellspacing="0" style="font-size: 0.86rem;">
+                    <thead class="bg-light">
+                        <tr>
+                            <th>Kỳ</th>
+                            <th>Mã hóa đơn</th>
+                            <th>Phòng</th>
+                            <th class="text-right">Tổng tiền</th>
+                            <th class="text-right">Đã nộp</th>
+                            <th class="text-right">Còn nợ</th>
+                            <th class="text-center">Hạn nộp</th>
+                            <th class="text-center">Trạng thái</th>
+                            <th class="text-center">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="inv : ${invoices}">
+                            <td class="font-weight-bold text-gray-800 align-middle text-nowrap" th:text="${'T' + inv.month + '/' + inv.year}"></td>
+                            <td class="font-weight-bold text-primary align-middle text-nowrap">
+                                <a th:href="@{'/tenant/invoices/' + ${inv.id}}" th:text="${inv.invoiceCode}"></a>
+                            </td>
+                            <td class="align-middle text-nowrap">
+                                <span class="font-weight-bold text-gray-800" th:text="${inv.room.name}"></span>
+                                <span class="small text-muted d-block" th:text="${inv.room.property.name}"></span>
+                            </td>
+                            <td class="text-right font-weight-bold text-gray-900 tabular-nums align-middle text-nowrap"
+                                th:text="${#numbers.formatDecimal(inv.totalAmount, 0, 'POINT', 0, 'COMMA') + ' đ'}"></td>
+                            <td class="text-right font-weight-bold text-success tabular-nums align-middle text-nowrap"
+                                th:text="${#numbers.formatDecimal(inv.paidAmount, 0, 'POINT', 0, 'COMMA') + ' đ'}"></td>
+                            <td class="text-right font-weight-bold tabular-nums align-middle text-nowrap"
+                                th:classappend="${inv.remainingAmount > 0 ? 'text-danger' : 'text-muted'}"
+                                th:text="${#numbers.formatDecimal(inv.remainingAmount, 0, 'POINT', 0, 'COMMA') + ' đ'}"></td>
+                            <td class="text-center small align-middle text-nowrap" th:text="${#temporals.format(inv.dueDate, 'dd/MM/yyyy')}"></td>
+                            <td class="text-center align-middle text-nowrap">
+                                <span class="badge px-2 py-1"
+                                      th:classappend="${inv.status.name() == 'PAID' ? 'badge-success' : (inv.status.name() == 'OVERDUE' ? 'badge-danger' : 'badge-warning')}"
+                                      th:text="${inv.status.displayName}"></span>
+                            </td>
+                            <td class="text-center align-middle text-nowrap">
+                                <a th:href="@{'/tenant/invoices/' + ${inv.id}}" class="btn btn-sm btn-primary font-weight-bold shadow-sm py-1 px-2">
+                                    <i class="fas fa-eye mr-1"></i> Chi tiết
+                                </a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</div>

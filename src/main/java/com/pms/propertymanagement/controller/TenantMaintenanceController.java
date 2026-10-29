@@ -1,14 +1,19 @@
 package com.pms.propertymanagement.controller;
 
 import com.pms.propertymanagement.dto.request.ContactRequest;
+import com.pms.propertymanagement.entity.Contract;
 import com.pms.propertymanagement.entity.MaintenanceRequest;
+import com.pms.propertymanagement.entity.MeterReading;
 import com.pms.propertymanagement.entity.Post;
 import com.pms.propertymanagement.entity.Room;
 import com.pms.propertymanagement.entity.User;
+import com.pms.propertymanagement.enums.ContractStatus;
 import com.pms.propertymanagement.enums.MaintenanceCategory;
 import com.pms.propertymanagement.enums.MaintenanceStatus;
 import com.pms.propertymanagement.enums.RoomStatus;
 import com.pms.propertymanagement.dto.request.MaintenanceCreateForm;
+import com.pms.propertymanagement.repository.ContractRepository;
+import com.pms.propertymanagement.repository.MeterReadingRepository;
 import com.pms.propertymanagement.service.ContactService;
 import com.pms.propertymanagement.service.PostService;
 import com.pms.propertymanagement.service.TenantMaintenanceService;
@@ -32,16 +37,15 @@ public class TenantMaintenanceController {
     private final TenantMaintenanceService tenantMaintenanceService;
     private final ContactService contactService;
     private final PostService postService;
+    private final ContractRepository contractRepository;
+    private final MeterReadingRepository meterReadingRepository;
 
     @GetMapping("/home")
-    public String home(HttpSession session, Model model) {
+    public String home(HttpSession session) {
         User user = (User) session.getAttribute("user");
         if (user == null)
             return "redirect:/login";
-        List<Room> rooms = tenantMaintenanceService.getAvailableRooms();
-        model.addAttribute("rooms", rooms);
-        model.addAttribute("content", "tenant/available-room-list");
-        return "layout/public-main";
+        return "redirect:/tenant/dashboard";
     }
 
     @PostMapping("/rooms/{roomId}/rent")
@@ -86,21 +90,30 @@ public class TenantMaintenanceController {
             return "redirect:/login";
         List<Room> rooms = tenantMaintenanceService.getRoomsForTenant(user);
         model.addAttribute("rooms", rooms);
+        model.addAttribute("activeTenantMenu", "rooms");
         model.addAttribute("content", "tenant/room-list");
-        return "layout/public-main";
+        return "layout/tenant-layout";
     }
 
     @GetMapping("/rooms/{roomId}")
-    public String roomDetail(@PathVariable Long roomId, HttpSession session, Model model) {
+    public String roomDetail(@PathVariable Long roomId, HttpSession session, Model model, RedirectAttributes redirectAttributes) {
         User user = (User) session.getAttribute("user");
         if (user == null)
             return "redirect:/login";
+        if (!tenantMaintenanceService.isRoomRentedByTenant(roomId, user)) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Bạn chỉ có quyền xem thông tin phòng trọ mà mình đang thuê.");
+            return "redirect:/tenant/rooms";
+        }
         Room room = tenantMaintenanceService.getRoomDetail(roomId);
-        boolean canRequestMaintenance = tenantMaintenanceService.isRoomRentedByTenant(roomId, user);
+        Contract activeContract = contractRepository.findFirstByRoom_IdAndStatus(roomId, ContractStatus.ACTIVE).orElse(null);
+        List<MeterReading> meterReadings = meterReadingRepository.findByRoom_IdOrderByYearDescMonthDesc(roomId);
         model.addAttribute("room", room);
-        model.addAttribute("canRequestMaintenance", canRequestMaintenance);
+        model.addAttribute("activeContract", activeContract);
+        model.addAttribute("meterReadings", meterReadings);
+        model.addAttribute("canRequestMaintenance", true);
+        model.addAttribute("activeTenantMenu", "rooms");
         model.addAttribute("content", "tenant/room-detail");
-        return "layout/public-main";
+        return "layout/tenant-layout";
     }
 
     @GetMapping("/rooms/{roomId}/maintenance/create")
@@ -129,8 +142,9 @@ public class TenantMaintenanceController {
             form.setDescription((String) desc);
         }
         model.addAttribute("maintenanceForm", form);
+        model.addAttribute("activeTenantMenu", "maintenance");
         model.addAttribute("content", "tenant/maintenance-create");
-        return "layout/public-main";
+        return "layout/tenant-layout";
     }
 
     @GetMapping("/maintenance")
@@ -144,8 +158,9 @@ public class TenantMaintenanceController {
         model.addAttribute("requests", requests);
         model.addAttribute("success", success != null);
         model.addAttribute("createdId", createdId);
+        model.addAttribute("activeTenantMenu", "maintenance");
         model.addAttribute("content", "tenant/maintenance-list");
-        return "layout/public-main";
+        return "layout/tenant-layout";
     }
 
     @PostMapping("/rooms/{roomId}/maintenance/create")
@@ -183,8 +198,13 @@ public class TenantMaintenanceController {
             return "redirect:/tenant/rooms/" + roomId + "/maintenance/create";
         }
 
-        MaintenanceRequest saved = tenantMaintenanceService.createRequest(roomId, user, category, description, image);
-        return "redirect:/tenant/maintenance?success=true&createdId=" + saved.getId();
+        try {
+            MaintenanceRequest saved = tenantMaintenanceService.createRequest(roomId, user, category, description, image);
+            return "redirect:/tenant/maintenance?success=true&createdId=" + saved.getId();
+        } catch (IllegalStateException | IllegalArgumentException ex) {
+            redirectAttributes.addFlashAttribute("errorDescription", ex.getMessage());
+            return "redirect:/tenant/rooms/" + roomId + "/maintenance/create";
+        }
     }
 
     @GetMapping("/maintenance/{id}")
@@ -197,8 +217,9 @@ public class TenantMaintenanceController {
         model.addAttribute("request", req);
         model.addAttribute("success", success != null);
         model.addAttribute("statuses", MaintenanceStatus.values());
+        model.addAttribute("activeTenantMenu", "maintenance");
         model.addAttribute("content", "tenant/maintenance-detail");
-        return "layout/public-main";
+        return "layout/tenant-layout";
     }
 
     @PostMapping("/maintenance/{id}/confirm")
@@ -206,8 +227,12 @@ public class TenantMaintenanceController {
         User user = (User) session.getAttribute("user");
         if (user == null)
             return "redirect:/login";
-        tenantMaintenanceService.confirmCompletion(id, user);
-        redirectAttributes.addAttribute("success", "true");
+        try {
+            tenantMaintenanceService.confirmCompletion(id, user);
+            redirectAttributes.addAttribute("success", "true");
+        } catch (IllegalStateException | IllegalArgumentException ex) {
+            redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
+        }
         return "redirect:/tenant/maintenance/" + id;
     }
 
@@ -223,8 +248,12 @@ public class TenantMaintenanceController {
             redirectAttributes.addFlashAttribute("errorReopen", "Vui lòng nhập lý do");
             return "redirect:/tenant/maintenance/" + id;
         }
-        tenantMaintenanceService.reopenRequest(id, reason, user);
-        redirectAttributes.addAttribute("success", "true");
+        try {
+            tenantMaintenanceService.reopenRequest(id, reason, user);
+            redirectAttributes.addAttribute("success", "true");
+        } catch (IllegalStateException | IllegalArgumentException ex) {
+            redirectAttributes.addFlashAttribute("errorReopen", ex.getMessage());
+        }
         return "redirect:/tenant/maintenance/" + id;
     }
 }

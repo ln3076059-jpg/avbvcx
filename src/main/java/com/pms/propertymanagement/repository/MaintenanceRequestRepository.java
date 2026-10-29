@@ -34,5 +34,6 @@ public interface MaintenanceRequestRepository extends JpaRepository<MaintenanceR
     List<MaintenanceRequest> findByRoom_Property_Owner_IdAndStatusOrderByCreatedAtDesc(Long ownerId, MaintenanceStatus status);
 
     long countByRoom_IdAndStatusIn(Long roomId, List<MaintenanceStatus> statuses);
-}
 
+    long countByRoom_Property_Owner_IdAndStatusIn(Long ownerId, List<MaintenanceStatus> statuses);
+}

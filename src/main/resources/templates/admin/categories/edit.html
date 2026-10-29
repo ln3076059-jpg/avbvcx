@@ -1,0 +1,71 @@
+<div th:fragment="content" class="container-fluid">
+
+    <!-- Page Heading -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <div>
+            <h1 class="h3 mb-1 text-gray-800 font-weight-bold">
+                Chỉnh Sửa Danh Mục: <span class="text-primary" th:text="${category.name}">Nhà trọ</span>
+            </h1>
+            <p class="text-muted small mb-0">Cập nhật tên danh mục loại hình cho thuê phòng.</p>
+        </div>
+        <a th:href="@{/admin/categories}" class="btn btn-secondary btn-icon-split shadow-sm">
+            <span class="icon text-white-50">
+                <i class="fas fa-arrow-left"></i>
+            </span>
+            <span class="text font-weight-bold">Quay Lại Danh Sách</span>
+        </a>
+    </div>
+
+    <!-- Form Card -->
+    <div class="row">
+        <div class="col-lg-6 mx-auto">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 bg-white border-bottom-primary d-flex align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-edit mr-1"></i> Chỉnh Sửa Thông Tin
+                    </h6>
+                    <span class="badge badge-info">ID: <span th:text="${category.id}">1</span></span>
+                </div>
+                <div class="card-body p-4">
+                    <form th:action="@{'/admin/categories/' + ${category.id} + '/edit'}" method="post">
+                        
+                        <div class="form-group">
+                            <label for="name" class="font-weight-bold text-gray-700">
+                                Tên danh mục <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text"><i class="fas fa-tag"></i></span>
+                                </div>
+                                <input type="text" class="form-control" id="name" name="name" required 
+                                       th:value="${category.name}" placeholder="Nhập tên danh mục">
+                            </div>
+                        </div>
+
+                        <div class="form-group bg-light p-3 rounded">
+                            <div class="small text-muted mb-1 font-weight-bold">Dữ liệu liên quan:</div>
+                            <div class="d-flex justify-content-between">
+                                <span class="text-gray-700 small">Số lượng cơ sở nhà trọ đang liên kết:</span>
+                                <span class="badge badge-primary font-weight-bold" 
+                                      th:text="${category.properties != null ? category.properties.size() : 0}">0</span>
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <div class="d-flex justify-content-end">
+                            <a th:href="@{/admin/categories}" class="btn btn-secondary mr-2">
+                                <i class="fas fa-times mr-1"></i> Hủy Bỏ
+                            </a>
+                            <button type="submit" class="btn btn-primary font-weight-bold">
+                                <i class="fas fa-save mr-1"></i> Lưu Thay Đổi
+                            </button>
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>

@@ -8,59 +8,21 @@ package com.pms.propertymanagement.enums;
  *       PENDING_APPROVAL → REJECTED (staff rejects) → owner resubmits → PENDING_REVISION → ACTIVE
  */
 public enum PostStatus {
-    /**
-     * PENDING_APPROVAL: Post submitted by owner, waiting for staff review
-     * - postExpiredAt is null (timer has not started yet)
-     * - Not visible in marketplace
-     * - Staff must approve before it goes live
-     */
-    PENDING_APPROVAL,
+    PENDING_APPROVAL("Chờ duyệt"),
+    REJECTED("Bị từ chối"),
+    PENDING_REVISION("Chờ duyệt lại"),
+    DRAFT("Bản nháp"),
+    ACTIVE("Đang hiển thị"),
+    EXPIRED("Hết hạn"),
+    HIDDEN("Đang ẩn");
 
-    /**
-     * REJECTED: Staff rejected the post
-     * - rejectionReason field contains staff feedback
-     * - Owner can edit and resubmit (back to PENDING_APPROVAL)
-     */
-    REJECTED,
+    private final String displayName;
 
-    /**
-     * PENDING_REVISION: Owner edited an already-approved post and resubmitted
-     * - postExpiredAt is preserved (timer paused, not reset)
-     * - Not visible in marketplace until staff re-approves
-     * - Distinct from PENDING_APPROVAL so moderator knows this is a content update, not a new post
-     */
-    PENDING_REVISION,
+    PostStatus(String displayName) {
+        this.displayName = displayName;
+    }
 
-    /**
-     * DRAFT: Post created but not yet paid/published
-     * - Property exists but post has no duration yet
-     * - Not visible in marketplace
-     * - Waiting for owner to purchase POST package
-     */
-    DRAFT,
-    
-    /**
-     * ACTIVE: Post is live and visible in marketplace
-     * - Has valid postExpiredAt (not expired yet)
-     * - Automatically set when owner purchases POST duration
-     * - Condition: now < postExpiredAt
-     */
-    ACTIVE,
-    
-    /**
-     * EXPIRED: Post duration has ended
-     * - postExpiredAt has passed
-     * - No longer visible in marketplace
-     * - Can be renewed by purchasing new duration
-     * - Automatically set by scheduler when now >= postExpiredAt
-     */
-    EXPIRED,
-    
-    /**
-     * HIDDEN: Manually hidden by owner
-     * - Owner chose to hide (not due to expiration)
-     * - Can be unhidden anytime
-     * - Example: Property already rented but owner wants to keep record
-     */
-    HIDDEN
+    public String getDisplayName() {
+        return displayName;
+    }
 }

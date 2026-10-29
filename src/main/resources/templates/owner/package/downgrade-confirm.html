@@ -1,247 +1,137 @@
-<!doctype html>
-<div th:fragment="content" class="space-y-6">
-  <!-- Flash Messages -->
-  <div
-    th:if="${errorMessage}"
-    class="flex items-start gap-3 bg-red-50 border border-red-300 text-red-800 rounded-xl p-4"
-  >
-    <i
-      class="fa-solid fa-circle-exclamation text-red-500 mt-0.5 text-lg flex-shrink-0"
-    ></i>
-    <div>
-      <p class="font-semibold">Không thể thực hiện</p>
-      <p class="text-sm mt-0.5" th:text="${errorMessage}"></p>
-    </div>
-  </div>
+<div class="container-fluid" th:fragment="content">
 
-  <!-- Page Header -->
-  <div
-    class="bg-gradient-to-r from-orange-500 to-orange-600 rounded-xl p-6 text-white"
-  >
-    <div class="flex items-center gap-4">
-      <div
-        class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center flex-shrink-0"
-      >
-        <i class="fa-solid fa-arrow-down-to-bracket text-xl"></i>
-      </div>
-      <div>
-        <h1 class="text-2xl font-bold">
-          Chuyển sang gói: <span th:text="${newPlan.name}">Basic</span>
-        </h1>
-        <p class="text-orange-100 text-sm mt-1">
-          Gói mới cho phép tối đa
-          <strong th:text="${keepCount}">2</strong> nhà trọ hoạt động. Vui lòng
-          chọn đúng <strong th:text="${keepCount}">2</strong> nhà trọ bạn muốn
-          giữ lại. Các nhà trọ không được chọn sẽ bị
-          <strong>tạm khóa</strong> (không xóa dữ liệu).
-        </p>
-      </div>
-    </div>
-  </div>
-
-  <!-- Info box -->
-  <div
-    class="bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-start gap-3"
-  >
-    <i class="fa-solid fa-circle-info text-amber-500 mt-0.5 flex-shrink-0"></i>
-    <div class="text-sm text-amber-800">
-      <p class="font-semibold">Nhà trọ bị khóa sẽ không bị xóa</p>
-      <p class="mt-1">
-        Các nhà trọ bị tạm khóa vẫn lưu đầy đủ dữ liệu (phòng, hợp đồng, dịch
-        vụ). Khi nâng gói lên, chúng sẽ được mở khóa tự động.
-      </p>
-    </div>
-  </div>
-
-  <!-- No properties -->
-  <div
-    th:if="${#lists.isEmpty(allProperties)}"
-    class="bg-white rounded-2xl border border-gray-100 shadow-sm p-12 text-center"
-  >
-    <i class="fa-regular fa-folder-open text-4xl text-gray-300 mb-4 block"></i>
-    <p class="text-gray-500">Bạn không có nhà trọ nào đang hoạt động.</p>
-    <a
-      href="/owner/management-plans"
-      class="mt-4 inline-block px-5 py-2 rounded-lg bg-blue-600 text-white font-semibold hover:bg-blue-700"
-    >
-      Quay lại
-    </a>
-  </div>
-
-  <!-- Property selection form -->
-  <div th:unless="${#lists.isEmpty(allProperties)}">
-    <form
-      th:action="@{/owner/management-plans/downgrade/{id}(id=${newPlan.id})}"
-      method="post"
-      id="downgradeForm"
-    >
-      <!-- Selection counter -->
-      <div class="flex items-center justify-between mb-4">
-        <h2 class="text-lg font-semibold text-gray-800">
-          Chọn nhà trọ giữ lại
-        </h2>
-        <div class="flex items-center gap-2 bg-gray-100 rounded-lg px-4 py-2">
-          <span class="text-sm text-gray-500">Đã chọn:</span>
-          <span id="selectedCount" class="font-bold text-blue-600">0</span>
-          <span class="text-sm text-gray-500"
-            >/ <span th:text="${keepCount}">2</span></span
-          >
+        <!-- Page Heading -->
+        <div class="d-sm-flex align-items-center justify-content-between mb-4">
+            <div>
+                <a th:href="@{/owner/management-plans}" class="btn btn-sm btn-outline-secondary mb-2">
+                    <i class="fas fa-arrow-left fa-sm mr-1"></i> Quay lại danh sách gói
+                </a>
+                <h1 class="h3 mb-0 text-gray-800 font-weight-bold">
+                    <i class="fas fa-arrow-down text-warning mr-2"></i>Chuyển Xuống Gói: <span th:text="${newPlan.name}">Basic</span>
+                </h1>
+                <p class="text-muted small mb-0 mt-1">
+                    Gói mới cho phép tối đa <strong th:text="${keepCount}">2</strong> cơ sở hoạt động. Vui lòng chọn đúng <strong th:text="${keepCount}">2</strong> cơ sở bạn muốn giữ lại.
+                </p>
+            </div>
+            <div class="card border-left-warning shadow-sm py-2 px-3 bg-white">
+                <div class="text-xs text-uppercase font-weight-bold text-muted">Đã Chọn Giữ Lại</div>
+                <div class="h5 mb-0 font-weight-bold text-warning">
+                    <span id="selectedCount">0</span> / <span th:text="${keepCount}">2</span>
+                </div>
+            </div>
         </div>
-      </div>
 
-      <!-- Property cards grid -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
-        <label
-          th:each="prop : ${allProperties}"
-          th:for="'prop-' + ${prop.id}"
-          class="property-card relative bg-white rounded-xl border-2 border-gray-200 shadow-sm cursor-pointer hover:border-blue-400 transition-all select-none"
-        >
-          <input
-            type="checkbox"
-            name="keepPropertyIds"
-            th:id="'prop-' + ${prop.id}"
-            th:value="${prop.id}"
-            class="sr-only property-checkbox"
-          />
-
-          <!-- Status badge (ACTIVE / LOCKED) -->
-          <div class="absolute top-2 left-2">
-            <span
-              th:if="${'ACTIVE'.equals(prop.status)}"
-              class="text-xs bg-green-100 text-green-700 font-semibold px-2 py-0.5 rounded-full"
-              >đang hoạt động</span
-            >
-            <span
-              th:unless="${'ACTIVE'.equals(prop.status)}"
-              class="text-xs bg-yellow-100 text-yellow-700 font-semibold px-2 py-0.5 rounded-full"
-              >đang khóa</span
-            >
-          </div>
-
-          <!-- Checkmark overlay -->
-          <div
-            class="check-indicator hidden absolute top-3 right-3 w-6 h-6 bg-blue-600 rounded-full flex items-center justify-center shadow"
-          >
-            <i class="fa-solid fa-check text-white text-xs"></i>
-          </div>
-
-          <div class="flex items-start gap-3 p-4">
-            <!-- Thumbnail -->
-            <div
-              class="h-16 w-20 flex-shrink-0 overflow-hidden rounded-lg border border-gray-100 bg-gray-50"
-            >
-              <img
-                th:src="${prop.img_url != null ? prop.img_url : '/images/no-image.jpg'}"
-                class="h-full w-full object-cover"
-                alt="property"
-              />
+        <!-- Warning Alert -->
+        <div class="alert alert-warning border-left-warning shadow-sm mb-4">
+            <div class="d-flex align-items-center">
+                <i class="fas fa-info-circle fa-2x text-warning mr-3"></i>
+                <div>
+                    <h6 class="font-weight-bold mb-1">Cơ sở không được chọn sẽ được bảo lưu an toàn</h6>
+                    <p class="small mb-0">Các cơ sở không được chọn chỉ tạm thời bị khóa tính năng vận hành. Mọi dữ liệu phòng, hợp đồng, lịch sử thu tiền vẫn được lưu trữ nguyên vẹn và sẽ tự động mở lại khi bạn nâng gói.</p>
+                </div>
             </div>
-            <!-- Info -->
-            <div class="overflow-hidden">
-              <p
-                class="font-semibold text-gray-900 truncate"
-                th:text="${prop.name ?: prop.title ?: 'Nhà trọ #' + prop.id}"
-              >
-                Tên nhà trọ
-              </p>
-              <p
-                class="text-xs text-gray-500 mt-0.5 truncate"
-                th:text="${prop.addressNumber}"
-              >
-                Địa chỉ
-              </p>
-              <div class="mt-1.5 flex items-center gap-1.5">
-                <span
-                  class="text-xs bg-gray-100 text-gray-600 rounded px-1.5 py-0.5"
-                  th:text="${prop.categoryName}"
-                  >Nhà trọ</span
-                >
-                <span
-                  class="text-xs text-gray-400"
-                  th:text="${prop.rentedRooms} + '/' + ${prop.totalRooms} + ' phòng'"
-                  >0/0 phòng</span
-                >
-              </div>
+        </div>
+
+        <!-- No properties state -->
+        <div th:if="${#lists.isEmpty(allProperties)}" class="card shadow p-5 text-center text-muted">
+            <i class="fas fa-folder-open fa-3x text-gray-300 mb-3"></i>
+            <p>Bạn không có cơ sở nhà trọ nào đang hoạt động.</p>
+            <div>
+                <a th:href="@{/owner/management-plans}" class="btn btn-primary font-weight-bold">Quay lại</a>
             </div>
-          </div>
-        </label>
-      </div>
+        </div>
 
-      <!-- Action buttons -->
-      <div class="flex items-center justify-between gap-4">
-        <a
-          href="/owner/management-plans"
-          class="px-5 py-2.5 rounded-xl border border-gray-300 text-gray-700 font-semibold hover:bg-gray-50 transition-all"
-        >
-          Hủy bỏ
-        </a>
-        <button
-          type="submit"
-          id="btnConfirmDowngrade"
-          disabled
-          class="px-6 py-2.5 rounded-xl bg-orange-600 hover:bg-orange-700 text-white font-semibold shadow-md transition-all disabled:opacity-40 disabled:cursor-not-allowed"
-        >
-          <i class="fa-solid fa-lock mr-2"></i>
-          Xác nhận hạ gói
-        </button>
-      </div>
-    </form>
-  </div>
+        <!-- Property selection form -->
+        <div th:unless="${#lists.isEmpty(allProperties)}">
+            <form th:action="@{/owner/management-plans/downgrade/{id}(id=${newPlan.id})}" method="post" id="downgradeForm">
+                <div class="row mb-4">
+                    <div th:each="prop : ${allProperties}" class="col-md-6 col-lg-4 mb-3">
+                        <label th:for="'prop-' + ${prop.id}" class="card shadow-sm h-100 property-card border cursor-pointer select-none position-relative p-0 overflow-hidden mb-0" style="cursor: pointer;">
+                            <input type="checkbox" name="keepPropertyIds" th:id="'prop-' + ${prop.id}" th:value="${prop.id}" class="d-none property-checkbox" />
+                            
+                            <!-- Badges -->
+                            <div class="p-2 bg-light border-bottom d-flex justify-content-between align-items-center">
+                                <span th:if="${'ACTIVE'.equals(prop.status)}" class="badge badge-success">Đang hoạt động</span>
+                                <span th:unless="${'ACTIVE'.equals(prop.status)}" class="badge badge-warning text-dark">Đang khóa</span>
+                                <span class="check-indicator badge badge-primary font-weight-bold d-none">
+                                    <i class="fas fa-check mr-1"></i> Đã chọn
+                                </span>
+                            </div>
 
-  <script th:inline="javascript">
-    const keepCount = /*[[${keepCount}]]*/ 2;
-    const checkboxes = document.querySelectorAll(".property-checkbox");
-    const btnConfirm = document.getElementById("btnConfirmDowngrade");
-    const selectedCountEl = document.getElementById("selectedCount");
+                            <div class="card-body p-3">
+                                <div class="d-flex align-items-center">
+                                    <img th:src="${prop.img_url != null ? prop.img_url : '/sb-admin-2/img/undraw_profile.svg'}"
+                                         class="rounded mr-3" style="width: 60px; height: 60px; object-fit: cover;" alt="property" />
+                                    <div class="overflow-hidden">
+                                        <h6 class="font-weight-bold text-gray-900 mb-1 text-truncate" th:text="${prop.name ?: prop.title ?: 'Nhà trọ #' + prop.id}">Tên nhà trọ</h6>
+                                        <small class="text-muted d-block text-truncate" th:text="${prop.addressNumber}">Địa chỉ</small>
+                                        <div class="mt-1">
+                                            <span class="badge badge-light border text-muted" th:text="${prop.categoryName}">Nhà trọ</span>
+                                            <span class="badge badge-light border text-muted" th:text="${prop.rentedRooms} + '/' + ${prop.totalRooms} + ' phòng'">0/0 phòng</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </label>
+                    </div>
+                </div>
 
-    function updateUI() {
-      const checked = document.querySelectorAll(".property-checkbox:checked");
-      const count = checked.length;
-      selectedCountEl.textContent = count;
+                <!-- Action buttons -->
+                <div class="card shadow p-3 mb-5 d-flex flex-row justify-content-between align-items-center bg-white">
+                    <a th:href="@{/owner/management-plans}" class="btn btn-outline-secondary font-weight-bold">
+                        <i class="fas fa-arrow-left mr-1"></i> Hủy Bỏ
+                    </a>
+                    <button type="submit" id="btnConfirmDowngrade" disabled class="btn btn-warning shadow-sm font-weight-bold text-white px-4">
+                        <i class="fas fa-lock mr-1"></i> Xác Nhận Giữ Lại & Hạ Gói
+                    </button>
+                </div>
+            </form>
+        </div>
 
-      // Enable submit only when exactly keepCount properties are selected
-      btnConfirm.disabled = count !== keepCount;
+    <script th:inline="javascript">
+      /*<![CDATA[*/
+      const keepCount = /*[[${keepCount}]]*/ 2;
+      const checkboxes = document.querySelectorAll(".property-checkbox");
+      const btnConfirm = document.getElementById("btnConfirmDowngrade");
+      const selectedCountEl = document.getElementById("selectedCount");
 
-      // Update card highlighting
+      function updateUI() {
+        const checked = document.querySelectorAll(".property-checkbox:checked");
+        const count = checked.length;
+        if (selectedCountEl) selectedCountEl.textContent = count;
+
+        if (btnConfirm) btnConfirm.disabled = (count !== keepCount);
+
+        checkboxes.forEach((cb) => {
+          const card = cb.closest(".property-card");
+          const indicator = card.querySelector(".check-indicator");
+          if (cb.checked) {
+            card.classList.add("border-primary", "bg-light");
+            if (indicator) indicator.classList.remove("d-none");
+          } else {
+            card.classList.remove("border-primary", "bg-light");
+            if (indicator) indicator.classList.add("d-none");
+          }
+        });
+
+        checkboxes.forEach((cb) => {
+          const card = cb.closest(".property-card");
+          if (!cb.checked && count >= keepCount) {
+            card.style.opacity = '0.5';
+            cb.disabled = true;
+          } else if (!cb.checked) {
+            card.style.opacity = '1';
+            cb.disabled = false;
+          }
+        });
+      }
+
       checkboxes.forEach((cb) => {
-        const card = cb.closest(".property-card");
-        const indicator = card.querySelector(".check-indicator");
-        if (cb.checked) {
-          card.classList.add("border-blue-500", "bg-blue-50/40");
-          card.classList.remove("border-gray-200");
-          indicator.classList.remove("hidden");
-          indicator.classList.add("flex");
-        } else {
-          card.classList.remove("border-blue-500", "bg-blue-50/40");
-          card.classList.add("border-gray-200");
-          indicator.classList.add("hidden");
-          indicator.classList.remove("flex");
-        }
+        cb.addEventListener("change", updateUI);
       });
 
-      // Disable unchecked checkboxes when limit reached
-      checkboxes.forEach((cb) => {
-        if (!cb.checked && count >= keepCount) {
-          cb.closest(".property-card").classList.add(
-            "opacity-50",
-            "cursor-not-allowed",
-          );
-          cb.disabled = true;
-        } else if (!cb.checked) {
-          cb.closest(".property-card").classList.remove(
-            "opacity-50",
-            "cursor-not-allowed",
-          );
-          cb.disabled = false;
-        }
-      });
-    }
-
-    checkboxes.forEach((cb) => {
-      cb.addEventListener("change", updateUI);
-    });
-
-    // Initial state
-    updateUI();
-  </script>
+      updateUI();
+      /*]]>*/
+    </script>
 </div>
+

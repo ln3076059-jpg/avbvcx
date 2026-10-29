@@ -99,6 +99,11 @@ public interface PostService {
     Post findPostById(Long id);
 
     /**
+     * Find a post by ID and verify it belongs to ownerId, throws IllegalArgumentException if not owned
+     */
+    Post getPostByIdAndOwner(Long postId, Long ownerId);
+
+    /**
      * Find a post by property ID
      */
     Optional<Post> findPostByPropertyId(Long propertyId);
@@ -148,6 +153,8 @@ public interface PostService {
      * Ordered by boost status and expiry date
      */
     List<Post> getAllMarketplacePosts();
+
+    List<Post> searchMarketplacePosts(String keyword);
 
     /**
      * Get marketplace posts by category

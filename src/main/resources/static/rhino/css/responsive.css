@@ -1,0 +1,62 @@
+/*---------------------------------------------------------------------
+  File Name: responsive.css (Rhino Template - Senior UI/UX Edition)
+---------------------------------------------------------------------*/
+
+@media (max-width: 991px) {
+  .header {
+    height: auto;
+  }
+
+  .header_top {
+    padding: 8px 0;
+  }
+
+  .navigation .navbar-collapse {
+    background: #161825;
+    padding: 16px;
+    margin-top: 12px;
+    border-radius: 10px;
+    width: 100%;
+    box-shadow: 0 12px 30px rgba(15, 23, 42, 0.2);
+  }
+
+  .navigation .navbar-nav .nav-link {
+    padding: 10px 14px;
+    color: #ffffff !important;
+  }
+
+  .navigation .navbar-nav .nav-link:focus,
+  .navigation .navbar-nav .nav-link:hover,
+  .navigation .navbar-nav .active > .nav-link,
+  .navigation .navbar-nav .nav-link.active {
+    background: #fe9901 !important;
+    color: #ffffff !important;
+  }
+
+  .about_img {
+    margin-top: 24px;
+  }
+
+  .main_form {
+    padding: 24px;
+  }
+}
+
+@media (max-width: 767px) {
+  .banner_main {
+    padding: 44px 0 96px 0;
+  }
+
+  .build_box h1 {
+    font-size: 30px;
+  }
+
+  .award {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+  }
+
+  .relative2 {
+    padding: 0px 20px 32px 20px;
+  }
+}

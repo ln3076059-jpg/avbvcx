@@ -24,10 +24,10 @@ public class PostPackage {
     @Column(unique = true, nullable = false, length = 50)
     private String code; // 15_DAYS, 30_DAYS, 60_DAYS
     
-    @Column(nullable = false, columnDefinition = "nvarchar(255)")
+    @Column(nullable = false, length = 255)
     private String name;
     
-    @Column(columnDefinition = "nvarchar(1000)")
+    @Column(columnDefinition = "TEXT")
     private String description;
     
     @Column(nullable = false, name = "duration_days")

@@ -1,312 +1,1388 @@
-<div th:fragment="content" class="bg-gray-50 min-h-screen pb-12">
-  <div class="container mx-auto px-4 py-6">
-    <nav class="flex text-sm text-gray-500 mb-6 gap-2">
-      <a href="/" class="hover:text-blue-600">Trang chủ</a>
-      <span>/</span>
-      <a
-        th:href="@{/public/category/{id}(id=${p.categoryId})}"
-        th:text="${p.categoryName}"
-        class="hover:text-blue-600"
-        >Chuyên mục</a
-      >
-      <span>/</span>
-      <span class="text-gray-800 font-medium truncate" th:text="${p.title}"
-        >Tiêu đề bài đăng</span
-      >
-    </nav>
+<div th:fragment="content">
 
-    <div
-      class="grid grid-cols-1 md:grid-cols-4 gap-2 mb-8 rounded-2xl overflow-hidden shadow-sm bg-white p-2"
-    >
-      <div class="md:col-span-2 md:row-span-2 h-[300px] md:h-[500px]">
-        <img
-          th:src="${#lists.isEmpty(p.imageUrls) ? '/images/no-image.jpg' : p.imageUrls[0]}"
-          class="w-full h-full object-cover hover:opacity-90 transition cursor-pointer"
-        />
-      </div>
-      <div
-        th:each="img, iter : ${p.imageUrls}"
-        th:if="${iter.index > 0 && iter.index < 5}"
-        class="hidden md:block h-[248px]"
-      >
-        <img
-          th:src="${img}"
-          class="w-full h-full object-cover hover:opacity-90 transition cursor-pointer"
-        />
-      </div>
+  <!-- Three.js CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+  <!-- 1. Compact E-Commerce Breadcrumbs -->
+  <div class="bg-light border-bottom py-2">
+    <div class="container">
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb mb-0 small d-flex align-items-center gap-1">
+          <li class="breadcrumb-item"><a th:href="@{/}" class="text-decoration-none" style="color: #ea580c;"><i class="fa-solid fa-house me-1"></i>Trang chủ</a></li>
+          <li class="breadcrumb-item"><a th:href="@{/properties}" class="text-decoration-none" style="color: #ea580c;" th:text="${p.categoryName != null and !p.categoryName.isEmpty() ? p.categoryName : 'Phòng trọ &amp; Căn hộ'}">Nhà trọ</a></li>
+          <li class="breadcrumb-item active text-dark fw-semibold" aria-current="page" th:text="${p.title}">Chi tiết phòng</li>
+        </ol>
+      </nav>
     </div>
+  </div>
 
-    <div class="flex flex-col lg:flex-row gap-8">
-      <div class="lg:w-2/3 space-y-8">
-        <section class="bg-white p-6 rounded-2xl shadow-sm">
-          <div class="flex gap-2 mb-3">
-            <span
-              class="bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded"
-              >HOT</span
-            >
-            <span
-              class="bg-blue-100 text-blue-700 text-[10px] font-bold px-2 py-0.5 rounded"
-              th:text="${p.categoryName}"
-              >LOẠI</span
-            >
+  <!-- 2. Main Content Section (#real-estate-2) -->
+  <section id="real-estate-2" class="real-estate-2 section pt-3"
+           th:with="fb1=${'/images/rooms/room-' + ((p.id % 12) + 1) + '.jpg'},
+                    fb2=${'/images/rooms/room-' + (((p.id + 1) % 12) + 1) + '.jpg'},
+                    fb3=${'/images/rooms/room-' + (((p.id + 2) % 12) + 1) + '.jpg'},
+                    fb4=${'/images/rooms/room-' + (((p.id + 3) % 12) + 1) + '.jpg'},
+                    img1=${p.imageUrls != null and p.imageUrls.size() > 0 and !p.imageUrls[0].contains('unsplash.com') ? p.imageUrls[0] : fb1},
+                    img2=${p.imageUrls != null and p.imageUrls.size() > 1 and !p.imageUrls[1].contains('unsplash.com') ? p.imageUrls[1] : fb2},
+                    img3=${p.imageUrls != null and p.imageUrls.size() > 2 and !p.imageUrls[2].contains('unsplash.com') ? p.imageUrls[2] : fb3},
+                    img4=${p.imageUrls != null and p.imageUrls.size() > 3 and !p.imageUrls[3].contains('unsplash.com') ? p.imageUrls[3] : fb4}">
+
+    <div class="container" data-aos="fade-up">
+
+      <!-- Flash Error / Success Alert when redirected -->
+      <div th:if="${addToCartSuccess}" class="alert alert-success py-2.5 px-3 small d-flex flex-wrap align-items-center justify-content-between mb-3 shadow-sm" style="border-radius: 8px; border-left: 5px solid #16a34a !important;" role="alert">
+        <div class="d-flex align-items-center">
+          <i class="fa-solid fa-circle-check text-success fs-5 me-2.5"></i>
+          <div>
+            <strong class="text-success d-block">Đã thêm <span th:text="${registeredRoomName}">Phòng</span> vào giỏ phòng thành công!</strong>
+            <span class="text-secondary">Phòng đã được lưu trong giỏ hàng. Bạn có thể xem giỏ để thanh toán cọc hoặc tiếp tục xem thêm phòng.</span>
           </div>
-          <h1
-            class="text-2xl font-bold text-gray-900 mb-4 leading-tight"
-            th:text="${p.title}"
-          >
-            Tiêu đề
-          </h1>
-          <p class="text-gray-500 flex items-center gap-2 text-sm">
-            <i class="fa-solid fa-location-dot text-red-500"></i>
-            <span
-              th:text="${p.addressNumber + ', ' + p.wardName + ', ' + p.provinceName}"
-              >Địa chỉ</span
-            >
-          </p>
-
-          <div
-            class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6 pt-6 border-t border-gray-50 text-center"
-          >
-            <div>
-              <p class="text-xs text-gray-400 mb-1">Giá chỉ từ</p>
-              <p
-                class="text-orange-600 font-bold text-lg"
-                th:text="${#numbers.formatDecimal(p.price, 0, 'COMMA', 0, 'POINT') + ' đ/tháng'}"
-              ></p>
-            </div>
-            <div>
-              <p class="text-xs text-gray-400 mb-1">Diện tích</p>
-              <p
-                class="font-bold text-gray-800 text-lg"
-                th:text="${p.acreage + ' m²'}"
-              ></p>
-            </div>
-            <div>
-              <p class="text-xs text-gray-400 mb-1">Số phòng</p>
-              <p
-                class="font-bold text-gray-800 text-lg"
-                th:text="${p.numberOfRooms > 0 ? p.numberOfRooms : 'Đang cập nhật'}"
-              ></p>
-            </div>
-            <div>
-              <p class="text-xs text-gray-400 mb-1">Ngày đăng</p>
-              <p
-                class="font-bold text-gray-800 text-lg text-sm"
-                th:text="${p.formattedCreatedAt}"
-              ></p>
-            </div>
-          </div>
-        </section>
-
-        <section class="bg-white p-6 rounded-2xl shadow-sm">
-          <h2
-            class="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2"
-          >
-            <span class="w-1.5 h-6 bg-blue-600 rounded-full"></span>
-            Giới thiệu
-          </h2>
-          <div
-            class="text-gray-700 leading-relaxed whitespace-pre-line text-sm"
-            th:text="${p.description}"
-          >
-            Nội dung giới thiệu...
-          </div>
-        </section>
-
-        <section class="bg-white p-6 rounded-2xl shadow-sm">
-          <h2
-            class="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2"
-          >
-            <span class="w-1.5 h-6 bg-blue-600 rounded-full"></span>
-            Thông tin chi tiết
-          </h2>
-
-          <div class="space-y-8">
-            <!-- Đối tượng -->
-            <div th:if="${not #lists.isEmpty(p.targetTenants)}">
-              <h3 class="font-bold text-gray-900 mb-4 text-base">Đối tượng</h3>
-              <div class="grid grid-cols-2 md:grid-cols-2 gap-y-3">
-                <div
-                  th:each="target : ${p.targetTenants}"
-                  class="flex items-center gap-3 text-gray-700"
-                >
-                  <i
-                    th:class="${target.icon} + ' w-5 text-center text-gray-500'"
-                  ></i>
-                  <span th:text="${target.name}" class="text-sm"></span>
-                </div>
-              </div>
-            </div>
-
-            <hr class="border-gray-100" />
-
-            <!-- Tiện nghi -->
-            <div th:if="${not #lists.isEmpty(p.amenities)}">
-              <h3 class="font-bold text-gray-900 mb-4 text-base">Tiện nghi</h3>
-              <div class="grid grid-cols-2 md:grid-cols-3 gap-y-3">
-                <div
-                  th:each="amen : ${p.amenities}"
-                  class="flex items-center gap-3 text-gray-700"
-                >
-                  <i
-                    th:class="${amen.icon} + ' w-5 text-center text-gray-500'"
-                  ></i>
-                  <span class="text-sm" th:text="${amen.name}"></span>
-                </div>
-              </div>
-            </div>
-
-            <hr class="border-gray-100" />
-
-            <!-- Môi trường -->
-            <div th:if="${not #lists.isEmpty(p.surroundings)}">
-              <h3 class="font-bold text-gray-900 mb-4 text-base">
-                Môi trường xung quanh
-              </h3>
-              <div class="grid grid-cols-2 md:grid-cols-3 gap-y-3">
-                <div
-                  th:each="sur : ${p.surroundings}"
-                  class="flex items-center gap-3 text-gray-700"
-                >
-                  <i
-                    th:class="${sur.icon} + ' w-5 text-center text-gray-500'"
-                  ></i>
-                  <span class="text-sm" th:text="${sur.name}"></span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <!-- Đã tích hợp phần Môi trường xung quanh vào section trên, xoá section cũ bên dưới -->
+        </div>
+        <a th:href="@{/my-bookings}" class="btn btn-sm btn-success fw-bold px-3 py-1.5 ms-auto text-nowrap">
+          <i class="fa-solid fa-cart-shopping me-1"></i>Xem Giỏ Phòng &amp; Thanh Toán
+        </a>
+      </div>
+      <div th:if="${errorMessage}" class="alert alert-warning py-2.5 px-3 small d-flex align-items-center mb-3" style="border-radius: 8px;" role="alert">
+        <i class="fa-solid fa-circle-exclamation me-2 text-warning"></i>
+        <span th:text="${errorMessage}">Vui lòng đăng nhập tài khoản.</span>
+      </div>
+      <div th:if="${registerRentError}" class="alert alert-danger py-2.5 px-3 small d-flex align-items-center mb-3" style="border-radius: 8px;" role="alert">
+        <i class="fa-solid fa-circle-exclamation me-2"></i>
+        <span th:text="${registerRentError}">Lỗi đặt phòng</span>
+      </div>
+      <div th:if="${contactSuccess}" class="alert alert-success py-2.5 px-3 small d-flex align-items-center mb-3" style="border-radius: 8px;" role="alert">
+        <i class="fa-solid fa-circle-check me-2"></i>
+        <span>Yêu cầu hẹn xem phòng của bạn đã được gửi thành công! Chủ nhà sẽ liên hệ lại với bạn trong vòng 15 phút.</span>
       </div>
 
-      <div class="lg:w-1/3">
-        <div class="sticky top-24 space-y-4">
-          <!-- Owner card -->
-          <div class="bg-white border border-gray-200 rounded-xl p-5">
-            <div class="flex items-center gap-4 mb-5">
-              <div
-                class="w-14 h-14 rounded-full bg-gray-100 flex items-center justify-center text-gray-500"
-              >
-                <i class="fa-solid fa-user"></i>
+      <!-- ========================================================================= -->
+      <!-- 2A. E-COMMERCE PRODUCT HERO BUY BOX (GỌN GÀNG, KHÔNG CÓ FORM THÔNG TIN NGƯỜI ĐẶT) -->
+      <!-- ========================================================================= -->
+      <div id="ecommerceProductBox" class="p-3 p-lg-4 mb-4" style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; box-shadow: 0 8px 24px rgba(15, 23, 42, 0.05);">
+        <div class="row g-4">
+
+          <!-- LEFT COLUMN (col-lg-5): PRODUCT GALLERY + THUMBNAILS + SHOP OWNER BAR -->
+          <div class="col-lg-5">
+            <!-- Main Product Photo -->
+            <div class="position-relative rounded-3 overflow-hidden mb-2" style="height: 350px; background: #0f172a;">
+              <img th:src="${img1}"
+                   th:attr="onerror=|this.onerror=null;this.src='${fb1}';|"
+                   id="mainGalleryImage"
+                   alt="Ảnh chính phòng trọ"
+                   style="width: 100%; height: 100%; object-fit: cover; cursor: pointer;"
+                   onclick="if(typeof openPhotoLightbox==='function') openPhotoLightbox(0);" />
+              <span class="position-absolute top-0 start-0 m-2 px-2.5 py-1 rounded text-white fw-bold small"
+                    style="background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); font-size: 12px;">
+                <i class="fa-solid fa-fire me-1"></i>Đặt Thuê Online
+              </span>
+              <span class="position-absolute top-0 end-0 m-2 px-2.5 py-1 rounded text-white fw-bold small"
+                    style="background-color: rgba(15, 23, 42, 0.78); font-size: 12px;">
+                <i class="fa-solid fa-door-open me-1" style="color: #93c5fd;"></i>
+                <span th:text="${(availableRooms != null ? availableRooms.size() : 3) + '/' + (propertyRooms != null and !propertyRooms.isEmpty() ? propertyRooms.size() : 5) + ' phòng trống'}">3/5 phòng trống</span>
+              </span>
+              <!-- Zoom Indicator -->
+              <button type="button" onclick="if(typeof openPhotoLightbox==='function') openPhotoLightbox(0);"
+                      class="position-absolute bottom-0 end-0 m-2 btn btn-sm btn-dark bg-opacity-75 text-white border-0 rounded px-2 py-1"
+                      title="Phóng to ảnh">
+                <i class="fa-solid fa-up-right-and-down-left-from-center me-1"></i>Phóng to
+              </button>
+            </div>
+
+            <!-- 4 Interactive Thumbnails (Accessible WCAG 2.2 Keyboard Supported) -->
+            <div class="row g-2 mb-3">
+              <div class="col-3">
+                <div class="position-relative rounded overflow-hidden cursor-pointer photo-strip-btn border border-2"
+                     style="height: 72px; border-color: #fe9901 !important;"
+                     role="button" tabindex="0" aria-label="Xem ảnh thực tế 1 · Mặt chính không gian"
+                     th:attr="data-img=${img1},data-idx=0,data-caption='Ảnh thực tế 1 · Mặt chính không gian'"
+                     onclick="selectEcommercePhoto(this, 0)"
+                     onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();selectEcommercePhoto(this, 0);}">
+                  <img th:src="${img1}" th:attr="onerror=|this.onerror=null;this.src='${fb1}';|" alt="Ảnh 1" class="w-100 h-100 object-fit-cover" />
+                </div>
               </div>
+              <div class="col-3">
+                <div class="position-relative rounded overflow-hidden cursor-pointer photo-strip-btn"
+                     style="height: 72px;"
+                     role="button" tabindex="0" aria-label="Xem ảnh thực tế 2 · Chi tiết nội thất"
+                     th:attr="data-img=${img2},data-idx=1,data-caption='Ảnh thực tế 2 · Chi tiết nội thất'"
+                     onclick="selectEcommercePhoto(this, 1)"
+                     onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();selectEcommercePhoto(this, 1);}">
+                  <img th:src="${img2}" th:attr="onerror=|this.onerror=null;this.src='${fb2}';|" alt="Ảnh 2" class="w-100 h-100 object-fit-cover" />
+                </div>
+              </div>
+              <div class="col-3">
+                <div class="position-relative rounded overflow-hidden cursor-pointer photo-strip-btn"
+                     style="height: 72px;"
+                     role="button" tabindex="0" aria-label="Xem ảnh thực tế 3 · Ánh sáng và cửa sổ"
+                     th:attr="data-img=${img3},data-idx=2,data-caption='Góc không gian 3 · Ánh sáng &amp; cửa sổ'"
+                     onclick="selectEcommercePhoto(this, 2)"
+                     onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();selectEcommercePhoto(this, 2);}">
+                  <img th:src="${img3}" th:attr="onerror=|this.onerror=null;this.src='${fb3}';|" alt="Ảnh 3" class="w-100 h-100 object-fit-cover" />
+                </div>
+              </div>
+              <div class="col-3">
+                <div class="position-relative rounded overflow-hidden cursor-pointer photo-strip-btn"
+                     style="height: 72px;"
+                     role="button" tabindex="0" aria-label="Xem ảnh thực tế 4 · Khu vực tiện nghi"
+                     th:attr="data-img=${img4},data-idx=3,data-caption='Góc không gian 4 · Khu vực tiện nghi'"
+                     onclick="selectEcommercePhoto(this, 3)"
+                     onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();selectEcommercePhoto(this, 3);}">
+                  <img th:src="${img4}" th:attr="onerror=|this.onerror=null;this.src='${fb4}';|" alt="Ảnh 4" class="w-100 h-100 object-fit-cover" />
+                </div>
+              </div>
+            </div>
+
+            <!-- Shop / Owner Card -->
+            <div class="p-3 rounded-3 d-flex align-items-center justify-content-between gap-2" style="background-color: #f8fafc; border: 1px solid #e2e8f0;">
+              <div class="d-flex align-items-center gap-2.5">
+                <div class="d-flex align-items-center justify-content-center text-white fw-bold position-relative flex-shrink-0"
+                     style="width: 44px; height: 44px; border-radius: 10px; background: #fe9901; font-size: 17px;">
+                  <span th:text="${p.ownerName != null and !p.ownerName.isEmpty() ? #strings.substring(p.ownerName, 0, 1).toUpperCase() : 'C'}">O</span>
+                </div>
+                <div>
+                  <div class="fw-bold small" style="color: #161825;" th:text="${p.ownerName != null and !p.ownerName.isEmpty() ? p.ownerName : 'Ban Quản Lý Tòa Nhà'}">owner1</div>
+                  <div class="text-muted" style="font-size: 12px;">
+                    <span class="text-success fw-semibold"><i class="fa-solid fa-circle me-1" style="font-size: 8px;"></i>Đang trực tuyến</span>
+                    · Phản hồi: <strong>99%</strong>
+                  </div>
+                </div>
+              </div>
+              <div class="d-flex align-items-center gap-1.5">
+                <button type="button" class="btn-estate-outline py-1.5 px-2.5 small" data-bs-toggle="modal" data-bs-target="#property3dModal">
+                  <i class="fa-solid fa-cube"></i><span>Xem 3D</span>
+                </button>
+                <a th:href="@{/my-bookings}" class="btn-estate py-1.5 px-2.5 small">
+                  <i class="fa-solid fa-bag-shopping"></i><span>Đơn Đặt</span>
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <!-- RIGHT COLUMN (col-lg-7): PURE E-COMMERCE BUY BOX & VARIANT SELECTOR -->
+          <div class="col-lg-7">
+            <!-- Product Title with Badges -->
+            <div class="mb-2">
+              <span class="badge me-1 px-2 py-1 align-middle" style="background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); color: #fff; font-size: 12px; font-weight: 700;">
+                Yêu thích+
+              </span>
+              <span class="badge me-1 px-2 py-1 align-middle" style="background-color: #dcfce7; color: #166534; font-size: 12px; font-weight: 700;">
+                <i class="fa-solid fa-shield-halved me-1"></i>Đã xác thực
+              </span>
+              <span th:if="${p.categoryName != null and !p.categoryName.isEmpty()}"
+                    class="badge me-1 px-2 py-1 align-middle" style="background-color: #fff3e0; color: #c97a05; font-size: 12px; font-weight: 700;"
+                    th:text="${p.categoryName}">
+                Nhà trọ
+              </span>
+              <h1 class="d-inline fw-bold align-middle" style="font-size: 23px; color: #161825; line-height: 1.3;"
+                  th:text="${p.title}">
+                Nhà trọ cạnh ĐHQG BD
+              </h1>
+            </div>
+
+            <!-- E-Commerce Rating, Reviews, Bookings & Location Bar -->
+            <div class="d-flex flex-wrap align-items-center gap-2 pb-2 mb-2 small text-muted">
+              <div class="d-flex align-items-center gap-1">
+                <span class="fw-bold text-decoration-underline" style="color: #ea580c;">4.9</span>
+                <span style="color: #ea580c; font-size: 12px;">
+                  <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                </span>
+              </div>
+              <span>|</span>
+              <div><strong class="text-dark">28</strong> Đánh giá</div>
+              <span>|</span>
+              <div><strong class="text-dark">15</strong> Lượt đặt thuê</div>
+              <span>|</span>
+              <div class="text-truncate" style="max-width: 260px;" th:title="${p.addressNumber + ', ' + p.wardName + ', ' + p.provinceName}">
+                <i class="fa-solid fa-location-dot me-1" style="color: #ea580c;"></i>
+                <span th:text="${p.addressNumber + ', ' + p.wardName + ', ' + p.provinceName}">Địa chỉ</span>
+              </div>
+            </div>
+
+            <!-- E-Commerce Flash Price Banner -->
+            <div class="p-3 rounded-3 mb-3 d-flex flex-wrap align-items-center justify-content-between gap-2"
+                 style="background: linear-gradient(135deg, #fff7ed 0%, #fffbeb 100%); border: 1px solid #fed7aa;">
               <div>
-                <p class="text-xs text-gray-400 uppercase">Chủ sở hữu</p>
-                <h3
-                  class="font-semibold text-gray-800"
-                  th:text="${p.ownerName}"
-                >
-                  Tên chủ trọ
-                </h3>
+                <div class="d-flex align-items-baseline gap-2">
+                  <span id="ecomSelectedOriginalPriceDisplay"
+                        class="text-muted text-decoration-line-through small tabular-nums"
+                        th:text="${#numbers.formatDecimal(p.price * 1.15, 0, 'POINT', 0, 'COMMA') + ' ₫'}">2.100.000 ₫</span>
+                  <span id="ecomSelectedPriceDisplay"
+                        class="fw-bold tabular-nums"
+                        style="font-size: 24px; color: #ea580c; line-height: 1.2;"
+                        th:text="${#numbers.formatDecimal(p.price, 0, 'POINT', 0, 'COMMA') + ' ₫ / tháng'}">
+                    1.800.000 ₫ / tháng
+                  </span>
+                  <span class="badge px-2 py-1" style="background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); color: #fff; font-size: 11px;">
+                    GIỮ PHÒNG ONLINE
+                  </span>
+                </div>
+                <div class="small mt-1" style="color: #161825;">
+                  <span>Tiền cọc: <strong id="ecomSelectedDepositDisplay" class="tabular-nums" th:text="${#numbers.formatDecimal(p.price, 0, 'POINT', 0, 'COMMA') + ' ₫'}">1.800.000 ₫</strong></span>
+                  <span class="mx-2">·</span>
+                  <span>Diện tích: <strong id="ecomSelectedAreaDisplay" class="tabular-nums" th:text="${p.acreage + ' m²'}">22.0 m²</strong></span>
+                  <span class="mx-2">·</span>
+                  <span>Điện: 3.500đ · Nước: 20.000đ</span>
+                </div>
+              </div>
+              <div class="text-end">
+                <span class="badge px-2.5 py-1.5" style="background-color: #dcfce7; color: #166534; font-size: 12px;">
+                  <i class="fa-solid fa-circle-check me-1"></i><span th:text="${post != null and post.property != null and post.property.owner != null and post.property.owner.ekycVerified == true ? 'Chủ nhà đã xác thực eKYC · Giá niêm yết' : 'Giá niêm yết trực tiếp'}">Cam kết giá niêm yết chính chủ</span>
+                </span>
               </div>
             </div>
 
-            <div class="space-y-2">
-              <!-- Call -->
-              <a
-                th:if="${p.ownerPhone != null and !p.ownerPhone.isEmpty()}"
-                th:href="'tel:' + ${p.ownerPhone}"
-                class="flex items-center justify-center gap-2 w-full py-2.5 rounded-lg border border-blue-600 text-blue-600 hover:bg-blue-50 transition"
-              >
-                <i class="fa-solid fa-phone"></i>
-                <span th:text="${p.ownerPhone}">Số điện thoại</span>
-              </a>
-
-              <div
-                th:if="${p.ownerPhone == null or p.ownerPhone.isEmpty()}"
-                class="flex items-center justify-center gap-2 w-full py-2.5 rounded-lg bg-gray-200 text-gray-500"
-              >
-                <i class="fa-solid fa-phone-slash"></i>
-                <span>Chưa cập nhật SĐT</span>
+            <!-- E-COMMERCE CONFIGURATION BOX (CHỈ CÓ LỰA CHỌN PHÒNG, KỲ HẠN, NGÀY VÀO Ở) -->
+            <div class="p-3 rounded-3 mb-3" style="background: #f8fafc; border: 1px solid #e2e8f0;">
+              <!-- Variant 1: Chọn Phòng -->
+              <div class="row align-items-start mb-2.5">
+                <div class="col-sm-3 small fw-semibold text-secondary pt-1.5">Chọn Phòng</div>
+                <div class="col-sm-9">
+                  <div class="d-flex flex-wrap gap-2" th:if="${propertyRooms != null and !propertyRooms.isEmpty()}">
+                    <button th:each="rm, iter : ${propertyRooms}"
+                            th:if="${iter.index < 8}"
+                            type="button"
+                            th:disabled="${rm.status.name() != 'AVAILABLE'}"
+                            th:data-room-id="${rm.id}"
+                            th:data-room-name="${rm.name}"
+                            th:data-room-price="${#numbers.formatDecimal(rm.price != null ? rm.price : p.price, 0, 'POINT', 0, 'COMMA')}"
+                            th:data-room-orig-price="${#numbers.formatDecimal((rm.price != null ? rm.price : p.price) * 1.15, 0, 'POINT', 0, 'COMMA')}"
+                            th:data-room-deposit="${#numbers.formatDecimal(rm.deposit != null and rm.deposit > 0 ? rm.deposit : (rm.price != null ? rm.price : p.price), 0, 'POINT', 0, 'COMMA')}"
+                            th:data-room-area="${rm.area != null ? rm.area : p.acreage}"
+                            th:data-room-max-occ="${rm.maxOccupancy != null ? rm.maxOccupancy : 6}"
+                            onclick="selectEcommerceRoomVariant(this)"
+                            class="ecom-room-chip position-relative px-2.5 py-1.5 rounded small fw-semibold text-start border"
+                            th:style="${rm.status.name() == 'AVAILABLE' and (availableRooms != null and !availableRooms.isEmpty() and rm.id == availableRooms[0].id)
+                              ? 'border-color: #fe9901 !important; outline: 2px solid #fe9901; color: #ea580c; background-color: #fff3e0 !important; cursor: pointer;'
+                              : (rm.status.name() == 'AVAILABLE'
+                                ? 'border-color: #cbd5e1; color: #161825; background-color: #ffffff; cursor: pointer;'
+                                : 'border-color: #e2e8f0; color: #94a3b8; background-color: #f1f5f9 !important; cursor: not-allowed; opacity: 0.65;')}">
+                      <i th:class="${rm.status.name() == 'AVAILABLE' ? 'fa-solid fa-door-open me-1 text-success' : 'fa-solid fa-lock me-1 text-muted'}"></i>
+                      <span th:text="${rm.name}">Phòng 1</span>
+                      <span class="text-muted" style="font-size: 11px;"
+                            th:text="${rm.status.name() == 'AVAILABLE' ? '(' + (rm.area != null ? rm.area : p.acreage) + 'm²)' : '(Hết)'}">(22m²)</span>
+                    </button>
+                  </div>
+                </div>
               </div>
 
-              <!-- Zalo -->
-              <a
-                th:if="${p.ownerPhone != null and !p.ownerPhone.isEmpty()}"
-                th:href="'https://zalo.me/' + ${p.ownerPhone}"
-                target="_blank"
-                class="flex items-center justify-center gap-2 w-full py-2.5 rounded-lg border border-green-600 text-green-600 hover:bg-green-50 transition"
-              >
-                <i class="fa-solid fa-comment"></i>
-                Chat Zalo
-              </a>
+              <!-- Variant 2: Chọn Kỳ Hạn Hợp Đồng -->
+              <div class="row align-items-center mb-2.5">
+                <div class="col-sm-3 small fw-semibold text-secondary">Kỳ Hạn Thuê</div>
+                <div class="col-sm-9">
+                  <div class="d-flex flex-wrap gap-2">
+                    <button type="button" onclick="selectEcommerceDuration(this, '6')" class="ecom-dur-chip px-2.5 py-1 rounded bg-white small fw-semibold border" style="border-color: #cbd5e1; color: #161825;">
+                      6 Tháng
+                    </button>
+                    <button type="button" onclick="selectEcommerceDuration(this, '12')" class="ecom-dur-chip px-2.5 py-1 rounded small fw-semibold border" style="border-color: #fe9901; outline: 2px solid #fe9901; color: #ea580c; background-color: #fff3e0;">
+                      12 Tháng (Tiêu chuẩn)
+                    </button>
+                    <button type="button" onclick="selectEcommerceDuration(this, '24')" class="ecom-dur-chip px-2.5 py-1 rounded bg-white small fw-semibold border" style="border-color: #cbd5e1; color: #161825;">
+                      24 Tháng (Ưu đãi)
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Variant 3: Số Người Ở & Ngày Nhận Phòng -->
+              <div class="row align-items-center">
+                <div class="col-sm-3 small fw-semibold text-secondary">Số Người &amp; Nhận Phòng</div>
+                <div class="col-sm-9 d-flex flex-wrap align-items-center gap-3">
+                  <div class="d-inline-flex align-items-center rounded border bg-white">
+                    <button type="button" onclick="stepEcommerceOccupants(-1)" class="btn btn-sm px-2 py-0.5 border-0 fw-bold text-secondary">-</button>
+                    <input type="number" id="ecomOccupantsInput" value="2" min="1" max="6" readonly
+                           class="form-control form-control-sm text-center border-0 fw-bold tabular-nums p-0" style="width: 38px;" />
+                    <button type="button" onclick="stepEcommerceOccupants(1)" class="btn btn-sm px-2 py-0.5 border-0 fw-bold text-secondary">+</button>
+                  </div>
+                  <span class="small text-muted">người ở</span>
+                  <div class="d-flex align-items-center gap-1.5 ms-auto ms-sm-0">
+                    <span class="small text-secondary fw-semibold">Nhận phòng:</span>
+                    <input type="date" id="ecomMoveInDateInput" required
+                           th:value="${#temporals.format(#temporals.createToday().plusDays(3), 'yyyy-MM-dd')}"
+                           class="form-control form-control-sm tabular-nums" style="width: 140px;" />
+                  </div>
+                </div>
+              </div>
             </div>
 
-            <p class="text-[11px] text-gray-400 text-center mt-4">
-              Lưu ý: Nên xem phòng trực tiếp trước khi đặt cọc.
+            <!-- Unauthenticated Login Notice Banner -->
+            <div th:if="${session.user == null}" class="p-2.5 rounded-2 mb-2.5 d-flex align-items-center justify-content-between gap-2" style="background: #fff7ed; border: 1.5px dashed #fed7aa;">
+              <div class="d-flex align-items-center gap-2">
+                <i class="fa-solid fa-user-lock fs-5" style="color: #ea580c;"></i>
+                <div class="small lh-sm text-secondary">
+                  Chưa đăng nhập? <a th:href="@{/login}" class="fw-bold text-decoration-none" style="color: #ea580c;">Đăng nhập</a> hoặc <a th:href="@{/register}" class="fw-bold text-decoration-none" style="color: #ea580c;">Đăng ký</a> để đặt phòng &amp; thêm vào giỏ.
+                </div>
+              </div>
+              <a th:href="@{/login}" class="btn btn-sm btn-outline-warning text-dark fw-bold px-2.5 py-1 text-nowrap" style="font-size: 12px;">Đăng Nhập</a>
+            </div>
+
+            <!-- E-Commerce Action Buttons: CÁC NÚT HÀNH ĐỘNG DẪN TỚI MODAL XÁC NHẬN / HẸN XEM -->
+            <div class="d-flex flex-wrap align-items-center gap-2 pt-1">
+              <button type="button" onclick="openBookingConfirmationModal(true)" class="btn btn-outline-warning fw-bold py-2.5 px-3 d-inline-flex align-items-center justify-content-center" style="border: 2px solid #fe9901; color: #ea580c; background: #fffaf0;">
+                <i class="fa-solid fa-cart-plus me-1.5"></i>
+                <span>Thêm Vào Giỏ Phòng</span>
+              </button>
+              <button type="button" onclick="openBookingConfirmationModal(false)" class="btn-estate flex-grow-1 text-center justify-content-center py-2.5">
+                <i class="fa-solid fa-bolt me-1.5"></i>
+                <span>Đặt Thuê Phòng Ngay</span>
+              </button>
+              <button type="button" onclick="openScheduleVisitModal()" class="btn-estate-outline py-2.5 px-3 small">
+                <i class="fa-regular fa-calendar-check me-1.5"></i>
+                <span>Hẹn Lịch Xem Phòng</span>
+              </button>
+            </div>
+            <div class="mt-2 small text-muted" style="font-size: 11.5px;">
+              <i class="fa-solid fa-circle-check me-1 text-success"></i>
+              Bấm "Đặt Thuê Phòng Ngay" để vào giỏ thanh toán tiền cọc, hoặc "Thêm Vào Giỏ Phòng" để lưu giữ phòng và xem tiếp.
+            </div>
+
+            <!-- E-Commerce Guarantee Footer -->
+            <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mt-3 pt-2.5 small text-muted border-top">
+              <span><i class="fa-solid fa-shield-heart me-1" style="color: #ea580c;"></i>Hình ảnh khảo sát thực tế</span>
+              <span><i class="fa-solid fa-clock-rotate-left me-1" style="color: #ea580c;"></i>Giữ phòng ưu tiên 24h</span>
+              <span><i class="fa-solid fa-file-contract me-1" style="color: #ea580c;"></i>Hợp đồng điện tử minh bạch</span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ========================================================================= -->
+      <!-- 2B. COMPACT 3D & VIDEO SHOWCASE BANNER                                    -->
+      <!-- ========================================================================= -->
+      <div id="property3dShowcaseCard" class="p-4 mb-4 rounded-3 text-white position-relative overflow-hidden"
+           style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); border-left: 5px solid #fe9901; box-shadow: 0 10px 30px rgba(15, 23, 42, 0.12);">
+        <div class="row align-items-center g-3">
+          <div class="col-lg-8">
+            <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
+              <span class="badge px-2.5 py-1 text-white fw-bold" style="background-color: #fe9901; font-size: 11px;">
+                <i class="fa-solid fa-cube me-1"></i>MÔ HÌNH 3D DIGITAL TWIN
+              </span>
+              <span class="badge bg-secondary bg-opacity-50 text-white fw-normal" style="font-size: 11px;">
+                Diện tích: [[${p.acreage}]] m² · [[${p.numberOfRooms > 0 ? p.numberOfRooms : 1}]] phòng
+              </span>
+              <span class="badge bg-success bg-opacity-75 text-white fw-normal" style="font-size: 11px;">
+                <i class="fa-solid fa-layer-group me-1"></i>[[${p.amenities != null ? p.amenities.size() : 4}]] tiện ích đã số hóa 3D
+              </span>
+            </div>
+            <h3 class="h5 fw-bold text-white mb-1.5">
+              Khám Phá Không Gian 3D 360° &amp; Video Review Thực Tế
+            </h3>
+            <p class="text-white-50 small mb-0" style="max-width: 65ch;">
+              Mô hình 3D cho phép quan sát mặt bằng 2D, xoay 360°, đổi ánh sáng Ngày/Đêm và định vị chính xác vị trí điều hòa, giường nệm, nhà vệ sinh.
             </p>
           </div>
+          <div class="col-lg-4 text-lg-end">
+            <div class="d-flex flex-column flex-sm-row justify-content-lg-end gap-2">
+              <button type="button" class="btn-estate py-2 px-3 small justify-content-center"
+                      data-bs-toggle="modal" data-bs-target="#property3dModal">
+                <i class="fa-solid fa-cube me-1"></i>
+                <span>Mở Trải Nghiệm 3D</span>
+              </button>
+              <a th:href="@{/video-review}" class="btn-estate-outline py-2 px-3 small justify-content-center"
+                 style="background: rgba(255,255,255,0.08) !important; color: #ffffff !important; border-color: rgba(255,255,255,0.4) !important;">
+                <i class="fa-solid fa-circle-play me-1"></i>
+                <span>Video Review</span>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
 
-          <!-- Contact form -->
-          <form
-            th:action="@{/owner/contact/{slug}(slug=${p.slug})}"
-            th:object="${contact}"
-            method="post"
-            class="bg-white border border-gray-200 rounded-xl p-5 space-y-4"
-          >
-            <div>
-              <h4 class="font-semibold text-gray-800">Bạn cần hỗ trợ?</h4>
-              <p class="text-sm text-gray-500">
-                Để lại thông tin, chúng tôi sẽ liên hệ hỗ trợ miễn phí.
+      <!-- ========================================================================= -->
+      <!-- 2C. MAIN CONTENT 2 COLUMNS: LEFT (COL-8) + RIGHT SIDEBAR (COL-4)          -->
+      <!-- ========================================================================= -->
+      <div class="row justify-content-between gy-4">
+
+        <!-- LEFT COLUMN (col-lg-8) -->
+        <div class="col-lg-8" data-aos="fade-up">
+
+          <!-- Property Description -->
+          <div class="portfolio-description mb-4">
+            <h2 class="h5 fw-bold mb-3" style="color: #161825;">Thông tin chi tiết không gian lưu trú</h2>
+            <div class="lh-lg mb-4 text-secondary" style="white-space: pre-line; max-width: 68ch;" th:text="${p.description}">
+              Không gian sống lý tưởng, đầy đủ tiện nghi, giờ giấc tự do, an ninh 24/7.
+            </div>
+
+            <!-- Landlord Testimonial Quote -->
+            <div class="testimonial-item p-3.5 rounded-3 mb-4" style="background: #f8fafc; border-left: 3px solid #fe9901;">
+              <p class="mb-2 text-dark fst-italic small">
+                "Cam kết hình ảnh thực tế tại hiện trường, niêm yết đúng giá thuê và đơn giá điện nước, hỗ trợ ký hợp đồng điện tử và khai báo tạm trú minh bạch cho cư dân."
+              </p>
+              <div class="d-flex align-items-center gap-2.5">
+                <div class="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold"
+                     style="width: 40px; height: 40px; background-color: #fe9901; font-size: 15px;">
+                  <span th:text="${p.ownerName != null and !p.ownerName.isEmpty() ? #strings.substring(p.ownerName, 0, 1) : 'C'}">C</span>
+                </div>
+                <div>
+                  <div class="fw-bold small text-dark" th:text="${p.ownerName != null and !p.ownerName.isEmpty() ? p.ownerName : 'Ban Quản Lý Tòa Nhà'}">Chủ nhà</div>
+                  <div class="text-success small" style="font-size: 11px;"><i class="fa-solid fa-circle-check me-1"></i>Chủ nhà xác thực · Đang trực tuyến</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Nav Pills Tabs: Amenities / Map / Safety -->
+          <ul class="nav nav-pills mb-3" id="detailsTab" role="tablist">
+            <li class="nav-item">
+              <a class="nav-link active py-2 px-3 small fw-bold" data-bs-toggle="pill" href="#tab-amenities" role="tab">
+                <i class="fa-solid fa-couch me-1"></i>Tiện nghi &amp; Khu vực
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link py-2 px-3 small fw-bold" data-bs-toggle="pill" href="#tab-map" role="tab">
+                <i class="fa-solid fa-map-location-dot me-1"></i>Bản đồ Vị trí
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link py-2 px-3 small fw-bold" data-bs-toggle="pill" href="#tab-safety" role="tab">
+                <i class="fa-solid fa-shield-halved me-1"></i>Lưu ý An toàn
+              </a>
+            </li>
+          </ul>
+
+          <!-- Tab Content -->
+          <div class="tab-content mb-4">
+            <!-- Tab 1: Amenities & Surroundings -->
+            <div class="tab-pane fade show active p-3.5 rounded-3" style="background: #f8fafc; border: 1px solid #e2e8f0;" id="tab-amenities" role="tabpanel">
+              <div th:if="${not #lists.isEmpty(p.amenities)}" class="mb-3">
+                <h5 class="small fw-bold text-dark mb-2">Trang thiết bị &amp; Tiện ích (Bấm để xem trên 3D):</h5>
+                <div class="d-flex flex-wrap gap-2">
+                  <button th:each="amen : ${p.amenities}"
+                          type="button"
+                          th:data-amen="${amen.name}"
+                          onclick="focus3DAmenityByName(this.getAttribute('data-amen'))"
+                          class="btn btn-sm btn-white border rounded-pill px-3 py-1.5 d-inline-flex align-items-center gap-1.5 text-dark small shadow-sm">
+                    <i th:class="${amen.icon != null ? amen.icon : 'fa-solid fa-check'}" style="color: #ea580c;"></i>
+                    <span th:text="${amen.name}">Wifi tốc độ cao</span>
+                  </button>
+                </div>
+              </div>
+
+              <div th:if="${not #lists.isEmpty(p.targetTenants)}" class="mb-3">
+                <h5 class="small fw-bold text-dark mb-1.5">Đối tượng thuê phù hợp:</h5>
+                <div class="d-flex flex-wrap gap-1.5">
+                  <span th:each="target : ${p.targetTenants}" class="badge bg-white text-secondary border px-2.5 py-1.5 fw-medium small" th:text="${target.name}">
+                    Sinh viên &amp; Gia đình
+                  </span>
+                </div>
+              </div>
+
+              <div th:if="${not #lists.isEmpty(p.surroundings)}">
+                <h5 class="small fw-bold text-dark mb-1.5">Môi trường xung quanh:</h5>
+                <div class="d-flex flex-wrap gap-1.5">
+                  <span th:each="sur : ${p.surroundings}" class="badge bg-white text-secondary border px-2.5 py-1.5 fw-medium small" th:text="${sur.name}">
+                    Gần trường học
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Tab 2: Map -->
+            <div class="tab-pane fade p-2 rounded-3" style="background: #f8fafc; border: 1px solid #e2e8f0;" id="tab-map" role="tabpanel">
+              <iframe style="border:0; width: 100%; height: 320px; border-radius: 8px;"
+                      th:src="'https://maps.google.com/maps?q=' + ${#uris.escapeQueryParam(p.addressNumber + ', ' + p.wardName + ', ' + p.provinceName)} + '&t=&z=15&ie=UTF8&iwloc=&output=embed'"
+                      allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+            </div>
+
+            <!-- Tab 3: Safety -->
+            <div class="tab-pane fade p-3.5 rounded-3" style="background: #f8fafc; border: 1px solid #e2e8f0;" id="tab-safety" role="tabpanel">
+              <h5 class="small fw-bold text-dark mb-2"><i class="fa-solid fa-shield-halved text-success me-1"></i>Lưu ý an toàn khi thuê phòng</h5>
+              <p class="mb-0 text-muted small lh-lg">
+                Khách thuê nên trực tiếp đến xem phòng thực tế hoặc sử dụng mô hình 3D để đối chiếu trang thiết bị, kiểm tra công tơ điện nước và ký hợp đồng điện tử qua hệ thống để đảm bảo quyền lợi bảo toàn tiền cọc.
               </p>
             </div>
+          </div>
 
-            <div>
-              <label class="block text-sm text-gray-600 mb-1" for="name">
-                Họ và tên
-              </label>
-              <input
-                type="text"
-                id="name"
-                th:field="*{name}"
-                required
-                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
+          <!-- BẢNG GIÁ DỊCH VỤ & DỰ TOÁN NHANH -->
+          <div class="p-3.5 mb-4 rounded-3" style="background: #fffaf5; border: 1.5px solid #fed7aa;">
+            <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-2 pb-1.5 border-bottom border-warning-subtle">
+              <div class="d-flex align-items-center gap-2">
+                <div class="d-flex align-items-center justify-content-center rounded text-white" style="width: 32px; height: 32px; background: #fe9901;">
+                  <i class="fa-solid fa-bolt"></i>
+                </div>
+                <div>
+                  <h4 class="small fw-bold text-uppercase mb-0" style="color: #9a3412;">Bảng Giá Dịch Vụ &amp; Dự Toán Chi Phí Hàng Tháng</h4>
+                  <span class="text-muted" style="font-size: 11.5px;">Biểu phí cố định và minh bạch được chủ trọ cam kết niêm yết</span>
+                </div>
+              </div>
+              <div class="d-flex align-items-center gap-2">
+                <button type="button" class="btn-estate py-1.5 px-3 small" data-bs-toggle="modal" data-bs-target="#costCalculatorModal">
+                  <i class="fa-solid fa-calculator me-1"></i>Tự Tính Dự Toán Chi Tiết
+                </button>
+              </div>
             </div>
 
-            <div>
-              <label class="block text-sm text-gray-600 mb-1" for="phone">
-                Số điện thoại
-              </label>
-              <input
-                type="text"
-                id="phone"
-                th:field="*{phone}"
-                required
-                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
+            <div class="row g-2 text-center text-sm-start">
+              <div class="col-sm-4">
+                <div class="p-2.5 rounded bg-white border border-warning-subtle h-100">
+                  <span class="text-muted d-block" style="font-size: 11.5px;"><i class="fa-solid fa-bolt text-warning me-1"></i>Điện sinh hoạt:</span>
+                  <strong class="d-block tabular-nums" style="color: #ea580c; font-size: 14px;">3.500 đ / kWh</strong>
+                  <span class="text-muted" style="font-size: 11px;">(Định mức tiêu chuẩn ~80 kWh)</span>
+                </div>
+              </div>
+              <div class="col-sm-4">
+                <div class="p-2.5 rounded bg-white border border-warning-subtle h-100">
+                  <span class="text-muted d-block" style="font-size: 11.5px;"><i class="fa-solid fa-droplet text-primary me-1"></i>Nước sinh hoạt:</span>
+                  <strong class="d-block tabular-nums" style="color: #ea580c; font-size: 14px;">20.000 đ / m³</strong>
+                  <span class="text-muted" style="font-size: 11px;">(Định mức tiêu chuẩn ~4 m³)</span>
+                </div>
+              </div>
+              <div class="col-sm-4">
+                <div class="p-2.5 rounded bg-white border border-warning-subtle h-100">
+                  <span class="text-muted d-block" style="font-size: 11.5px;"><i class="fa-solid fa-wifi text-success me-1"></i>Phí dịch vụ chung:</span>
+                  <strong class="d-block tabular-nums" style="color: #ea580c; font-size: 14px;">150.000 đ / tháng</strong>
+                  <span class="text-muted" style="font-size: 11px;">(Wifi tốc độ cao, rác, vệ sinh)</span>
+                </div>
+              </div>
             </div>
 
-            <div>
-              <label class="block text-sm text-gray-600 mb-1" for="note">
-                Ghi chú (nếu có)
-              </label>
-              <textarea
-                id="note"
-                th:field="*{note}"
-                rows="2"
-                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-              ></textarea>
+            <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mt-2 pt-2 border-top border-warning-subtle small">
+              <span class="text-secondary">
+                <i class="fa-solid fa-circle-info me-1" style="color: #ea580c;"></i>
+                Ước tính sinh hoạt 2 người: <strong>~2.210.000 đ / tháng</strong> (bình quân <strong>~1.105.000 đ/người</strong>).
+              </span>
+              <a th:href="@{/my-bookings}" class="text-decoration-none fw-bold small" style="color: #ea580c;">
+                Lập ngân sách tại giỏ hàng <i class="fa-solid fa-arrow-right ms-1"></i>
+              </a>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- RIGHT COLUMN: PROPERTY INFO SUMMARY & DIRECT CONTACT (col-lg-4) -->
+        <div class="col-lg-4" data-aos="fade-up" data-aos-delay="100">
+
+          <!-- Quick Summary Card -->
+          <div class="portfolio-info mb-3.5 p-3.5" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px;">
+            <h3 class="text-uppercase fw-bold h6 mb-3" style="color: #161825;">Tóm tắt thông tin phòng</h3>
+            <ul class="list-unstyled mb-3 small d-flex flex-column gap-2">
+              <li class="d-flex justify-content-between pb-1 border-bottom"><strong>Mã tin đăng:</strong> <span class="tabular-nums" th:text="'#' + ${p.id}">#101</span></li>
+              <li class="d-flex justify-content-between pb-1 border-bottom"><strong>Khu vực:</strong> <span th:text="${p.wardName + ', ' + p.provinceName}">TP. Vinh</span></li>
+              <li class="d-flex justify-content-between pb-1 border-bottom"><strong>Loại hình:</strong> <span th:text="${p.categoryName != null ? p.categoryName : 'Nhà trọ'}">Nhà trọ</span></li>
+              <li class="d-flex justify-content-between pb-1 border-bottom"><strong>Trạng thái:</strong> <span style="color: #ea580c; font-weight: 700;">Đang mở cho thuê</span></li>
+              <li class="d-flex justify-content-between pb-1 border-bottom"><strong>Diện tích:</strong> <span class="tabular-nums" th:text="${p.acreage + ' m²'}">28 m²</span></li>
+              <li class="d-flex justify-content-between pb-1 border-bottom"><strong>Số phòng:</strong> <span class="tabular-nums" th:text="${p.numberOfRooms > 0 ? p.numberOfRooms + ' phòng' : 'Phòng đơn'}">1 phòng</span></li>
+              <li class="d-flex justify-content-between pb-1 border-bottom"><strong>Giá niêm yết:</strong> <span class="fw-bold tabular-nums" style="color: #ea580c;" th:text="${#numbers.formatDecimal(p.price, 0, 'POINT', 0, 'COMMA') + ' đ/tháng'}">3.500.000 đ/tháng</span></li>
+              <li class="d-flex justify-content-between"><strong>Chủ nhà:</strong> <span th:text="${p.ownerName != null and !p.ownerName.isEmpty() ? p.ownerName : 'Ban quản lý'}">Chủ trọ</span></li>
+            </ul>
+
+            <div class="d-grid gap-2">
+              <button type="button" onclick="openBookingConfirmationModal()"
+                      class="btn-estate text-center w-100 justify-content-center py-2">
+                <i class="fa-solid fa-cart-shopping me-1"></i>
+                <span>Đặt Thuê Phòng Ngay</span>
+              </button>
+              <button type="button" onclick="openScheduleVisitModal()"
+                      class="btn-estate-outline text-center w-100 justify-content-center py-1.5 small">
+                <i class="fa-regular fa-calendar-check me-1"></i>
+                <span>Hẹn Lịch Xem Phòng</span>
+              </button>
+              <a th:if="${p.ownerPhone != null and !p.ownerPhone.isEmpty()}"
+                 th:href="'tel:' + ${p.ownerPhone}"
+                 class="btn-estate-outline text-center w-100 justify-content-center py-1.5 tabular-nums small">
+                <i class="bi bi-telephone-fill"></i>
+                <span th:text="'Hotline: ' + ${p.ownerPhone}">0988.123.456</span>
+              </a>
+              <a th:if="${p.ownerPhone != null and !p.ownerPhone.isEmpty()}"
+                 th:href="'https://zalo.me/' + ${p.ownerPhone}"
+                 target="_blank" rel="noopener noreferrer"
+                 class="btn-estate-outline text-center w-100 justify-content-center py-1.5 small">
+                <i class="bi bi-chat-dots-fill"></i>
+                <span>Nhắn tin qua Zalo</span>
+              </a>
             </div>
 
-            <button
-              th:if="${contactSuccess == null}"
-              type="submit"
-              class="w-full bg-blue-600 text-white py-2.5 rounded-lg font-semibold hover:bg-blue-700 transition"
-            >
-              Gửi yêu cầu
-            </button>
-
-            <div
-              th:if="${contactSuccess}"
-              class="bg-green-50 border border-green-200 text-green-700 rounded-lg p-3 text-sm"
-            >
-              ✅ Yêu cầu của bạn đã được gửi. Chúng tôi sẽ liên hệ sớm.
+            <!-- Report Listing Button -->
+            <div class="mt-3 pt-2 text-center border-top">
+              <button type="button" class="btn btn-sm btn-link text-muted text-decoration-none small p-0"
+                      data-bs-toggle="modal" data-bs-target="#reportListingModal">
+                <i class="bi bi-flag-fill text-danger me-1"></i>Báo cáo tin đăng sai sự thật
+              </button>
             </div>
-          </form>
+          </div>
+
+          <!-- Trust & Safety Card -->
+          <div class="p-3.5 rounded-3 mb-4" style="background: #f8fafc; border: 1px solid #e2e8f0;">
+            <div class="d-flex align-items-center gap-2 mb-2">
+              <i class="fa-solid fa-shield-halved text-success"></i>
+              <strong class="small text-dark">Cam kết từ TrọMới</strong>
+            </div>
+            <div class="d-flex flex-column gap-2 small text-secondary">
+              <div class="d-flex align-items-start gap-2">
+                <i class="fa-solid fa-check text-success mt-1"></i>
+                <span>100% hình ảnh và mô hình 3D được xác thực tại hiện trường.</span>
+              </div>
+              <div class="d-flex align-items-start gap-2">
+                <i class="fa-solid fa-check text-success mt-1"></i>
+                <span>Bảo vệ quyền lợi tiền cọc qua quy trình hợp đồng số.</span>
+              </div>
+              <div class="d-flex align-items-start gap-2">
+                <i class="fa-solid fa-check text-success mt-1"></i>
+                <span>Kích hoạt tự động Cổng Cư Dân theo dõi hóa đơn và báo bảo trì.</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </section><!-- /Real Estate 2 Section -->
+
+  <!-- 3. Similar Properties Section (#real-estate) -->
+  <section th:if="${similarProperties != null and !similarProperties.isEmpty()}" class="real-estate section light-background pt-4 pb-5">
+    <div class="container section-title pb-3" data-aos="fade-up">
+      <h2 class="h5 fw-bold mb-1">Không Gian Tương Tự Cùng Phân Khúc</h2>
+      <p class="small text-muted mb-0">Gợi ý các phòng trọ và căn hộ có vị trí hoặc ngân sách tương đồng</p>
+    </div>
+
+    <div class="container">
+      <div class="row gy-4">
+        <div class="col-xl-4 col-md-6"
+             data-aos="fade-up"
+             th:each="sim, iterStat : ${similarProperties}"
+             th:attr="data-aos-delay=${(iterStat.index % 3 + 1) * 100}">
+          <div th:replace="~{layout/parts/property-card :: card(p=${sim})}"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL: YÊU CẦU ĐĂNG NHẬP TRƯỚC KHI THAO TÁC (#modalRequireLogin)          -->
+  <!-- ========================================================================= -->
+  <div class="modal fade" id="modalRequireLogin" tabindex="-1" aria-labelledby="modalRequireLoginLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 440px;">
+      <div class="modal-content" style="border-radius: 18px; border: none; box-shadow: 0 25px 50px rgba(0,0,0,0.2);">
+        <div class="modal-header border-0 pb-0 justify-content-end">
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+        </div>
+        <div class="modal-body text-center px-4 pb-4 pt-1">
+          <div class="mx-auto rounded-circle d-flex align-items-center justify-content-center text-white mb-3"
+               style="width: 64px; height: 64px; background: linear-gradient(135deg, #fe9901 0%, #ea580c 100%); font-size: 26px; box-shadow: 0 8px 18px rgba(254,153,1,0.35);">
+            <i class="fa-solid fa-user-lock"></i>
+          </div>
+          <h5 class="h6 fw-bold text-dark mb-2" id="modalRequireLoginLabel">Yêu Cầu Đăng Nhập Tài Khoản</h5>
+          <p class="text-secondary small mb-4 lh-base">
+            Để đảm bảo an toàn giao dịch, xác thực danh tính và tích hợp quản lý hợp đồng trên Cổng Cư Dân, bạn cần <strong>đăng nhập tài khoản</strong> trước khi đặt phòng hoặc hẹn lịch xem phòng.
+          </p>
+          <div class="d-grid gap-2 mb-3">
+            <a th:href="@{/login}" class="btn-estate py-2.5 text-center fw-bold text-white text-decoration-none">
+              <i class="fa-solid fa-right-to-bracket me-1.5"></i>Đăng Nhập Ngay
+            </a>
+            <a th:href="@{/register}" class="btn btn-outline-secondary py-2 small fw-semibold">
+              <i class="fa-solid fa-user-plus me-1.5"></i>Chưa có tài khoản? Đăng ký miễn phí
+            </a>
+          </div>
+          <span class="text-muted" style="font-size: 11.5px;">
+            <i class="fa-solid fa-shield-halved text-success me-1"></i>Hệ thống bảo mật dữ liệu khách thuê theo tiêu chuẩn TrọMới
+          </span>
         </div>
       </div>
     </div>
   </div>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL: XÁC NHẬN ĐẶT THUÊ & THÔNG TIN NGƯỜI NHẬN PHÒNG (#modalConfirmBooking) -->
+  <!-- (ĐƯA TOÀN BỘ PHẦN NGƯỜI ĐẶT ĐƠN VÀO MODAL NÀY THAY VÌ ĐỂ TRÊN TRANG CHI TIẾT) -->
+  <!-- ========================================================================= -->
+  <div class="modal fade" id="modalConfirmBooking" tabindex="-1" aria-labelledby="modalConfirmBookingLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content" style="border-radius: 16px; border: none; box-shadow: 0 20px 40px rgba(0,0,0,0.15);">
+        <div class="modal-header border-bottom py-3 px-4" style="background: linear-gradient(135deg, #fff7ed 0%, #fffbeb 100%);">
+          <div class="d-flex align-items-center gap-2.5">
+            <div class="d-flex align-items-center justify-content-center rounded text-white" style="width: 38px; height: 38px; background: #fe9901; font-size: 16px;">
+              <i class="fa-solid fa-cart-shopping"></i>
+            </div>
+            <div>
+              <h5 class="modal-title h6 fw-bold mb-0 text-dark" id="modalConfirmBookingLabel">Xác Nhận Đặt Thuê Phòng &amp; Giữ Chỗ</h5>
+              <span class="text-muted" style="font-size: 11.5px;" id="modalConfirmBookingSub">Hồ sơ giữ phòng ưu tiên 24 giờ trên hệ thống</span>
+            </div>
+          </div>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+        </div>
+
+        <form th:action="@{/properties/{slug}/register-rent(slug=${p.slug})}" method="post" id="modalBookingForm">
+          <!-- Hidden inputs populated dynamically from Buy Box selections -->
+          <input type="hidden" id="modalRedirectActionInput" name="redirectAction" value="DIRECT_CHECKOUT" />
+          <input type="hidden" id="modalRoomIdInput" name="roomId" value="" />
+          <input type="hidden" id="modalDurationInput" name="durationMonths" value="12" />
+          <input type="hidden" id="modalOccupantsInput" name="occupants" value="2" />
+          <input type="hidden" id="modalMoveInDateInput" name="moveInDate" value="" />
+
+          <div class="modal-body p-4">
+            <!-- 1. Tóm tắt lựa chọn phòng -->
+            <div class="p-3 rounded-3 mb-3" style="background: #f8fafc; border: 1px solid #e2e8f0;">
+              <div class="d-flex align-items-center justify-content-between mb-2 pb-1.5 border-bottom">
+                <span class="badge px-2 py-1 text-white fw-bold" style="background-color: #fe9901; font-size: 11px;">Phòng đã chọn</span>
+                <span class="fw-bold tabular-nums" style="color: #ea580c; font-size: 16px;" id="modalSummaryPrice">1.800.000 ₫ / tháng</span>
+              </div>
+              <div class="row g-2 small">
+                <div class="col-6">
+                  <span class="text-muted d-block" style="font-size: 11px;">Phân loại phòng:</span>
+                  <strong class="text-dark" id="modalSummaryRoomName">Phòng 1</strong>
+                </div>
+                <div class="col-6">
+                  <span class="text-muted d-block" style="font-size: 11px;">Tiền cọc giữ chỗ:</span>
+                  <strong class="text-dark tabular-nums" id="modalSummaryDeposit">1.800.000 ₫</strong>
+                </div>
+                <div class="col-6">
+                  <span class="text-muted d-block" style="font-size: 11px;">Ngày dọn vào:</span>
+                  <strong class="text-dark tabular-nums" id="modalSummaryMoveIn">01/11/2026</strong>
+                </div>
+                <div class="col-6">
+                  <span class="text-muted d-block" style="font-size: 11px;">Kỳ hạn &amp; Số người:</span>
+                  <strong class="text-dark" id="modalSummaryTerms">12 tháng · 2 người</strong>
+                </div>
+              </div>
+            </div>
+
+            <!-- 2. PHẦN THÔNG TIN NGƯỜI ĐẶT ĐƠN / NHẬN PHÒNG (NẰM TRONG MODAL XÁC NHẬN) -->
+            <div class="mb-3">
+              <h6 class="small fw-bold text-uppercase mb-2.5" style="color: #9a3412;">
+                <i class="fa-solid fa-user-check me-1.5" style="color: #ea580c;"></i>Thông Tin Người Đặt Đơn / Nhận Phòng
+              </h6>
+
+              <div class="mb-2.5">
+                <label class="form-label small fw-semibold text-secondary mb-1">Họ và tên người thuê *</label>
+                <input type="text" name="name" required
+                       th:value="${session.user != null ? session.user.fullName : ''}"
+                       placeholder="Ví dụ: Nguyễn Văn An"
+                       class="form-control form-control-sm" />
+              </div>
+
+              <div class="mb-2.5">
+                <label class="form-label small fw-semibold text-secondary mb-1">Số điện thoại liên hệ (Zalo) *</label>
+                <input type="tel" name="phone" required
+                       th:value="${session.user != null ? session.user.phone : ''}"
+                       placeholder="Ví dụ: 0901234567"
+                       class="form-control form-control-sm tabular-nums" />
+              </div>
+
+              <div class="mb-2.5">
+                <label class="form-label small fw-semibold text-secondary mb-1">Số CCCD / Ghi chú cho chủ trọ</label>
+                <input type="text" name="citizenId"
+                       placeholder="Số CCCD hoặc giờ liên hệ thuận tiện..."
+                       class="form-control form-control-sm tabular-nums" />
+                <input type="hidden" name="note" value="Đặt thuê phòng trực tuyến trên hệ thống" />
+              </div>
+            </div>
+
+            <div class="p-2.5 rounded small" style="background: #fffaf5; border: 1px dashed #fed7aa; font-size: 11.5px; color: #9a3412;">
+              <i class="fa-solid fa-shield-halved me-1 text-success"></i>
+              Thông tin sẽ được mã hóa và chuyển tới chủ nhà trọ. Đơn đặt phòng sẽ được tự động kích hoạt vào <strong>Giỏ hàng &amp; Cổng Cư Dân</strong>.
+            </div>
+          </div>
+
+          <div class="modal-footer border-top py-2.5 px-4 d-flex justify-content-between">
+            <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">Quay lại</button>
+            <button type="submit" class="btn-estate py-2 px-3 small" id="modalBookingSubmitBtn">
+              <i class="fa-solid fa-check me-1"></i><span id="modalBookingSubmitText">Xác Nhận Đặt Thuê Phòng</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL: HẸN LỊCH XEM PHÒNG TRỰC TIẾP (#modalScheduleVisit)                  -->
+  <!-- ========================================================================= -->
+  <div class="modal fade" id="modalScheduleVisit" tabindex="-1" aria-labelledby="modalScheduleVisitLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content" style="border-radius: 16px;">
+        <div class="modal-header border-bottom py-3 px-4" style="background: #f8fafc;">
+          <div class="d-flex align-items-center gap-2">
+            <div class="rounded p-1.5 text-white" style="background: #fe9901;"><i class="fa-regular fa-calendar-check"></i></div>
+            <h5 class="modal-title h6 fw-bold mb-0 text-dark" id="modalScheduleVisitLabel">Hẹn Lịch Xem Phòng Trực Tiếp</h5>
+          </div>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+        </div>
+        <form th:action="@{/owner/contact/{slug}(slug=${p.slug})}" th:object="${contact}" method="post" onsubmit="appendVisitScheduleOnSubmit()">
+          <div class="modal-body p-4">
+            <p class="small text-muted mb-3">Chủ nhà sẽ nhận thông báo hẹn xem phòng và liên hệ xác nhận trong vòng 15 phút.</p>
+            <div class="row g-2 mb-2.5">
+              <div class="col-6">
+                <label class="form-label small fw-semibold text-secondary mb-1" for="visitDateInput">Ngày hẹn xem phòng</label>
+                <input type="date" id="visitDateInput" class="form-control form-control-sm tabular-nums"
+                       th:value="${#temporals.format(#temporals.createToday().plusDays(1), 'yyyy-MM-dd')}" />
+              </div>
+              <div class="col-6">
+                <label class="form-label small fw-semibold text-secondary mb-1" for="visitTimeSelect">Khung giờ hẹn</label>
+                <select id="visitTimeSelect" class="form-select form-select-sm">
+                  <option value="Sáng 8h-11h">Sáng (8h - 11h)</option>
+                  <option value="Chiều 14h-17h" selected>Chiều (14h - 17h)</option>
+                  <option value="Tối 18h-20h">Tối (18h - 20h)</option>
+                </select>
+              </div>
+            </div>
+            <div class="mb-2.5">
+              <label class="form-label small fw-semibold text-secondary mb-1" for="contactName">Họ và tên người xem *</label>
+              <input type="text" id="contactName" name="name"
+                     th:value="${session.user != null ? session.user.fullName : ''}"
+                     placeholder="Ví dụ: Nguyễn Văn A" required class="form-control form-control-sm" />
+            </div>
+            <div class="mb-2.5">
+              <label class="form-label small fw-semibold text-secondary mb-1" for="contactPhone">Số điện thoại liên hệ *</label>
+              <input type="tel" id="contactPhone" name="phone"
+                     th:value="${session.user != null ? session.user.phone : ''}"
+                     placeholder="0912 345 678" required class="form-control form-control-sm tabular-nums" />
+            </div>
+            <div class="mb-2">
+              <div class="d-flex align-items-center justify-content-between mb-1">
+                <label class="form-label small fw-semibold text-secondary mb-0" for="contactNote">Lời nhắn cho chủ nhà</label>
+                <div class="d-flex gap-1">
+                  <button type="button" onclick="fillQuickInquiryNote('Xem phòng hôm nay')" class="badge bg-light text-secondary border-0 cursor-pointer" style="font-size: 10.5px;">Hôm nay</button>
+                  <button type="button" onclick="fillQuickInquiryNote('Phòng còn trống không ạ?')" class="badge bg-light text-secondary border-0 cursor-pointer" style="font-size: 10.5px;">Còn trống?</button>
+                </div>
+              </div>
+              <textarea id="contactNote" th:field="*{note}" rows="2"
+                        placeholder="Mình muốn xem phòng vào cuối tuần này..."
+                        class="form-control form-control-sm"></textarea>
+            </div>
+          </div>
+          <div class="modal-footer border-top py-2.5 px-4 d-flex justify-content-between">
+            <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">Hủy</button>
+            <button type="submit" class="btn-estate py-2 px-3 small">
+              <i class="fa-regular fa-calendar-check me-1"></i>Gửi Yêu Cầu Hẹn Xem
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL: THREE.JS 3D INTERACTIVE ARCHITECTURAL TWIN (#property3dModal)       -->
+  <!-- ========================================================================= -->
+  <div class="modal fade" id="property3dModal" tabindex="-1" aria-labelledby="property3dModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+      <div class="modal-content text-white" style="background-color: #0f172a; border: 1px solid #334155;">
+        <div class="modal-header border-bottom border-secondary py-2.5 px-3">
+          <div class="d-flex align-items-center gap-2">
+            <span class="badge" style="background-color: #fe9901; font-size: 13px;"><i class="fa-solid fa-cube me-1"></i>3D Digital Twin</span>
+            <h5 class="modal-title h6 fw-bold mb-0 text-white" id="property3dModalLabel" th:text="${p.title}">Mô hình không gian 3D</h5>
+          </div>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Đóng"></button>
+        </div>
+        <div class="modal-body p-3">
+
+          <div id="property3dShowcase"
+               class="w-100 text-white select-none"
+               th:attr="data-acreage=${p.acreage > 0 ? p.acreage : 28},
+                        data-rooms=${p.numberOfRooms > 0 ? p.numberOfRooms : 1},
+                        data-price=${p.price},
+                        data-slug=${p.slug},
+                        data-title=${p.title},
+                        data-address=${(p.addressNumber != null ? p.addressNumber : '') + ', ' + (p.wardName != null ? p.wardName : '') + ', ' + (p.provinceName != null ? p.provinceName : '')},
+                        data-category=${p.categoryName}">
+
+            <!-- Hidden Data Bridge for Three.js -->
+            <div id="dbFacilityBridge" class="hidden d-none" aria-hidden="true">
+              <span th:each="amen : ${p.amenities}" class="db-amenity-node" th:attr="data-name=${amen.name},data-icon=${amen.icon}"></span>
+              <span th:each="sur : ${p.surroundings}" class="db-surrounding-node" th:attr="data-name=${sur.name},data-icon=${sur.icon}"></span>
+            </div>
+
+            <!-- Top 3D Control Bar -->
+            <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-2 mb-2">
+              <!-- Camera Presets -->
+              <div class="d-inline-flex flex-wrap p-1 rounded gap-1" style="background: #1e293b;">
+                <button type="button" onclick="set3DCameraPreset('isometric')" data-cam="isometric" class="cam-preset-btn px-2.5 py-1 text-white small fw-semibold rounded border-0" style="background-color: #fe9901;">
+                  Toàn cảnh 3D
+                </button>
+                <button type="button" id="btnTopDown2D" onclick="set3DCameraPreset('top')" data-cam="top" class="cam-preset-btn px-2.5 py-1 bg-transparent text-white small fw-medium rounded border-0">
+                  <i class="fa-solid fa-compass-drafting text-info me-1"></i>Bản vẽ 2D (Top-Down)
+                </button>
+                <button type="button" onclick="set3DCameraPreset('interior')" data-cam="interior" class="cam-preset-btn px-2.5 py-1 bg-transparent text-white small fw-medium rounded border-0">
+                  Trong phòng
+                </button>
+              </div>
+
+              <!-- Lighting & Toggles -->
+              <div class="d-flex flex-wrap align-items-center gap-1.5">
+                <button type="button" id="btnToggleDayNight" onclick="toggle3DDayNightLighting()" class="px-2.5 py-1 text-white small fw-medium rounded border-0 d-inline-flex align-items-center gap-1" style="background: #1e293b;">
+                  <i class="fa-solid fa-circle-half-stroke text-warning"></i>
+                  <span id="dayNightToggleLabel">Ngày / Đêm</span>
+                </button>
+                <div class="d-inline-flex p-1 rounded gap-1" style="background: #1e293b;">
+                  <button type="button" onclick="set3DLighting('day')" data-light="day" class="light-preset-btn px-2 py-0.5 text-white small rounded border-0" style="background-color: #fe9901;">Ngày</button>
+                  <button type="button" onclick="set3DLighting('sunset')" data-light="sunset" class="light-preset-btn px-2 py-0.5 bg-transparent text-white small rounded border-0">Chiều</button>
+                  <button type="button" onclick="set3DLighting('night')" data-light="night" class="light-preset-btn px-2 py-0.5 bg-transparent text-white small rounded border-0">Đêm</button>
+                </div>
+                <button type="button" id="btnToggleAutoRotate" onclick="toggle3DAutoRotate()" class="px-2.5 py-1 text-white small fw-semibold rounded border-0" style="background-color: #fe9901;">
+                  <i class="fa-solid fa-rotate me-1"></i>360°
+                </button>
+                <button type="button" id="btnToggleHotspots" onclick="toggle3DHotspots()" class="px-2.5 py-1 text-white small fw-medium rounded border-0" style="background: #1e293b;">
+                  <i class="fa-solid fa-tags me-1"></i>Nhãn 3D
+                </button>
+              </div>
+            </div>
+
+            <!-- Amenity Quick Filter Bar -->
+            <div class="p-2 rounded d-flex flex-wrap align-items-center justify-content-between gap-1.5 mb-2" style="background: #1e293b;">
+              <div class="d-flex flex-wrap align-items-center gap-1" id="dbAmenityQuickBar">
+                <span class="small text-white-50 me-1" style="font-size: 11.5px;">
+                  <i class="fa-solid fa-check-double text-info me-1"></i>Tiện ích định vị:
+                </span>
+                <th:block th:if="${not #lists.isEmpty(p.amenities)}">
+                  <button th:each="amen : ${p.amenities}"
+                          type="button"
+                          th:data-amen="${amen.name}"
+                          onclick="focus3DAmenityByName(this.getAttribute('data-amen'))"
+                          class="px-2 py-0.5 rounded-pill text-white small border border-secondary d-inline-flex align-items-center gap-1" style="background: #0f172a; font-size: 11px;">
+                    <i th:class="${amen.icon != null ? amen.icon : 'fa-solid fa-cube'} + ' text-info'" style="font-size: 10px;"></i>
+                    <span th:text="${amen.name}">Điều hòa</span>
+                  </button>
+                </th:block>
+              </div>
+              <span class="small text-white-50" id="dbMissingNotice" style="font-size: 11px;">
+                Bấm vào tiện ích để di chuyển góc nhìn
+              </span>
+            </div>
+
+            <!-- 3D Canvas Viewport -->
+            <div id="panel3DContainer" class="position-relative w-100 overflow-hidden select-none rounded-2" style="height: 520px; background-color: #0b101e;">
+              <div id="threeCanvasMount" class="w-100 h-100 cursor-grab active:cursor-grabbing"></div>
+              <div id="threeHotspotsLayer" class="position-absolute top-0 start-0 w-100 h-100 pointer-events-none overflow-hidden"></div>
+
+              <!-- Top-Left Architectural Telemetry Overlay -->
+              <div class="position-absolute top-0 start-0 m-2.5 px-3 py-1.5 rounded small pointer-events-none" style="background: rgba(15, 23, 42, 0.88);">
+                <p class="fw-bold text-white mb-0 d-flex align-items-center gap-1.5">
+                  <span class="rounded-circle d-inline-block" style="width: 8px; height: 8px; background-color: #38bdf8;"></span>
+                  <span id="hudRoomTitle" th:text="${p.title}">Mô hình không gian 3D</span>
+                </p>
+                <p class="text-white-50 mb-0 tabular-nums" style="font-size: 11px;" id="hudDimensionsText">
+                  Diện tích: [[${p.acreage}]] m²
+                </p>
+              </div>
+
+              <!-- Selected Zone Inspector Card -->
+              <div id="hudZoneInspector" class="position-absolute bottom-0 start-0 m-2.5 px-3 py-2 rounded small" style="max-width: 380px; background: rgba(15, 23, 42, 0.92); border-left: 3px solid #fe9901;">
+                <p class="fw-bold mb-0.5" style="color: #38bdf8; font-size: 12.5px;" id="inspectorTitle">
+                  Khám phá không gian 3D
+                </p>
+                <p class="text-white-50 mb-0" style="font-size: 11px; line-height: 1.3;" id="inspectorDesc">
+                  Dùng chuột kéo xoay, cuộn để zoom, hoặc chọn các tiện ích phía trên để camera di chuyển tới thiết bị.
+                </p>
+              </div>
+
+              <!-- Zoom & Reset Controls -->
+              <div class="position-absolute bottom-0 end-0 m-2.5 d-flex align-items-center gap-1 p-1 rounded" style="background: rgba(0, 0, 0, 0.8);">
+                <button type="button" onclick="zoom3D(-1.2)" title="Phóng to" class="btn btn-sm btn-dark border-secondary text-white py-0.5 px-2">
+                  <i class="fa-solid fa-plus"></i>
+                </button>
+                <button type="button" onclick="zoom3D(1.2)" title="Thu nhỏ" class="btn btn-sm btn-dark border-secondary text-white py-0.5 px-2">
+                  <i class="fa-solid fa-minus"></i>
+                </button>
+                <button type="button" onclick="set3DCameraPreset('isometric')" title="Đặt lại" class="btn btn-sm btn-dark border-secondary text-white py-0.5 px-2 small">
+                  Đặt lại
+                </button>
+                <button type="button" onclick="toggle3DFullscreen()" title="Toàn màn hình" class="btn btn-sm btn-dark border-secondary text-white py-0.5 px-2">
+                  <i class="fa-solid fa-expand"></i>
+                </button>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+        <div class="modal-footer border-top border-secondary py-2 px-3 d-flex justify-content-between">
+          <span class="small text-white-50">Dữ liệu tiện ích được đồng bộ trực tiếp từ hồ sơ phòng trọ.</span>
+          <button type="button" class="btn btn-sm btn-outline-light px-3" data-bs-dismiss="modal">Đóng cửa sổ 3D</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL: DETAILED MONTHLY COST CALCULATOR (#costCalculatorModal)             -->
+  <!-- ========================================================================= -->
+  <div class="modal fade" id="costCalculatorModal" tabindex="-1" aria-labelledby="costCalculatorModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <div class="modal-content" style="border-radius: 16px;">
+        <div class="modal-header border-bottom py-2.5 px-4" style="background: #fffaf5;">
+          <div class="d-flex align-items-center gap-2">
+            <div class="rounded p-1.5 text-white" style="background: #fe9901;"><i class="fa-solid fa-calculator"></i></div>
+            <h5 class="modal-title h6 fw-bold mb-0 text-dark" id="costCalculatorModalLabel">Bảng Dự Toán Chi Phí Hàng Tháng Chi Tiết</h5>
+          </div>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+        </div>
+        <div class="modal-body p-4">
+
+          <div id="costCalculatorCard" th:data-base-price="${p.price != null ? p.price : 0}">
+            <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3 pb-2 border-bottom">
+              <div>
+                <p class="text-muted small mb-0">Tự do điều chỉnh mức sử dụng điện, nước và số người ở để dự toán tổng ngân sách thực tế</p>
+              </div>
+              <button type="button" onclick="autoEstimateByRoomAppliances()" class="btn-estate py-1.5 px-3 small">
+                <i class="fa-solid fa-bolt me-1"></i><span>Ước tính tự động</span>
+              </button>
+            </div>
+
+            <div class="row g-3 mb-3">
+              <!-- Giá phòng cơ bản -->
+              <div class="col-md-6">
+                <div class="p-3 bg-light rounded-3 d-flex align-items-center justify-content-between">
+                  <div>
+                    <span class="fw-bold d-block small">Giá phòng cơ bản</span>
+                    <span class="text-muted" style="font-size: 11px;">Cố định theo hợp đồng</span>
+                  </div>
+                  <span class="fs-6 fw-bold tabular-nums" style="color: #ea580c;"
+                        id="calcBasePriceDisplay"
+                        th:data-base-price="${p.price != null ? p.price : 0}"
+                        th:text="${#numbers.formatDecimal(p.price, 0, 'POINT', 0, 'COMMA') + ' đ'}">
+                    3.000.000 đ
+                  </span>
+                </div>
+              </div>
+
+              <!-- Phí dịch vụ chung -->
+              <div class="col-md-6">
+                <div class="p-3 bg-light rounded-3 d-flex align-items-center justify-content-between">
+                  <div>
+                    <span class="fw-bold d-block small">Phí dịch vụ chung</span>
+                    <span class="text-muted" style="font-size: 11px;">Wifi, rác, vệ sinh</span>
+                  </div>
+                  <input type="number" id="calcServiceFee" value="150000" min="0" step="10000"
+                         oninput="calculateMonthlyCost()"
+                         class="form-control form-control-sm text-end fw-bold tabular-nums" style="width: 120px;" />
+                </div>
+              </div>
+
+              <!-- Điện sinh hoạt -->
+              <div class="col-md-6">
+                <div class="p-3 bg-light rounded-3">
+                  <div class="d-flex align-items-center justify-content-between mb-1">
+                    <label for="calcElecKwh" class="fw-bold small mb-0">
+                      Điện sinh hoạt (<span id="calcElecKwhLabel" class="tabular-nums" style="color: #ea580c;">80</span> kWh)
+                    </label>
+                    <span id="calcElecTotalLabel" class="tabular-nums fw-bold small text-dark">280.000 đ</span>
+                  </div>
+                  <input type="range" id="calcElecKwh" min="0" max="300" value="80"
+                         oninput="calculateMonthlyCost()" class="w-100 cursor-pointer" />
+                  <div class="d-flex justify-content-between text-muted mt-1" style="font-size: 11px;">
+                    <span>0 kWh</span>
+                    <span>3.500 đ/kWh</span>
+                    <span>300 kWh</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Nước sinh hoạt -->
+              <div class="col-md-6">
+                <div class="p-3 bg-light rounded-3">
+                  <div class="d-flex align-items-center justify-content-between mb-1">
+                    <label for="calcWaterM3" class="fw-bold small mb-0">
+                      Nước sinh hoạt (<span id="calcWaterM3Label" class="tabular-nums" style="color: #ea580c;">4</span> m³)
+                    </label>
+                    <span id="calcWaterTotalLabel" class="tabular-nums fw-bold small text-dark">80.000 đ</span>
+                  </div>
+                  <input type="range" id="calcWaterM3" min="0" max="20" value="4"
+                         oninput="calculateMonthlyCost()" class="w-100 cursor-pointer" />
+                  <div class="d-flex justify-content-between text-muted mt-1" style="font-size: 11px;">
+                    <span>0 m³</span>
+                    <span>20.000 đ/m³</span>
+                    <span>20 m³</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Occupants & Grand Total -->
+            <div class="p-3 rounded-3 d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3" style="background: #f8fafc; border: 1px solid #e2e8f0;">
+              <div>
+                <label class="small fw-bold d-block mb-1.5">Số người ở thực tế:</label>
+                <div id="occupantBtnGroup" class="d-inline-flex p-1 gap-1 rounded bg-white border" role="group">
+                  <button type="button" onclick="setOccupants(1)" data-occ="1" class="occ-btn px-2.5 py-1 small fw-semibold text-white border-0 rounded" style="background-color: #fe9901;">1 người</button>
+                  <button type="button" onclick="setOccupants(2)" data-occ="2" class="occ-btn px-2.5 py-1 small fw-semibold text-secondary bg-transparent border-0 rounded">2 người</button>
+                  <button type="button" onclick="setOccupants(3)" data-occ="3" class="occ-btn px-2.5 py-1 small fw-semibold text-secondary bg-transparent border-0 rounded">3 người</button>
+                  <button type="button" onclick="setOccupants(4)" data-occ="4" class="occ-btn px-2.5 py-1 small fw-semibold text-secondary bg-transparent border-0 rounded">4 người</button>
+                </div>
+              </div>
+
+              <div class="d-flex flex-wrap align-items-center gap-2.5">
+                <div class="px-3 py-2 rounded bg-white border">
+                  <p class="text-muted mb-0" style="font-size: 11px;">Tổng chi phí / tháng:</p>
+                  <p id="calcGrandTotal" class="fs-6 fw-bold mb-0 tabular-nums" style="color: #161825;">0 đ</p>
+                </div>
+                <div class="px-3 py-2 text-white rounded" style="background: #fe9901;">
+                  <p class="mb-0 text-white" style="font-size: 11px;">Bình quân mỗi người:</p>
+                  <p id="calcPerPerson" class="fs-6 fw-bold mb-0 tabular-nums text-white">0 đ/người</p>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+        <div class="modal-footer border-top py-2.5 px-4 d-flex justify-content-between">
+          <a th:href="@{/my-bookings}" class="btn btn-sm btn-outline-secondary">Xem Quản Lý Giỏ Hàng</a>
+          <button type="button" class="btn btn-sm text-white fw-bold px-3" style="background-color: #fe9901;" data-bs-dismiss="modal">
+            Hoàn tất
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL: REPORT LISTING MODAL (#reportListingModal)                         -->
+  <!-- ========================================================================= -->
+  <div class="modal fade" id="reportListingModal" tabindex="-1" aria-labelledby="reportListingModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content" style="border-radius: 14px;">
+        <div class="modal-header border-bottom py-2.5 px-3">
+          <h5 class="modal-title h6 fw-bold mb-0 text-danger" id="reportListingModalLabel">
+            <i class="bi bi-flag-fill me-1"></i>Báo Cáo Tin Đăng Vi Phạm
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+        </div>
+        <div class="modal-body p-3">
+          <p class="small text-muted mb-3">
+            TrọMới cam kết thông tin minh bạch. Vui lòng chọn lý do để Bộ phận kiểm duyệt xác minh trong vòng 24 giờ:
+          </p>
+          <div class="d-flex flex-column gap-2 mb-3" id="reportOptionsBox">
+            <button type="button" onclick="submitPropertyReportAndClose('Phòng đã cho thuê nhưng chưa đóng tin')" class="btn btn-sm btn-outline-secondary text-start py-2 px-3">
+              <i class="fa-solid fa-door-closed me-2 text-danger"></i>Phòng đã cho thuê nhưng chưa đóng tin
+            </button>
+            <button type="button" onclick="submitPropertyReportAndClose('Sai giá thuê hoặc thông tin diện tích')" class="btn btn-sm btn-outline-secondary text-start py-2 px-3">
+              <i class="fa-solid fa-tag me-2 text-warning"></i>Sai lệch giá thuê thực tế hoặc diện tích
+            </button>
+            <button type="button" onclick="submitPropertyReportAndClose('Hình ảnh không đúng thực tế / Không liên lạc được')" class="btn btn-sm btn-outline-secondary text-start py-2 px-3">
+              <i class="fa-solid fa-triangle-exclamation me-2 text-danger"></i>Hình ảnh sai thực tế / Chủ nhà không nghe máy
+            </button>
+          </div>
+          <div id="reportListingToast" class="hidden alert alert-success small mb-0 d-flex align-items-center gap-2">
+            <i class="fa-solid fa-circle-check"></i>
+            <span id="reportListingToastText">Đã ghi nhận báo cáo! Bộ phận kiểm duyệt sẽ xử lý.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL: FULLSCREEN PHOTO LIGHTBOX (#photoLightboxModal)                   -->
+  <!-- ========================================================================= -->
+  <div id="photoLightboxModal" role="dialog" aria-modal="true" aria-label="Trình xem ảnh toàn màn hình" class="hidden fixed inset-0 z-50 bg-black/95 flex flex-col justify-between p-4 sm:p-8 select-none">
+    <div class="d-flex align-items-center justify-content-between text-white">
+      <div class="d-flex align-items-center gap-3">
+        <span class="badge rounded-pill px-3 py-2 tabular-nums" style="background-color: #146c38; color: #ffffff;" id="lightboxCounterLabel">1 / 4</span>
+        <span class="small text-white-50" id="lightboxCaptionLabel">Ảnh khảo sát thực tế</span>
+      </div>
+      <button type="button" onclick="closePhotoLightbox()" class="btn btn-outline-light btn-sm rounded-circle" style="width: 38px; height: 38px;">
+        <i class="bi bi-x-lg"></i>
+      </button>
+    </div>
+
+    <div class="position-relative flex-grow-1 d-flex align-items-center justify-content-center my-3 overflow-hidden">
+      <button type="button" onclick="navigatePhotoLightbox(-1)" class="position-absolute start-0 ms-2 z-3 btn btn-dark rounded-circle" style="width: 44px; height: 44px;">
+        <i class="bi bi-chevron-left"></i>
+      </button>
+      <img id="lightboxMainImg" src="/images/rooms/room-1.jpg" alt="Ảnh phóng to" style="max-height: 75vh; max-width: 88vw; object-fit: contain;" />
+      <button type="button" onclick="navigatePhotoLightbox(1)" class="position-absolute end-0 me-2 z-3 btn btn-dark rounded-circle" style="width: 44px; height: 44px;">
+        <i class="bi bi-chevron-right"></i>
+      </button>
+    </div>
+
+    <div class="text-center small text-white-50">
+      Sử dụng phím mũi tên trái / phải hoặc bấm nút điều hướng để chuyển ảnh
+    </div>
+  </div>
+
+  <!-- Inline scripts for Buy Box interactions, Modal sync & Booking flow -->
+  <script th:inline="javascript">
+    var selectedRoomId = /*[[${availableRooms != null and !availableRooms.isEmpty() ? availableRooms[0].id : (propertyRooms != null and !propertyRooms.isEmpty() ? propertyRooms[0].id : '')}]]*/ '';
+    var selectedRoomName = /*[[${availableRooms != null and !availableRooms.isEmpty() ? availableRooms[0].name : (propertyRooms != null and !propertyRooms.isEmpty() ? propertyRooms[0].name : 'Phòng tiêu chuẩn')}]]*/ 'Phòng tiêu chuẩn';
+    var selectedDuration = 12;
+
+    function selectEcommercePhoto(el, idx) {
+      var imgUrl = el.getAttribute('data-img');
+      var mainImg = document.getElementById('mainGalleryImage');
+      if (mainImg && imgUrl) mainImg.src = imgUrl;
+      document.querySelectorAll('.photo-strip-btn').forEach(function(btn) {
+        btn.style.borderColor = '#e2e8f0';
+        btn.classList.remove('border-2');
+      });
+      el.style.borderColor = '#fe9901';
+      el.classList.add('border-2');
+      if (typeof selectPropertyPhoto === 'function') selectPropertyPhoto(el, idx);
+    }
+
+    function selectEcommerceRoomVariant(btn) {
+      document.querySelectorAll('.ecom-room-chip').forEach(function(chip) {
+        if (!chip.disabled) {
+          chip.style.outline = 'none';
+          chip.style.borderColor = '#cbd5e1';
+          chip.style.color = '#161825';
+          chip.style.backgroundColor = '#ffffff';
+        }
+      });
+      btn.style.outline = '2px solid #fe9901';
+      btn.style.borderColor = '#fe9901';
+      btn.style.color = '#ea580c';
+      btn.style.backgroundColor = '#fff3e0';
+      selectedRoomId = btn.getAttribute('data-room-id');
+      selectedRoomName = btn.getAttribute('data-room-name') + ' (' + (btn.getAttribute('data-room-area') || '') + 'm²)';
+      var rPrice = btn.getAttribute('data-room-price');
+      var rOrigPrice = btn.getAttribute('data-room-orig-price');
+      var rDeposit = btn.getAttribute('data-room-deposit') || rPrice;
+      var rArea = btn.getAttribute('data-room-area');
+      var rMaxOcc = btn.getAttribute('data-room-max-occ');
+
+      var priceEl = document.getElementById('ecomSelectedPriceDisplay');
+      if (priceEl && rPrice) priceEl.textContent = rPrice + ' ₫ / tháng';
+      var origPriceEl = document.getElementById('ecomSelectedOriginalPriceDisplay');
+      if (origPriceEl && rOrigPrice) origPriceEl.textContent = rOrigPrice + ' ₫';
+      var depEl = document.getElementById('ecomSelectedDepositDisplay');
+      if (depEl && rDeposit) depEl.textContent = rDeposit + ' ₫';
+      var areaEl = document.getElementById('ecomSelectedAreaDisplay');
+      if (areaEl && rArea) areaEl.textContent = rArea + ' m²';
+      var occInput = document.getElementById('ecomOccupantsInput');
+      if (occInput && rMaxOcc) {
+        occInput.max = rMaxOcc;
+        if (parseInt(occInput.value || '1', 10) > parseInt(rMaxOcc, 10)) {
+          occInput.value = rMaxOcc;
+        }
+      }
+    }
+
+    function selectEcommerceDuration(btn, months) {
+      selectedDuration = parseInt(months, 10) || 12;
+      document.querySelectorAll('.ecom-dur-chip').forEach(function(chip) {
+        chip.style.outline = 'none';
+        chip.style.borderColor = '#cbd5e1';
+        chip.style.color = '#161825';
+        chip.style.backgroundColor = '#ffffff';
+      });
+      btn.style.outline = '2px solid #fe9901';
+      btn.style.borderColor = '#fe9901';
+      btn.style.color = '#ea580c';
+      btn.style.backgroundColor = '#fff3e0';
+    }
+
+    function stepEcommerceOccupants(delta) {
+      var inp = document.getElementById('ecomOccupantsInput');
+      if (!inp) return;
+      var val = parseInt(inp.value || '2', 10) + delta;
+      if (val < 1) val = 1;
+      if (val > 6) val = 6;
+      inp.value = val;
+    }
+
+    // Authentication Check: Users MUST be logged in to book or schedule visit
+    function checkAuthRequirement() {
+      var isUserLoggedIn = /*[[${session.user != null}]]*/ false;
+      if (!isUserLoggedIn) {
+        var loginModal = document.getElementById('modalRequireLogin');
+        if (loginModal && typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+          var m = bootstrap.Modal.getInstance(loginModal) || new bootstrap.Modal(loginModal);
+          m.show();
+        } else {
+          window.location.href = '/login';
+        }
+        return false;
+      }
+      return true;
+    }
+
+    // Opens the dedicated Booking Confirmation Modal (Contains Renter details & confirmation)
+    // isAddToCart = true: Adds to cart & stays on PDP; false: Proceeds to checkout in my-bookings
+    function openBookingConfirmationModal(isAddToCart) {
+      if (!checkAuthRequirement()) return;
+
+      var redirectActionInput = document.getElementById('modalRedirectActionInput');
+      var modalTitle = document.getElementById('modalConfirmBookingLabel');
+      var modalSub = document.getElementById('modalConfirmBookingSub');
+      var submitBtnText = document.getElementById('modalBookingSubmitText');
+
+      if (isAddToCart) {
+        if (redirectActionInput) redirectActionInput.value = 'CART_STAY';
+        if (modalTitle) modalTitle.textContent = 'Thêm Phòng Vào Giỏ Hàng';
+        if (modalSub) modalSub.textContent = 'Lưu phòng đã chọn vào giỏ phòng để giữ chỗ và xem lại bất cứ lúc nào';
+        if (submitBtnText) submitBtnText.textContent = 'Xác Nhận & Thêm Vào Giỏ Hàng';
+      } else {
+        if (redirectActionInput) redirectActionInput.value = 'DIRECT_CHECKOUT';
+        if (modalTitle) modalTitle.textContent = 'Xác Nhận Đặt Thuê Phòng & Giữ Chỗ';
+        if (modalSub) modalSub.textContent = 'Hồ sơ giữ phòng ưu tiên 24 giờ trên hệ thống';
+        if (submitBtnText) submitBtnText.textContent = 'Xác Nhận & Đến Giỏ Hàng Thanh Toán';
+      }
+
+      var roomIdInput = document.getElementById('modalRoomIdInput');
+      if (roomIdInput) roomIdInput.value = selectedRoomId;
+
+      var durInput = document.getElementById('modalDurationInput');
+      if (durInput) durInput.value = selectedDuration;
+
+      var occVal = document.getElementById('ecomOccupantsInput')?.value || '2';
+      var modalOcc = document.getElementById('modalOccupantsInput');
+      if (modalOcc) modalOcc.value = occVal;
+
+      var moveInVal = document.getElementById('ecomMoveInDateInput')?.value || '';
+      var modalMoveIn = document.getElementById('modalMoveInDateInput');
+      if (modalMoveIn) modalMoveIn.value = moveInVal;
+
+      var priceTxt = document.getElementById('ecomSelectedPriceDisplay')?.textContent || '';
+      var depTxt = document.getElementById('ecomSelectedDepositDisplay')?.textContent || '';
+
+      var sumPrice = document.getElementById('modalSummaryPrice');
+      if (sumPrice && priceTxt) sumPrice.textContent = priceTxt;
+      var sumDep = document.getElementById('modalSummaryDeposit');
+      if (sumDep && depTxt) sumDep.textContent = depTxt;
+      var sumRoom = document.getElementById('modalSummaryRoomName');
+      if (sumRoom) sumRoom.textContent = selectedRoomName;
+      var sumMoveIn = document.getElementById('modalSummaryMoveIn');
+      if (sumMoveIn) sumMoveIn.textContent = moveInVal;
+      var sumTerms = document.getElementById('modalSummaryTerms');
+      if (sumTerms) sumTerms.textContent = selectedDuration + ' tháng · ' + occVal + ' người';
+
+      var modalEl = document.getElementById('modalConfirmBooking');
+      if (modalEl && typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+        var modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+        modal.show();
+      }
+    }
+
+    // Opens the Schedule Visit Modal
+    function openScheduleVisitModal() {
+      if (!checkAuthRequirement()) return;
+      var modalEl = document.getElementById('modalScheduleVisit');
+      if (modalEl && typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+        var modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+        modal.show();
+      }
+    }
+
+    function submitPropertyReportAndClose(reason) {
+      if (typeof submitPropertyReport === 'function') {
+        submitPropertyReport(reason);
+      }
+      setTimeout(function() {
+        var modalEl = document.getElementById('reportListingModal');
+        if (modalEl && typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+          var modal = bootstrap.Modal.getInstance(modalEl);
+          if (modal) modal.hide();
+        }
+      }, 1500);
+    }
+
+    // Trigger Three.js resize when modal opens
+    document.addEventListener('DOMContentLoaded', function() {
+      var modal3d = document.getElementById('property3dModal');
+      if (modal3d) {
+        modal3d.addEventListener('shown.bs.modal', function () {
+          if (typeof window.onThreeResize === 'function') {
+            window.onThreeResize();
+          }
+        });
+      }
+      if (typeof calculateMonthlyCost === 'function') calculateMonthlyCost();
+    });
+  </script>
+
+  <!-- Database-Driven Three.js 3D Architectural Viewer + Smart Estimator Script -->
+  <script th:src="@{/js/property-detail-3d.js}" defer></script>
+
 </div>

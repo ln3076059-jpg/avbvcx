@@ -1,175 +1,412 @@
-<div class="space-y-14 pb-8">
-  <section class="reveal video-hero relative overflow-hidden rounded-[36px] px-6 py-10 md:px-10 md:py-14">
-    <div class="hero-orb hero-orb-three"></div>
-    <div class="hero-orb hero-orb-four"></div>
+<div>
 
-    <div class="relative grid gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:items-center">
-      <div class="space-y-6">
-        <div class="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-sm font-semibold text-rose-100 backdrop-blur">
-          <i class="fa-solid fa-circle-play text-rose-300"></i>
-          Video review
+  <!-- 1. Upside Page Title & Breadcrumbs -->
+  <div class="page-title">
+    <div class="heading">
+      <div class="container">
+        <div class="Properties_taital_main mb-2">
+          <h1 class="Properties_taital mb-0">Video Review <span style="color: #fef3c7;">Thực Tế</span></h1>
         </div>
-
-        <div class="space-y-4">
-          <h1 class="max-w-3xl text-4xl font-extrabold leading-tight text-white md:text-5xl">
-            Một không gian đẹp cần được xem bằng video, không chỉ bằng ảnh.
-          </h1>
-          <p class="max-w-2xl text-base leading-8 text-slate-200">
-            Trang này mô tả hướng phát triển cho khu vực video review: căn hộ mini, phòng trọ, nhà nguyên căn
-            được giới thiệu bằng clip ngắn, bố cục sáng và dễ chốt lịch xem phòng.
-          </p>
-        </div>
-
-        <div class="flex flex-wrap gap-4">
-          <a href="/" class="inline-flex items-center gap-2 rounded-full bg-white px-6 py-3.5 text-sm font-semibold text-slate-900 transition hover:-translate-y-0.5 hover:bg-sky-100">
-            <i class="fa-solid fa-house"></i>
-            Về trang chủ
-          </a>
-          <a href="/login/owner" class="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-6 py-3.5 text-sm font-semibold text-white backdrop-blur transition hover:bg-white/20">
-            <i class="fa-solid fa-video"></i>
-            Đăng ký quay review
-          </a>
-        </div>
-      </div>
-
-      <div class="reveal rounded-[32px] border border-white/10 bg-white/10 p-5 backdrop-blur-xl shadow-[0_24px_80px_rgba(15,23,42,0.28)]">
-        <div class="relative overflow-hidden rounded-[28px]">
-          <img
-            th:src="${featuredProperty != null ? featuredProperty.imageUrl : '/images/no-image.jpg'}"
-            alt="Ảnh bìa video review"
-            class="h-[360px] w-full object-cover"
-          />
-          <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/30 to-transparent"></div>
-          <button class="absolute left-1/2 top-1/2 flex h-20 w-20 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-white text-2xl text-rose-500 shadow-[0_20px_60px_rgba(255,255,255,0.28)] transition hover:scale-105">
-            <i class="fa-solid fa-play"></i>
-          </button>
-          <div class="absolute bottom-5 left-5 right-5 flex items-end justify-between gap-4">
-            <div class="text-white">
-              <p class="text-xs font-bold uppercase tracking-[0.24em] text-sky-100">Xem trước</p>
-              <h2 class="mt-2 text-2xl font-extrabold" th:text="${featuredProperty != null ? featuredProperty.title : 'Khu trọ review thực tế'}">
-                Khu trọ review thực tế
-              </h2>
-            </div>
-            <span class="rounded-full bg-white/15 px-4 py-2 text-xs font-semibold text-white backdrop-blur">
-              Sắp hoàn thiện
-            </span>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <section class="reveal grid gap-5 md:grid-cols-3">
-    <div class="rounded-[28px] border border-slate-200 bg-white p-6 shadow-[0_16px_45px_rgba(15,23,42,0.06)]">
-      <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-rose-100 text-rose-600">
-        <i class="fa-solid fa-film"></i>
-      </div>
-        <h3 class="mt-5 text-xl font-extrabold text-slate-900">Clip ngắn, thông tin rõ</h3>
-      <p class="mt-3 text-sm leading-7 text-slate-500">
-        Video dự kiến tập trung vào lối vào, phòng ngủ, bếp, nhà vệ sinh và khu vực xung quanh.
-      </p>
-    </div>
-
-    <div class="rounded-[28px] border border-slate-200 bg-white p-6 shadow-[0_16px_45px_rgba(15,23,42,0.06)]">
-      <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-sky-100 text-sky-700">
-        <i class="fa-solid fa-location-dot"></i>
-      </div>
-        <h3 class="mt-5 text-xl font-extrabold text-slate-900">Review theo khu vực</h3>
-      <p class="mt-3 text-sm leading-7 text-slate-500">
-        Mỗi video có thể gắn với phường, tỉnh/thành và bài đăng cụ thể để người xem dễ đối chiếu.
-      </p>
-    </div>
-
-    <div class="rounded-[28px] border border-slate-200 bg-white p-6 shadow-[0_16px_45px_rgba(15,23,42,0.06)]">
-      <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-100 text-amber-700">
-        <i class="fa-solid fa-calendar-check"></i>
-      </div>
-        <h3 class="mt-5 text-xl font-extrabold text-slate-900">Đặt lịch xem phòng</h3>
-      <p class="mt-3 text-sm leading-7 text-slate-500">
-        Sau khi xem clip, người thuê có thể chuyển sang bài đăng chi tiết để chat và hẹn xem phòng.
-      </p>
-    </div>
-  </section>
-
-  <section class="space-y-6">
-    <div class="reveal flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-      <div>
-        <p class="text-sm font-bold uppercase tracking-[0.3em] text-rose-600">Đề xuất review</p>
-        <h2 class="mt-3 text-3xl font-extrabold text-slate-950 md:text-4xl">Những điểm đến nên được quay review đầu tiên.</h2>
-      </div>
-      <p class="max-w-xl text-sm leading-7 text-slate-500">
-        Trong lúc chưa có module video backend riêng, trang này vẫn có thể làm điểm đến truyền thông và CTA cho tính năng sắp ra mắt.
-      </p>
-    </div>
-
-    <div class="grid gap-5 lg:grid-cols-3">
-      <article
-        th:each="item : ${videoHighlights}"
-        class="reveal overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-[0_16px_45px_rgba(15,23,42,0.06)] transition hover:-translate-y-1.5 hover:shadow-[0_24px_60px_rgba(244,63,94,0.14)]"
-      >
-        <div class="relative">
-          <img th:src="${item.imageUrl}" th:alt="${item.title}" class="h-56 w-full object-cover" />
-          <div class="absolute inset-0 bg-gradient-to-t from-slate-950/70 to-transparent"></div>
-          <div class="absolute bottom-4 left-4 inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-2 text-xs font-semibold text-white backdrop-blur">
-            <i class="fa-solid fa-play"></i>
-            Review đề xuất
-          </div>
-        </div>
-
-        <div class="space-y-4 p-5">
-          <div class="flex items-center justify-between gap-3">
-            <span class="rounded-full bg-amber-50 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.2em] text-amber-700" th:text="${item.categoryName}">
-              Nha tro
-            </span>
-            <span class="text-sm font-semibold text-slate-500" th:text="${#numbers.formatDecimal(item.price, 0, 'COMMA', 0, 'POINT') + ' đ/tháng'}">
-              3,500,000 đ/tháng
-            </span>
-          </div>
-
-          <h3 class="text-xl font-extrabold text-slate-900" th:text="${item.title}">Phong can review</h3>
-          <p class="text-sm leading-7 text-slate-500" th:text="${item.wardName + ', ' + item.provinceName}">
-            Khu vực review
-          </p>
-
-          <a
-            th:href="@{/public/property/{slug}(slug=${item.slug})}"
-            class="inline-flex items-center gap-2 rounded-full bg-slate-950 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-rose-600"
+        <p class="mb-0 text-start" style="max-width: 75ch; margin: 0;">
+          Quan sát căn hộ dịch vụ, phòng trọ và nhà nguyên căn qua các đoạn phim ngắn thực tế, giữ nguyên ánh sáng tự nhiên để người thuê dễ đối chiếu trước khi hẹn lịch xem phòng.
+        </p>
+        <div class="d-flex flex-wrap gap-3 mt-3">
+          <button
+            type="button"
+            onclick="openVideoTourModal(this)"
+            th:attr="data-title=${featuredProperty != null ? featuredProperty.title : 'Khu trọ review thực tế'},
+                     data-slug=${featuredProperty != null ? featuredProperty.slug : ''},
+                     data-price=${featuredProperty != null ? #numbers.formatDecimal(featuredProperty.price, 0, 'COMMA', 0, 'POINT') + ' đ/tháng' : '3.500.000 đ/tháng'},
+                     data-area=${featuredProperty != null ? featuredProperty.wardName + ', ' + featuredProperty.provinceName : 'Khu vực trung tâm'},
+                     data-img=${featuredProperty != null and featuredProperty.imageUrl != null and !featuredProperty.imageUrl.contains('unsplash.com') and !featuredProperty.imageUrl.contains('/upside/images/') ? featuredProperty.imageUrl : '/images/rooms/room-2.jpg'}"
+            class="btn-estate"
+            style="background: #ffffff !important; color: #ea580c !important; box-shadow: 0 6px 16px rgba(15, 23, 42, 0.14) !important;"
           >
-            Xem bài đăng
-            <i class="fa-solid fa-arrow-right-long"></i>
+            <i class="bi bi-play-circle-fill"></i>
+            <span>Xem Video Tour Tiêu Điểm</span>
+          </button>
+          <a th:href="@{/properties}" class="btn-estate-outline" style="background: rgba(255, 255, 255, 0.18) !important; color: #ffffff !important; border: 1.5px solid rgba(255, 255, 255, 0.65) !important;">
+            <i class="bi bi-houses"></i>
+            <span>Danh sách phòng đang mở</span>
           </a>
         </div>
-      </article>
-    </div>
-
-    <div th:if="${#lists.isEmpty(videoHighlights)}" class="reveal rounded-[28px] border border-dashed border-slate-300 bg-white px-6 py-14 text-center shadow-sm">
-      <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-rose-100 text-rose-600">
-        <i class="fa-solid fa-video text-2xl"></i>
       </div>
-      <h3 class="mt-5 text-2xl font-extrabold text-slate-900">Chưa có nội dung review</h3>
-      <p class="mx-auto mt-3 max-w-2xl text-sm leading-7 text-slate-500">
-        Bạn có thể dùng trang này như một landing page thông báo tính năng video review sắp hoàn thiện, trong khi module dữ liệu video được xây dựng sau.
-      </p>
+    </div>
+    <nav class="breadcrumbs">
+      <div class="container">
+        <ol>
+          <li><a th:href="@{/}">Trang chủ</a></li>
+          <li class="current">Video Review</li>
+        </ol>
+      </div>
+    </nav>
+  </div><!-- End Page Title -->
+
+  <!-- 2. Featured Video Spotlight Banner -->
+  <section class="Properties_section layout_padding pb-0">
+    <div class="container">
+      <div class="row g-0 overflow-hidden" style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; box-shadow: 0 12px 32px rgba(15, 23, 42, 0.06);">
+        <div class="col-lg-7 position-relative" style="min-height: 360px;">
+          <img
+            th:src="${featuredProperty != null and featuredProperty.imageUrl != null and !featuredProperty.imageUrl.contains('unsplash.com') and !featuredProperty.imageUrl.contains('/upside/images/') ? featuredProperty.imageUrl : '/images/rooms/room-2.jpg'}"
+            onerror="this.onerror=null;this.src='/images/rooms/room-2.jpg';"
+            alt="Ảnh bìa video review"
+            class="w-100 h-100 object-fit-cover"
+            style="min-height: 360px;"
+          />
+          <button
+            type="button"
+            onclick="openVideoTourModal(this)"
+            th:attr="data-title=${featuredProperty != null ? featuredProperty.title : 'Khu trọ review thực tế'},
+                     data-slug=${featuredProperty != null ? featuredProperty.slug : ''},
+                     data-price=${featuredProperty != null ? #numbers.formatDecimal(featuredProperty.price, 0, 'COMMA', 0, 'POINT') + ' đ/tháng' : '3.500.000 đ/tháng'},
+                     data-area=${featuredProperty != null ? featuredProperty.wardName + ', ' + featuredProperty.provinceName : 'Khu vực trung tâm'},
+                     data-img=${featuredProperty != null and featuredProperty.imageUrl != null and !featuredProperty.imageUrl.contains('1502005229762') and !featuredProperty.imageUrl.contains('/upside/images/') ? featuredProperty.imageUrl : '/images/rooms/room-2.jpg'}"
+            class="position-absolute top-50 start-50 translate-middle d-flex align-items-center justify-content-center border-0 cursor-pointer"
+            style="width: 68px; height: 68px; border-radius: 50%; background-color: #fe9901; color: #ffffff; font-size: 28px; box-shadow: 0 8px 24px rgba(254, 153, 1, 0.45);"
+          >
+            <i class="bi bi-play-fill"></i>
+          </button>
+        </div>
+        <div class="col-lg-5 p-4 p-lg-5 d-flex flex-column justify-content-center" style="background: linear-gradient(135deg, #ffffff 0%, #fffbeb 100%);">
+          <div class="mb-2">
+            <span class="estate-badge-cat">Video Tiêu Điểm</span>
+          </div>
+          <h2 class="h3 fw-bold text-uppercase mb-3" style="color: #0f172a;" th:text="${featuredProperty != null ? featuredProperty.title : 'Khu trọ review thực tế'}">
+            Khu trọ review thực tế
+          </h2>
+          <p class="mb-4" style="color: #475569; line-height: 1.65;">
+            Khảo sát trực tiếp lối vào, phòng chính, khu bếp và nhà vệ sinh khép kín với ánh sáng thực tế tại hiện trường.
+          </p>
+          <div class="d-flex flex-wrap gap-2">
+            <button
+              type="button"
+              onclick="openVideoTourModal(this)"
+              th:attr="data-title=${featuredProperty != null ? featuredProperty.title : 'Khu trọ review thực tế'},
+                       data-slug=${featuredProperty != null ? featuredProperty.slug : ''},
+                       data-price=${featuredProperty != null ? #numbers.formatDecimal(featuredProperty.price, 0, 'COMMA', 0, 'POINT') + ' đ/tháng' : '3.500.000 đ/tháng'},
+                       data-area=${featuredProperty != null ? featuredProperty.wardName + ', ' + featuredProperty.provinceName : 'Khu vực trung tâm'},
+                       data-img=${featuredProperty != null and featuredProperty.imageUrl != null and !featuredProperty.imageUrl.contains('1502005229762') and !featuredProperty.imageUrl.contains('/upside/images/') ? featuredProperty.imageUrl : '/images/rooms/room-2.jpg'}"
+              class="btn-estate"
+            >
+              <i class="bi bi-play-circle"></i>
+              <span>Phát Video Ngay</span>
+            </button>
+            <a th:if="${featuredProperty != null}"
+               th:href="@{/public/property/{slug}(slug=${featuredProperty.slug})}"
+               class="btn-estate-outline">
+              <span>Xem bài đăng</span>
+              <i class="bi bi-arrow-right"></i>
+            </a>
+          </div>
+        </div>
+      </div>
     </div>
   </section>
 
-  <section class="reveal rounded-[36px] border border-slate-200 bg-white px-6 py-10 shadow-[0_18px_50px_rgba(15,23,42,0.06)] md:px-10">
-    <div class="grid gap-6 lg:grid-cols-3">
-      <div class="timeline-card">
-        <span class="timeline-step">01</span>
-        <h3 class="mt-5 text-xl font-extrabold text-slate-900">Quay không gian thật</h3>
-        <p class="mt-3 text-sm leading-7 text-slate-500">Clip nên cho thấy lối vào, kết cấu phòng, ánh sáng và các tiện nghi trong bài đăng.</p>
+  <!-- 3. Video Highlights Gallery -->
+  <section id="real-estate" class="Properties_section layout_padding">
+    <div class="container">
+      <div class="mb-4">
+        <span class="text-uppercase fw-bold small d-inline-block mb-1" style="color: #ea580c; letter-spacing: 0.08em; font-size: 13px;">KHÁM PHÁ KHÔNG GIAN THỰC TẾ</span>
+        <h2 class="h4 fw-bold text-uppercase mb-0" style="color: #161825; font-size: 24px;">Danh Sách Video Thực Tế</h2>
       </div>
-      <div class="timeline-card">
-        <span class="timeline-step">02</span>
-        <h3 class="mt-5 text-xl font-extrabold text-slate-900">Đồng bộ với bài đăng</h3>
-        <p class="mt-3 text-sm leading-7 text-slate-500">Video cần dẫn thẳng đến bài đăng chi tiết để người xem chuyển đổi mượt hơn.</p>
+
+      <div class="Properties_section_2">
+        <div class="row">
+          <div
+            class="col-lg-4 col-md-6"
+            th:each="item : ${videoHighlights}"
+          >
+            <div class="upside-property-card">
+              <div class="blog_img">
+                <img
+                  th:src="${item.imageUrl != null and !item.imageUrl.contains('unsplash.com') and !item.imageUrl.contains('/upside/images/') ? item.imageUrl : '/images/rooms/room-3.jpg'}"
+                  onerror="this.onerror=null;this.src='/images/rooms/room-3.jpg';"
+                  th:alt="${item.title}"
+                />
+
+                <div class="position-absolute top-0 start-0 end-0 p-2 d-flex align-items-center justify-content-between" style="z-index: 3;">
+                  <span class="estate-badge-cat" th:text="${item.categoryName}">Nhà trọ</span>
+                  <button
+                    type="button"
+                    onclick="openVideoTourModal(this)"
+                    th:attr="data-title=${item.title},
+                             data-slug=${item.slug},
+                             data-price=${#numbers.formatDecimal(item.price, 0, 'COMMA', 0, 'POINT') + ' đ/tháng'},
+                             data-area=${item.wardName + ', ' + item.provinceName},
+                             data-img=${item.imageUrl != null and !item.imageUrl.contains('1502005229762') and !item.imageUrl.contains('/upside/images/') ? item.imageUrl : '/images/rooms/room-3.jpg'}"
+                    class="estate-action-pill"
+                  >
+                    <i class="bi bi-play-circle-fill" style="color: #ea580c;"></i>
+                    <span>Phát Video</span>
+                  </button>
+                </div>
+              </div>
+
+              <div class="image_box">
+                <div class="left_box">
+                  <h2 class="road_text">
+                    <a th:href="@{/public/property/{slug}(slug=${item.slug})}" th:text="${item.title}">
+                      Phòng cần review
+                    </a>
+                  </h2>
+                  <div class="area_main">
+                    <h3 class="area_text active">
+                      <a th:href="@{/public/property/{slug}(slug=${item.slug})}">
+                        Khu vực:<br /><span th:text="${item.wardName + ', ' + item.provinceName}">Khu vực</span>
+                      </a>
+                    </h3>
+                    <h3 class="area_text">
+                      <a href="#"
+                         onclick="openVideoTourModal(this); return false;"
+                         th:attr="data-title=${item.title},
+                                  data-slug=${item.slug},
+                                  data-price=${#numbers.formatDecimal(item.price, 0, 'COMMA', 0, 'POINT') + ' đ/tháng'},
+                                  data-area=${item.wardName + ', ' + item.provinceName},
+                                  data-img=${item.imageUrl != null and !item.imageUrl.contains('1502005229762') and !item.imageUrl.contains('/upside/images/') ? item.imageUrl : '/images/rooms/room-3.jpg'}">
+                        Video:<br /><span style="color: #ea580c;">Xem Tour</span>
+                      </a>
+                    </h3>
+                  </div>
+                </div>
+                <div class="right_box">
+                  <a th:href="@{/public/property/{slug}(slug=${item.slug})}" class="text-decoration-none">
+                    <div class="rate_text tabular-nums" th:text="${#numbers.formatDecimal(item.price, 0, 'COMMA', 0, 'POINT')} + ' đ'">
+                      3.500.000 đ
+                    </div>
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
-      <div class="timeline-card">
-        <span class="timeline-step">03</span>
-        <h3 class="mt-5 text-xl font-extrabold text-slate-900">Nhận yêu cầu xem phòng</h3>
-        <p class="mt-3 text-sm leading-7 text-slate-500">Sau khi xem clip, CTA được đặt nổi bật để người dùng đặt lịch xem phòng ngay.</p>
+
+      <div th:if="${#lists.isEmpty(videoHighlights)}" class="bg-light border p-5 text-center">
+        <i class="bi bi-camera-video fs-1" style="color: #ea580c;"></i>
+        <h3 class="h5 fw-bold mt-3">Chưa có nội dung review</h3>
+        <p class="text-muted mb-0">Danh sách tư liệu video đang được biên tập và cập nhật từ các bài đăng mới nhất.</p>
       </div>
     </div>
   </section>
+
+  <!-- 4. EstateAgency Services Pillars (#services) -->
+  <section id="services" class="layout_padding" style="background-color: #f8fafc; border-top: 1px solid #e2e8f0;">
+    <div class="container">
+      <div class="titlepage text-center mb-5">
+        <h2 style="font-size: 28px; font-weight: 800; color: #0f172a; text-transform: uppercase;">
+          Quy Trình Thực Hiện <span style="color: #ea580c;">Video Review</span>
+        </h2>
+        <span style="font-size: 15px; color: #64748b; max-width: 68ch; margin: 0 auto; display: block;">
+          Mọi tư liệu hình ảnh đều được ghi nhận trung thực và đồng bộ trực tiếp với hồ sơ bài đăng
+        </span>
+      </div>
+
+      <div class="row g-4">
+        <!-- Bước 1 -->
+        <div class="col-lg-4 col-md-6">
+          <div class="process-card p-4 p-lg-4 h-100 rounded-3 text-center position-relative"
+               style="background: #ffffff; border: 1px solid #e2e8f0; border-top: 4px solid #ea580c; box-shadow: 0 10px 25px rgba(15, 23, 42, 0.05); transition: transform 0.25s ease, box-shadow 0.25s ease;">
+            <div class="d-inline-flex align-items-center justify-content-center mb-3">
+              <span class="badge rounded-pill px-3 py-1 text-uppercase fw-bold"
+                    style="background: #fff7ed; color: #ea580c; border: 1px solid #fed7aa; font-size: 11.5px; letter-spacing: 0.04em;">
+                Bước 01
+              </span>
+            </div>
+            <div class="d-flex align-items-center justify-content-center mx-auto mb-3 rounded-circle"
+                 style="width: 72px; height: 72px; background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%); color: #ea580c; font-size: 26px; border: 1.5px solid #fed7aa; box-shadow: 0 4px 14px rgba(234, 88, 12, 0.12);">
+              <i class="fa-solid fa-video"></i>
+            </div>
+            <h3 class="fw-bold mb-2" style="font-size: 18px; color: #0f172a;">Ghi Hình Thực Tế</h3>
+            <p class="mb-0" style="font-size: 14px; color: #64748b; line-height: 1.65;">
+              Đoạn phim tập trung vào lối vào, phòng ngủ, khu bếp, nhà vệ sinh và ánh sáng tự nhiên xung quanh khu nhà.
+            </p>
+          </div>
+        </div>
+
+        <!-- Bước 2 -->
+        <div class="col-lg-4 col-md-6">
+          <div class="process-card p-4 p-lg-4 h-100 rounded-3 text-center position-relative"
+               style="background: #ffffff; border: 1px solid #e2e8f0; border-top: 4px solid #ea580c; box-shadow: 0 10px 25px rgba(15, 23, 42, 0.05); transition: transform 0.25s ease, box-shadow 0.25s ease;">
+            <div class="d-inline-flex align-items-center justify-content-center mb-3">
+              <span class="badge rounded-pill px-3 py-1 text-uppercase fw-bold"
+                    style="background: #fff7ed; color: #ea580c; border: 1px solid #fed7aa; font-size: 11.5px; letter-spacing: 0.04em;">
+                Bước 02
+              </span>
+            </div>
+            <div class="d-flex align-items-center justify-content-center mx-auto mb-3 rounded-circle"
+                 style="width: 72px; height: 72px; background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%); color: #ea580c; font-size: 26px; border: 1.5px solid #fed7aa; box-shadow: 0 4px 14px rgba(234, 88, 12, 0.12);">
+              <i class="fa-solid fa-file-shield"></i>
+            </div>
+            <h3 class="fw-bold mb-2" style="font-size: 18px; color: #0f172a;">Đồng Bộ Hồ Sơ &amp; Giá Thuê</h3>
+            <p class="mb-0" style="font-size: 14px; color: #64748b; line-height: 1.65;">
+              Mỗi video gắn trực tiếp với phường, tỉnh/thành, mô hình 3D và bảng dự toán chi phí hàng tháng rõ ràng.
+            </p>
+          </div>
+        </div>
+
+        <!-- Bước 3 -->
+        <div class="col-lg-4 col-md-6">
+          <div class="process-card p-4 p-lg-4 h-100 rounded-3 text-center position-relative"
+               style="background: #ffffff; border: 1px solid #e2e8f0; border-top: 4px solid #ea580c; box-shadow: 0 10px 25px rgba(15, 23, 42, 0.05); transition: transform 0.25s ease, box-shadow 0.25s ease;">
+            <div class="d-inline-flex align-items-center justify-content-center mb-3">
+              <span class="badge rounded-pill px-3 py-1 text-uppercase fw-bold"
+                    style="background: #fff7ed; color: #ea580c; border: 1px solid #fed7aa; font-size: 11.5px; letter-spacing: 0.04em;">
+                Bước 03
+              </span>
+            </div>
+            <div class="d-flex align-items-center justify-content-center mx-auto mb-3 rounded-circle"
+                 style="width: 72px; height: 72px; background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%); color: #ea580c; font-size: 26px; border: 1.5px solid #fed7aa; box-shadow: 0 4px 14px rgba(234, 88, 12, 0.12);">
+              <i class="fa-solid fa-calendar-check"></i>
+            </div>
+            <h3 class="fw-bold mb-2" style="font-size: 18px; color: #0f172a;">Đặt Lịch Xem Phòng</h3>
+            <p class="mb-0" style="font-size: 14px; color: #64748b; line-height: 1.65;">
+              Sau khi xem tư liệu, người thuê có thể chuyển thẳng sang hồ sơ chi tiết để hẹn lịch xem phòng cùng chủ nhà.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- INTERACTIVE VIDEO TOUR PLAYER MODAL (#videoTourModal) -->
+  <div id="videoTourModal" data-ui role="dialog" aria-modal="true" aria-label="Video thực tế không gian" class="hidden fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4">
+    <div class="text-white w-full max-w-4xl rounded overflow-hidden" style="background-color: #0f172a; border-top: 4px solid #fe9901;">
+      <div class="d-flex align-items-center justify-content-between px-4 py-3">
+        <div>
+          <p class="small mb-0 fw-semibold" style="color: #38bdf8;">Trình phát Video Tour Thực Tế</p>
+          <h3 id="videoModalTitle" class="h5 fw-bold text-white mb-0 text-truncate">
+            Khu trọ review thực tế
+          </h3>
+        </div>
+        <button type="button" onclick="closeVideoTourModal()" class="btn btn-sm btn-outline-light rounded-circle" style="width: 36px; height: 36px;">
+          <i class="bi bi-x-lg"></i>
+        </button>
+      </div>
+
+      <div class="p-4">
+        <div class="position-relative bg-[#090d16] overflow-hidden mb-3" style="aspect-ratio: 16/9;">
+          <img id="videoModalFrameImg" src="/images/rooms/room-2.jpg" alt="Khung hình video review" class="w-100 h-100 object-fit-cover" />
+          <div class="position-absolute top-0 start-0 m-3 bg-[#0f172a] bg-opacity-85 px-3 py-1.5 rounded small d-flex align-items-center gap-2">
+            <span class="rounded-circle d-inline-block" style="width: 8px; height: 8px; background-color: #38bdf8;"></span>
+            <span id="videoModalSceneLabel">Góc quay 1/4: Mặt tiền &amp; Lối vào</span>
+          </div>
+
+          <div class="position-absolute bottom-0 start-0 end-0 bg-[#0f172a] bg-opacity-90 p-3">
+            <div class="w-100 bg-secondary rounded-pill overflow-hidden mb-2" style="height: 6px;">
+              <div id="videoModalProgressBar" class="h-100" style="width: 25%; background-color: #fe9901;"></div>
+            </div>
+            <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 small">
+              <div class="d-flex flex-wrap align-items-center gap-1.5">
+                <button type="button" onclick="toggleVideoTourPlay()" id="videoModalPlayBtn" class="btn-estate py-1 px-3 small">
+                  <i class="fa-solid fa-pause" id="videoModalPlayIcon"></i>
+                  <span id="videoModalPlayText">Đang phát</span>
+                </button>
+                <button type="button" onclick="stepVideoTourScene(0)" class="btn btn-sm btn-dark border-secondary">Lối vào</button>
+                <button type="button" onclick="stepVideoTourScene(1)" class="btn btn-sm btn-dark border-secondary">Phòng chính</button>
+                <button type="button" onclick="stepVideoTourScene(2)" class="btn btn-sm btn-dark border-secondary">Khu bếp</button>
+                <button type="button" onclick="stepVideoTourScene(3)" class="btn btn-sm btn-dark border-secondary">Ánh sáng &amp; WC</button>
+              </div>
+              <span class="fw-bold tabular-nums" style="color: #fbbf24;" id="videoModalPriceBadge">3.500.000 đ/tháng</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-3 bg-[#1e293b] p-3 rounded">
+          <div class="small">
+            <p class="fw-semibold mb-1" style="color: #38bdf8;">
+              <i class="bi bi-patch-check-fill me-1"></i>Đã xác thực hình ảnh &amp; ánh sáng thực tế tại hiện trường
+            </p>
+            <p class="text-white-50 mb-0" id="videoModalAreaText">Khu vực: Đang cập nhật</p>
+          </div>
+          <a id="videoModalDetailLink" href="/properties" class="btn-estate py-2 px-4 small text-nowrap">
+            <span>Xem hồ sơ &amp; Đặt lịch hẹn</span>
+            <i class="bi bi-arrow-right"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      let tourTimer = null;
+      let tourPlaying = true;
+      let tourSceneIndex = 0;
+      let baseImg = '/images/rooms/room-2.jpg';
+
+      const scenes = [
+        { label: 'Góc quay 1/4: Mặt tiền & Lối vào an ninh', fallback: '/images/rooms/room-2.jpg', pct: '25%' },
+        { label: 'Góc quay 2/4: Không gian sinh hoạt chính', fallback: '/images/rooms/room-5.jpg', pct: '50%' },
+        { label: 'Góc quay 3/4: Khu kệ bếp & Cửa sổ thoáng', fallback: '/images/rooms/room-7.jpg', pct: '75%' },
+        { label: 'Góc quay 4/4: Phòng vệ sinh khép kín & Nội thất', fallback: '/images/rooms/room-9.jpg', pct: '100%' }
+      ];
+
+      function renderScene() {
+        const sc = scenes[tourSceneIndex] || scenes[0];
+        const imgEl = document.getElementById('videoModalFrameImg');
+        const labelEl = document.getElementById('videoModalSceneLabel');
+        const barEl = document.getElementById('videoModalProgressBar');
+        if (imgEl) {
+          imgEl.src = tourSceneIndex === 0 ? baseImg : sc.fallback;
+        }
+        if (labelEl) labelEl.textContent = sc.label;
+        if (barEl) barEl.style.width = sc.pct;
+      }
+
+      function startTimer() {
+        clearInterval(tourTimer);
+        tourTimer = setInterval(function () {
+          if (!tourPlaying) return;
+          tourSceneIndex = (tourSceneIndex + 1) % scenes.length;
+          renderScene();
+        }, 2800);
+      }
+
+      window.openVideoTourModal = function (btn) {
+        if (!btn) return;
+        const title = btn.getAttribute('data-title') || 'Khu trọ review thực tế';
+        const slug = btn.getAttribute('data-slug') || '';
+        const price = btn.getAttribute('data-price') || '3.500.000 đ/tháng';
+        const area = btn.getAttribute('data-area') || 'Khu vực trung tâm';
+        baseImg = btn.getAttribute('data-img') || '/images/rooms/room-2.jpg';
+
+        document.getElementById('videoModalTitle').textContent = title;
+        document.getElementById('videoModalPriceBadge').textContent = price;
+        document.getElementById('videoModalAreaText').textContent = 'Khu vực: ' + area;
+        const linkEl = document.getElementById('videoModalDetailLink');
+        if (linkEl) {
+          linkEl.href = slug ? ('/public/property/' + slug) : '/properties';
+        }
+
+        tourSceneIndex = 0;
+        tourPlaying = true;
+        renderScene();
+        startTimer();
+        document.getElementById('videoTourModal').classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+      };
+
+      window.closeVideoTourModal = function () {
+        clearInterval(tourTimer);
+        document.getElementById('videoTourModal').classList.add('hidden');
+        document.body.style.overflow = '';
+      };
+
+      window.stepVideoTourScene = function (idx) {
+        tourSceneIndex = idx % scenes.length;
+        renderScene();
+      };
+
+      window.toggleVideoTourPlay = function () {
+        tourPlaying = !tourPlaying;
+        const icon = document.getElementById('videoModalPlayIcon');
+        const txt = document.getElementById('videoModalPlayText');
+        if (icon) icon.className = tourPlaying ? 'fa-solid fa-pause' : 'fa-solid fa-play';
+        if (txt) txt.textContent = tourPlaying ? 'Đang phát' : 'Tạm dừng';
+      };
+    })();
+  </script>
+
 </div>

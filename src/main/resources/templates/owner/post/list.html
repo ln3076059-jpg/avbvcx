@@ -1,466 +1,254 @@
-<div th:fragment="content" class="space-y-6">
-  <!-- Header Section -->
-  <div class="flex justify-between items-center">
-    <div>
-      <h1 class="text-3xl font-bold text-gray-900 mb-2">Quản lý Bài Đăng</h1>
-      <p class="text-gray-600">
-        Quản lý hiển thị và nội dung bài đăng cho thuê nhà trọ của bạn
-      </p>
-    </div>
-    <div>
-      <a
-        th:if="${hasAvailableProperties}"
-        href="/owner/posts/create"
-        class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors"
-      >
-        <i class="fas fa-plus mr-2"></i>
-        Tạo bài đăng mới
-      </a>
-      <div
-        th:unless="${hasAvailableProperties}"
-        class="flex items-center gap-3"
-      >
-        <span class="text-sm text-gray-500 italic">
-          <i class="fas fa-info-circle text-yellow-500 mr-1"></i>
-          Cần có nhà trọ trống để tạo bài đăng
-        </span>
-        <a
-          href="/owner/properties/create"
-          class="inline-flex items-center px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white font-medium rounded-lg transition-colors"
-        >
-          <i class="fas fa-building mr-2"></i>
-          Thêm nhà trọ
-        </a>
-      </div>
-    </div>
-  </div>
+<div class="container-fluid" th:fragment="content">
 
-  <!-- Success/Error Messages -->
-  <div
-    th:if="${successMessage}"
-    class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4"
-  >
-    <span th:text="${successMessage}"></span>
-  </div>
-  <div
-    th:if="${errorMessage}"
-    class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4"
-  >
-    <span th:text="${errorMessage}"></span>
-  </div>
-
-  <!-- Posts Summary Stats -->
-  <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
-    <div class="bg-white rounded-lg shadow p-4">
-      <div class="flex items-center justify-between">
+    <!-- Page Heading -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
         <div>
-          <p class="text-gray-500 text-xs">Tổng bài đăng</p>
-          <p
-            class="text-2xl font-bold text-gray-900"
-            th:text="${allPosts.size()}"
-          >
-            0
-          </p>
+            <h1 class="h3 mb-0 text-gray-800 font-weight-bold">
+                <i class="fas fa-bullhorn text-success mr-2"></i>Quản Lý Tin Đăng Cho Thuê
+            </h1>
+            <p class="text-muted small mb-0 mt-1">Quản lý nội dung, hình ảnh, thời hạn hiển thị và lượt tiếp cận của các bài đăng tìm khách thuê</p>
         </div>
-        <div class="bg-blue-100 rounded-full p-3">
-          <i class="fas fa-file-alt text-blue-600 text-xl"></i>
+        <div class="d-flex align-items-center">
+            <a th:if="${hasAvailableProperties}" th:href="@{/owner/posts/create}" class="btn btn-sm btn-success shadow-sm font-weight-bold">
+                <i class="fas fa-plus fa-sm text-white-50 mr-1"></i>Tạo Bài Đăng Mới
+            </a>
+            <a th:unless="${hasAvailableProperties}" th:href="@{/owner/properties/create}" class="btn btn-sm btn-warning shadow-sm font-weight-bold">
+                <i class="fas fa-building fa-sm mr-1"></i>Thêm Cơ Sở Trước Khi Đăng Tin
+            </a>
         </div>
-      </div>
     </div>
 
-    <div class="bg-white rounded-lg shadow p-4">
-      <div class="flex items-center justify-between">
-        <div>
-          <p class="text-gray-500 text-xs">Chờ duyệt</p>
-          <p
-            class="text-2xl font-bold text-yellow-600"
-            th:text="${(postsByStatus['PENDING_APPROVAL'] != null ? postsByStatus['PENDING_APPROVAL'].size() : 0) + (postsByStatus['PENDING_REVISION'] != null ? postsByStatus['PENDING_REVISION'].size() : 0)}"
-          >
-            0
-          </p>
-        </div>
-        <div class="bg-yellow-100 rounded-full p-3">
-          <i class="fas fa-hourglass-half text-yellow-600 text-xl"></i>
-        </div>
-      </div>
-    </div>
-
-    <div class="bg-white rounded-lg shadow p-4">
-      <div class="flex items-center justify-between">
-        <div>
-          <p class="text-gray-500 text-xs">Đang hiển thị</p>
-          <p
-            class="text-2xl font-bold text-green-600"
-            th:text="${postsByStatus['ACTIVE'] != null ? postsByStatus['ACTIVE'].size() : 0}"
-          >
-            0
-          </p>
-        </div>
-        <div class="bg-green-100 rounded-full p-3">
-          <i class="fas fa-check-circle text-green-600 text-xl"></i>
-        </div>
-      </div>
-    </div>
-
-    <div class="bg-white rounded-lg shadow p-4">
-      <div class="flex items-center justify-between">
-        <div>
-          <p class="text-gray-500 text-xs">Đã ẩn</p>
-          <p
-            class="text-2xl font-bold text-gray-600"
-            th:text="${postsByStatus['HIDDEN'] != null ? postsByStatus['HIDDEN'].size() : 0}"
-          >
-            0
-          </p>
-        </div>
-        <div class="bg-gray-100 rounded-full p-3">
-          <i class="fas fa-eye-slash text-gray-600 text-xl"></i>
-        </div>
-      </div>
-    </div>
-
-    <div class="bg-white rounded-lg shadow p-4">
-      <div class="flex items-center justify-between">
-        <div>
-          <p class="text-gray-500 text-xs">Hết hạn</p>
-          <p
-            class="text-2xl font-bold text-red-600"
-            th:text="${postsByStatus['EXPIRED'] != null ? postsByStatus['EXPIRED'].size() : 0}"
-          >
-            0
-          </p>
-        </div>
-        <div class="bg-red-100 rounded-full p-3">
-          <i class="fas fa-clock text-red-600 text-xl"></i>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Posts List -->
-  <div class="bg-white rounded-lg shadow">
-    <div class="px-6 py-4 border-b border-gray-200">
-      <h2 class="text-xl font-semibold text-gray-900">Danh sách bài đăng</h2>
-    </div>
-
-    <div class="overflow-x-auto">
-      <table class="min-w-full divide-y divide-gray-200">
-        <thead class="bg-gray-50">
-          <tr>
-            <th
-              class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-            >
-              Bài đăng
-            </th>
-            <th
-              class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-            >
-              Trạng thái
-            </th>
-            <th
-              class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-            >
-              Hiển thị
-            </th>
-            <th
-              class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-            >
-              Lượt xem
-            </th>
-            <th
-              class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-            >
-              Hết hạn
-            </th>
-            <th
-              class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-            >
-              Hành động
-            </th>
-          </tr>
-        </thead>
-        <tbody class="bg-white divide-y divide-gray-200">
-          <tr
-            th:each="post : ${allPosts}"
-            th:classappend="${post.isExpired ? 'bg-red-50' : ''}"
-          >
-            <!-- Post Info -->
-            <td class="px-6 py-4">
-              <div class="flex items-center">
-                <img
-                  th:src="${post.imageUrl}"
-                  class="h-16 w-16 rounded object-cover"
-                  alt="Property Image"
-                />
-                <div class="ml-4">
-                  <p class="font-medium text-gray-900" th:text="${post.title}">
-                    Nhà trọ ABC
-                  </p>
-                  <p
-                    class="text-sm text-gray-500"
-                    th:text="${post.propertyName}"
-                  >
-                    Property Name
-                  </p>
-                  <p
-                    class="text-xs text-blue-600"
-                    th:text="'/properties/' + ${post.slug}"
-                  >
-                    /properties/slug
-                  </p>
+    <!-- Quick Stats Cards (4 Cards) -->
+    <div class="row">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Tổng Số Tin Đăng</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800" th:text="${allPosts != null ? allPosts.size() : 0}">0</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-newspaper fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
                 </div>
-              </div>
-            </td>
-
-            <!-- Status -->
-            <td class="px-6 py-4">
-              <span
-                th:if="${post.status.name() == 'PENDING_APPROVAL'}"
-                class="px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800"
-              >
-                <i class="fas fa-clock"></i> Chờ duyệt
-              </span>
-              <span
-                th:if="${post.status.name() == 'REJECTED'}"
-                class="px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800"
-              >
-                <i class="fas fa-times-circle"></i> Từ chối
-              </span>
-              <span
-                th:if="${post.status.name() == 'ACTIVE'}"
-                class="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800"
-              >
-                <i class="fas fa-check-circle"></i> ACTIVE
-              </span>
-              <span
-                th:if="${post.status.name() == 'HIDDEN'}"
-                class="px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800"
-              >
-                <i class="fas fa-eye-slash"></i> HIDDEN
-              </span>
-              <span
-                th:if="${post.status.name() == 'EXPIRED'}"
-                class="px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800"
-              >
-                <i class="fas fa-clock"></i> EXPIRED
-              </span>
-              <span
-                th:if="${post.status.name() == 'DRAFT'}"
-                class="px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800"
-              >
-                <i class="fas fa-edit"></i> DRAFT
-              </span>
-              <span
-                th:if="${post.status.name() == 'PENDING_REVISION'}"
-                class="px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800"
-              >
-                <i class="fas fa-sync-alt"></i> Chờ duyệt lại
-              </span>
-              <!-- Rejection reason tooltip for REJECTED posts -->
-              <div
-                th:if="${post.status.name() == 'REJECTED' and post.rejectionReason != null}"
-                class="mt-1 text-xs text-red-600 max-w-xs"
-              >
-                <i class="fas fa-info-circle"></i>
-                <span th:text="${post.rejectionReason}"></span>
-              </div>
-            </td>
-
-            <!-- Visibility -->
-            <td class="px-6 py-4">
-              <span
-                th:if="${post.status.name() == 'PENDING_APPROVAL'}"
-                class="text-yellow-600 font-medium"
-              >
-                <i class="fas fa-hourglass-half"></i> Chờ duyệt
-              </span>
-              <span
-                th:if="${post.status.name() == 'REJECTED'}"
-                class="text-red-500 font-medium"
-              >
-                <i class="fas fa-ban"></i> Bị từ chối
-              </span>
-              <span
-                th:if="${post.status.name() == 'PENDING_REVISION'}"
-                class="text-blue-600 font-medium"
-              >
-                <i class="fas fa-sync-alt"></i> Chờ duyệt lại
-              </span>
-              <span th:if="${post.isActive}" class="text-green-600 font-medium">
-                <i class="fas fa-eye"></i> Đang hiển thị
-              </span>
-              <span
-                th:if="${!post.isActive and post.status.name() != 'PENDING_APPROVAL' and post.status.name() != 'REJECTED' and post.status.name() != 'PENDING_REVISION'}"
-                class="text-gray-500"
-              >
-                <i class="fas fa-eye-slash"></i> Không hiển thị
-              </span>
-            </td>
-
-            <!-- View Count -->
-            <td class="px-6 py-4">
-              <p class="text-gray-900 font-medium" th:text="${post.viewCount}">
-                0
-              </p>
-            </td>
-
-            <!-- Expiry -->
-            <td class="px-6 py-4">
-              <div th:if="${post.status.name() == 'PENDING_APPROVAL'}">
-                <p class="text-sm text-yellow-600 font-medium">Chưa bắt đầu</p>
-                <p class="text-xs text-gray-400">Tính từ khi được duyệt</p>
-              </div>
-              <div th:if="${post.status.name() == 'PENDING_REVISION'}">
-                <p class="text-sm text-blue-600 font-medium">Đang tạm dừng</p>
-                <p
-                  class="text-xs text-gray-400"
-                  th:text="${post.daysRemaining > 0 ? post.daysRemaining + ' ngày được bảo lưu' : 'Hết hạn — sẽ được bù thêm'}"
-                ></p>
-              </div>
-              <div th:if="${post.status.name() == 'REJECTED'}">
-                <p class="text-sm text-red-500 font-medium">Không áp dụng</p>
-              </div>
-              <div
-                th:if="${post.postExpiredAt != null and post.daysRemaining > 0}"
-              >
-                <p
-                  class="text-sm font-medium text-gray-900"
-                  th:text="${post.daysRemaining} + ' ngày'"
-                >
-                  X ngày
-                </p>
-                <p
-                  class="text-xs text-gray-500"
-                  th:text="${post.formattedExpiry}"
-                >
-                  Date
-                </p>
-              </div>
-              <div
-                th:if="${post.postExpiredAt != null and post.daysRemaining <= 0}"
-              >
-                <p class="text-sm font-medium text-red-600">Đã hết hạn</p>
-                <p
-                  class="text-xs text-gray-500"
-                  th:text="${post.formattedExpiry}"
-                >
-                  Date
-                </p>
-              </div>
-            </td>
-
-            <!-- Actions -->
-            <td class="px-6 py-4">
-              <div class="flex space-x-2">
-                <!-- Edit Button (for all statuses) -->
-                <a
-                  th:href="@{/owner/posts/{id}/edit(id=${post.postId})}"
-                  class="text-blue-600 hover:text-blue-800"
-                  title="Chỉnh sửa nội dung"
-                >
-                  <i class="fas fa-edit"></i>
-                </a>
-
-                <!-- Resubmit Button (REJECTED only) -->
-                <form
-                  th:if="${post.status.name() == 'REJECTED'}"
-                  th:action="@{/owner/posts/{id}/resubmit(id=${post.postId})}"
-                  method="post"
-                  class="inline"
-                >
-                  <button
-                    type="submit"
-                    class="text-yellow-600 hover:text-yellow-800"
-                    title="Gửi lại để duyệt"
-                  >
-                    <i class="fas fa-paper-plane"></i>
-                  </button>
-                </form>
-
-                <!-- Hide/Show Button (ACTIVE/HIDDEN only) -->
-                <form
-                  th:if="${post.status.name() == 'ACTIVE'}"
-                  th:action="@{/owner/posts/{id}/hide(id=${post.postId})}"
-                  method="post"
-                  class="inline"
-                >
-                  <button
-                    type="submit"
-                    class="text-gray-600 hover:text-gray-800"
-                    title="Ẩn bài đăng"
-                  >
-                    <i class="fas fa-eye-slash"></i>
-                  </button>
-                </form>
-
-                <form
-                  th:if="${post.status.name() == 'HIDDEN'}"
-                  th:action="@{/owner/posts/{id}/show(id=${post.postId})}"
-                  method="post"
-                  class="inline"
-                >
-                  <button
-                    type="submit"
-                    class="text-green-600 hover:text-green-800"
-                    title="Hiển thị bài đăng"
-                  >
-                    <i class="fas fa-eye"></i>
-                  </button>
-                </form>
-
-                <!-- Renew Button (ACTIVE/EXPIRED only) -->
-                <a
-                  th:if="${post.status.name() == 'ACTIVE' or post.status.name() == 'EXPIRED'}"
-                  th:href="@{/owner/posts/{id}/renew(id=${post.postId})}"
-                  class="text-orange-600 hover:text-orange-800"
-                  title="Gia hạn"
-                >
-                  <i class="fas fa-redo"></i>
-                </a>
-
-                <!-- Analytics Button (ACTIVE/EXPIRED only) -->
-                <a
-                  th:if="${post.status.name() == 'ACTIVE' or post.status.name() == 'EXPIRED'}"
-                  th:href="@{/owner/posts/{id}/analytics(id=${post.postId})}"
-                  class="text-purple-600 hover:text-purple-800"
-                  title="Thống kê"
-                >
-                  <i class="fas fa-chart-line"></i>
-                </a>
-              </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-
-      <!-- Empty State -->
-      <div th:if="${allPosts.isEmpty()}" class="text-center py-12">
-        <i class="fas fa-file-alt text-gray-400 text-6xl mb-4"></i>
-        <p class="text-gray-500 text-lg mb-2">Chưa có bài đăng nào</p>
-        <div th:if="${hasAvailableProperties}">
-          <p class="text-gray-400 text-sm mb-4">
-            Bạn có nhà trọ chưa có bài đăng. Hãy tạo bài đăng để hiển thị trên
-            marketplace.
-          </p>
-          <a
-            href="/owner/posts/create"
-            class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors"
-          >
-            <i class="fas fa-plus mr-2"></i> Tạo bài đăng đầu tiên
-          </a>
+            </div>
         </div>
-        <div th:unless="${hasAvailableProperties}">
-          <p class="text-gray-400 text-sm mb-4">
-            Bạn cần thêm nhà trọ trước khi tạo bài đăng.
-          </p>
-          <a
-            href="/owner/properties/create"
-            class="inline-flex items-center px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white font-medium rounded-lg transition-colors"
-          >
-            <i class="fas fa-building mr-2"></i> Thêm nhà trọ
-          </a>
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Đang Hiển Thị</div>
+                            <div class="h5 mb-0 font-weight-bold text-success" 
+                                 th:text="${postsByStatus != null and postsByStatus['ACTIVE'] != null ? postsByStatus['ACTIVE'].size() : 0}">0</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-check-circle fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-      </div>
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Chờ Phê Duyệt</div>
+                            <div class="h5 mb-0 font-weight-bold text-warning"
+                                 th:text="${postsByStatus != null and postsByStatus['PENDING_APPROVAL'] != null ? postsByStatus['PENDING_APPROVAL'].size() : 0}">0</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-hourglass-half fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-danger shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">Tin Hết Hạn</div>
+                            <div class="h5 mb-0 font-weight-bold text-danger"
+                                 th:text="${postsByStatus != null and postsByStatus['EXPIRED'] != null ? postsByStatus['EXPIRED'].size() : 0}">0</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-clock fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-  </div>
+
+    <!-- Search & Filter Card -->
+    <div class="search-container border-left-success">
+        <div class="row align-items-center">
+            <div class="col-md-5 mb-2 mb-md-0">
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text bg-light border-0"><i class="fas fa-search text-gray-400"></i></span>
+                    </div>
+                    <input type="text" id="ownerPostSearch" class="form-control border-0 bg-light small" 
+                           placeholder="Tìm nhanh theo tiêu đề tin đăng, tên cơ sở..." onkeyup="filterOwnerPosts()">
+                </div>
+            </div>
+            <div class="col-md-4 mb-2 mb-md-0">
+                <select id="ownerPostStatusFilter" class="form-control custom-select" onchange="filterOwnerPosts()">
+                    <option value="ALL">-- Tất cả trạng thái --</option>
+                    <option value="ACTIVE">Đang hiển thị (ACTIVE)</option>
+                    <option value="PENDING_APPROVAL">Chờ phê duyệt (PENDING_APPROVAL)</option>
+                    <option value="PENDING_REVISION">Chờ duyệt sửa (PENDING_REVISION)</option>
+                    <option value="HIDDEN">Đang ẩn (HIDDEN)</option>
+                    <option value="EXPIRED">Đã hết hạn (EXPIRED)</option>
+                    <option value="REJECTED">Bị từ chối (REJECTED)</option>
+                </select>
+            </div>
+            <div class="col-md-3 text-md-right">
+                <span class="small text-gray-600 font-weight-bold">
+                    Hiển thị <span id="postFilteredCount" class="text-success font-weight-bold" th:text="${allPosts != null ? allPosts.size() : 0}">0</span> bài đăng
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- DataTales Card -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 bg-white border-bottom-success d-flex justify-content-between align-items-center">
+            <h6 class="m-0 font-weight-bold text-success">
+                <i class="fas fa-list-alt mr-1"></i>Danh Sách Tin Đăng
+            </h6>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover mb-0" id="ownerPostsTable" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th style="width: 30%;">Tiêu Đề & Hình Ảnh Tin</th>
+                            <th style="width: 20%;">Cơ Sở Nhà Trọ & Giá Thuê</th>
+                            <th style="width: 15%;">Lượt Xem & Hạn Hiển Thị</th>
+                            <th style="width: 15%;">Trạng Thái Hoạt Động</th>
+                            <th style="width: 20%;" class="text-center">Chức Năng</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:if="${allPosts == null or #lists.isEmpty(allPosts)}">
+                            <td colspan="5" class="text-center py-5 text-muted">
+                                <i class="fas fa-bullhorn fa-3x mb-3 text-gray-300 d-block"></i>
+                                Bạn chưa có bài đăng nào. Hãy nhấn <strong>"Tạo Bài Đăng Mới"</strong> để quảng bá phòng trọ đến khách thuê.
+                            </td>
+                        </tr>
+                        <tr th:each="post : ${allPosts}" class="owner-post-row"
+                            th:data-title="${post.title != null ? post.title.toLowerCase() : ''}"
+                            th:data-prop="${post.propertyName != null ? post.propertyName.toLowerCase() : ''}"
+                            th:data-status="${post.status != null ? post.status.name() : ''}">
+                            
+                            <!-- Cột 1: Tiêu đề & Ảnh -->
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <img th:src="${post.imageUrl != null and !post.imageUrl.contains('1502005229762') ? post.imageUrl : '/images/rooms/room-' + ((post.postId % 12) + 1) + '.jpg'}" 
+                                         onerror="this.onerror=null;this.src='/images/rooms/room-1.jpg';"
+                                         alt="Ảnh bài đăng" class="rounded mr-3 border shadow-xs" 
+                                         style="width: 60px; height: 60px; object-fit: cover;">
+                                    <div>
+                                        <a th:href="@{|/properties/${post.slug}|}" target="_blank" class="font-weight-bold text-primary text-decoration-none" th:text="${post.title}">
+                                            Phòng trọ cao cấp trung tâm
+                                        </a>
+                                        <div class="small text-muted font-mono mt-1" th:text="'ID: #' + ${post.postId}">#1</div>
+                                    </div>
+                                </div>
+                            </td>
+
+                            <!-- Cột 2: Cơ sở & Địa chỉ -->
+                            <td>
+                                <div class="font-weight-bold text-dark" th:text="${post.propertyName}">Nhà Trọ Xanh</div>
+                                <div class="small text-muted mt-1" th:if="${post.addressNumber != null}">
+                                    <i class="fas fa-map-marker-alt text-danger mr-1"></i>
+                                    <span th:text="${post.addressNumber}">123 Đường ABC</span>
+                                </div>
+                            </td>
+
+                            <!-- Cột 3: Lượt xem & Hạn -->
+                            <td>
+                                <div class="small text-dark">
+                                    <i class="far fa-eye text-info mr-1"></i><strong th:text="${post.viewCount != null ? post.viewCount : 0}">0</strong> lượt xem
+                                </div>
+                                <div class="small text-muted mt-1" th:if="${post.formattedExpiry != null}">
+                                    <i class="far fa-calendar-alt mr-1"></i>Hạn: <span th:text="${post.formattedExpiry}">01/01/2026</span>
+                                </div>
+                            </td>
+
+                            <!-- Cột 4: Trạng thái -->
+                            <td>
+                                <span class="badge" 
+                                      th:classappend="${post.status != null and post.status.name() == 'ACTIVE' ? 'badge-success' : (post.status != null and (post.status.name() == 'PENDING_APPROVAL' or post.status.name() == 'PENDING_REVISION') ? 'badge-warning' : (post.status != null and post.status.name() == 'REJECTED' ? 'badge-danger' : 'badge-secondary'))}" 
+                                      th:text="${post.status != null ? post.status.displayName : 'Chờ duyệt'}">
+                                    Đang hiển thị
+                                </span>
+                                <div class="small text-danger mt-1" th:if="${post.expired}">
+                                    <i class="fas fa-exclamation-circle mr-1"></i>Hết hạn gói
+                                </div>
+                            </td>
+
+                            <!-- Cột 5: Chức Năng (Thao Tác) -->
+                            <td class="text-center action-btns">
+                                <a th:href="@{|/properties/${post.slug}|}" target="_blank" class="btn btn-info btn-sm shadow-sm" title="Xem bài đăng thực tế">
+                                    <i class="fas fa-external-link-alt mr-1"></i>Xem
+                                </a>
+                                <a th:href="@{|/owner/posts/${post.postId}/analytics|}" class="btn btn-info btn-sm shadow-sm" title="Thống kê & Ẩn/Hiện">
+                                    <i class="fas fa-chart-line"></i>
+                                </a>
+                                <a th:href="@{|/owner/posts/${post.postId}/edit|}" class="btn btn-primary btn-sm shadow-sm" title="Chỉnh sửa nội dung">
+                                    <i class="fas fa-edit mr-1"></i>Sửa
+                                </a>
+                                <a th:href="@{|/owner/posts/${post.postId}/renew|}" class="btn btn-warning btn-sm shadow-sm font-weight-bold" title="Gia hạn hiển thị">
+                                    <i class="fas fa-sync-alt mr-1"></i>Gia Hạn
+                                </a>
+                                <form th:if="${post.status != null and post.status.name() == 'ACTIVE'}"
+                                      th:action="@{|/owner/posts/${post.postId}/hide|}" method="post" class="d-inline"
+                                      data-confirm="Bạn có chắc muốn tạm ẩn bài đăng này khỏi sàn giao dịch?">
+                                    <button type="submit" class="btn btn-secondary btn-sm shadow-sm" title="Tạm ẩn bài đăng"
+                                            data-confirm="Bạn có chắc muốn tạm ẩn bài đăng này khỏi sàn giao dịch?">
+                                        <i class="fas fa-eye-slash"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
 </div>
+
+<script>
+function filterOwnerPosts() {
+    var search = document.getElementById('ownerPostSearch').value.toLowerCase().trim();
+    var status = document.getElementById('ownerPostStatusFilter').value;
+    var rows = document.querySelectorAll('.owner-post-row');
+    var count = 0;
+
+    rows.forEach(function(row) {
+        var title = row.getAttribute('data-title') || '';
+        var prop = row.getAttribute('data-prop') || '';
+        var rowStatus = row.getAttribute('data-status') || '';
+
+        var matchSearch = !search || title.includes(search) || prop.includes(search);
+        var matchStatus = (status === 'ALL') || (rowStatus === status);
+
+        if (matchSearch && matchStatus) {
+            row.style.display = '';
+            count++;
+        } else {
+            row.style.display = 'none';
+        }
+    });
+
+    document.getElementById('postFilteredCount').textContent = count;
+}
+</script>

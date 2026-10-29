@@ -1,0 +1,60 @@
+<div th:fragment="content" class="container-fluid">
+
+    <!-- Page Heading -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <div>
+            <h1 class="h3 mb-1 text-gray-800 font-weight-bold">Thêm Danh Mục Bất Động Sản Mới</h1>
+            <p class="text-muted small mb-0">Tạo loại hình cho thuê mới (ví dụ: Nhà trọ, Homestay, Ký túc xá, Chung cư mini).</p>
+        </div>
+        <a th:href="@{/admin/categories}" class="btn btn-secondary btn-icon-split shadow-sm">
+            <span class="icon text-white-50">
+                <i class="fas fa-arrow-left"></i>
+            </span>
+            <span class="text font-weight-bold">Quay Lại Danh Sách</span>
+        </a>
+    </div>
+
+    <!-- Form Card -->
+    <div class="row">
+        <div class="col-lg-6 mx-auto">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 bg-white border-bottom-primary">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-plus-circle mr-1"></i> Thông Tin Danh Mục
+                    </h6>
+                </div>
+                <div class="card-body p-4">
+                    <form th:action="@{/admin/categories/create}" method="post">
+                        
+                        <div class="form-group">
+                            <label for="name" class="font-weight-bold text-gray-700">
+                                Tên loại hình / Danh mục <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text"><i class="fas fa-tag"></i></span>
+                                </div>
+                                <input type="text" class="form-control" id="name" name="name" required 
+                                       placeholder="Ví dụ: Căn hộ studio, Ký túc xá cao cấp...">
+                            </div>
+                            <small class="form-text text-muted">Tên danh mục xuất hiện trên bộ lọc trang chủ và danh sách đăng tin.</small>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <div class="d-flex justify-content-end">
+                            <a th:href="@{/admin/categories}" class="btn btn-secondary mr-2">
+                                <i class="fas fa-times mr-1"></i> Hủy Bỏ
+                            </a>
+                            <button type="submit" class="btn btn-primary font-weight-bold">
+                                <i class="fas fa-save mr-1"></i> Thêm Danh Mục
+                            </button>
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>

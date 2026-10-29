@@ -1,0 +1,226 @@
+<div th:fragment="content" class="container-fluid">
+
+    <!-- Page Heading -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <div>
+            <h1 class="h3 mb-1 text-gray-800 font-weight-bold">Quản Lý Tin Đăng Cho Thuê</h1>
+            <p class="text-muted small mb-0">Kiểm duyệt, theo dõi trạng thái hiển thị, lượt xem và thời hạn bài đăng trên sàn giao dịch Trọ Mới.</p>
+        </div>
+        <div>
+            <a th:href="@{/admin/posts/create}" class="btn btn-primary btn-icon-split shadow-sm mr-2">
+                <span class="icon text-white-50">
+                    <i class="fas fa-plus-circle"></i>
+                </span>
+                <span class="text font-weight-bold">Đăng Tin Mới</span>
+            </a>
+            <span class="badge badge-primary px-3 py-2 font-weight-bold" th:text="${posts != null ? posts.size() + ' bài đăng' : '0'}">0 bài đăng</span>
+        </div>
+    </div>
+
+    <!-- 3-Card KPI Summary Row -->
+    <div class="row mb-4">
+        <div class="col-md-4 mb-3 mb-md-0">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body py-2">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Tổng số bài đăng</div>
+                            <div class="h4 mb-0 font-weight-bold text-gray-800" th:text="${posts != null ? posts.size() : 0}">0</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-newspaper fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3 mb-md-0">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body py-2">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Đang hiển thị</div>
+                            <div class="h4 mb-0 font-weight-bold text-gray-800"
+                                 th:text="${posts != null ? posts.?[status != null and status.name() == 'ACTIVE'].size() : 0}">0</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-check-circle fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body py-2">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Chờ phê duyệt</div>
+                            <div class="h4 mb-0 font-weight-bold text-gray-800"
+                                 th:text="${posts != null ? posts.?[status != null and (status.name() == 'PENDING_APPROVAL' or status.name() == 'PENDING_REVISION')].size() : 0}">0</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-hourglass-half fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search & Filter Card -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 bg-white">
+            <h6 class="m-0 font-weight-bold text-primary">
+                <i class="fas fa-filter mr-1"></i> Bộ Lọc & Tìm Kiếm Bài Đăng
+            </h6>
+        </div>
+        <div class="card-body">
+            <form th:action="@{/admin/posts}" method="get" class="form-row align-items-center">
+                <div class="col-lg-6 col-md-6 mb-2">
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <div class="input-group-text bg-light"><i class="fas fa-search text-gray-400"></i></div>
+                        </div>
+                        <input type="text" class="form-control" id="keyword" name="keyword" 
+                               th:value="${keyword}" placeholder="Nhập tiêu đề tin đăng, tên cơ sở trọ...">
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-4 mb-2">
+                    <select class="form-control" id="status" name="status">
+                        <option value="">-- Tất cả trạng thái --</option>
+                        <option value="ACTIVE" th:selected="${statusFilter == 'ACTIVE'}">Đang hiển thị (ACTIVE)</option>
+                        <option value="PENDING_APPROVAL" th:selected="${statusFilter == 'PENDING_APPROVAL'}">Chờ phê duyệt (PENDING_APPROVAL)</option>
+                        <option value="EXPIRED" th:selected="${statusFilter == 'EXPIRED'}">Đã hết hạn (EXPIRED)</option>
+                        <option value="REJECTED" th:selected="${statusFilter == 'REJECTED'}">Bị từ chối (REJECTED)</option>
+                        <option value="HIDDEN" th:selected="${statusFilter == 'HIDDEN'}">Đang ẩn (HIDDEN)</option>
+                    </select>
+                </div>
+                <div class="col-lg-2 col-md-2 mb-2">
+                    <button type="submit" class="btn btn-primary btn-block font-weight-bold">
+                        <i class="fas fa-search mr-1"></i> Lọc Tin
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- DataTales Example (Strictly 5 Columns) -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 d-flex align-items-center justify-content-between">
+            <h6 class="m-0 font-weight-bold text-primary">
+                <i class="fas fa-bullhorn mr-1"></i> Danh Sách Bài Đăng Cho Thuê
+            </h6>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover" id="dataTable" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th style="width: 70px;" class="text-center">Mã Tin</th>
+                            <th>Tiêu Đề Tin Rao & Slug</th>
+                            <th>Cơ Sở Trọ & Chủ Nhà</th>
+                            <th>Trạng Thái & Lượt Xem</th>
+                            <th style="width: 180px;" class="text-center">Chức Năng</th>
+                        </tr>
+                    </thead>
+                    <tfoot>
+                        <tr>
+                            <th class="text-center">Mã Tin</th>
+                            <th>Tiêu Đề Tin Rao & Slug</th>
+                            <th>Cơ Sở Trọ & Chủ Nhà</th>
+                            <th>Trạng Thái & Lượt Xem</th>
+                            <th class="text-center">Chức Năng</th>
+                        </tr>
+                    </tfoot>
+                    <tbody>
+                        <tr th:each="post : ${posts}">
+                            <!-- Cột 1: Mã Tin -->
+                            <td class="text-center font-weight-bold text-gray-700" th:text="${post.id}">1</td>
+
+                            <!-- Cột 2: Tiêu Đề Tin Rao & Slug -->
+                            <td>
+                                <a th:href="@{'/admin/posts/' + ${post.id}}" class="font-weight-bold text-primary text-decoration-none">
+                                    <span th:text="${post.title}">Phòng trọ cao cấp Cầu Giấy đầy đủ đồ đạc</span>
+                                </a>
+                                <div class="small text-muted mt-1">
+                                    <i class="fas fa-link fa-xs mr-1 text-gray-400"></i>
+                                    <code class="text-dark bg-light px-1 py-0 rounded" th:text="${post.slug}">phong-tro-cau-giay</code>
+                                </div>
+                                <div class="small text-gray-500 mt-1" th:if="${post.createdAt != null}">
+                                    <i class="far fa-clock mr-1"></i>
+                                    <span th:text="${#temporals.format(post.createdAt, 'dd/MM/yyyy HH:mm')}">01/01/2026</span>
+                                </div>
+                            </td>
+
+                            <!-- Cột 3: Cơ Sở Trọ & Chủ Nhà -->
+                            <td>
+                                <div class="font-weight-bold text-dark" 
+                                     th:text="${post.property != null ? post.property.name : 'N/A'}">Nhà trọ A</div>
+                                <div class="small text-muted" th:if="${post.property != null and post.property.owner != null}">
+                                    <i class="fas fa-user-circle mr-1 text-gray-400"></i>
+                                    <span th:text="${post.property.owner.fullName != null ? post.property.owner.fullName : post.property.owner.username}">Chủ trọ</span>
+                                </div>
+                            </td>
+
+                            <!-- Cột 4: Trạng Thái & Lượt Xem -->
+                            <td>
+                                <div class="mb-1">
+                                    <span class="badge" 
+                                          th:classappend="${post.status != null and post.status.name() == 'ACTIVE' ? 'badge-success' : 
+                                                           (post.status != null and post.status.name() == 'PENDING_APPROVAL' ? 'badge-warning' : 
+                                                           (post.status != null and post.status.name() == 'REJECTED' ? 'badge-danger' : 'badge-secondary'))}"
+                                          th:text="${post.status != null ? post.status.displayName : 'N/A'}">Đang hiển thị</span>
+                                </div>
+                                <div class="small text-gray-600">
+                                    <i class="fas fa-eye text-primary mr-1"></i>
+                                    <span class="font-weight-bold" th:text="${post.viewCount}">0</span> lượt xem
+                                </div>
+                            </td>
+
+                            <!-- Cột 5: Chức Năng -->
+                            <td class="text-center action-btns">
+                                <a th:href="@{'/admin/posts/' + ${post.id}}" 
+                                   class="btn btn-primary btn-sm btn-circle" title="Xem chi tiết">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+
+                                <form th:if="${post.status != null and post.status.name() != 'ACTIVE'}" 
+                                      th:action="@{'/admin/posts/' + ${post.id} + '/approve'}" method="post" class="d-inline"
+                                      data-confirm="Bạn có đồng ý phê duyệt bài đăng này không?">
+                                    <button type="submit" class="btn btn-success btn-sm btn-circle" title="Phê duyệt tin hiển thị"
+                                            data-confirm="Bạn có đồng ý phê duyệt bài đăng này không?">
+                                        <i class="fas fa-check"></i>
+                                    </button>
+                                </form>
+
+                                <form th:if="${post.status != null and post.status.name() == 'ACTIVE'}" 
+                                      th:action="@{'/admin/posts/' + ${post.id} + '/reject'}" method="post" class="d-inline"
+                                      data-confirm="Bạn có muốn hạ bài đăng này khỏi sàn giao dịch không?">
+                                    <button type="submit" class="btn btn-warning btn-sm btn-circle" title="Hạ bài đăng"
+                                            data-confirm="Bạn có muốn hạ bài đăng này khỏi sàn giao dịch không?">
+                                        <i class="fas fa-eye-slash"></i>
+                                    </button>
+                                </form>
+
+                                <a th:href="@{'/admin/posts/' + ${post.id} + '/edit'}" 
+                                   class="btn btn-info btn-sm btn-circle" title="Chỉnh sửa bài đăng">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+
+                                <form th:action="@{'/admin/posts/' + ${post.id} + '/delete'}" method="post" class="d-inline"
+                                      data-confirm="Bạn có chắc chắn muốn xóa bài đăng này không?">
+                                    <button type="submit" class="btn btn-danger btn-sm btn-circle" title="Xóa tin rao"
+                                            data-confirm="Bạn có chắc chắn muốn xóa bài đăng này không?">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</div>

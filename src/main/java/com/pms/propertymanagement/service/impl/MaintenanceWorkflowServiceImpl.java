@@ -48,8 +48,8 @@ public class MaintenanceWorkflowServiceImpl implements MaintenanceWorkflowServic
     @Transactional
     public MaintenanceRequest assignRequest(Long id, User owner, Long staffId) {
         MaintenanceRequest req = getRequestDetailForOwner(id, owner);
-        if (req.getStatus() != MaintenanceStatus.PENDING) {
-            throw new IllegalStateException("Chỉ phân công khi trạng thái là PENDING");
+        if (req.getStatus() != MaintenanceStatus.PENDING && req.getStatus() != MaintenanceStatus.REOPENED) {
+            throw new IllegalStateException("Chỉ phân công khi trạng thái là PENDING hoặc REOPENED");
         }
         if (staffId == null) {
             throw new IllegalArgumentException("Vui lòng chọn nhân viên");
@@ -58,7 +58,10 @@ public class MaintenanceWorkflowServiceImpl implements MaintenanceWorkflowServic
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy nhân viên"));
         boolean isStaff = staff.getRoles().stream().anyMatch(r -> "STAFF".equals(r.getName()));
         if (!isStaff) {
-            throw new IllegalArgumentException("Người được chọn không phải nhân viên");
+            throw new IllegalArgumentException("Người được chọn không phải nhân viên kỹ thuật");
+        }
+        if (!staff.isActive()) {
+            throw new IllegalStateException("Tài khoản nhân viên kỹ thuật đang bị khóa, không thể phân công!");
         }
 
         req.setStaff(staff);
@@ -81,8 +84,8 @@ public class MaintenanceWorkflowServiceImpl implements MaintenanceWorkflowServic
     @Transactional
     public MaintenanceRequest rejectRequest(Long id, User owner, String reason) {
         MaintenanceRequest req = getRequestDetailForOwner(id, owner);
-        if (req.getStatus() != MaintenanceStatus.PENDING) {
-            throw new IllegalStateException("Chỉ từ chối khi trạng thái là PENDING");
+        if (req.getStatus() != MaintenanceStatus.PENDING && req.getStatus() != MaintenanceStatus.REOPENED) {
+            throw new IllegalStateException("Chỉ từ chối khi trạng thái là PENDING hoặc REOPENED");
         }
         if (!StringUtils.hasText(reason)) {
             throw new IllegalArgumentException("Vui lòng nhập lý do từ chối");
@@ -111,6 +114,10 @@ public class MaintenanceWorkflowServiceImpl implements MaintenanceWorkflowServic
         if (staff == null) {
             throw new ForbiddenException("Bạn chưa đăng nhập");
         }
+        boolean isAdmin = staff.getRoles() != null && staff.getRoles().stream().anyMatch(r -> r.getName().equals("ADMIN"));
+        if (isAdmin) {
+            return maintenanceRequestRepository.findAll(org.springframework.data.domain.Sort.by(org.springframework.data.domain.Sort.Direction.DESC, "createdAt"));
+        }
         return maintenanceRequestRepository.findByStaff_IdOrderByCreatedAtDesc(staff.getId());
     }
 
@@ -120,6 +127,11 @@ public class MaintenanceWorkflowServiceImpl implements MaintenanceWorkflowServic
         if (staff == null) {
             throw new ForbiddenException("Bạn chưa đăng nhập");
         }
+        boolean isAdmin = staff.getRoles() != null && staff.getRoles().stream().anyMatch(r -> r.getName().equals("ADMIN"));
+        if (isAdmin) {
+            return maintenanceRequestRepository.findById(id)
+                    .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy yêu cầu sửa chữa #" + id));
+        }
         return maintenanceRequestRepository.findByIdAndStaff_Id(id, staff.getId())
                 .orElseThrow(() -> new ForbiddenException("Bạn không có quyền truy cập yêu cầu này"));
     }
@@ -128,8 +140,8 @@ public class MaintenanceWorkflowServiceImpl implements MaintenanceWorkflowServic
     @Transactional
     public MaintenanceRequest startRequest(Long id, User staff) {
         MaintenanceRequest req = getRequestDetailForStaff(id, staff);
-        if (req.getStatus() != MaintenanceStatus.ASSIGNED) {
-            throw new IllegalStateException("Chỉ bắt đầu xử lý khi trạng thái là ASSIGNED");
+        if (req.getStatus() != MaintenanceStatus.ASSIGNED && req.getStatus() != MaintenanceStatus.REOPENED) {
+            throw new IllegalStateException("Chỉ bắt đầu xử lý khi trạng thái là ASSIGNED hoặc REOPENED");
         }
         req.setStatus(MaintenanceStatus.IN_PROGRESS);
         req.setStartedAt(LocalDateTime.now());

@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="Cổng Thông Tin Cư Dân & Khách Hàng - Trọ Mới">
+    <meta name="author" content="Trọ Mới Cư Dân">
+
+    <title th:text="${pageTitle != null ? pageTitle + ' - Trọ Mới Cư Dân' : 'Trọ Mới - Cổng Thông Tin Cư Dân'}">Trọ Mới - Cổng Thông Tin Cư Dân</title>
+
+    <!-- Custom fonts for SB Admin 2 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
+
+    <!-- SB Admin 2 Custom Styles -->
+    <link th:href="@{/sb-admin-2/css/sb-admin-2.min.css}" rel="stylesheet">
+
+    <!-- DataTables Bootstrap 4 Styles -->
+    <link th:href="@{/sb-admin-2/vendor/datatables/dataTables.bootstrap4.min.css}" rel="stylesheet">
+
+    <!-- Tailwind (without preflight) for any utility classes in sub-fragments -->
+    <script>
+        window.tailwind = { config: { corePlugins: { preflight: false } } };
+    </script>
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <style>
+        body {
+            font-family: 'Be Vietnam Pro', 'Nunito', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            color: #334155;
+            background-color: #f8fafc;
+        }
+        .collapse {
+            visibility: visible !important;
+        }
+        .action-btns .btn {
+            margin: 2px;
+        }
+
+        /* Senior UI/UX Rhino Modernization for Tenant Portal */
+        #accordionSidebar {
+            background: #161825 !important;
+            border-right: 1px solid #1e2438;
+        }
+        .sidebar-dark .sidebar-heading {
+            color: #94a3b8 !important;
+            font-weight: 700 !important;
+            font-size: 11px !important;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+        }
+        .sidebar-dark .nav-item .nav-link {
+            color: #cbd5e1 !important;
+            font-weight: 600;
+            font-size: 13.5px;
+            padding: 10px 16px;
+            margin: 3px 12px;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+        }
+        .sidebar-dark .nav-item .nav-link i {
+            color: #94a3b8 !important;
+            font-size: 14px;
+            margin-right: 10px;
+            transition: all 0.2s ease;
+        }
+        .sidebar-dark .nav-item .nav-link:hover {
+            background: rgba(255, 255, 255, 0.08) !important;
+            color: #ffffff !important;
+        }
+        .sidebar-dark .nav-item .nav-link:hover i {
+            color: #ea580c !important;
+        }
+        .sidebar-dark .nav-item.active .nav-link {
+            background: linear-gradient(135deg, #f97316 0%, #ea580c 100%) !important;
+            color: #ffffff !important;
+            font-weight: 700;
+            box-shadow: 0 4px 14px rgba(234, 88, 12, 0.35);
+        }
+        .sidebar-dark .nav-item.active .nav-link i {
+            color: #ffffff !important;
+        }
+
+        /* Buttons & Pills */
+        .btn-primary {
+            background: linear-gradient(135deg, #f97316 0%, #ea580c 100%) !important;
+            border-color: #ea580c !important;
+            color: #ffffff !important;
+            box-shadow: 0 4px 12px rgba(234, 88, 12, 0.25);
+            border-radius: 8px;
+            font-weight: 700;
+            transition: all 0.2s ease;
+        }
+        .btn-primary:hover {
+            background: #c2410c !important;
+            border-color: #c2410c !important;
+            color: #ffffff !important;
+            transform: translateY(-1px);
+        }
+        .btn-outline-primary {
+            color: #ea580c !important;
+            border: 1.5px solid #fdba74 !important;
+            background-color: transparent !important;
+            border-radius: 8px;
+            font-weight: 700;
+            transition: all 0.2s ease;
+        }
+        .btn-outline-primary:hover {
+            background-color: #fff7ed !important;
+            color: #c2410c !important;
+            border-color: #ea580c !important;
+        }
+        .btn-warning {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%) !important;
+            border-color: #d97706 !important;
+            color: #ffffff !important;
+            box-shadow: 0 4px 12px rgba(217, 119, 6, 0.25);
+            font-weight: 700;
+            border-radius: 8px;
+        }
+        .btn-warning:hover {
+            background: #b45309 !important;
+            color: #ffffff !important;
+        }
+
+        /* Badges */
+        .badge-warning {
+            background-color: #fef3c7 !important;
+            color: #9a3412 !important;
+            border: 1px solid #fde68a;
+            font-weight: 700;
+        }
+        .badge-primary {
+            background-color: #ea580c !important;
+            color: #ffffff !important;
+            font-weight: 700;
+        }
+        .text-primary {
+            color: #ea580c !important;
+        }
+        .border-left-primary {
+            border-left: 0.25rem solid #ea580c !important;
+        }
+        .border-left-info {
+            border-left: 0.25rem solid #0284c7 !important;
+        }
+        .border-left-danger {
+            border-left: 0.25rem solid #ef4444 !important;
+        }
+        .border-left-success {
+            border-left: 0.25rem solid #10b981 !important;
+        }
+
+        /* Modern Cards */
+        .card {
+            border-radius: 12px !important;
+            border: 1px solid #e2e8f0 !important;
+            box-shadow: 0 4px 18px rgba(15, 23, 42, 0.04) !important;
+        }
+        .card-header {
+            border-top-left-radius: 12px !important;
+            border-top-right-radius: 12px !important;
+            background-color: #ffffff !important;
+            border-bottom: 1px solid #f1f5f9 !important;
+        }
+
+        .wallet-pill {
+            background: #fff7ed;
+            border: 1px solid #fed7aa;
+            border-radius: 8px;
+            padding: 6px 14px;
+            display: inline-flex;
+            align-items: center;
+            font-weight: 700;
+            color: #ea580c;
+            font-size: 13px;
+            transition: all 0.2s ease;
+        }
+        .wallet-pill:hover {
+            background: #ffedd5;
+            color: #c2410c;
+            text-decoration: none;
+        }
+        .text-tm-blue { color: #ea580c; }
+        .bg-tm-blue { background-color: #ea580c; }
+        .border-tm-blue { border-color: #ea580c; }
+        .tabular-nums { font-variant-numeric: tabular-nums; }
+    </style>
+</head>
+
+<body id="page-top">
+
+    <!-- Page Wrapper -->
+    <div id="wrapper">
+
+        <!-- Sidebar (SB Admin 2) -->
+        <ul class="navbar-nav sidebar sidebar-dark accordion no-print" id="accordionSidebar">
+
+            <!-- Sidebar - Brand -->
+            <a class="sidebar-brand d-flex align-items-center justify-content-center py-3" th:href="@{/tenant/dashboard}">
+                <div class="sidebar-brand-icon d-inline-flex align-items-center justify-content-center"
+                     style="width: 36px; height: 36px; border-radius: 9px; background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); color: #ffffff; box-shadow: 0 4px 12px rgba(234, 88, 12, 0.35);">
+                    <i class="fas fa-house-chimney"></i>
+                </div>
+                <div class="sidebar-brand-text mx-2 text-white font-weight-bold" style="white-space: nowrap !important; letter-spacing: 0.02em;">
+                    TRỌ MỚI <span class="badge ml-1 px-1.5 py-0.5" style="background: rgba(255,255,255,0.18); font-size: 10px; color: #fed7aa; font-weight: 700;">CƯ DÂN</span>
+                </div>
+            </a>
+
+            <!-- Divider -->
+            <hr class="sidebar-divider my-0">
+
+            <!-- Nav Item - Dashboard -->
+            <li class="nav-item" th:classappend="${activeTenantMenu == 'dashboard' or activeTenantMenu == null or activeTenantMenu == ''} ? 'active' : ''">
+                <a class="nav-link" th:href="@{/tenant/dashboard}">
+                    <i class="fas fa-fw fa-tachometer-alt"></i>
+                    <span>Tổng quan cư dân</span>
+                </a>
+            </li>
+
+            <!-- Divider -->
+            <hr class="sidebar-divider">
+
+            <!-- Heading -->
+            <div class="sidebar-heading">
+                Phòng trọ &amp; Hợp đồng
+            </div>
+
+            <!-- Nav Item - Phòng của tôi -->
+            <li class="nav-item" th:classappend="${activeTenantMenu == 'rooms'} ? 'active' : ''">
+                <a class="nav-link" th:href="@{/tenant/rooms}">
+                    <i class="fas fa-fw fa-door-open"></i>
+                    <span>Phòng của tôi</span>
+                </a>
+            </li>
+
+            <!-- Nav Item - Hợp đồng -->
+            <li class="nav-item" th:classappend="${activeTenantMenu == 'contract'} ? 'active' : ''">
+                <a class="nav-link" th:href="@{/tenant/contract}">
+                    <i class="fas fa-fw fa-file-contract"></i>
+                    <span>Hợp đồng thuê phòng</span>
+                </a>
+            </li>
+
+            <!-- Divider -->
+            <hr class="sidebar-divider">
+
+            <!-- Heading -->
+            <div class="sidebar-heading">
+                Tài chính &amp; Thanh toán
+            </div>
+
+            <!-- Nav Item - Hóa đơn tiền phòng -->
+            <li class="nav-item" th:classappend="${activeTenantMenu == 'invoices'} ? 'active' : ''">
+                <a class="nav-link" th:href="@{/tenant/invoices}">
+                    <i class="fas fa-fw fa-file-invoice-dollar"></i>
+                    <span>Hóa đơn tiền phòng</span>
+                </a>
+            </li>
+
+            <!-- Nav Item - Lịch sử nộp tiền -->
+            <li class="nav-item" th:classappend="${activeTenantMenu == 'payments'} ? 'active' : ''">
+                <a class="nav-link" th:href="@{/tenant/payments}">
+                    <i class="fas fa-fw fa-receipt"></i>
+                    <span>Lịch sử nộp tiền</span>
+                </a>
+            </li>
+
+            <!-- Divider -->
+            <hr class="sidebar-divider">
+
+            <!-- Heading -->
+            <div class="sidebar-heading">
+                Tiện ích &amp; Hỗ trợ
+            </div>
+
+            <!-- Nav Item - Báo hỏng & sửa chữa -->
+            <li class="nav-item" th:classappend="${activeTenantMenu == 'maintenance'} ? 'active' : ''">
+                <a class="nav-link" th:href="@{/tenant/maintenance}">
+                    <i class="fas fa-fw fa-tools"></i>
+                    <span>Báo hỏng &amp; sửa chữa</span>
+                </a>
+            </li>
+
+            <!-- Nav Item - Sàn tìm phòng công khai -->
+            <li class="nav-item">
+                <a class="nav-link" th:href="@{/}">
+                    <i class="fas fa-fw fa-globe"></i>
+                    <span>Trang chủ tìm phòng</span>
+                </a>
+            </li>
+
+            <!-- Divider -->
+            <hr class="sidebar-divider d-none d-md-block">
+
+            <!-- Sidebar Toggler (Sidebar) -->
+            <div class="text-center d-none d-md-inline">
+                <button class="rounded-circle border-0" id="sidebarToggle"></button>
+            </div>
+
+        </ul>
+        <!-- End of Sidebar -->
+
+        <!-- Content Wrapper -->
+        <div id="content-wrapper" class="d-flex flex-column">
+
+            <!-- Main Content -->
+            <div id="content">
+
+                <!-- Topbar (SB Admin 2) -->
+                <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow no-print">
+
+                    <!-- Sidebar Toggle (Topbar) -->
+                    <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
+                        <i class="fa fa-bars"></i>
+                    </button>
+
+                    <!-- Topbar Search (SB Admin 2 Classic) -->
+                    <form th:action="@{/tenant/home}" method="get"
+                          class="d-none d-sm-inline-block form-inline mr-auto ml-md-3 my-2 my-md-0 mw-100 navbar-search">
+                        <div class="input-group">
+                            <input type="text" name="keyword" class="form-control bg-light border-0 small"
+                                   placeholder="Tìm nhanh phòng trọ, hợp đồng, hóa đơn..." aria-label="Search">
+                            <div class="input-group-append">
+                                <button class="btn btn-primary" type="submit">
+                                    <i class="fas fa-search fa-sm"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+
+                    <!-- Topbar Navbar -->
+                    <ul class="navbar-nav ml-auto">
+
+                        <!-- Nav Item - Rented Room Quick Pill -->
+                        <li class="nav-item no-arrow mx-2 d-none d-md-flex align-items-center">
+                            <a th:href="@{/tenant/contract}" class="wallet-pill text-decoration-none">
+                                <i class="fas fa-key mr-2 text-primary"></i>
+                                <span class="text-gray-700">Phòng &amp; Hợp đồng của tôi</span>
+                            </a>
+                        </li>
+
+                        <!-- Nav Item - Public Portal Link -->
+                        <li class="nav-item no-arrow mx-1 d-none d-sm-flex align-items-center">
+                            <a class="nav-link small text-gray-600" th:href="@{/}" title="Về trang chủ tìm phòng">
+                                <i class="fas fa-home mr-1 text-primary"></i> Trang chủ
+                            </a>
+                        </li>
+
+                        <!-- Nav Item - Alerts -->
+                        <li class="nav-item dropdown no-arrow mx-1">
+                            <a class="nav-link dropdown-toggle" href="#" id="alertsDropdown" role="button"
+                               data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <i class="fas fa-bell fa-fw"></i>
+                                <span class="badge badge-danger badge-counter">2</span>
+                            </a>
+                            <div class="dropdown-list dropdown-menu dropdown-menu-right shadow animated--grow-in"
+                                 aria-labelledby="alertsDropdown">
+                                <h6 class="dropdown-header">
+                                    Thông Báo Cư Dân
+                                </h6>
+                                <a class="dropdown-item d-flex align-items-center" th:href="@{/tenant/invoices}">
+                                    <div class="mr-3">
+                                        <div class="icon-circle bg-primary">
+                                            <i class="fas fa-file-invoice-dollar text-white"></i>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <span class="font-weight-bold">Tra cứu hóa đơn tiền nhà &amp; điện nước</span>
+                                    </div>
+                                </a>
+                                <a class="dropdown-item d-flex align-items-center" th:href="@{/tenant/maintenance}">
+                                    <div class="mr-3">
+                                        <div class="icon-circle bg-warning">
+                                            <i class="fas fa-tools text-white"></i>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <span>Theo dõi tiến độ yêu cầu sửa chữa</span>
+                                    </div>
+                                </a>
+                            </div>
+                        </li>
+
+                        <div class="topbar-divider d-none d-sm-block"></div>
+
+                        <!-- Nav Item - User Information -->
+                        <li class="nav-item dropdown no-arrow">
+                            <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
+                               data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <span class="mr-2 d-none d-lg-inline text-gray-600 small font-weight-bold"
+                                      th:text="${session.user != null ? (session.user.fullName != null ? session.user.fullName : session.user.username) : 'Khách thuê'}">Khách thuê</span>
+                                <img class="img-profile rounded-circle" th:src="@{/sb-admin-2/img/undraw_profile.svg}" alt="Avatar Tenant">
+                            </a>
+                            <!-- Dropdown - User Information -->
+                            <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in"
+                                 aria-labelledby="userDropdown">
+                                <div class="dropdown-item-text text-muted small pb-2 border-bottom">
+                                    <strong class="text-dark" th:text="${session.user != null ? session.user.username : 'tenant1'}">tenant1</strong><br>
+                                    Vai trò: <span class="badge badge-primary">Khách hàng / Cư dân</span>
+                                </div>
+                                <a class="dropdown-item" th:href="@{/tenant/dashboard}">
+                                    <i class="fas fa-tachometer-alt fa-sm fa-fw mr-2 text-gray-400"></i>
+                                    Tổng quan cư dân
+                                </a>
+                                <a class="dropdown-item" th:href="@{/tenant/contract}">
+                                    <i class="fas fa-file-contract fa-sm fa-fw mr-2 text-gray-400"></i>
+                                    Hợp đồng thuê phòng
+                                </a>
+                                <a class="dropdown-item" th:href="@{/tenant/invoices}">
+                                    <i class="fas fa-file-invoice-dollar fa-sm fa-fw mr-2 text-gray-400"></i>
+                                    Hóa đơn &amp; thanh toán
+                                </a>
+                                <div class="dropdown-divider"></div>
+                                <a class="dropdown-item text-danger font-weight-bold" href="#" data-toggle="modal" data-target="#logoutModal">
+                                    <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-danger"></i>
+                                    Đăng xuất
+                                </a>
+                            </div>
+                        </li>
+
+                    </ul>
+
+                </nav>
+                <!-- End of Topbar -->
+
+                <!-- Begin Page Content -->
+                <div class="container-fluid">
+                    <div th:replace="~{${content}}"></div>
+                </div>
+                <!-- /.container-fluid -->
+
+            </div>
+            <!-- End of Main Content -->
+
+            <!-- Footer -->
+            <footer class="sticky-footer bg-white no-print">
+                <div class="container my-auto">
+                    <div class="copyright text-center my-auto">
+                        <span>Bản quyền &copy; Cổng Thông Tin Cư Dân - Hệ Thống Quản Lý Nhà Trọ Trọ Mới 2026</span>
+                    </div>
+                </div>
+            </footer>
+            <!-- End of Footer -->
+
+        </div>
+        <!-- End of Content Wrapper -->
+
+    </div>
+    <!-- End of Page Wrapper -->
+
+    <!-- Scroll to Top Button-->
+    <a class="scroll-to-top rounded no-print" href="#page-top">
+        <i class="fas fa-angle-up"></i>
+    </a>
+
+    <!-- Logout Modal-->
+    <div class="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="logoutModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title font-weight-bold" id="logoutModalLabel">
+                        <i class="fas fa-sign-out-alt mr-2"></i>Xác nhận đăng xuất
+                    </h5>
+                    <button class="close text-white" type="button" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body text-gray-700">
+                    Bạn có chắc chắn muốn đăng xuất khỏi Cổng Thông Tin Cư Dân Trọ Mới không?
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary font-weight-bold" type="button" data-dismiss="modal">Hủy bỏ</button>
+                    <a class="btn btn-danger font-weight-bold" th:href="@{/logout}">Đăng xuất ngay</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom Confirmation Modal (#uxConfirmModal) -->
+    <div id="uxConfirmModal" class="hidden fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-[1px] flex items-center justify-center p-4 no-print" role="dialog" aria-modal="true" aria-labelledby="uxConfirmModalTitle">
+        <div class="bg-white rounded-xl border border-slate-200 w-full max-w-md p-6 space-y-4 shadow-xl">
+            <div class="flex items-start gap-3">
+                <div class="w-10 h-10 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
+                    <i class="fa-solid fa-circle-question text-lg"></i>
+                </div>
+                <div class="space-y-1 flex-1">
+                    <h3 id="uxConfirmModalTitle" class="text-base font-semibold text-slate-900">Xác nhận thao tác</h3>
+                    <p id="uxConfirmModalMessage" class="text-xs text-slate-600 leading-relaxed">Bạn có chắc chắn muốn thực hiện thao tác này?</p>
+                </div>
+            </div>
+            <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+                <button type="button" id="uxConfirmCancelBtn" class="btn btn-sm btn-secondary font-weight-bold">
+                    Hủy bỏ
+                </button>
+                <button type="button" id="uxConfirmAcceptBtn" class="btn btn-sm btn-primary font-weight-bold">
+                    Đồng ý thực hiện
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap core JavaScript-->
+    <script th:src="@{/sb-admin-2/vendor/jquery/jquery.min.js}"></script>
+    <script th:src="@{/sb-admin-2/vendor/bootstrap/js/bootstrap.bundle.min.js}"></script>
+
+    <!-- Core plugin JavaScript-->
+    <script th:src="@{/sb-admin-2/vendor/jquery-easing/jquery.easing.min.js}"></script>
+
+    <!-- Custom scripts for all pages-->
+    <script th:src="@{/sb-admin-2/js/sb-admin-2.min.js}"></script>
+
+    <!-- Page level plugins (DataTables) -->
+    <script th:src="@{/sb-admin-2/vendor/datatables/jquery.dataTables.min.js}"></script>
+    <script th:src="@{/sb-admin-2/vendor/datatables/dataTables.bootstrap4.min.js}"></script>
+
+    <script>
+        (function () {
+            const modal = document.getElementById('uxConfirmModal');
+            const msgEl = document.getElementById('uxConfirmModalMessage');
+            const cancelBtn = document.getElementById('uxConfirmCancelBtn');
+            const acceptBtn = document.getElementById('uxConfirmAcceptBtn');
+            let pendingAction = null;
+
+            function openUxConfirm(message, onConfirm) {
+                if (!modal || !msgEl) {
+                    onConfirm();
+                    return;
+                }
+                msgEl.textContent = message || 'Bạn có chắc chắn muốn thực hiện thao tác này?';
+                pendingAction = onConfirm;
+                modal.classList.remove('hidden');
+            }
+
+            function closeUxConfirm() {
+                if (modal) modal.classList.add('hidden');
+                pendingAction = null;
+            }
+
+            if (cancelBtn) cancelBtn.addEventListener('click', closeUxConfirm);
+            if (modal) {
+                modal.addEventListener('click', function (e) {
+                    if (e.target === modal) closeUxConfirm();
+                });
+            }
+            if (acceptBtn) {
+                acceptBtn.addEventListener('click', function () {
+                    const fn = pendingAction;
+                    closeUxConfirm();
+                    if (typeof fn === 'function') fn();
+                });
+            }
+
+            window.confirmSubmit = function (event, message) {
+                event.preventDefault();
+                const form = event.target.closest('form');
+                if (!form) return;
+                openUxConfirm(message, function () {
+                    form.dataset.uxConfirmed = 'true';
+                    form.submit();
+                });
+            };
+
+            window.confirmLink = function (event, message) {
+                event.preventDefault();
+                const link = event.currentTarget.getAttribute('href');
+                if (!link) return;
+                openUxConfirm(message, function () {
+                    window.location.href = link;
+                });
+            };
+        })();
+    </script>
+</body>
+</html>

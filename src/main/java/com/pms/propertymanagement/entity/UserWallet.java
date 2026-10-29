@@ -16,6 +16,9 @@ public class UserWallet {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Version
+    private Long version;
     
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", unique = true)
@@ -55,6 +58,12 @@ public class UserWallet {
     public void addBalance(BigDecimal amount) {
         this.balance = this.balance.add(amount);
         this.totalDeposited = this.totalDeposited.add(amount);
+        this.lastTransactionAt = LocalDateTime.now();
+    }
+
+    public void refundBalance(BigDecimal amount) {
+        this.balance = this.balance.add(amount);
+        this.totalSpent = this.totalSpent.subtract(amount).max(BigDecimal.ZERO);
         this.lastTransactionAt = LocalDateTime.now();
     }
     

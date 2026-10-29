@@ -1,0 +1,117 @@
+<div th:fragment="content">
+
+    <!-- Page Heading -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <div>
+            <h1 class="h3 mb-1 text-gray-800 font-weight-bold">
+                <i class="fas fa-receipt text-primary mr-2"></i>Lịch Sử Nộp Tiền &amp; Thanh Toán
+            </h1>
+            <p class="mb-0 text-muted small">Ghi nhận các lần nộp tiền phòng, điện nước và các khoản phí dịch vụ đã được ghi sổ.</p>
+        </div>
+    </div>
+
+    <!-- Summary KPI Row (SB Admin 2) -->
+    <div class="row mb-2">
+        <div class="col-xl-6 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                Tổng số tiền đã thanh toán
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-success tabular-nums"
+                                 id="totalPaidBannerAmount"
+                                 th:text="${payments != null and !payments.empty ? #numbers.formatDecimal(#aggregates.sum(payments.![amount != null ? amount : 0]), 0, 'POINT', 0, 'COMMA') + ' đ' : '0 đ'}">
+                                0 đ
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-check-circle fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-6 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Tổng số giao dịch ghi nhận
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800 tabular-nums"
+                                 th:text="${(payments != null ? payments.size() : 0) + ' giao dịch'}">
+                                0 giao dịch
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-history fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Payment History Table Card (SB Admin 2) -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+            <h6 class="m-0 font-weight-bold text-primary">
+                <i class="fas fa-table mr-1"></i> Sổ Giao Dịch Thanh Toán
+            </h6>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover mb-0" width="100%" cellspacing="0">
+                    <thead class="bg-light">
+                        <tr class="text-nowrap">
+                            <th style="width: 13%;">Thời gian</th>
+                            <th style="width: 9%;">Mã phiếu</th>
+                            <th style="width: 17%;">Hóa đơn kỳ</th>
+                            <th style="width: 12%;" class="text-right">Số tiền nộp</th>
+                            <th style="width: 11%;" class="text-center">Hình thức</th>
+                            <th style="width: 13%;">Mã giao dịch</th>
+                            <th style="width: 14%;">Nội dung nộp</th>
+                            <th style="width: 11%;" class="text-center">Biên lai</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:if="${payments == null or payments.empty}">
+                            <td colspan="8" class="text-center py-4 text-muted">
+                                Chưa có giao dịch thanh toán nào được ghi nhận.
+                            </td>
+                        </tr>
+                        <tr th:each="p : ${payments}">
+                            <td class="text-nowrap small text-gray-700 align-middle" th:text="${#temporals.format(p.paymentDate, 'dd/MM/yyyy HH:mm')}"></td>
+                            <td class="font-weight-bold text-gray-800 text-nowrap align-middle" th:text="${'#PAY-' + p.id}"></td>
+                            <td class="text-nowrap align-middle">
+                                <a th:if="${p.invoice != null}" th:href="@{'/tenant/invoices/' + ${p.invoice.id}}" class="font-weight-bold text-primary">
+                                    <span th:text="${p.invoice.invoiceCode}"></span>
+                                    <small class="text-muted ml-1" th:text="${'(' + p.invoice.month + '/' + p.invoice.year + ')'}"></small>
+                                </a>
+                                <span th:if="${p.invoice == null}" class="text-muted font-italic">Thanh toán tự do</span>
+                            </td>
+                            <td class="text-right font-weight-bold text-success tabular-nums text-nowrap align-middle"
+                                th:text="${#numbers.formatDecimal(p.amount, 0, 'POINT', 0, 'COMMA') + ' đ'}"></td>
+                            <td class="text-center text-nowrap align-middle">
+                                <span th:if="${p.paymentMethod != null}" class="badge badge-info px-2.5 py-1" th:text="${p.paymentMethod.displayName}"></span>
+                                <span th:if="${p.paymentMethod == null}" class="text-muted">---</span>
+                            </td>
+                            <td class="small font-mono text-primary font-weight-bold text-nowrap align-middle" th:text="${p.transactionCode != null and !p.transactionCode.isEmpty() ? p.transactionCode : ('VNPAY-2026-' + p.id)}"></td>
+                            <td class="small text-gray-700 align-middle" th:text="${p.note != null ? p.note : '-'}"></td>
+                            <td class="text-center text-nowrap align-middle">
+                                <button type="button" onclick="window.print()" class="btn btn-sm btn-outline-primary font-weight-bold">
+                                    <i class="fas fa-print mr-1"></i> In biên lai
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</div>

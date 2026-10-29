@@ -1,53 +1,312 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
-    <title>Xác thực eKYC</title>
+    <meta charset="UTF-8" />
+    <title>Xác thực eKYC | TrọMới - Upside PMS</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link th:href="@{/rhino/images/fevicon.png}" rel="icon" />
+    <link href="https://fonts.googleapis.com" rel="preconnect" />
+    <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link th:href="@{/assets/vendor/bootstrap/css/bootstrap.min.css}" rel="stylesheet" />
+    <link th:href="@{/assets/vendor/bootstrap-icons/bootstrap-icons.css}" rel="stylesheet" />
+    <link th:href="@{/assets/vendor/fontawesome-free/css/all.min.css}" rel="stylesheet" />
+    <link th:href="@{/rhino/css/style.css}" rel="stylesheet" />
+    <link th:href="@{/rhino/css/responsive.css}" rel="stylesheet" />
+    <script>
+      window.tailwind = { config: { corePlugins: { preflight: false } } };
+    </script>
     <script src="https://cdn.tailwindcss.com"></script>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+                    <style>
+      :root {
+        --default-font: "Be Vietnam Pro", sans-serif;
+        --heading-font: "Be Vietnam Pro", sans-serif;
+        --nav-font: "Be Vietnam Pro", sans-serif;
+      }
+      .container, .container-fluid, .container_staff {
+        max-width: 1280px;
+        padding-left: 20px !important;
+        padding-right: 20px !important;
+        margin-left: auto !important;
+        margin-right: auto !important;
+      }
+      body { font-family: var(--default-font) !important; font-size: 15px !important; background-color: #f8fafc !important; color: #334155; overflow-x: hidden; line-height: 1.65; }
+      h1, h2, h3, h4, h5, h6 { font-family: var(--heading-font) !important; color: #161825; letter-spacing: -0.015em; }
+      p { font-size: 15px; line-height: 1.65; margin: 0 0 12px 0; }
+      .light-background, .bg-light { background-color: #f8fafc !important; }
+      .bg-white { background-color: #ffffff !important; border: 1px solid #e2e8f0; box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06); }
+      .header_section { position: relative; z-index: 1000; width: 100%; }
+      .header { width: 100%; height: auto !important; }
+      .header_top { background-color: #161825; padding: 9px 0; }
+      ul.contat_infoma { display: flex !important; align-items: center; gap: 12px; margin: 0; padding: 0; list-style: none; }
+      ul.contat_infoma li { color: #ffffff; font-size: 13.5px; display: inline-flex; align-items: center; gap: 8px; }
+      ul.contat_infoma li i { color: #fe9901; }
+      ul.contat_infoma li a { color: #ffffff; display: inline-flex; align-items: center; gap: 8px; text-decoration: none; }
+      ul.contat_infoma li a:hover { color: #fe9901; }
+      ul.social_icon_top { display: flex; align-items: center; justify-content: center; gap: 8px; margin: 0; padding: 0; list-style: none; }
+      ul.social_icon_top li a { display: inline-flex; align-items: center; justify-content: center; border-radius: 50%; color: #161825; background: #ffffff; width: 28px; height: 28px; font-size: 13px; text-decoration: none; }
+      ul.social_icon_top li a:hover { background: #fe9901; color: #ffffff; }
+      .header_bottom { background-color: #ffffff; height: auto !important; padding: 12px 0 !important; border-bottom: 1px solid #e2e8f0; box-shadow: 0 4px 20px rgba(15, 23, 42, 0.04); }
+      .logo { flex-shrink: 0; }
+      .logo a { font-family: var(--heading-font) !important; font-size: 22px !important; line-height: 1.2 !important; color: #161825 !important; font-weight: 800 !important; text-transform: uppercase; text-decoration: none; display: inline-flex; align-items: center; gap: 10px; white-space: nowrap; }
+      .navigation.navbar { float: none !important; padding: 0; width: 100%; }
+      @media (min-width: 992px) {
+        .navigation.navbar { flex-wrap: nowrap !important; }
+        .navigation .navbar-collapse { flex-basis: auto !important; flex-grow: 0 !important; display: flex !important; align-items: center !important; }
+      }
+      .navigation .navbar-nav .nav-link { padding: 8px 12px !important; color: #1e293b !important; font-size: 13.5px !important; font-weight: 600; text-transform: uppercase; border-radius: 8px; margin: 0 1px; white-space: nowrap; transition: all 0.2s ease; }
+      .navigation .navbar-nav .nav-link:focus,
+      .navigation .navbar-nav .nav-link:hover,
+      .navigation .navbar-nav .active > .nav-link,
+      .navigation .navbar-nav .nav-link.active { background: #fe9901 !important; color: #ffffff !important; border-radius: 8px; box-shadow: 0 4px 12px rgba(254, 153, 1, 0.28); }
+      .navigation .nav-item.dropdown:hover > .dropdown-menu { display: block; }
+      .btn-estate {
+        font-family: var(--default-font); font-weight: 700; font-size: 14px !important; text-transform: uppercase;
+        display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+        padding: 11px 22px; border-radius: 8px; white-space: nowrap !important;
+        color: #ffffff !important; background-color: #fe9901 !important; border: 0; text-decoration: none; cursor: pointer;
+        box-shadow: 0 4px 14px rgba(254, 153, 1, 0.3); transition: all 0.22s ease;
+      }
+      .btn-estate:hover { background-color: #e08200 !important; color: #ffffff !important; transform: translateY(-1px); }
+      .btn-estate-nav {
+        font-family: var(--default-font); font-weight: 700; font-size: 13.5px !important; text-transform: uppercase;
+        padding: 8px 16px !important; border-radius: 8px; white-space: nowrap !important;
+        background-color: #fe9901 !important; color: #ffffff !important; border: 0;
+        display: inline-flex !important; align-items: center; gap: 6px; flex-shrink: 0;
+        box-shadow: 0 4px 12px rgba(254, 153, 1, 0.28);
+      }
+      .btn-estate-nav:hover { background-color: #161825 !important; color: #ffffff !important; }
+      .page-title, .back_re { background: linear-gradient(135deg, #f59e0b 0%, #ea580c 100%) !important; padding: 36px 0 30px 0 !important; border: none !important; color: #ffffff; }
+      .page-title .heading h1 { font-family: var(--heading-font) !important; font-weight: 800 !important; font-size: 30px !important; line-height: 1.25 !important; color: #ffffff !important; text-transform: uppercase; }
+      .page-title .heading h1 span { color: #ffffff !important; }
+      .page-title .heading p { color: rgba(255, 255, 255, 0.95) !important; }
+      .page-title .breadcrumbs ol { display: flex; justify-content: center; list-style: none; padding: 12px 0 0 0; margin: 0; gap: 8px; font-weight: 600; font-size: 14px; color: rgba(255, 255, 255, 0.9); }
+      .page-title .breadcrumbs ol li + li::before { content: "/"; padding-right: 8px; color: rgba(255, 255, 255, 0.7); }
+      .page-title .breadcrumbs ol li a { color: #ffffff !important; text-decoration: underline; }
+    </style>
 </head>
-<body class="min-h-screen flex items-center justify-center bg-gray-100">
-<div class="w-full max-w-lg bg-white p-8 rounded-xl shadow-lg">
-    <h1 class="text-3xl font-bold text-center mb-2">Xác thực eKYC</h1>
-    <p class="text-sm text-gray-600 text-center mb-6">Upload 3 ảnh để xác thực (CCCD mặt trước, CCCD mặt sau, ảnh khuôn mặt).</p>
+<body class="d-flex flex-column min-vh-100 bg-white text-[#444444]">
 
-    <div th:if="${lastSubmissionAt != null}" class="text-sm text-gray-600 mb-4">
-        Lần gửi gần nhất: <span th:text="${#temporals.format(lastSubmissionAt, 'dd/MM/yyyy HH:mm:ss')}"></span>
+<div th:replace="~{layout/header :: header-main}"></div>
+
+<main class="main flex-grow-1">
+    <div class="page-title">
+        <div class="heading">
+            <div class="container text-center">
+                <h1>Xác Thực Danh Tính <span style="color: #fef3c7;">eKYC</span></h1>
+                <p class="mb-0">Tải lên 3 ảnh để xác thực hồ sơ Chủ nhà trọ (CCCD mặt trước, CCCD mặt sau, ảnh khuôn mặt)</p>
+            </div>
+        </div>
+        <nav class="breadcrumbs">
+            <div class="container">
+                <ol>
+                    <li><a th:href="@{/}">Trang chủ</a></li>
+                    <li class="current">Xác thực eKYC</li>
+                </ol>
+            </div>
+        </nav>
     </div>
 
-    <div th:if="${errors != null and !errors.isEmpty()}" class="mb-4 rounded-lg border border-red-200 bg-red-50 p-4">
-        <div class="font-semibold text-red-700 mb-2">Có lỗi khi upload</div>
-        <ul class="list-disc list-inside text-red-700">
-            <li th:each="err : ${errors}" th:text="${err}"></li>
-        </ul>
-    </div>
+    <section class="section py-5 light-background">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-6 col-md-8">
+                    <div class="bg-white p-4 p-md-5" style="border-top: 4px solid #2eca6a !important;">
 
-    <form th:action="@{/ekyc}" method="post" enctype="multipart/form-data" class="space-y-4">
-        <input type="hidden" name="next" th:value="${next}"/>
+                        <div th:if="${lastSubmissionAt != null}" class="alert alert-info small tabular-nums">
+                            Lần gửi gần nhất: <span th:text="${#temporals.format(lastSubmissionAt, 'dd/MM/yyyy HH:mm:ss')}"></span>
+                        </div>
 
-        <div>
-            <label for="frontImage" class="block text-sm font-medium text-gray-700">CCCD mặt trước</label>
-            <input type="file" id="frontImage" name="frontImage" accept="image/*" required
-                   class="mt-1 w-full px-4 py-2 border rounded-lg bg-white"/>
+                        <div th:if="${errors != null and !errors.isEmpty()}" class="alert alert-danger small">
+                            <div class="fw-bold mb-1">Có lỗi khi tải ảnh</div>
+                            <ul class="mb-0 ps-3">
+                                <li th:each="err : ${errors}" th:text="${err}"></li>
+                            </ul>
+                        </div>
+
+                        <form id="ekycForm" th:action="@{/ekyc}" method="post" enctype="multipart/form-data" onsubmit="handleEkycSubmit()" class="d-flex flex-column gap-4">
+                            <input type="hidden" name="next" th:value="${next}" />
+
+                            <div>
+                                <label for="frontImage" class="form-label small fw-bold text-dark">1. CCCD mặt trước *</label>
+                                <input type="file" id="frontImage" name="frontImage" accept="image/*" required
+                                       onchange="previewEkycFile(this, 'frontPreviewImg', 'frontPreviewBox', 'frontMetaInfo', 'frontQualityWarn')"
+                                       class="form-control" />
+                                <div id="frontPreviewBox" class="hidden bg-light p-2.5 border mt-2 space-y-2">
+                                    <img id="frontPreviewImg" src="" alt="Preview CCCD mặt trước" class="h-32 w-full object-contain bg-white" />
+                                    <div id="frontMetaInfo" class="flex items-center justify-between text-xs text-muted tabular-nums px-1"></div>
+                                    <div id="frontQualityWarn" class="hidden p-2 bg-amber-50 border border-amber-200 text-amber-900 text-xs font-medium flex items-center gap-1.5"></div>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label for="backImage" class="form-label small fw-bold text-dark">2. CCCD mặt sau *</label>
+                                <input type="file" id="backImage" name="backImage" accept="image/*" required
+                                       onchange="previewEkycFile(this, 'backPreviewImg', 'backPreviewBox', 'backMetaInfo', 'backQualityWarn')"
+                                       class="form-control" />
+                                <div id="backPreviewBox" class="hidden bg-light p-2.5 border mt-2 space-y-2">
+                                    <img id="backPreviewImg" src="" alt="Preview CCCD mặt sau" class="h-32 w-full object-contain bg-white" />
+                                    <div id="backMetaInfo" class="flex items-center justify-between text-xs text-muted tabular-nums px-1"></div>
+                                    <div id="backQualityWarn" class="hidden p-2 bg-amber-50 border border-amber-200 text-amber-900 text-xs font-medium flex items-center gap-1.5"></div>
+                                </div>
+                            </div>
+
+                            <div>
+                                <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-1">
+                                    <label for="faceImage" class="form-label small fw-bold text-dark mb-0">3. Ảnh khuôn mặt chính diện *</label>
+                                    <button type="button" onclick="openFaceCamera()" class="btn btn-sm btn-outline-success rounded-pill px-3">
+                                        <i class="fa-solid fa-camera me-1"></i>Mở Camera chụp trực tiếp
+                                    </button>
+                                </div>
+                                <input type="file" id="faceImage" name="faceImage" accept="image/*" required
+                                       onchange="previewEkycFile(this, 'facePreviewImg', 'facePreviewBox', 'faceMetaInfo', 'faceQualityWarn')"
+                                       class="form-control" />
+
+                                <!-- Live Camera Box -->
+                                <div id="faceCameraBox" role="dialog" aria-modal="true" aria-label="Chụp ảnh khuôn mặt trực tiếp" class="hidden bg-dark p-3 mt-2 space-y-3 text-center rounded">
+                                    <video id="faceCameraVideo" autoplay playsinline class="w-full max-h-56 object-cover mx-auto bg-black"></video>
+                                    <canvas id="faceCameraCanvas" class="hidden"></canvas>
+                                    <div class="d-flex align-items-center justify-content-center gap-2">
+                                        <button type="button" onclick="captureFaceSnapshot()" class="btn-estate py-1.5 px-3 small">
+                                            <i class="fa-solid fa-camera-retro"></i>
+                                            <span>Chụp ảnh &amp; Đính kèm</span>
+                                        </button>
+                                        <button type="button" onclick="stopFaceCamera()" class="btn btn-sm btn-secondary rounded-pill px-3">
+                                            Đóng Camera
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div id="facePreviewBox" class="hidden bg-light p-2.5 border mt-2 space-y-2">
+                                    <img id="facePreviewImg" src="" alt="Preview khuôn mặt" class="h-36 w-full object-contain bg-white" />
+                                    <div id="faceMetaInfo" class="flex items-center justify-between text-xs text-muted tabular-nums px-1"></div>
+                                    <div id="faceQualityWarn" class="hidden p-2 bg-amber-50 border border-amber-200 text-amber-900 text-xs font-medium flex items-center gap-1.5"></div>
+                                </div>
+                            </div>
+
+                            <div id="ekycSubmittingState" class="hidden bg-light border p-3 small">
+                                <div class="d-flex align-items-center gap-2 fw-bold text-dark">
+                                    <i class="fa-solid fa-circle-notch fa-spin" style="color: #2eca6a;"></i>
+                                    <span id="ekycStepText">Đang tải ảnh bảo mật &amp; phân tích OCR CCCD...</span>
+                                </div>
+                                <p class="text-muted mb-0 mt-1">Vui lòng giữ nguyên cửa sổ trình duyệt trong vài giây để hệ thống đối chiếu dữ liệu.</p>
+                            </div>
+
+                            <button type="submit" id="ekycSubmitBtn" class="btn-estate w-100">
+                                <i class="fa-solid fa-shield-check"></i>
+                                <span>Gửi hồ sơ xác thực</span>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
         </div>
+    </section>
+</main>
 
-        <div>
-            <label for="backImage" class="block text-sm font-medium text-gray-700">CCCD mặt sau</label>
-            <input type="file" id="backImage" name="backImage" accept="image/*" required
-                   class="mt-1 w-full px-4 py-2 border rounded-lg bg-white"/>
-        </div>
+<div th:replace="~{layout/footer :: footer-main}"></div>
 
-        <div>
-            <label for="faceImage" class="block text-sm font-medium text-gray-700">Ảnh khuôn mặt</label>
-            <input type="file" id="faceImage" name="faceImage" accept="image/*" required
-                   class="mt-1 w-full px-4 py-2 border rounded-lg bg-white"/>
-        </div>
+<script th:src="@{/assets/vendor/bootstrap/js/bootstrap.bundle.min.js}"></script>
+<script th:src="@{/assets/js/main.js}"></script>
+<script>
+    let activeMediaStream = null;
 
-        <button type="submit" class="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition">
-            Xác thực
-        </button>
-    </form>
-</div>
+    function previewEkycFile(input, imgId, boxId, metaId, warnId) {
+        const file = input.files && input.files[0];
+        const img = document.getElementById(imgId);
+        const box = document.getElementById(boxId);
+        const metaEl = metaId ? document.getElementById(metaId) : null;
+        const warnEl = warnId ? document.getElementById(warnId) : null;
+        if (!file || !img || !box) return;
+        const sizeKb = (file.size / 1024).toFixed(1);
+        const reader = new FileReader();
+        reader.onload = function (e) {
+            img.onload = function () {
+                const w = img.naturalWidth || 0;
+                const h = img.naturalHeight || 0;
+                if (metaEl) {
+                    metaEl.innerHTML =
+                        '<span><i class="fa-solid fa-file-image text-[#2eca6a] mr-1"></i>Dung lượng: <strong>' + sizeKb + ' KB</strong></span>' +
+                        '<span><i class="fa-solid fa-expand text-[#2eca6a] mr-1"></i>Độ phân giải: <strong>' + w + 'x' + h + ' px</strong></span>';
+                }
+                if (warnEl) {
+                    if (file.size < 10 * 1024 || w < 300 || h < 200) {
+                        warnEl.classList.remove('hidden');
+                        warnEl.innerHTML = '<i class="fa-solid fa-triangle-exclamation text-amber-600 shrink-0"></i><span>Cảnh báo: Ảnh quá nhỏ (&lt; 10 KB) hoặc độ phân giải thấp (' + w + 'x' + h + ' px). Vui lòng chọn ảnh rõ nét hơn để tránh lỗi OCR.</span>';
+                    } else {
+                        warnEl.classList.add('hidden');
+                        warnEl.innerHTML = '';
+                    }
+                }
+            };
+            img.src = e.target.result;
+            box.classList.remove('hidden');
+        };
+        reader.readAsDataURL(file);
+    }
+
+    function openFaceCamera() {
+        const camBox = document.getElementById('faceCameraBox');
+        const video = document.getElementById('faceCameraVideo');
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+            return;
+        }
+        camBox.classList.remove('hidden');
+        navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' }, audio: false })
+            .then(function (stream) {
+                activeMediaStream = stream;
+                video.srcObject = stream;
+            })
+            .catch(function () {
+                camBox.classList.add('hidden');
+            });
+    }
+
+    function stopFaceCamera() {
+        if (activeMediaStream) {
+            activeMediaStream.getTracks().forEach(function (t) { t.stop(); });
+            activeMediaStream = null;
+        }
+        const camBox = document.getElementById('faceCameraBox');
+        if (camBox) camBox.classList.add('hidden');
+    }
+
+    function captureFaceSnapshot() {
+        const video = document.getElementById('faceCameraVideo');
+        const canvas = document.getElementById('faceCameraCanvas');
+        const faceInput = document.getElementById('faceImage');
+        if (!video || !canvas || !faceInput) return;
+
+        canvas.width = video.videoWidth || 640;
+        canvas.height = video.videoHeight || 480;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+        canvas.toBlob(function (blob) {
+            if (!blob) return;
+            const file = new File([blob], 'ekyc-face-capture.jpg', { type: 'image/jpeg' });
+            const dt = new DataTransfer();
+            dt.items.add(file);
+            faceInput.files = dt.files;
+            previewEkycFile(faceInput, 'facePreviewImg', 'facePreviewBox', 'faceMetaInfo', 'faceQualityWarn');
+            stopFaceCamera();
+        }, 'image/jpeg', 0.92);
+    }
+
+    function handleEkycSubmit() {
+        stopFaceCamera();
+        const loadingBox = document.getElementById('ekycSubmittingState');
+        const btn = document.getElementById('ekycSubmitBtn');
+        const stepTxt = document.getElementById('ekycStepText');
+        if (loadingBox) loadingBox.classList.remove('hidden');
+        if (btn) {
+            btn.disabled = true;
+            btn.classList.add('opacity-75');
+        }
+        setTimeout(function () {
+            if (stepTxt) stepTxt.textContent = 'Đang đối chiếu sinh trắc học khuôn mặt & hoàn tất hồ sơ...';
+        }, 1200);
+    }
+</script>
 </body>
 </html>
-

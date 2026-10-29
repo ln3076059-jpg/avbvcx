@@ -1,0 +1,257 @@
+<div th:fragment="content">
+    <style>
+        @media print {
+            header, footer, nav, .no-print, button, a, #accordionSidebar {
+                display: none !important;
+            }
+            body, main, #content-wrapper, #content {
+                background: white !important;
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+            .printable-contract {
+                border: none !important;
+                box-shadow: none !important;
+                width: 100% !important;
+            }
+        }
+    </style>
+
+    <!-- Flash notifications -->
+    <div th:if="${successMessage}" class="alert alert-success d-flex align-items-center no-print" role="alert">
+        <i class="fas fa-check-circle mr-2"></i>
+        <span th:text="${successMessage}"></span>
+    </div>
+    <div th:if="${errorMessage}" class="alert alert-danger d-flex align-items-center no-print" role="alert">
+        <i class="fas fa-exclamation-circle mr-2"></i>
+        <span th:text="${errorMessage}"></span>
+    </div>
+
+    <!-- Page Heading -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4 no-print">
+        <div>
+            <h1 class="h3 mb-1 text-gray-800 font-weight-bold">
+                <i class="fas fa-file-contract text-primary mr-2"></i>Thông Tin Hợp Đồng Thuê Phòng
+            </h1>
+            <p class="mb-0 text-muted small">Chi tiết điều khoản, thời hạn hợp đồng, giá thuê và các dịch vụ phòng của bạn.</p>
+        </div>
+        <div th:if="${contract != null}" class="d-flex flex-wrap mt-2 mt-sm-0">
+            <a th:href="@{|/tenant/rooms/${room.id}|}" class="btn btn-sm btn-outline-primary shadow-sm font-weight-bold mr-2">
+                <i class="fas fa-door-open mr-1"></i> Xem thông tin phòng thuê
+            </a>
+            <button type="button" onclick="window.print()" class="btn btn-sm btn-primary shadow-sm font-weight-bold">
+                <i class="fas fa-print mr-1"></i> In / Xuất PDF Hợp Đồng
+            </button>
+        </div>
+    </div>
+
+    <!-- Empty State -->
+    <div th:if="${contract == null}" class="card shadow mb-4">
+        <div class="card-body py-5 text-center text-muted">
+            <i class="fas fa-file-excel fa-3x mb-3 text-gray-300"></i>
+            <h5 class="font-weight-bold text-gray-700">Hiện bạn chưa có hợp đồng thuê nào đang kích hoạt</h5>
+            <p class="small mb-0">Vui lòng liên hệ chủ nhà trọ để được ký kết và kích hoạt hợp đồng thuê phòng.</p>
+        </div>
+    </div>
+
+    <!-- Contract Details Card (SB Admin 2) -->
+    <div th:if="${contract != null}" class="card shadow mb-4 printable-contract">
+        <div class="card-header py-3 d-flex flex-wrap align-items-center justify-content-between">
+            <div>
+                <div class="text-xs font-weight-bold text-primary text-uppercase">Hợp đồng thuê nhà trọ</div>
+                <h5 class="m-0 font-weight-bold text-gray-800" th:text="${'Mã HĐ: ' + contract.code}">Mã HĐ</h5>
+                <small class="text-muted">Ngày lập hợp đồng: <span th:text="${#temporals.format(contract.createdAt, 'dd/MM/yyyy')}"></span></small>
+            </div>
+            <span class="badge badge-success px-3 py-2 font-weight-bold">
+                <i class="fas fa-check-circle mr-1"></i> Đang hoạt động
+            </span>
+        </div>
+
+        <div class="card-body py-3">
+            <!-- Room & Landlord Info -->
+            <div class="row mb-3">
+                <div class="col-md-6 mb-2 mb-md-0">
+                    <div class="p-2.5 px-3 bg-light rounded border h-100">
+                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-0.5">Thông tin phòng thuê</div>
+                        <div class="h6 font-weight-bold text-gray-800 mb-0.5" th:text="${contract.room.name}">Phòng 101</div>
+                        <div class="small text-gray-700" th:text="${'Khu trọ: ' + contract.room.property.name + ' — Đ/c: ' + (contract.room.property.addressNumber ?: '') + ', ' + (contract.room.property.ward != null ? contract.room.property.ward.name : '')}"></div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="p-2.5 px-3 bg-light rounded border h-100">
+                        <div class="text-xs font-weight-bold text-success text-uppercase mb-0.5">Chủ nhà trọ đại diện (Bên A)</div>
+                        <div class="h6 font-weight-bold text-gray-800 mb-0.5" th:text="${contract.room.property.owner.fullName ?: contract.room.property.owner.username}">Chủ nhà</div>
+                        <div class="small text-gray-700">SĐT: <strong th:text="${contract.room.property.owner.phone ?: 'Chưa cập nhật'}"></strong> · Email: <span th:text="${contract.room.property.owner.email ?: 'Chưa cập nhật'}"></span></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Terms & Details KPI Row -->
+            <h6 class="font-weight-bold text-gray-800 text-uppercase small mb-2">
+                <i class="fas fa-coins text-warning mr-1"></i> Điều khoản &amp; Chi phí thuê
+            </h6>
+            <div class="row mb-3">
+                <div class="col-sm-6 col-md-3 mb-2">
+                    <div class="card border-left-primary h-100 py-1">
+                        <div class="card-body py-1.5 px-3">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase">Giá thuê / tháng</div>
+                            <div class="h6 mb-0 font-weight-bold text-gray-800 mt-0.5 tabular-nums"
+                                 th:text="${#numbers.formatDecimal(contract.rentPrice, 0, 'POINT', 0, 'COMMA') + ' đ'}"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-6 col-md-3 mb-2">
+                    <div class="card border-left-info h-100 py-1">
+                        <div class="card-body py-1.5 px-3">
+                            <div class="text-xs font-weight-bold text-info text-uppercase">Tiền đặt cọc</div>
+                            <div class="h6 mb-0 font-weight-bold text-gray-800 mt-0.5 tabular-nums"
+                                 th:text="${#numbers.formatDecimal(contract.deposit, 0, 'POINT', 0, 'COMMA') + ' đ'}"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-6 col-md-3 mb-2">
+                    <div class="card border-left-success h-100 py-1">
+                        <div class="card-body py-1.5 px-3">
+                            <div class="text-xs font-weight-bold text-success text-uppercase">Ngày bắt đầu</div>
+                            <div class="h6 mb-0 font-weight-bold text-gray-800 mt-0.5 tabular-nums"
+                                 th:text="${#temporals.format(contract.startDate, 'dd/MM/yyyy')}"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-6 col-md-3 mb-2">
+                    <div class="card border-left-danger h-100 py-1">
+                        <div class="card-body py-1.5 px-3">
+                            <div class="text-xs font-weight-bold text-danger text-uppercase">Ngày kết thúc</div>
+                            <div class="h6 mb-0 font-weight-bold text-danger mt-0.5 tabular-nums"
+                                 th:text="${#temporals.format(contract.endDate, 'dd/MM/yyyy')}"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Services -->
+            <div th:if="${contract.services != null and !contract.services.empty}" class="mb-3">
+                <h6 class="font-weight-bold text-gray-800 text-uppercase small mb-1.5">
+                    <i class="fas fa-concierge-bell text-primary mr-1"></i> Dịch vụ phòng kèm theo
+                </h6>
+                <div class="row">
+                    <div th:each="s : ${contract.services}" class="col-sm-6 col-md-3 mb-1.5">
+                        <div class="p-1.5 px-2.5 border rounded bg-light d-flex align-items-center justify-content-between small">
+                            <span class="font-weight-bold text-gray-800" th:text="${s.name}"></span>
+                            <span class="font-weight-bold text-primary tabular-nums" th:text="${#numbers.formatDecimal(s.price, 0, 'POINT', 0, 'COMMA') + ' đ/' + s.unit}"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tenants in room -->
+            <div th:if="${contract.tenants != null and !contract.tenants.empty}">
+                <h6 class="font-weight-bold text-gray-800 text-uppercase small mb-2">
+                    <i class="fas fa-users text-primary mr-1"></i> Danh sách thành viên ở chung
+                </h6>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover mb-0 small">
+                        <thead class="bg-light">
+                            <tr>
+                                <th>Họ và tên</th>
+                                <th>Số điện thoại</th>
+                                <th>Nghề nghiệp</th>
+                                <th class="text-center">Vai trò</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="t : ${contract.tenants}">
+                                <td class="font-weight-bold text-gray-800" th:text="${t.fullName}"></td>
+                                <td class="tabular-nums" th:text="${t.phone}"></td>
+                                <td th:text="${t.career ?: '-'}"></td>
+                                <td class="text-center">
+                                    <span th:if="${contract.representative != null and contract.representative.id == t.id}" class="badge badge-primary">Đại diện HĐ</span>
+                                    <span th:unless="${contract.representative != null and contract.representative.id == t.id}" class="badge badge-secondary">Ở cùng</span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Legal Terms & Digital Signatures (Bên A - Chủ nhà & Bên B - Cư dân) -->
+            <div class="mt-4 pt-3 border-top">
+                <h6 class="font-weight-bold text-gray-800 text-uppercase small mb-2">
+                    <i class="fas fa-gavel text-primary mr-1"></i> Cam kết điều khoản &amp; Xác nhận chữ ký điện tử
+                </h6>
+                <div class="p-3 bg-light rounded border small text-gray-700 mb-3">
+                    <div class="mb-1"><strong>1. Nghĩa vụ thanh toán:</strong> Bên thuê (Bên B) thanh toán tiền thuê phòng và phí dịch vụ đúng hạn từ ngày 01 đến ngày 05 hàng tháng theo hóa đơn trên hệ thống Cổng Cư Dân.</div>
+                    <div class="mb-1"><strong>2. Bảo quản tài sản &amp; Nội quy:</strong> Bên B có trách nhiệm giữ gìn tài sản chung, tuân thủ quy định PCCC, an ninh trật tự và đăng ký tạm trú theo quy định pháp luật.</div>
+                    <div><strong>3. Gia hạn &amp; Chấm dứt hợp đồng:</strong> Khi có nhu cầu gia hạn hoặc trả phòng trước hạn, Bên B gửi yêu cầu thông báo trước tối thiểu 30 ngày để đối soát tiền đặt cọc.</div>
+                </div>
+
+                <div class="row text-center mt-3">
+                    <div class="col-md-6 mb-3 mb-md-0">
+                        <div class="p-3 border rounded bg-white h-100">
+                            <div class="text-xs font-weight-bold text-uppercase text-secondary">ĐẠI DIỆN BÊN CHO THUÊ (BÊN A)</div>
+                            <div class="small text-muted mb-2">Chủ nhà trọ / Ban quản lý</div>
+                            <div class="d-inline-block px-3 py-1 rounded border border-success bg-light text-success font-weight-bold small mb-2">
+                                <i class="fas fa-check-circle mr-1"></i> ĐÃ KÝ SỐ &amp; PHÊ DUYỆT HỢP ĐỒNG
+                            </div>
+                            <div class="font-weight-bold text-gray-800" th:text="${contract.room.property.owner.fullName ?: contract.room.property.owner.username}">Chủ nhà</div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="p-3 border rounded bg-white h-100">
+                            <div class="text-xs font-weight-bold text-uppercase text-secondary">ĐẠI DIỆN BÊN THUÊ PHÒNG (BÊN B)</div>
+                            <div class="small text-muted mb-2">Cư dân đại diện hợp đồng</div>
+                            <div class="d-inline-block px-3 py-1 rounded border border-primary bg-light text-primary font-weight-bold small mb-2">
+                                <i class="fas fa-fingerprint mr-1"></i> ĐÃ XÁC THỰC NHẬN PHÒNG TRỰC TUYẾN
+                            </div>
+                            <div class="font-weight-bold text-gray-800" th:text="${contract.representative != null ? contract.representative.fullName : (tenant != null ? tenant.fullName : 'Cư dân đại diện')}">Nguyễn Văn An</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Gửi yêu cầu Gia hạn / Báo trả phòng -->
+    <div th:if="${contract != null}" id="contractActionModal" class="hidden fixed inset-0 z-50 bg-slate-900/60 flex items-center justify-center p-4 no-print">
+        <div class="bg-white rounded-xl border border-gray-200 w-full max-w-md p-4 shadow-lg">
+            <div class="d-flex align-items-center justify-content-between border-bottom pb-2 mb-3">
+                <h6 class="m-0 font-weight-bold text-primary">
+                    <i class="fas fa-file-signature mr-1"></i> Gửi yêu cầu Gia hạn / Báo trả phòng
+                </h6>
+                <button type="button" onclick="document.getElementById('contractActionModal').classList.add('hidden')" class="close">
+                    <span>&times;</span>
+                </button>
+            </div>
+
+            <form th:action="@{/tenant/contract/request-action}" method="post">
+                <input type="hidden" name="contractId" th:value="${contract.id}" />
+                <input type="hidden" name="roomId" th:value="${selectedRoomId}" />
+
+                <div class="form-group">
+                    <label class="small font-weight-bold text-gray-700">Loại yêu cầu *</label>
+                    <select name="actionType" class="form-control form-control-sm">
+                        <option value="RENEW">Đề nghị gia hạn hợp đồng thuê</option>
+                        <option value="RETURN">Thông báo trả phòng / kết thúc hợp đồng</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="small font-weight-bold text-gray-700">Ghi chú thời gian &amp; nguyện vọng</label>
+                    <textarea name="reason" rows="3" required
+                              placeholder="VD: Em muốn gia hạn thêm 6 tháng kể từ ngày hết hạn..."
+                              class="form-control form-control-sm"></textarea>
+                </div>
+
+                <div class="d-flex justify-content-end pt-2">
+                    <button type="button" onclick="document.getElementById('contractActionModal').classList.add('hidden')" class="btn btn-sm btn-secondary mr-2">
+                        Hủy
+                    </button>
+                    <button type="submit" class="btn btn-sm btn-primary font-weight-bold">
+                        Gửi yêu cầu tới Chủ trọ
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+</div>

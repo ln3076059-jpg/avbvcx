@@ -1,299 +1,267 @@
-<div th:fragment="content">
-  <!-- Header -->
-  <div
-    class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6"
-  >
-    <div>
-      <h1 class="text-2xl font-bold text-gray-900">Quản lý tài sản</h1>
-      <p class="text-sm text-gray-500">
-        Tổng cộng:
-        <span class="font-semibold text-blue-600" th:text="${properties.size()}"
-          >0</span
-        >
-        nhà trọ đang quản lý
-      </p>
+<div class="container-fluid" th:fragment="content">
+
+    <!-- Page Heading -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <div>
+            <h1 class="h3 mb-0 text-gray-800 font-weight-bold">
+                <i class="fas fa-building text-success mr-2"></i>Quản Lý Cơ Sở Nhà Trọ
+            </h1>
+            <p class="text-muted small mb-0 mt-1">Danh sách tất cả các tòa nhà, dãy phòng trọ cho thuê do bạn sở hữu và vận hành</p>
+        </div>
+        <div class="d-flex align-items-center">
+            <a th:href="@{/owner/management-plans}" class="btn btn-sm btn-outline-warning shadow-sm font-weight-bold mr-2">
+                <i class="fas fa-crown mr-1"></i>Gói Quản Lý
+            </a>
+            <a th:href="@{/owner/properties/create}" class="btn btn-sm btn-success shadow-sm font-weight-bold">
+                <i class="fas fa-plus fa-sm text-white-50 mr-1"></i>Thêm Nhà Trọ Mới
+            </a>
+        </div>
     </div>
 
-    <!-- Actions: Tạo nhà trọ mới -->
-    <div class="flex items-center justify-end gap-3">
-      <button
-        id="btnCreatePost"
-        type="button"
-        class="inline-flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-xl font-semibold shadow-md transition-all active:scale-95"
-      >
-        <i class="fa-solid fa-building text-xs"></i>
-        Thêm nhà trọ
-      </button>
-    </div>
-  </div>
-
-  <!-- Error message -->
-  <div
-    th:if="${errorMessage}"
-    class="mb-6 flex items-center p-4 rounded-xl bg-red-50 border border-red-100 text-red-700 animate-fade-in"
-  >
-    <i class="fa-solid fa-triangle-exclamation mr-3 text-lg"></i>
-    <span class="font-medium" th:text="${errorMessage}">Có lỗi xảy ra!</span>
-  </div>
-
-  <!-- Success message -->
-  <div
-    th:if="${successMessage}"
-    class="mb-6 flex items-center p-4 rounded-xl bg-green-50 border border-green-100 text-green-700 animate-fade-in"
-  >
-    <i class="fa-solid fa-circle-check mr-3 text-lg"></i>
-    <span class="font-medium" th:text="${successMessage}"
-      >Thao tác thành công!</span
-    >
-  </div>
-
-  <!-- Table -->
-  <div
-    class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden"
-  >
-    <div class="overflow-x-auto">
-      <table class="w-full text-left border-collapse">
-        <thead class="bg-gray-50/50 border-b border-gray-100">
-          <tr class="text-gray-500 uppercase text-[11px] tracking-wider">
-            <th class="px-6 py-4 font-bold">Thông tin tài sản</th>
-            <th class="px-6 py-4 font-bold">Vị trí</th>
-            <th class="px-6 py-4 font-bold">Loại hình</th>
-            <th class="px-6 py-4 font-bold">Tình trạng phòng</th>
-            <th class="px-6 py-4 font-bold">Ngày đăng</th>
-            <th class="px-6 py-4 font-bold text-center">Hành động</th>
-          </tr>
-        </thead>
-
-        <tbody class="divide-y divide-gray-50">
-          <tr
-            th:each="prop : ${properties}"
-            th:classappend="${prop.status == 'PLAN_LOCKED'} ? 'opacity-60 bg-gray-50' : 'hover:bg-blue-50/30'"
-            class="transition-colors group"
-          >
-            <td class="px-6 py-4">
-              <div class="flex items-center gap-4">
-                <div
-                  class="h-14 w-20 flex-shrink-0 overflow-hidden rounded-lg border border-gray-100 bg-gray-50"
-                >
-                  <img
-                    th:src="${prop.img_url != null ? prop.img_url : '/images/no-image.jpg'}"
-                    class="h-full w-full object-cover"
-                    alt="property image"
-                  />
-                </div>
-                <div class="max-w-[250px]">
-                  <div class="flex items-center gap-1.5">
-                    <div
-                      class="font-bold text-gray-900 truncate group-hover:text-blue-600 transition-colors"
-                      th:classappend="${prop.status == 'PLAN_LOCKED'} ? '!text-gray-400 !group-hover:text-gray-400' : ''"
-                      th:text="${prop.name}"
-                    >
-                      Tiêu đề tài sản
+    <!-- Quick Stats Cards (4 Cards) -->
+    <div class="row" th:with="totalProps=${properties != null ? properties.size() : 0}">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Tổng Số Cơ Sở</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800" th:text="${totalProps}">0</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-hotel fa-2x text-gray-300"></i>
+                        </div>
                     </div>
-                    <!-- Lock badge for PLAN_LOCKED -->
-                    <span
-                      th:if="${prop.status == 'PLAN_LOCKED'}"
-                      class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-orange-100 text-orange-600 flex-shrink-0"
-                      title="Nhà trọ tạm khóa do hạ gói"
-                    >
-                      <i class="fa-solid fa-lock text-[9px]"></i> Tạm khóa
-                    </span>
-                  </div>
-                  <div
-                    class="text-[11px] text-gray-400 mt-0.5"
-                    th:text="'ID: #' + ${prop.id}"
-                  >
-                    ID: #123
-                  </div>
                 </div>
-              </div>
-            </td>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Cơ Sở Hoạt Động</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800" th:text="${totalProps}">0</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-check-circle fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Trạng Thái Vận Hành</div>
+                            <div class="h5 mb-0 font-weight-bold text-success">Đang Cho Thuê</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-chart-line fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Quản Lý Phòng Trọ</div>
+                            <a th:href="@{/owner/rooms}" class="h6 mb-0 font-weight-bold text-warning d-inline-block">
+                                Chi tiết danh sách &rarr;
+                            </a>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-door-open fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-            <td class="px-6 py-4">
-              <span
-                class="text-sm text-gray-600 line-clamp-1"
-                th:text="${prop.addressNumber}"
-              >
-                123 Lê Văn Việt
-              </span>
-            </td>
-
-            <td class="px-6 py-4">
-              <span
-                class="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-semibold bg-gray-100 text-gray-600"
-                th:text="${prop.categoryName}"
-              >
-                Nhà trọ
-              </span>
-            </td>
-
-            <td class="px-6 py-4">
-              <div class="flex items-center gap-2">
-                <span
-                  class="text-sm font-semibold text-gray-700"
-                  th:text="${prop.rentedRooms} + '/' + ${prop.totalRooms}"
-                >
-                  2/10
+    <!-- Live Search & Filters -->
+    <div class="search-container border-left-success">
+        <div class="row align-items-center">
+            <div class="col-md-5 mb-2 mb-md-0">
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text bg-light border-0"><i class="fas fa-search text-gray-400"></i></span>
+                    </div>
+                    <input type="text" id="ownerPropSearch" class="form-control border-0 bg-light small" 
+                           placeholder="Tìm nhanh theo tên nhà trọ, địa chỉ..." onkeyup="filterOwnerProps()">
+                </div>
+            </div>
+            <div class="col-md-4 mb-2 mb-md-0">
+                <select id="ownerPropStatusFilter" class="form-control custom-select" onchange="filterOwnerProps()">
+                    <option value="ALL">-- Tất cả trạng thái --</option>
+                    <option value="ACTIVE">Đang hoạt động</option>
+                    <option value="PLAN_LOCKED">Tạm khóa gói</option>
+                </select>
+            </div>
+            <div class="col-md-3 text-md-right">
+                <span class="small text-gray-600 font-weight-bold">
+                    Hiển thị <span id="propFilteredCount" class="text-success font-weight-bold" th:text="${properties != null ? properties.size() : 0}">0</span> cơ sở
                 </span>
-                <span class="text-xs text-gray-500">đã thuê</span>
-              </div>
-              <div
-                class="w-24 h-1.5 bg-gray-100 rounded-full mt-1.5 overflow-hidden"
-              >
-                <div
-                  class="h-full bg-blue-500 rounded-full"
-                  th:style="'width: ' + (${prop.totalRooms > 0 ? (prop.rentedRooms * 100.0 / prop.totalRooms) : 0}) + '%'"
-                ></div>
-              </div>
-            </td>
-
-            <td class="px-6 py-4">
-              <span
-                class="text-sm text-gray-500 font-medium"
-                th:text="${prop.formattedCreatedAt}"
-              >
-                25/01/2026
-              </span>
-            </td>
-
-            <td class="px-6 py-4">
-              <!-- Normal actions -->
-              <div
-                th:unless="${prop.status == 'PLAN_LOCKED'}"
-                class="flex justify-center items-center gap-4"
-              >
-                <a
-                  th:href="@{/owner/properties/edit/{id}(id=${prop.id})}"
-                  class="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
-                  title="Chỉnh sửa"
-                >
-                  <i class="fa-solid fa-pen-to-square"></i>
-                </a>
-
-                <form
-                  th:action="@{/owner/properties/delete/{id}(id=${prop.id})}"
-                  method="post"
-                  class="inline"
-                  onsubmit="
-                    return confirm(
-                      'Bạn có chắc chắn muốn xóa vĩnh viễn tài sản này?',
-                    );
-                  "
-                >
-                  <button
-                    type="submit"
-                    class="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
-                    title="Xóa"
-                  >
-                    <i class="fa-solid fa-trash-can"></i>
-                  </button>
-                </form>
-              </div>
-
-              <!-- Locked state —— upgrade plan to unlock -->
-              <div
-                th:if="${prop.status == 'PLAN_LOCKED'}"
-                class="flex justify-center"
-              >
-                <a
-                  href="/owner/management-plans"
-                  class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-orange-50 text-orange-600 hover:bg-orange-100 transition-all"
-                  title="Nâng gói để mở khóa"
-                >
-                  <i class="fa-solid fa-lock text-[10px]"></i> Nâng gói
-                </a>
-              </div>
-            </td>
-          </tr>
-
-          <tr th:if="${#lists.isEmpty(properties)}">
-            <td colspan="6" class="py-20 text-center">
-              <div class="flex flex-col items-center">
-                <div
-                  class="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mb-4"
-                >
-                  <i
-                    class="fa-regular fa-folder-open text-2xl text-gray-300"
-                  ></i>
-                </div>
-                <h3 class="text-gray-900 font-semibold">Chưa có nhà trọ nào</h3>
-                <p class="text-gray-400 text-sm mt-1">
-                  Tạo nhà trọ đầu tiên để bắt đầu quản lý!
-                </p>
-              </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+            </div>
+        </div>
     </div>
-  </div>
 
-  <!-- Modal: Thông báo cần mua gói -->
-  <div
-    id="needPackageModal"
-    class="hidden fixed inset-0 bg-black/40 flex items-center justify-center z-50"
-  >
-    <!-- overlay click -->
-    <div id="modalOverlay" class="absolute inset-0"></div>
+    <!-- DataTales Card -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 bg-white border-bottom-success d-flex justify-content-between align-items-center">
+            <h6 class="m-0 font-weight-bold text-success">
+                <i class="fas fa-list mr-1"></i>Danh Sách Cơ Sở Nhà Trọ
+            </h6>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover mb-0" id="ownerPropertiesTable" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th style="width: 15%;">Mã & Ảnh Đại Diện</th>
+                            <th style="width: 25%;">Tên Cơ Sở Nhà Trọ</th>
+                            <th style="width: 25%;">Địa Chỉ & Khu Vực</th>
+                            <th style="width: 15%;">Quy Mô & Trạng Thái</th>
+                            <th style="width: 20%;" class="text-center">Chức Năng</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:if="${properties == null or #lists.isEmpty(properties)}">
+                            <td colspan="5" class="text-center py-5 text-muted">
+                                <i class="fas fa-hotel fa-3x mb-3 text-gray-300 d-block"></i>
+                                Bạn chưa có cơ sở nhà trọ nào. Hãy nhấn <strong>"Thêm Nhà Trọ Mới"</strong> để bắt đầu quản lý.
+                            </td>
+                        </tr>
+                        <tr th:each="prop : ${properties}" class="owner-prop-row"
+                            th:data-name="${prop.name != null ? prop.name.toLowerCase() : ''}"
+                            th:data-address="${prop.addressNumber != null ? prop.addressNumber.toLowerCase() : ''}"
+                            th:data-status="${prop.status != null ? prop.status : 'ACTIVE'}">
+                            
+                            <!-- Cột 1: Mã & Ảnh Thumbnail -->
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <img th:src="${prop.img_url != null and !prop.img_url.contains('1502005229762') ? prop.img_url : '/images/rooms/room-' + ((prop.id % 12) + 1) + '.jpg'}" 
+                                         onerror="this.onerror=null;this.src='/images/rooms/room-1.jpg';"
+                                         alt="Ảnh nhà trọ" class="rounded mr-2 border shadow-xs" 
+                                         style="width: 55px; height: 55px; object-fit: cover;">
+                                    <div>
+                                        <strong class="text-primary font-mono" th:text="'#' + ${prop.id}">#1</strong>
+                                        <div class="small text-muted" th:text="${prop.formattedCreatedAt ?: ''}"></div>
+                                    </div>
+                                </div>
+                            </td>
 
-    <div class="relative bg-white rounded-xl shadow-xl w-full max-w-md p-6">
-      <h3 class="text-lg font-semibold mb-2">Cần mua gói quản lý</h3>
-      <p class="text-sm text-gray-600 mb-5">
-        Bạn cần có gói quản lý (Management Plan) để tạo nhà trọ. Hãy kiểm tra
-        các gói có sẵn trong menu.
-      </p>
-      <div class="flex justify-end gap-3">
-        <button
-          type="button"
-          id="btnModalOk"
-          class="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold"
-        >
-          Đã hiểu
-        </button>
-      </div>
+                            <!-- Cột 2: Tên Nhà Trọ -->
+                            <td>
+                                <div class="font-weight-bold text-dark" th:text="${prop.name}">Nhà Trọ Xanh</div>
+                                <div class="small text-muted mt-1" th:if="${prop.categoryName != null}">
+                                    <i class="fas fa-tag text-info mr-1"></i><span th:text="${prop.categoryName}">Chung cư mini</span>
+                                </div>
+                            </td>
+
+                            <!-- Cột 3: Địa Chỉ -->
+                            <td>
+                                <div class="small text-gray-800" th:text="${prop.addressNumber ?: 'Chưa cập nhật địa chỉ'}">Số 12 ngõ 34 Cầu Giấy</div>
+                            </td>
+
+                            <!-- Cột 4: Quy Mô & Trạng Thái -->
+                            <td>
+                                <div class="small font-weight-bold text-dark">
+                                    <i class="fas fa-door-closed text-primary mr-1"></i><span th:text="${prop.rentedRooms != null ? prop.rentedRooms : 0}">0</span>/<span th:text="${prop.totalRooms != null ? prop.totalRooms : 0}">0</span> phòng
+                                </div>
+                                <div class="mt-1">
+                                    <span th:if="${prop.status == 'PLAN_LOCKED'}" class="badge badge-warning font-weight-bold">
+                                        <i class="fas fa-lock mr-1"></i>Tạm Khóa Gói
+                                    </span>
+                                    <span th:unless="${prop.status == 'PLAN_LOCKED'}" class="badge badge-success font-weight-bold">
+                                        <i class="fas fa-check-circle mr-1"></i>Đang Hoạt Động
+                                    </span>
+                                </div>
+                            </td>
+
+                            <!-- Cột 5: Chức Năng (Thao Tác) -->
+                            <td class="text-center action-btns">
+                                <a th:href="@{/owner/rooms(propertyId=${prop.id})}" class="btn btn-info btn-sm shadow-sm" title="Quản lý phòng">
+                                    <i class="fas fa-door-open mr-1"></i>Phòng
+                                </a>
+                                <a th:href="@{|/owner/properties/edit/${prop.id}|}" class="btn btn-primary btn-sm shadow-sm" title="Chỉnh sửa thông tin">
+                                    <i class="fas fa-edit mr-1"></i>Sửa
+                                </a>
+                                <button type="button" class="btn btn-danger btn-sm shadow-sm" title="Xóa nhà trọ"
+                                        th:data-id="${prop.id}" th:data-name="${prop.name}"
+                                        onclick="confirmDeleteProp(this.getAttribute('data-id'), this.getAttribute('data-name'))">
+                                    <i class="fas fa-trash-alt mr-1"></i>Xóa
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
-  </div>
 
-  <script th:inline="javascript">
-    // canPost có thể null -> ép boolean an toàn
-    const canPost = !!(/*[[${canPost}]]*/ false);
-    const createUrl =
-      /*[[@{/owner/properties/create}]]*/ "/owner/properties/create";
-
-    const btnCreatePost = document.getElementById("btnCreatePost");
-    const needPackageModal = document.getElementById("needPackageModal");
-    const modalOverlay = document.getElementById("modalOverlay");
-    const btnModalOk = document.getElementById("btnModalOk");
-
-    function openNeedPackageModal() {
-      needPackageModal.classList.remove("hidden");
-    }
-
-    function closeNeedPackageModal() {
-      needPackageModal.classList.add("hidden");
-    }
-
-    btnCreatePost.addEventListener("click", function () {
-      if (canPost) {
-        window.location.href = createUrl;
-        return;
-      }
-      openNeedPackageModal();
-    });
-
-    btnModalOk.addEventListener("click", closeNeedPackageModal);
-
-    // click nền để đóng
-    modalOverlay.addEventListener("click", closeNeedPackageModal);
-
-    // ESC để đóng
-    document.addEventListener("keydown", function (e) {
-      if (
-        e.key === "Escape" &&
-        !needPackageModal.classList.contains("hidden")
-      ) {
-        closeNeedPackageModal();
-      }
-    });
-  </script>
 </div>
+
+<!-- Modal Xóa Nhà Trọ -->
+<div class="modal fade" id="deletePropModal" tabindex="-1" role="dialog" aria-labelledby="delModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <form id="deletePropForm" method="post" action="">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title font-weight-bold" id="delModalLabel">
+                        <i class="fas fa-exclamation-triangle mr-2"></i>Xác Nhận Xóa Cơ Sở Nhà Trọ
+                    </h5>
+                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body text-gray-700">
+                    Bạn có chắc chắn muốn xóa cơ sở nhà trọ <strong id="deletePropName" class="text-danger"></strong> không?<br>
+                    <span class="small text-muted">Lưu ý: Bạn chỉ có thể xóa nhà trọ khi không còn phòng đang có hợp đồng hoạt động.</span>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary font-weight-bold" data-dismiss="modal">Hủy bỏ</button>
+                    <button type="submit" class="btn btn-danger font-weight-bold">Xác Nhận Xóa</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+function filterOwnerProps() {
+    var search = document.getElementById('ownerPropSearch').value.toLowerCase().trim();
+    var status = document.getElementById('ownerPropStatusFilter').value;
+    var rows = document.querySelectorAll('.owner-prop-row');
+    var count = 0;
+
+    rows.forEach(function(row) {
+        var name = row.getAttribute('data-name') || '';
+        var address = row.getAttribute('data-address') || '';
+        var rowStatus = row.getAttribute('data-status') || '';
+
+        var matchSearch = !search || name.includes(search) || address.includes(search);
+        var matchStatus = (status === 'ALL') || (rowStatus === status);
+
+        if (matchSearch && matchStatus) {
+            row.style.display = '';
+            count++;
+        } else {
+            row.style.display = 'none';
+        }
+    });
+
+    document.getElementById('propFilteredCount').textContent = count;
+}
+
+function confirmDeleteProp(propId, propName) {
+    document.getElementById('deletePropName').textContent = propName;
+    document.getElementById('deletePropForm').action = '/owner/properties/delete/' + propId;
+    $('#deletePropModal').modal('show');
+}
+</script>

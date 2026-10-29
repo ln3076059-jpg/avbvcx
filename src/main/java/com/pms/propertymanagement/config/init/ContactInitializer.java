@@ -7,6 +7,7 @@ import com.pms.propertymanagement.repository.ContactRepository;
 import com.pms.propertymanagement.repository.PropertyRepository;
 import com.pms.propertymanagement.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,6 +17,7 @@ import java.util.Random;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class ContactInitializer {
 
     private final ContactRepository contactRepository;
@@ -35,11 +37,11 @@ public class ContactInitializer {
 
         Random random = new Random();
         List<Contact> contacts = new ArrayList<>();
-        
+
         String[] firstNames = {"Nguyễn", "Trần", "Lê", "Phạm", "Hoàng", "Huỳnh", "Phan", "Vũ", "Võ", "Đặng"};
         String[] middleNames = {"Văn", "Thị", "Hữu", "Minh", "Quốc", "Gia", "Bảo", "Ngọc", "Thanh", "Đức"};
         String[] lastNames = {"An", "Bình", "Cường", "Dũng", "Em", "Giang", "Hùng", "Hải", "Khánh", "Linh", "Minh", "Nam", "Oanh", "Phú", "Quân"};
-        
+
         String[] notes = {
             "Cần thuê gấp trong tuần này",
             "Hỏi xem có chỗ để xe hơi không",
@@ -52,29 +54,29 @@ public class ContactInitializer {
             "Muốn tìm phòng có ban công",
             "Đã gọi nhưng không bắt máy"
         };
-        
+
         // Generate 15-20 contacts distributed among properties
         int totalContacts = 15 + random.nextInt(6);
-        
+
         for (int i = 0; i < totalContacts; i++) {
             Property randomProp = properties.get(random.nextInt(properties.size()));
-            String fullName = firstNames[random.nextInt(firstNames.length)] + " " + 
-                              middleNames[random.nextInt(middleNames.length)] + " " + 
+            String fullName = firstNames[random.nextInt(firstNames.length)] + " " +
+                              middleNames[random.nextInt(middleNames.length)] + " " +
                               lastNames[random.nextInt(lastNames.length)];
-            
+
             String phone = "09" + (random.nextInt(90000000) + 10000000);
-            
+
             Contact c = new Contact();
             c.setName(fullName);
             c.setPhone(phone);
             c.setNote(notes[random.nextInt(notes.length)]);
             c.setOwner(owner);
             c.setProperty(randomProp);
-            c.setIsChecked(random.nextBoolean()); // Randomly checked or not
+            c.setIsChecked(random.nextBoolean());
             contacts.add(c);
         }
 
         contactRepository.saveAll(contacts);
-        System.out.println("Generated " + contacts.size() + " sample contacts for owner1");
+        log.info("Generated {} sample contacts for owner1", contacts.size());
     }
 }

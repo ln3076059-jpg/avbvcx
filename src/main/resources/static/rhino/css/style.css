@@ -1,0 +1,1029 @@
+/*---------------------------------------------------------------------
+  File Name: style.css (Rhino Template - Senior UI/UX Bright Edition)
+  Colors:
+    - Primary Brand Orange: #fe9901 (with crisp #ffffff text)
+    - Deep Orange Hover:    #e08200 (with crisp #ffffff text)
+    - Header/Footer Navy:   #161825
+    - Card Surface:         #ffffff
+    - Section Alt Surface:  #f8fafc
+---------------------------------------------------------------------*/
+
+@import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap');
+
+* {
+  box-sizing: border-box !important;
+}
+
+*,
+*::after,
+*::before {
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+}
+
+.container {
+  max-width: 1280px;
+  padding-left: 20px !important;
+  padding-right: 20px !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  color: #334155;
+  font-size: 15px;
+  font-family: 'Be Vietnam Pro', sans-serif;
+  line-height: 1.65;
+  font-weight: 400;
+  background-color: #ffffff;
+}
+
+a {
+  color: #161825;
+  text-decoration: none !important;
+  outline: none !important;
+  transition: all 0.22s ease;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  letter-spacing: -0.015em;
+  position: relative;
+  padding: 0 0 8px 0;
+  font-weight: 700;
+  line-height: 1.28;
+  color: #161825;
+  margin: 0;
+  font-family: 'Be Vietnam Pro', sans-serif;
+}
+
+h1 {
+  font-size: 36px;
+}
+
+h2 {
+  font-size: 26px;
+}
+
+h3 {
+  font-size: 18px;
+}
+
+h4 {
+  font-size: 16px;
+}
+
+h5,
+h6 {
+  font-size: 14px;
+}
+
+h1 a,
+h2 a,
+h3 a,
+h4 a,
+h5 a,
+h6 a {
+  color: #161825;
+  text-decoration: none !important;
+}
+
+button:focus {
+  outline: none;
+}
+
+ul,
+li,
+ol {
+  margin: 0px;
+  padding: 0px;
+  list-style: none;
+}
+
+p {
+  margin: 0px;
+  font-weight: 400;
+  font-size: 15px;
+  line-height: 1.65;
+  color: #475569;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+button {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  cursor: pointer;
+}
+
+.full {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+.text_align_center {
+  text-align: center;
+}
+
+.text_align_left {
+  text-align: left;
+}
+
+.text_align_right {
+  text-align: right;
+}
+
+/*-- Rhino Header --*/
+
+.header {
+  width: 100%;
+  height: auto;
+}
+
+.header_top {
+  background-color: #161825;
+  padding: 9px 0;
+}
+
+ul.contat_infoma {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 0;
+  padding: 0;
+}
+
+ul.contat_infoma li {
+  color: #f8fafc;
+  font-size: 13.5px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+ul.contat_infoma li i {
+  font-size: 14px;
+  color: #fe9901;
+}
+
+ul.contat_infoma li a {
+  color: #f8fafc;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+ul.contat_infoma li a:hover {
+  color: #fe9901;
+}
+
+ul.social_icon_top {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+}
+
+ul.social_icon_top li {
+  display: inline-block;
+}
+
+ul.social_icon_top li a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  border-radius: 50%;
+  color: #161825;
+  background: #ffffff;
+  width: 28px;
+  height: 28px;
+}
+
+ul.social_icon_top li a:hover {
+  background: #fe9901;
+  color: #ffffff;
+}
+
+.header_bottom {
+  background-color: #ffffff;
+  height: auto;
+  padding: 12px 0;
+  border-bottom: 1px solid #e2e8f0;
+  box-shadow: 0 4px 20px rgba(15, 23, 42, 0.04);
+}
+
+.logo {
+  padding: 0;
+  flex-shrink: 0;
+}
+
+.logo a {
+  font-family: 'Be Vietnam Pro', sans-serif;
+  font-size: 22px;
+  line-height: 1.2;
+  color: #161825;
+  font-weight: 800;
+  text-transform: uppercase;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  white-space: nowrap;
+}
+
+/*-- Rhino Navigation (Single-Line Desktop Guaranteed) --*/
+
+.navigation.navbar {
+  padding: 0;
+}
+
+@media (min-width: 1280px) {
+  .navigation.navbar {
+    flex-wrap: nowrap !important;
+  }
+  .navigation .navbar-collapse {
+    flex-basis: auto !important;
+    flex-grow: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+  }
+}
+
+.navigation .navbar-nav .nav-link {
+  padding: 8px 12px;
+  color: #1e293b;
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 600;
+  text-transform: uppercase;
+  border-radius: 8px;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+}
+
+.navigation .navbar-nav .nav-link:focus,
+.navigation .navbar-nav .nav-link:hover,
+.navigation .navbar-nav .active > .nav-link,
+.navigation .navbar-nav .nav-link.active,
+.navigation .navbar-nav .nav-link.show,
+.navigation .navbar-nav .show > .nav-link {
+  background: #fe9901 !important;
+  color: #ffffff !important;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(254, 153, 1, 0.28);
+}
+
+ul.search {
+  padding-left: 8px;
+  margin: 0;
+  flex-shrink: 0;
+}
+
+ul.search li a {
+  color: #1e293b;
+  width: 38px;
+  height: 38px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  background-color: #f1f5f9;
+}
+
+ul.search li a:hover {
+  background-color: #fe9901;
+  color: #ffffff;
+}
+
+/**-- Rhino Banner Section --**/
+
+.banner_main {
+  position: relative;
+  background: linear-gradient(115deg, rgba(22, 24, 37, 0.82) 0%, rgba(22, 24, 37, 0.52) 100%),
+              url('/images/rooms/room-1.jpg') center center / cover no-repeat;
+  padding: 72px 0 135px 0;
+  overflow: hidden;
+}
+
+.build_box {
+  text-align: left;
+  padding-top: 8px;
+}
+
+.banner_po {
+  position: inherit;
+  padding: 0;
+  text-align: left;
+}
+
+.build_box h1 {
+  font-size: 42px;
+  font-weight: 800;
+  color: #ffffff;
+  line-height: 1.18;
+  padding-bottom: 16px;
+  display: block;
+}
+
+.build_box p {
+  color: #f1f5f9;
+  font-size: 16px;
+  line-height: 1.65;
+  font-weight: 400;
+  margin-bottom: 28px;
+  max-width: 62ch;
+}
+
+.build_box .conatct_btn {
+  font-size: 15px;
+  padding: 13px 28px;
+  text-transform: uppercase;
+  font-weight: 700;
+  background: #fe9901;
+  color: #ffffff !important;
+  border-radius: 8px;
+  box-shadow: 0 6px 20px rgba(254, 153, 1, 0.35);
+}
+
+.build_box .conatct_btn:hover {
+  background: #e08200;
+  color: #ffffff !important;
+  transform: translateY(-2px);
+}
+
+.banner .carousel-indicators {
+  display: none;
+}
+
+/**-- Section Headings & Buttons --**/
+
+.titlepage {
+  text-align: center;
+  padding-bottom: 36px;
+}
+
+.titlepage h2 {
+  font-size: 28px;
+  color: #161825;
+  line-height: 1.25;
+  font-weight: 800;
+  padding: 0;
+  text-transform: uppercase;
+}
+
+.titlepage span {
+  font-size: 15px;
+  line-height: 1.65;
+  color: #64748b;
+  padding-top: 12px;
+  display: block;
+  max-width: 66ch;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.d_flex {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.read_more {
+  font-size: 15px;
+  background-color: #fe9901;
+  color: #ffffff !important;
+  padding: 12px 26px;
+  width: auto;
+  min-width: 180px;
+  text-align: center;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-weight: 700;
+  border-radius: 8px;
+  height: auto;
+  text-transform: uppercase;
+  box-shadow: 0 4px 14px rgba(254, 153, 1, 0.28);
+  transition: all 0.22s ease;
+}
+
+.read_more:hover {
+  background: #161825;
+  color: #ffffff !important;
+  transform: translateY(-2px);
+}
+
+/*-- Rhino Three Box --*/
+
+.three_box {
+  margin-top: -70px;
+  position: relative;
+  z-index: 10;
+}
+
+.const {
+  padding: 30px 22px 26px 22px;
+  background: #ffffff;
+  border: 1px solid #f1f5f9;
+  border-bottom: 4px solid #fe9901;
+  border-radius: 12px;
+  height: 100%;
+  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.08);
+  transition: all 0.25s ease;
+}
+
+.const span {
+  display: block;
+  font-size: 15px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #161825;
+  padding-top: 18px;
+  line-height: 1.4;
+}
+
+#text_hover:hover.const,
+.const:hover {
+  background-color: #fe9901;
+  cursor: pointer;
+  transform: translateY(-5px);
+  box-shadow: 0 16px 36px rgba(254, 153, 1, 0.28);
+}
+
+#text_hover:hover.const span,
+.const:hover span {
+  color: #ffffff;
+}
+
+/**-- Rhino About Section --**/
+
+.about {
+  background-color: #ffffff;
+  padding: 72px 0;
+}
+
+.about .titlepage {
+  max-width: 100%;
+  float: none;
+  width: 100%;
+  text-align: left;
+  padding-bottom: 0;
+}
+
+.about .titlepage span {
+  padding-bottom: 28px;
+  padding-top: 16px;
+  margin-left: 0;
+}
+
+.about_img figure {
+  margin: 0;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 14px 36px rgba(15, 23, 42, 0.1);
+  border-bottom: 5px solid #fe9901;
+}
+
+.about_img figure img {
+  width: 100%;
+  height: 360px;
+  object-fit: cover;
+}
+
+/**-- Rhino Projects Section (Bright White Cards) --**/
+
+.projects {
+  padding: 72px 0;
+  background: #f8fafc;
+}
+
+.project {
+  position: relative;
+  overflow: hidden;
+  border-radius: 12px;
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 8px 26px rgba(15, 23, 42, 0.06);
+  transition: all 0.25s ease;
+}
+
+.project:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 16px 36px rgba(15, 23, 42, 0.12);
+}
+
+.project_img figure {
+  margin: 0;
+  overflow: hidden;
+}
+
+.project_img figure img {
+  width: 100%;
+  height: 240px;
+  object-fit: cover;
+  transition: transform 0.4s ease;
+}
+
+.project:hover .project_img figure img {
+  transform: scale(1.04);
+}
+
+.project_text {
+  padding: 20px;
+  background-color: #ffffff;
+  border-top: 3px solid #fe9901;
+  transition: all 0.25s ease;
+}
+
+.project_text h3 {
+  color: #161825;
+  text-align: left;
+  display: block;
+  font-size: 18px;
+  font-weight: 700;
+  padding-bottom: 6px;
+}
+
+.project_text p {
+  color: #64748b;
+  font-size: 14px;
+  text-align: left;
+  line-height: 1.6;
+}
+
+.project:hover .project_text {
+  background-color: #fe9901;
+}
+
+.project:hover .project_text h3,
+.project:hover .project_text p {
+  color: #ffffff;
+}
+
+/**-- Rhino Choose Section (Warm Bright Surface instead of Heavy Black) --**/
+
+.choose {
+  background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+  padding: 72px 0;
+  color: #161825;
+  border-top: 1px solid #fde68a;
+  border-bottom: 1px solid #fde68a;
+}
+
+.choose .titlepage {
+  text-align: left;
+  padding-bottom: 0;
+}
+
+.choose .titlepage h2 {
+  color: #161825;
+  padding-bottom: 14px;
+}
+
+.choose .titlepage p {
+  color: #475569;
+  font-weight: 400;
+  font-size: 15px;
+  line-height: 1.65;
+  padding-bottom: 32px;
+  max-width: 64ch;
+}
+
+.award {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.award_icon {
+  width: 100%;
+}
+
+.award_icon i {
+  background-color: #ffffff;
+  width: 100%;
+  max-width: 136px;
+  height: 108px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  margin: 0 auto;
+  box-shadow: 0 8px 24px rgba(254, 153, 1, 0.15);
+  border: 1px solid #fde68a;
+  transition: all 0.25s ease;
+}
+
+#awa_ho:hover.award_icon i {
+  background-color: #fe9901;
+  transform: translateY(-4px);
+}
+
+.award_icon strong {
+  color: #161825;
+  text-transform: uppercase;
+  font-weight: 700;
+  padding-top: 12px;
+  display: block;
+  font-size: 14px;
+}
+
+/**-- Rhino Staff Section --**/
+
+.container_staff {
+  max-width: 1280px;
+  width: 100%;
+  padding-right: 20px !important;
+  padding-left: 20px !important;
+  margin-right: auto !important;
+  margin-left: auto !important;
+}
+
+.staff_main {
+  background-color: #ffffff;
+  padding: 72px 0;
+}
+
+.staff {
+  text-align: center;
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  overflow: hidden;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-shadow: 0 8px 26px rgba(15, 23, 42, 0.06);
+  transition: all 0.25s ease;
+}
+
+.staff:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 14px 32px rgba(15, 23, 42, 0.1);
+}
+
+.man {
+  background-color: #ffffff;
+  margin: 0;
+  padding: 28px 20px 20px 20px;
+}
+
+.social_icon_main {
+  background: linear-gradient(135deg, #fe9901 0%, #f59e0b 100%);
+  padding: 18px 16px;
+}
+
+.social_icon_main h4 {
+  color: #ffffff;
+  font-size: 17px;
+  line-height: 1.3;
+  font-weight: 700;
+  padding-bottom: 12px;
+}
+
+ul.social_icon_staff {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+ul.social_icon_staff li {
+  display: inline-block;
+}
+
+ul.social_icon_staff li a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  border-radius: 50%;
+  color: #fe9901;
+  background: #ffffff;
+  width: 34px;
+  height: 34px;
+}
+
+ul.social_icon_staff li a:hover {
+  color: #ffffff;
+  background: #161825;
+}
+
+.staff_main .read_more {
+  margin: 36px auto 0 auto;
+}
+
+/**-- Rhino Contact Section --**/
+
+.contact {
+  background: #f8fafc;
+  padding: 72px 0;
+}
+
+.contact .titlepage {
+  text-align: left;
+  padding-bottom: 24px;
+}
+
+.main_form {
+  padding: 36px;
+  background: #ffffff;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  border-top: 4px solid #fe9901;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
+}
+
+.main_form .contactus {
+  border: 1.5px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 0px 16px;
+  margin-bottom: 18px;
+  width: 100%;
+  height: 46px;
+  background: #f8fafc;
+  color: #161825;
+  font-size: 15px;
+  font-weight: 400;
+  transition: all 0.2s ease;
+}
+
+.main_form .contactus:focus,
+.main_form .textarea:focus {
+  background: #ffffff;
+  border-color: #fe9901;
+  box-shadow: 0 0 0 3px rgba(254, 153, 1, 0.15);
+}
+
+.main_form .textarea {
+  border: 1.5px solid #e2e8f0;
+  border-radius: 8px;
+  margin-bottom: 18px;
+  width: 100%;
+  background: #f8fafc;
+  color: #161825;
+  font-size: 15px;
+  font-weight: 400;
+  padding: 12px 16px;
+  height: 100px;
+  transition: all 0.2s ease;
+}
+
+.main_form .send_btn {
+  font-size: 15px;
+  background-color: #fe9901;
+  text-transform: uppercase;
+  color: #ffffff;
+  padding: 12px 26px;
+  border-radius: 8px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 14px rgba(254, 153, 1, 0.3);
+}
+
+.main_form .send_btn:hover {
+  background-color: #161825;
+  color: #ffffff;
+}
+
+#request *::placeholder {
+  color: #94a3b8;
+  opacity: 1;
+}
+
+/**-- Rhino Clients Section --**/
+
+.clients {
+  padding: 72px 0;
+  background: #ffffff;
+  border-top: 1px solid #e2e8f0;
+  position: relative;
+}
+
+.clients .titlepage h2 {
+  color: #161825;
+}
+
+.clients .titlepage span {
+  color: #64748b;
+}
+
+.relative2 {
+  position: inherit;
+  padding: 0px 32px 36px 32px;
+  text-align: left;
+  border-top: #fe9901 solid 72px;
+  border-radius: 12px;
+}
+
+.relative2 i {
+  margin-top: -42px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.relative2 span {
+  color: #161825;
+  display: block;
+  font-size: 17px;
+  font-weight: 700;
+  padding-top: 14px;
+  padding-bottom: 6px;
+}
+
+.relative2 p {
+  color: #475569;
+  font-size: 15px;
+  line-height: 1.65;
+  font-weight: 400;
+}
+
+.testimo_ban_bg {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.05);
+}
+
+.consect {
+  padding: 0;
+}
+
+/**-- Rhino Footer --**/
+
+.footer {
+  background: #161825;
+  padding-top: 60px;
+  text-align: left;
+  border-top: 4px solid #fe9901;
+}
+
+.footer h3 {
+  font-weight: 700;
+  font-size: 16px;
+  line-height: 1.4;
+  text-align: left;
+  color: #ffffff;
+  margin-bottom: 18px;
+  padding-bottom: 8px;
+  display: inline-block;
+  border-bottom: 2px solid #fe9901;
+}
+
+.logo_bottom {
+  display: inline-flex;
+  align-items: center;
+  padding-bottom: 14px;
+}
+
+ul.link_menu li {
+  display: block;
+  text-align: left;
+  margin-bottom: 8px;
+}
+
+ul.link_menu li a {
+  color: #cbd5e1;
+  font-size: 14.5px;
+  line-height: 1.6;
+  display: inline-block;
+}
+
+ul.link_menu li a:hover {
+  color: #fe9901;
+  transform: translateX(3px);
+}
+
+ul.insta {
+  margin-top: 8px;
+  display: grid;
+  grid-template-columns: repeat(2, 84px);
+  gap: 10px;
+}
+
+ul.insta li {
+  display: block;
+  padding: 0;
+}
+
+ul.insta li img {
+  width: 84px;
+  height: 68px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.bottom_form {
+  margin-top: 8px;
+}
+
+.bottom_form .enter {
+  padding: 0px 14px;
+  width: 100%;
+  height: 42px;
+  background-color: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 400;
+  margin-bottom: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+}
+
+.bottom_form .enter::placeholder {
+  color: #94a3b8;
+}
+
+.sub_btn {
+  font-size: 14px;
+  font-weight: 700;
+  text-transform: uppercase;
+  background-color: #fe9901;
+  color: #ffffff;
+  padding: 10px 20px;
+  width: 100%;
+  height: 42px;
+  border-radius: 8px;
+  border: none;
+  box-shadow: 0 4px 14px rgba(254, 153, 1, 0.3);
+}
+
+.sub_btn:hover {
+  background-color: #e08200;
+  color: #ffffff;
+}
+
+.copyright {
+  margin-top: 48px;
+  background-color: #0f111a;
+  padding: 18px 0;
+}
+
+.many {
+  display: block;
+  color: #cbd5e1;
+  font-size: 14px;
+  line-height: 1.65;
+  font-weight: 400;
+  text-align: left;
+}
+
+.copyright p {
+  color: #cbd5e1;
+  font-size: 14px;
+  line-height: 1.6;
+  text-align: center;
+  margin: 0;
+  padding: 0;
+}
+
+.copyright a {
+  color: #fe9901;
+  font-weight: 600;
+}
+
+.copyright a:hover {
+  color: #ffffff;
+}
+
+/**-- Rhino Inner Page Title Banner (Warm Orange/Amber instead of Heavy Black) --**/
+
+.back_re {
+  background: linear-gradient(135deg, #f59e0b 0%, #ea580c 100%);
+}
+
+.back_re .title {
+  text-align: center;
+}
+
+.back_re .title h2 {
+  color: #ffffff;
+  font-size: 28px;
+  padding: 36px 0;
+  font-weight: 800;
+  text-transform: uppercase;
+  line-height: 1.25;
+}

@@ -37,7 +37,7 @@ public class OwnerSubscription {
     private LocalDateTime nextBillingDate;
     
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, columnDefinition = "nvarchar(20)")
+    @Column(nullable = false, length = 20)
     private SubscriptionStatus status = SubscriptionStatus.ACTIVE;
     
     // === USAGE TRACKING ===

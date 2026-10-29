@@ -1,253 +1,274 @@
-<div th:fragment="content" class="space-y-6">
-  <div class="max-w-4xl">
-    <!-- Header -->
-    <div class="mb-8">
-      <a
-        href="/owner/posts"
-        class="text-blue-600 hover:text-blue-800 mb-4 inline-block"
-      >
-        <i class="fas fa-arrow-left"></i> Quay lại danh sách
-      </a>
-      <h1 class="text-3xl font-bold text-gray-900 mb-2">Thống kê Bài Đăng</h1>
-      <p class="text-gray-600" th:text="${analytics.title}">Post Title</p>
-    </div>
-
-    <!-- Status Overview Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-      <!-- Status Card -->
-      <div class="bg-white rounded-lg shadow p-6">
-        <div class="flex items-center justify-between mb-4">
-          <h3 class="text-sm font-medium text-gray-600">Trạng thái</h3>
-          <i class="fas fa-info-circle text-gray-400"></i>
+<div class="container-fluid" th:fragment="content">
+<!-- Page Heading -->
+        <div class="d-sm-flex align-items-center justify-content-between mb-4">
+            <div>
+                <a th:href="@{/owner/posts}" class="btn btn-sm btn-outline-secondary mb-2">
+                    <i class="fas fa-arrow-left fa-sm mr-1"></i> Quay lại danh sách bài đăng
+                </a>
+                <h1 class="h3 mb-0 text-gray-800 font-weight-bold">
+                    <i class="fas fa-chart-line text-primary mr-2"></i>Thống Kê Bài Đăng
+                </h1>
+                <p class="text-muted small mb-0 mt-1" th:text="${analytics.title}">Post Title</p>
+            </div>
+            <div>
+                <a th:href="@{/properties/{slug}(slug=${analytics.slug})}" target="_blank" class="btn btn-info shadow-sm btn-sm">
+                    <i class="fas fa-external-link-alt fa-sm mr-1"></i> Xem Trên Marketplace
+                </a>
+            </div>
         </div>
-        <div class="flex items-center">
-          <span
-            th:class="${analytics.statusColorClass} + ' px-4 py-2 rounded-full text-lg font-semibold'"
-            th:text="${analytics.statusLabel}"
-            >Status</span
-          >
+
+        <!-- 4 KPI Cards -->
+        <div class="row">
+            <!-- Trạng thái -->
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="card border-left-primary shadow h-100 py-2">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Trạng Thái Hiển Thị</div>
+                                <div class="h5 mb-0 font-weight-bold">
+                                    <span th:class="${analytics.statusColorClass} + ' badge px-3 py-1'" th:text="${analytics.statusLabel}">Status</span>
+                                </div>
+                                <small class="text-muted mt-1 d-block" th:if="${analytics.isVisible}">
+                                    <i class="fas fa-eye text-success mr-1"></i>Đang công khai trực tuyến
+                                </small>
+                                <small class="text-muted mt-1 d-block" th:unless="${analytics.isVisible}">
+                                    <i class="fas fa-eye-slash text-secondary mr-1"></i>Không hiển thị công khai
+                                </small>
+                            </div>
+                            <div class="col-auto">
+                                <i class="fas fa-info-circle fa-2x text-gray-300"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Lượt xem -->
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="card border-left-success shadow h-100 py-2">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Tổng Lượt Xem Chi Tiết</div>
+                                <div class="h3 mb-0 font-weight-bold text-gray-800 tabular-nums" th:text="${analytics.viewCount}">0</div>
+                                <small class="text-muted mt-1 d-block">Lượt tương tác từ khách tìm trọ</small>
+                            </div>
+                            <div class="col-auto">
+                                <i class="fas fa-chart-line fa-2x text-gray-300"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Lượt Khách Liên Hệ & Tỷ Lệ Chuyển Đổi -->
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="card border-left-info shadow h-100 py-2">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Lượt Khách Liên Hệ</div>
+                                <div class="h3 mb-0 font-weight-bold text-gray-800 tabular-nums" th:text="${leadCount ?: 0}">0</div>
+                                <small class="text-muted mt-1 d-block">
+                                    Tỷ lệ chuyển đổi: <strong class="text-info tabular-nums" th:text="${(conversionRate ?: 0) + '%'}">0%</strong>
+                                </small>
+                            </div>
+                            <div class="col-auto">
+                                <i class="fas fa-user-check fa-2x text-gray-300"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Thời hạn còn lại -->
+            <div class="col-xl-3 col-md-6 mb-4">
+                <div class="card border-left-warning shadow h-100 py-2">
+                    <div class="card-body">
+                        <div class="row no-gutters align-items-center">
+                            <div class="col mr-2">
+                                <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Thời Gian Còn Lại</div>
+                                <div th:if="${analytics.daysRemaining > 0}" class="h3 mb-0 font-weight-bold text-warning tabular-nums">
+                                    <span th:text="${analytics.daysRemaining}">0</span> <span class="h6 font-weight-bold text-muted">ngày</span>
+                                </div>
+                                <div th:unless="${analytics.daysRemaining > 0}" class="h5 mb-0 font-weight-bold text-danger">
+                                    Đã hết hạn
+                                </div>
+                                <small class="text-muted mt-1 d-block" th:text="'Hết hạn: ' + ${analytics.formattedExpiry}">Date</small>
+                            </div>
+                            <div class="col-auto">
+                                <i class="fas fa-clock fa-2x text-gray-300"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-        <p class="text-xs text-gray-500 mt-2">
-          <span th:if="${analytics.isVisible}">
-            <i class="fas fa-eye text-green-500"></i> Đang hiển thị trên
-            marketplace
-          </span>
-          <span th:unless="${analytics.isVisible}">
-            <i class="fas fa-eye-slash text-gray-500"></i> Không hiển thị trên
-            marketplace
-          </span>
-        </p>
-      </div>
 
-      <!-- View Count Card -->
-      <div class="bg-white rounded-lg shadow p-6">
-        <div class="flex items-center justify-between mb-4">
-          <h3 class="text-sm font-medium text-gray-600">Lượt xem</h3>
-          <i class="fas fa-chart-line text-blue-400"></i>
+        <!-- Biểu đồ Xu hướng Lượt xem 7 ngày gần nhất -->
+        <div class="card shadow mb-4">
+            <div class="card-header py-3 bg-white border-bottom-primary d-flex justify-content-between align-items-center">
+                <h6 class="m-0 font-weight-bold text-primary">
+                    <i class="fas fa-chart-area mr-2"></i>Biểu đồ Xu hướng Lượt xem 7 ngày gần nhất
+                </h6>
+                <span class="badge badge-light border text-muted small">Phễu chuyển đổi: <strong class="text-dark tabular-nums" th:text="${analytics.viewCount}">0</strong> lượt xem &rarr; <strong class="text-success tabular-nums" th:text="${leadCount ?: 0}">0</strong> liên hệ (<span class="tabular-nums" th:text="${(conversionRate ?: 0) + '%'}">0%</span>)</span>
+            </div>
+            <div class="card-body">
+                <div style="position: relative; height: 240px;">
+                    <canvas id="postViewsTrendChart"></canvas>
+                </div>
+            </div>
         </div>
-        <div>
-          <p
-            class="text-4xl font-bold text-blue-600"
-            th:text="${analytics.viewCount}"
-          >
-            0
-          </p>
-          <p class="text-xs text-gray-500 mt-2">Tổng lượt xem chi tiết</p>
+
+        <div class="row">
+            <!-- Thông tin chi tiết bài đăng -->
+            <div class="col-lg-6 mb-4">
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3 bg-white border-bottom-primary">
+                        <h6 class="m-0 font-weight-bold text-primary">
+                            <i class="fas fa-file-alt mr-2"></i>Chi Tiết Bài Đăng
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between py-2 border-bottom">
+                            <span class="text-muted small">Mã bài đăng:</span>
+                            <span class="font-weight-bold" th:text="'#' + ${analytics.postId}">#123</span>
+                        </div>
+                        <div class="d-flex justify-content-between py-2 border-bottom">
+                            <span class="text-muted small">Đường dẫn SEO:</span>
+                            <a th:href="@{/properties/{slug}(slug=${analytics.slug})}" target="_blank" class="font-weight-bold text-primary" th:text="'/' + ${analytics.slug}">/slug</a>
+                        </div>
+                        <div class="d-flex justify-content-between py-2">
+                            <span class="text-muted small">Tiêu đề:</span>
+                            <span class="font-weight-bold text-right" style="max-width: 60%;" th:text="${analytics.title}">Title</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Thời gian & Nổi bật -->
+            <div class="col-lg-6 mb-4">
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3 bg-white border-bottom-success">
+                        <h6 class="m-0 font-weight-bold text-success">
+                            <i class="fas fa-calendar-alt mr-2"></i>Lịch Trình Hiển Thị
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between py-2 border-bottom">
+                            <span class="text-muted small">Thời hạn kết thúc:</span>
+                            <span class="font-weight-bold" th:text="${analytics.formattedExpiry}">Date</span>
+                        </div>
+                        <div class="d-flex justify-content-between py-2 border-bottom" th:if="${analytics.daysRemaining > 0}">
+                            <span class="text-muted small">Thời gian còn lại:</span>
+                            <span class="font-weight-bold text-warning" th:text="${analytics.daysRemaining} + ' ngày (' + ${analytics.hoursRemaining} + ' giờ)'">X ngày</span>
+                        </div>
+                        <div class="p-3 bg-warning text-dark rounded mt-3" th:if="${analytics.isBoosted}">
+                            <div class="font-weight-bold small"><i class="fas fa-star mr-1"></i> Đang được kích hoạt vị trí nổi bật (Boost)</div>
+                            <div class="small mt-1" th:text="'Hết hạn boost: ' + ${analytics.formattedBoostExpiry}">Boost date</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-      </div>
 
-      <!-- Days Remaining Card -->
-      <div class="bg-white rounded-lg shadow p-6">
-        <div class="flex items-center justify-between mb-4">
-          <h3 class="text-sm font-medium text-gray-600">Thời gian còn lại</h3>
-          <i class="fas fa-clock text-orange-400"></i>
+        <!-- Thao tác quản lý -->
+        <div class="card shadow mb-4">
+            <div class="card-header py-3 bg-white border-bottom-info">
+                <h6 class="m-0 font-weight-bold text-info">
+                    <i class="fas fa-tools mr-2"></i>Thao Tác Quản Lý Bài Đăng
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3 mb-2">
+                        <a th:href="@{/owner/posts/{id}/edit(id=${analytics.postId})}" class="btn btn-primary btn-block shadow-sm">
+                            <i class="fas fa-edit mr-1"></i> Chỉnh Sửa Nội Dung
+                        </a>
+                    </div>
+                    <div class="col-md-3 mb-2">
+                        <a th:href="@{/owner/posts/{id}/renew(id=${analytics.postId})}" class="btn btn-warning text-white btn-block shadow-sm font-weight-bold">
+                            <i class="fas fa-redo mr-1"></i> Gia Hạn Hiển Thị
+                        </a>
+                    </div>
+                    <div class="col-md-3 mb-2" th:if="${analytics.status.name() == 'ACTIVE'}">
+                        <form th:action="@{/owner/posts/{id}/hide(id=${analytics.postId})}" method="post"
+                              data-confirm="Bạn có chắc muốn tạm ẩn bài đăng này khỏi sàn?">
+                            <button type="submit" class="btn btn-secondary btn-block shadow-sm"
+                                    data-confirm="Bạn có chắc muốn tạm ẩn bài đăng này khỏi sàn?">
+                                <i class="fas fa-eye-slash mr-1"></i> Tạm Ẩn Bài Đăng
+                            </button>
+                        </form>
+                    </div>
+                    <div class="col-md-3 mb-2" th:if="${analytics.status.name() == 'HIDDEN'}">
+                        <form th:action="@{/owner/posts/{id}/show(id=${analytics.postId})}" method="post">
+                            <button type="submit" class="btn btn-success btn-block shadow-sm">
+                                <i class="fas fa-eye mr-1"></i> Hiển Thị Lại
+                            </button>
+                        </form>
+                    </div>
+                    <div class="col-md-3 mb-2">
+                        <a th:href="@{/properties/{slug}(slug=${analytics.slug})}" target="_blank" class="btn btn-info btn-block shadow-sm">
+                            <i class="fas fa-external-link-alt mr-1"></i> Xem Trên Web
+                        </a>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div>
-          <div th:if="${analytics.daysRemaining > 0}">
-            <p
-              class="text-4xl font-bold text-orange-600"
-              th:text="${analytics.daysRemaining}"
-            >
-              0
-            </p>
-            <p class="text-xs text-gray-500 mt-2">ngày</p>
-          </div>
-          <div th:unless="${analytics.daysRemaining > 0}">
-            <p class="text-2xl font-bold text-red-600">Hết hạn</p>
-            <p class="text-xs text-gray-500 mt-2">Cần gia hạn</p>
-          </div>
-        </div>
-      </div>
-    </div>
 
-    <!-- Detailed Information -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-      <!-- Post Details -->
-      <div class="bg-white rounded-lg shadow p-6">
-        <h2 class="text-xl font-semibold text-gray-900 mb-4">
-          <i class="fas fa-file-alt text-blue-600"></i> Thông tin bài đăng
-        </h2>
-        <div class="space-y-3">
-          <div class="flex justify-between">
-            <span class="text-gray-600">Post ID:</span>
-            <span
-              class="font-medium text-gray-900"
-              th:text="${analytics.postId}"
-              >123</span
-            >
-          </div>
-          <div class="flex justify-between">
-            <span class="text-gray-600">Slug:</span>
-            <a
-              th:href="@{/properties/{slug}(slug=${analytics.slug})}"
-              class="font-medium text-blue-600 hover:text-blue-800"
-              target="_blank"
-              th:text="'/' + ${analytics.slug}"
-            >
-              /slug
-            </a>
-          </div>
-          <div class="flex justify-between">
-            <span class="text-gray-600">Tiêu đề:</span>
-            <span
-              class="font-medium text-gray-900 text-right"
-              th:text="${analytics.title}"
-              >Title</span
-            >
-          </div>
-        </div>
-      </div>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.min.js"></script>
+        <script th:inline="javascript">
+        document.addEventListener('DOMContentLoaded', function () {
+            var chartLabels = /*[[${chartLabels}]]*/ ['N-6', 'N-5', 'N-4', 'N-3', 'N-2', 'Hôm qua', 'Hôm nay'];
+            var chartViews = /*[[${chartViews}]]*/ [0, 0, 0, 0, 0, 0, 0];
 
-      <!-- Visibility Timeline -->
-      <div class="bg-white rounded-lg shadow p-6">
-        <h2 class="text-xl font-semibold text-gray-900 mb-4">
-          <i class="fas fa-calendar-alt text-green-600"></i> Thời gian hiển thị
-        </h2>
-        <div class="space-y-3">
-          <div class="flex justify-between">
-            <span class="text-gray-600">Hết hạn vào:</span>
-            <span
-              class="font-medium text-gray-900"
-              th:text="${analytics.formattedExpiry}"
-              >Date</span
-            >
-          </div>
-          <div
-            class="flex justify-between"
-            th:if="${analytics.daysRemaining > 0}"
-          >
-            <span class="text-gray-600">Còn lại:</span>
-            <span class="font-medium text-orange-600">
-              <span th:text="${analytics.daysRemaining}">X</span> ngày (<span
-                th:text="${analytics.hoursRemaining}"
-                >Y</span
-              >
-              giờ)
-            </span>
-          </div>
-          <div
-            th:if="${analytics.isBoosted}"
-            class="p-3 bg-yellow-50 rounded-lg"
-          >
-            <p class="text-sm font-medium text-yellow-800">
-              <i class="fas fa-star"></i> Đang được Boost
-            </p>
-            <p
-              class="text-xs text-yellow-700 mt-1"
-              th:text="'Hết boost: ' + ${analytics.formattedBoostExpiry}"
-            >
-              Boost expires
-            </p>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Actions Section -->
-    <div class="bg-white rounded-lg shadow p-6 mb-8">
-      <h2 class="text-xl font-semibold text-gray-900 mb-4">
-        <i class="fas fa-tools text-purple-600"></i> Hành động
-      </h2>
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <!-- Edit Button -->
-        <a
-          th:href="@{/owner/posts/{id}/edit(id=${analytics.postId})}"
-          class="flex items-center justify-center px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
-        >
-          <i class="fas fa-edit mr-2"></i> Chỉnh sửa
-        </a>
-
-        <!-- Renew Button -->
-        <a
-          th:href="@{/owner/posts/{id}/renew(id=${analytics.postId})}"
-          class="flex items-center justify-center px-4 py-3 bg-orange-600 hover:bg-orange-700 text-white rounded-lg transition-colors"
-        >
-          <i class="fas fa-redo mr-2"></i> Gia hạn
-        </a>
-
-        <!-- Hide/Show Button -->
-        <form
-          th:if="${analytics.status.name() == 'ACTIVE'}"
-          th:action="@{/owner/posts/{id}/hide(id=${analytics.postId})}"
-          method="post"
-          class="w-full"
-        >
-          <button
-            type="submit"
-            class="w-full flex items-center justify-center px-4 py-3 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors"
-          >
-            <i class="fas fa-eye-slash mr-2"></i> Ẩn bài
-          </button>
-        </form>
-
-        <form
-          th:if="${analytics.status.name() == 'HIDDEN'}"
-          th:action="@{/owner/posts/{id}/show(id=${analytics.postId})}"
-          method="post"
-          class="w-full"
-        >
-          <button
-            type="submit"
-            class="w-full flex items-center justify-center px-4 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors"
-          >
-            <i class="fas fa-eye mr-2"></i> Hiển thị
-          </button>
-        </form>
-
-        <!-- View on Marketplace -->
-        <a
-          th:href="@{/properties/{slug}(slug=${analytics.slug})}"
-          target="_blank"
-          class="flex items-center justify-center px-4 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors"
-        >
-          <i class="fas fa-external-link-alt mr-2"></i> Xem bài
-        </a>
-      </div>
-    </div>
-
-    <!-- Tips Section -->
-    <div class="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-6">
-      <h3 class="font-medium text-gray-900 mb-3">
-        <i class="fas fa-lightbulb text-yellow-500"></i> Mẹo tăng hiệu quả
-      </h3>
-      <ul class="text-sm text-gray-700 space-y-2">
-        <li>
-          <i class="fas fa-check text-green-500"></i> Cập nhật nội dung thường
-          xuyên để giữ bài đăng hấp dẫn
-        </li>
-        <li>
-          <i class="fas fa-check text-green-500"></i> Thêm ảnh chất lượng cao để
-          tăng tỷ lệ xem chi tiết
-        </li>
-        <li>
-          <i class="fas fa-check text-green-500"></i> Sử dụng gói Boost để xuất
-          hiện ưu tiên trên marketplace
-        </li>
-        <li>
-          <i class="fas fa-check text-green-500"></i> Gia hạn trước khi hết hạn
-          để duy trì vị trí hiển thị
-        </li>
-      </ul>
-    </div>
-  </div>
+            var canvas = document.getElementById('postViewsTrendChart');
+            if (canvas && typeof Chart !== 'undefined') {
+                new Chart(canvas.getContext('2d'), {
+                    type: 'line',
+                    data: {
+                        labels: chartLabels,
+                        datasets: [{
+                            label: 'Lượt xem bài đăng',
+                            lineTension: 0,
+                            tension: 0,
+                            borderWidth: 2,
+                            backgroundColor: 'rgba(27, 108, 128, 0.08)',
+                            borderColor: '#1b6c80',
+                            pointRadius: 3,
+                            pointBackgroundColor: '#1b6c80',
+                            pointBorderColor: '#ffffff',
+                            pointHoverRadius: 4,
+                            data: chartViews
+                        }]
+                    },
+                    options: {
+                        maintainAspectRatio: false,
+                        legend: { display: false },
+                        scales: {
+                            xAxes: [{
+                                gridLines: { display: false, drawBorder: false },
+                                ticks: { fontColor: '#5d5f60', fontSize: 12 }
+                            }],
+                            yAxes: [{
+                                gridLines: {
+                                    color: '#e5e5e5',
+                                    zeroLineColor: '#e5e5e5',
+                                    drawBorder: false
+                                },
+                                ticks: {
+                                    beginAtZero: true,
+                                    maxTicksLimit: 5,
+                                    fontColor: '#5d5f60',
+                                    fontSize: 12
+                                }
+                            }]
+                        }
+                    }
+                });
+            }
+        });
+        </script>
 </div>
+

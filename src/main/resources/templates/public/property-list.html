@@ -1,31 +1,432 @@
 <div th:fragment="content">
 
-    <section class="bg-blue-700 py-6 shadow-inner">
-        <div th:replace="~{layout/parts/search-bar :: search}"></div>
-    </section>
-
-    <div class="container mx-auto px-4 py-8">
-        <div class="flex flex-col md:flex-row gap-8">
-
-            <aside class="w-full md:w-1/4">
-                <div th:replace="~{layout/parts/filter-sidebar :: sidebar}"></div>
-            </aside>
-
-            <main class="w-full md:w-3/4">
-                <div class="flex items-center justify-between mb-6">
-                    <h1 class="text-xl font-bold text-gray-800">
-                        Tìm nhà trọ, phòng trọ giá rẻ mới nhất [[${#calendars.format(#calendars.createNow(), 'MM/yyyy')}]]
-                    </h1>
-                </div>
-
-                <div th:each="prop : ${properties}">
-                    <div th:replace="~{layout/parts/property-card :: card(${prop})}"></div>
-                </div>
-
-                <div th:if="${#lists.isEmpty(properties)}" class="text-center py-20 bg-white rounded-lg border">
-                    <p class="text-gray-400">Không tìm thấy kết quả phù hợp với bộ lọc.</p>
-                </div>
-            </main>
+  <!-- 1. Upside Page Title & Breadcrumbs -->
+  <div class="page-title">
+    <div class="heading">
+      <div class="container">
+        <div class="Properties_taital_main mb-2">
+          <h1 class="Properties_taital mb-0">
+            <span th:text="${currentCategoryName != null ? currentCategoryName : 'Bất Động Sản Cho Thuê'}">Bất Động Sản Cho Thuê</span>
+          </h1>
         </div>
+        <p class="mb-0 text-start" style="max-width: 68ch; margin: 0;">
+          Tổng hợp <strong class="tabular-nums" id="heroTotalCount" style="color: #ffffff; text-decoration: underline;" th:text="${properties.size()}">31</strong> không gian lưu trú chính chủ, hình ảnh khảo sát thực tế, niêm yết giá minh bạch và hỗ trợ xem mô hình 3D trực tuyến.
+        </p>
+        <div class="d-flex flex-wrap gap-2 mt-3">
+          <a href="/properties"
+             th:class="${currentCategoryId == null ? 'btn-estate py-2 px-3 small' : 'btn-estate-outline py-2 px-3 small'}">
+            Tất cả phòng
+          </a>
+          <th:block th:each="cat : ${categories}">
+            <a th:href="@{/public/category/{id}(id=${cat.id})}"
+               th:class="${cat.id == currentCategoryId ? 'btn-estate py-2 px-3 small' : 'btn-estate-outline py-2 px-3 small'}"
+               th:text="${cat.name}">
+              Nhà trọ
+            </a>
+          </th:block>
+        </div>
+      </div>
     </div>
+    <nav class="breadcrumbs">
+      <div class="container">
+        <ol>
+          <li><a th:href="@{/}">Trang chủ</a></li>
+          <li><a th:href="@{/properties}">Bất động sản</a></li>
+          <li class="current" th:text="${currentCategoryName != null ? currentCategoryName : 'Tất cả không gian'}">Tất cả không gian</li>
+        </ol>
+      </div>
+    </nav>
+  </div>
+
+  <!-- 2. Interactive Filter Toolbar + Upside Properties Section -->
+  <section id="real-estate" class="Properties_section layout_padding pt-4">
+    <div class="container">
+
+      <!-- Interactive Search, Quick Price Pills & Sort Toolbar (Single Row Layout Guaranteed) -->
+      <div class="p-2.5 p-lg-3 mb-4" style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; box-shadow: 0 4px 18px rgba(15, 23, 42, 0.04);">
+        <div class="d-flex flex-wrap flex-xl-nowrap align-items-center justify-content-between gap-2">
+
+          <!-- 1. Live Search Input -->
+          <div style="width: 190px; flex-shrink: 0;">
+            <div class="position-relative">
+              <i class="fa fa-search position-absolute top-50 start-0 translate-middle-y ms-3 text-muted" style="font-size: 12px;"></i>
+              <input
+                type="text"
+                id="keywordSearchInput"
+                class="form-control ps-5 pe-3 py-1.5 small"
+                style="border-radius: 8px; border: 1.5px solid #cbd5e1; height: 36px; font-size: 12.5px;"
+                placeholder="Tìm theo tên, quận..."
+              />
+              <button
+                id="clearKeywordBtn"
+                type="button"
+                class="hidden position-absolute top-50 end-0 translate-middle-y me-2 border-0 bg-transparent text-muted"
+              >
+                <i class="bi bi-x-lg" style="font-size: 11px;"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- 2. Quick Price Pills & Saved Toggle -->
+          <div class="d-flex flex-wrap align-items-center justify-content-center gap-1.5 flex-shrink-0">
+            <button type="button" data-quick-price="all" class="quick-price-pill active px-3 py-1.5 rounded-lg text-xs font-semibold bg-[#ea580c] text-white border-0 transition-colors cursor-pointer whitespace-nowrap shadow-sm">Tất cả</button>
+            <button type="button" data-quick-price="under-2" class="quick-price-pill px-2.5 py-1.5 rounded-lg text-xs font-medium bg-white hover:bg-[#fff7ed] text-slate-700 hover:text-[#ea580c] border border-slate-200 hover:border-[#fed7aa] transition-colors cursor-pointer whitespace-nowrap">Dưới 2tr</button>
+            <button type="button" data-quick-price="2-3" class="quick-price-pill px-2.5 py-1.5 rounded-lg text-xs font-medium bg-white hover:bg-[#fff7ed] text-slate-700 hover:text-[#ea580c] border border-slate-200 hover:border-[#fed7aa] transition-colors cursor-pointer whitespace-nowrap">2 - 3tr</button>
+            <button type="button" data-quick-price="3-5" class="quick-price-pill px-2.5 py-1.5 rounded-lg text-xs font-medium bg-white hover:bg-[#fff7ed] text-slate-700 hover:text-[#ea580c] border border-slate-200 hover:border-[#fed7aa] transition-colors cursor-pointer whitespace-nowrap">3 - 5tr</button>
+            <button type="button" data-quick-price="over-5" class="quick-price-pill px-2.5 py-1.5 rounded-lg text-xs font-medium bg-white hover:bg-[#fff7ed] text-slate-700 hover:text-[#ea580c] border border-slate-200 hover:border-[#fed7aa] transition-colors cursor-pointer whitespace-nowrap">Trên 5tr</button>
+
+            <button type="button" id="savedOnlyFilterBtn" class="px-2.5 py-1.5 rounded-lg text-xs font-medium bg-white hover:bg-[#fff7ed] text-slate-700 hover:text-[#ea580c] border border-slate-200 hover:border-[#fed7aa] transition-colors inline-flex items-center gap-1.5 cursor-pointer whitespace-nowrap">
+              <i class="fa-regular fa-bookmark"></i>
+              <span>Đã lưu</span>
+            </button>
+          </div>
+
+          <!-- 3. Map View Toggle + Sort Select & Count -->
+          <div class="d-flex align-items-center justify-content-end gap-1.5 flex-shrink-0">
+            <button type="button" id="toggleListMapBtn" onclick="toggleListMapView()" class="px-2 py-1 rounded-lg text-xs font-semibold bg-[#fff7ed] text-[#ea580c] hover:bg-[#ea580c] hover:text-white border border-[#fed7aa] transition-colors inline-flex items-center gap-1 cursor-pointer whitespace-nowrap" style="height: 36px;">
+              <i class="fa-solid fa-map-location-dot"></i>
+              <span>Bản Đồ</span>
+            </button>
+
+            <select id="sortPropertySelect" class="form-select form-select-sm py-1" style="width: 152px; height: 36px; border-radius: 8px; border: 1.5px solid #cbd5e1; font-size: 12.5px;">
+              <option value="default">Mới nhất (Mặc định)</option>
+              <option value="price-asc">Giá: Thấp đến cao</option>
+              <option value="price-desc">Giá: Cao đến thấp</option>
+              <option value="acreage-desc">Diện tích: Lớn nhất</option>
+            </select>
+
+            <span class="small text-nowrap text-muted ps-1" style="font-size: 12.5px;">
+              <strong id="filteredCount" class="tabular-nums" style="color: #ea580c;" th:text="${properties.size()}">31</strong>/<span class="tabular-nums" th:text="${properties.size()}">31</span>
+            </span>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Collapsible Google Maps Overview Panel (#listMapViewPanel) -->
+      <div id="listMapViewPanel"
+           th:attr="data-category-name=${currentCategoryName != null ? currentCategoryName : 'Phòng trọ'}"
+           class="hidden p-3 p-lg-4 mb-4" style="background: #f4f6f8; border-radius: 12px;">
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+          <div class="d-flex align-items-center gap-2 small">
+            <span class="badge px-3 py-2" style="background-color: #fe9901; color: #ffffff;">
+              <i class="bi bi-geo-alt-fill me-1"></i>Bản Đồ Khu Vực
+            </span>
+            <span class="text-muted">Đang định vị theo tiêu chí:</span>
+            <strong id="listMapQueryText" th:text="${currentCategoryName != null ? currentCategoryName : 'Phòng trọ'}">Phòng trọ</strong>
+          </div>
+          <button type="button" onclick="toggleListMapView()" class="btn-estate-outline py-1 px-3 small">
+            <i class="bi bi-x-lg"></i>
+            <span>Thu gọn bản đồ</span>
+          </button>
+        </div>
+        <div class="w-100 overflow-hidden" style="height: 320px; border-radius: 8px;">
+          <iframe id="listMapIframe"
+                  title="Bản đồ khu vực lưu trú"
+                  class="w-100 h-100 border-0"
+                  loading="lazy"
+                  referrerpolicy="no-referrer-when-downgrade"
+                  src="https://maps.google.com/maps?q=Ph%C3%B2ng%20tr%E1%BB%8D%20Vinh%20Ngh%E1%BB%87%20An&amp;t=&amp;z=13&amp;ie=UTF8&amp;iwloc=&amp;output=embed"></iframe>
+        </div>
+      </div>
+
+      <!-- Main 2-Column Layout: Left Sidebar Filters (col-lg-3) + Right Upside Cards Grid (col-lg-9) -->
+      <div class="row gy-4">
+
+        <!-- LEFT SIDEBAR -->
+        <div class="col-lg-3">
+          <div class="p-4 mb-4" style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; box-shadow: 0 6px 22px rgba(15, 23, 42, 0.05);">
+            <div class="d-flex align-items-center justify-content-between pb-2 mb-3 border-bottom gap-2">
+              <h5 class="fw-bold mb-0 text-uppercase text-nowrap" style="font-size: 13.5px;"><i class="bi bi-sliders me-1.5" style="color: #ea580c;"></i>Bộ lọc chi tiết</h5>
+              <button type="button" id="resetAllFiltersBtn" onclick="resetAllFilters()" class="border-0 bg-transparent small fw-bold text-nowrap" style="color: #ea580c;">
+                <i class="bi bi-arrow-counterclockwise me-1"></i>Đặt lại
+              </button>
+            </div>
+
+            <!-- Khoảng giá -->
+            <div class="mb-4">
+              <h6 class="fw-bold small text-uppercase mb-2" style="color: #161825;">Khoảng giá thuê</h6>
+              <div class="d-flex flex-column gap-2 small">
+                <label class="d-flex align-items-center gap-2 cursor-pointer">
+                  <input type="radio" name="priceRangeRadio" value="all" checked class="accent-[#fe9901]" />
+                  <span>Tất cả mức giá</span>
+                </label>
+                <label class="d-flex align-items-center gap-2 cursor-pointer">
+                  <input type="radio" name="priceRangeRadio" value="under-2" class="accent-[#fe9901]" />
+                  <span class="tabular-nums">Dưới 2.000.000 đ</span>
+                </label>
+                <label class="d-flex align-items-center gap-2 cursor-pointer">
+                  <input type="radio" name="priceRangeRadio" value="2-3" class="accent-[#fe9901]" />
+                  <span class="tabular-nums">2.000.000 - 3.000.000 đ</span>
+                </label>
+                <label class="d-flex align-items-center gap-2 cursor-pointer">
+                  <input type="radio" name="priceRangeRadio" value="3-5" class="accent-[#fe9901]" />
+                  <span class="tabular-nums">3.000.000 - 5.000.000 đ</span>
+                </label>
+                <label class="d-flex align-items-center gap-2 cursor-pointer">
+                  <input type="radio" name="priceRangeRadio" value="over-5" class="accent-[#fe9901]" />
+                  <span class="tabular-nums">Trên 5.000.000 đ</span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Diện tích -->
+            <div class="mb-4 pt-2">
+              <h6 class="fw-bold small text-uppercase mb-2" style="color: #161825;">Diện tích sử dụng</h6>
+              <div class="d-flex flex-column gap-2 small">
+                <label class="d-flex align-items-center gap-2 cursor-pointer">
+                  <input type="radio" name="acreageRadio" value="all" checked class="accent-[#fe9901]" />
+                  <span>Tất cả diện tích</span>
+                </label>
+                <label class="d-flex align-items-center gap-2 cursor-pointer">
+                  <input type="radio" name="acreageRadio" value="under-20" class="accent-[#fe9901]" />
+                  <span class="tabular-nums">Dưới 20 m²</span>
+                </label>
+                <label class="d-flex align-items-center gap-2 cursor-pointer">
+                  <input type="radio" name="acreageRadio" value="20-30" class="accent-[#fe9901]" />
+                  <span class="tabular-nums">20 - 30 m²</span>
+                </label>
+                <label class="d-flex align-items-center gap-2 cursor-pointer">
+                  <input type="radio" name="acreageRadio" value="30-45" class="accent-[#fe9901]" />
+                  <span class="tabular-nums">30 - 45 m²</span>
+                </label>
+                <label class="d-flex align-items-center gap-2 cursor-pointer">
+                  <input type="radio" name="acreageRadio" value="over-45" class="accent-[#fe9901]" />
+                  <span class="tabular-nums">Trên 45 m²</span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Tiện ích -->
+            <div class="pt-2" th:if="${allAmenities != null and !allAmenities.isEmpty()}">
+              <h6 class="fw-bold small text-uppercase mb-2" style="color: #161825;">Tiện ích đi kèm</h6>
+              <div class="d-flex flex-column gap-2 small" style="max-height: 220px; overflow-y: auto;">
+                <label th:each="amenity : ${allAmenities}" class="d-flex align-items-center gap-2 cursor-pointer">
+                  <input type="checkbox" name="amenityCheckbox" th:value="${amenity.name}" class="accent-[#fe9901]" />
+                  <span class="text-truncate" th:text="${amenity.name}">Wifi</span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Assistance Box (Bright Warm Rhino Orange Gradient + Crisp White Text) -->
+          <div class="p-4 text-white" style="background: linear-gradient(135deg, #fe9901 0%, #ea580c 100%); border-radius: 12px; box-shadow: 0 10px 26px rgba(254, 153, 1, 0.25);">
+            <h5 class="h6 fw-bold text-white text-uppercase mb-2">Chưa tìm được phòng ưng ý?</h5>
+            <p class="mb-3 small" style="color: rgba(255, 255, 255, 0.95);">
+              Đội ngũ TrọMới hỗ trợ tìm phòng theo khu vực và kết nối chủ nhà trực tiếp hoàn toàn miễn phí 24/7.
+            </p>
+            <div class="d-grid gap-2">
+              <a href="tel:0988123456" class="btn py-2 px-3 small fw-bold text-center justify-content-center" style="background: #ffffff; color: #ea580c; border-radius: 8px;">
+                <i class="fa fa-phone me-1"></i>
+                <span>0988.123.456</span>
+              </a>
+              <button type="button"
+                      onclick="const btn = document.getElementById('chatToggle'); if(btn) btn.click();"
+                      class="btn py-2 px-3 small fw-bold text-white justify-content-center"
+                      style="background: rgba(255, 255, 255, 0.18) !important; color: #ffffff !important; border: 1.5px solid rgba(255, 255, 255, 0.65) !important; border-radius: 8px;">
+                <i class="fa fa-comments me-1"></i>
+                <span>Tư Vấn Trực Tuyến</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGHT PROPERTIES GRID -->
+        <div class="col-lg-9">
+
+          <!-- Active filter indicator -->
+          <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+            <div>
+              <h2 class="h5 fw-bold text-uppercase mb-0">
+                Danh sách bất động sản
+                <span class="badge ms-2 fw-bold small" style="background-color: #fe9901; color: #ffffff;" th:text="${currentCategoryName != null ? currentCategoryName : 'Tất cả'}">Tất cả</span>
+              </h2>
+            </div>
+            <button type="button"
+                    id="activeFilterIndicator"
+                    onclick="resetAllFilters()"
+                    class="hidden btn-estate py-1 px-3 small">
+              <i class="bi bi-funnel-fill"></i>
+              <span>Đang lọc kết quả · Bỏ lọc</span>
+            </button>
+          </div>
+
+          <!-- Real Estate Cards Grid (#propertyGrid) -->
+          <div id="propertyGrid" class="row">
+            <div th:each="prop : ${properties}"
+                 class="col-xl-6 col-md-6 property-grid-item">
+              <div
+                class="upside-property-card property-item-card"
+                th:data-id="${prop.id}"
+                th:data-slug="${prop.slug}"
+                th:data-price="${prop.price}"
+                th:data-acreage="${prop.acreage}"
+                th:data-title="${prop.title}"
+                th:data-category="${prop.categoryName}"
+                th:data-address="${(prop.addressNumber != null ? prop.addressNumber : '') + ' ' + (prop.wardName != null ? prop.wardName : '') + ' ' + (prop.provinceName != null ? prop.provinceName : '')}"
+              >
+                <div class="blog_img">
+                  <a th:href="@{/public/property/{slug}(slug=${prop.slug})}" class="d-block w-100 h-100">
+                    <img
+                      th:src="${prop.imageUrl != null and !prop.imageUrl.contains('unsplash.com') and !prop.imageUrl.contains('/upside/images/') ? prop.imageUrl : '/images/rooms/room-' + (((prop.id % 12) + 1)) + '.jpg'}"
+                      th:attr="onerror=|this.onerror=null;this.src='/images/rooms/room-${((prop.id % 12) + 1)}.jpg';|"
+                      th:alt="${prop.title}"
+                      loading="lazy"
+                    />
+                  </a>
+
+                  <!-- Top Floating Category & Actions (Wishlist + Compare) -->
+                  <div class="position-absolute top-0 start-0 end-0 p-2 d-flex align-items-center justify-content-between" style="z-index: 3; pointer-events: none;">
+                    <span class="estate-badge-cat" style="pointer-events: auto;" th:text="${prop.categoryName}">Nhà trọ</span>
+                    <div class="d-flex align-items-center gap-1" style="pointer-events: auto;">
+                      <button
+                        type="button"
+                        onclick="toggleCompareRoom(this)"
+                        th:attr="data-id=${prop.id},data-slug=${prop.slug},data-title=${prop.title},data-price=${prop.price},data-acreage=${prop.acreage},data-category=${prop.categoryName},data-address=${(prop.addressNumber != null ? prop.addressNumber : '') + ', ' + (prop.wardName != null ? prop.wardName : '') + ', ' + (prop.provinceName != null ? prop.provinceName : '')}"
+                        title="So sánh phòng"
+                        class="compare-room-btn estate-action-pill"
+                      >
+                        <i class="fa-solid fa-scale-balanced text-xs"></i>
+                        <span>So sánh</span>
+                      </button>
+                      <button
+                        type="button"
+                        onclick="toggleWishlist(event, this)"
+                        th:attr="data-slug=${prop.slug},data-title=${prop.title}"
+                        title="Lưu tin"
+                        class="estate-action-pill"
+                      >
+                        <i class="fa-regular fa-bookmark"></i>
+                        <span>Lưu tin</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Card Info Box (.image_box) -->
+                <div class="image_box">
+                  <div class="left_box">
+                    <h2 class="road_text">
+                      <a th:href="@{/public/property/{slug}(slug=${prop.slug})}" th:text="${prop.title}">
+                        Phòng trọ đẹp, tiện nghi
+                      </a>
+                    </h2>
+                    <div class="area_main">
+                      <h3 class="area_text active">
+                        <a th:href="@{/public/property/{slug}(slug=${prop.slug})}">
+                          Diện tích:<br /><span class="tabular-nums" th:text="${prop.acreage + 'm²'}">25m²</span>
+                        </a>
+                      </h3>
+                      <h3 class="area_text">
+                        <a th:href="@{/public/property/{slug}(slug=${prop.slug})}">
+                          Phòng:<br /><span class="tabular-nums" th:text="${prop.numberOfRooms > 0 ? prop.numberOfRooms + ' PN' : '1 PN'}">1 PN</span>
+                        </a>
+                      </h3>
+                      <h3 class="area_text">
+                        <a th:href="@{/public/property/{slug}(slug=${prop.slug})}">
+                          Khu vực:<br /><span th:text="${prop.wardName != null ? prop.wardName : prop.provinceName}">Trung tâm</span>
+                        </a>
+                      </h3>
+                    </div>
+                  </div>
+                  <div class="right_box">
+                    <a th:href="@{/public/property/{slug}(slug=${prop.slug})}" class="text-decoration-none">
+                      <div class="rate_text tabular-nums" th:text="${#numbers.formatDecimal(prop.price, 0, 'POINT', 0, 'COMMA')} + ' đ'">
+                        3.000.000 đ
+                      </div>
+                    </a>
+                  </div>
+                </div>
+
+                <!-- Hidden amenity tags for client filter -->
+                <div class="d-none hidden">
+                  <span class="amenity-tag" th:each="a : ${prop.amenities}" th:text="${a.name}"></span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Client-Side Pagination Bar -->
+          <div id="paginationBar" class="d-flex flex-wrap align-items-center justify-content-between gap-3 p-3 mt-4" style="background: #f4f6f8; border-radius: 12px;">
+            <span class="small text-muted">
+              Trang <strong id="currentPageLabel" class="text-dark tabular-nums">1</strong> / <span id="totalPagesLabel" class="tabular-nums">1</span>
+            </span>
+            <div id="paginationButtons" class="d-flex align-items-center gap-1"></div>
+          </div>
+
+          <!-- Empty Results State -->
+          <div id="emptyResultsState" class="hidden p-5 text-center mt-4" style="background: #f4f6f8; border-radius: 12px;">
+            <div class="mx-auto mb-3 d-flex align-items-center justify-content-center" style="width: 56px; height: 56px; border-radius: 12px; background-color: #fe9901; color: #ffffff;">
+              <i class="fa fa-search fs-4"></i>
+            </div>
+            <h4 class="h5 fw-bold text-uppercase">Không tìm thấy bài đăng phù hợp</h4>
+            <p class="text-muted small mx-auto mb-4" style="max-width: 460px;">
+              Không có phòng trọ nào khớp với bộ lọc bạn vừa chọn. Vui lòng nới lỏng khoảng giá hoặc bỏ bớt các tiêu chí tiện ích.
+            </p>
+            <div class="d-flex flex-wrap justify-content-center gap-2">
+              <button type="button" id="fuzzyResetFiltersBtn" onclick="fuzzyRelaxFilters()" class="btn-estate py-2 px-4 small">
+                <i class="fa fa-magic"></i>
+                <span>Gợi ý mở rộng tiêu chí</span>
+              </button>
+              <button type="button" onclick="resetAllFilters()" class="btn-estate-outline py-2 px-4 small">
+                <i class="bi bi-arrow-counterclockwise"></i>
+                <span>Đặt lại tất cả bộ lọc</span>
+              </button>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- FLOATING BOTTOM COMPARE DRAWER BAR -->
+  <div id="compareDrawerBar" data-ui class="hidden fixed bottom-0 left-0 right-0 z-40 text-white px-4 py-3" style="background-color: #0f2942; border-top: 3px solid #fe9901;">
+    <div class="container d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-3">
+      <div class="d-flex flex-wrap align-items-center gap-2">
+        <span class="badge px-3 py-2" style="background-color: #fe9901; color: #ffffff;">
+          <i class="fa-solid fa-scale-balanced me-1"></i>
+          So sánh phòng (<span id="compareCountLabel" class="tabular-nums">0</span>/3)
+        </span>
+        <div id="compareSelectedList" class="d-flex flex-wrap align-items-center gap-2 small"></div>
+      </div>
+      <div class="d-flex align-items-center gap-2">
+        <button type="button" onclick="clearCompareRooms()" class="btn-estate-outline text-white border-secondary py-1.5 px-3 small">
+          Xóa danh sách
+        </button>
+        <button type="button" onclick="openCompareModal()" class="btn-estate py-1.5 px-3 small">
+          <i class="fa-solid fa-table-columns"></i>
+          <span>Đối chiếu chi tiết</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- COMPARE ROOMS MODAL (#compareModal) -->
+  <div id="compareModal" data-ui role="dialog" aria-modal="true" aria-label="So sánh không gian lưu trú" class="hidden fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4">
+    <div class="bg-white w-full max-w-5xl max-h-[90vh] overflow-y-auto p-4 p-md-5 rounded">
+      <div class="d-flex align-items-center justify-content-between pb-3 mb-4">
+        <div>
+          <p class="small text-muted mb-0">Bảng đối chiếu thông số</p>
+          <h3 class="h4 fw-bold text-uppercase mb-0">So sánh không gian lưu trú</h3>
+        </div>
+        <button type="button" onclick="closeCompareModal()" class="btn-estate-outline py-1 px-2.5">
+          <i class="bi bi-x-lg"></i>
+        </button>
+      </div>
+
+      <div class="table-responsive">
+        <table class="table table-bordered align-middle small">
+          <thead id="compareTableHead" class="table-light"></thead>
+          <tbody id="compareTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Client-Side Instant Filtering, URL State Sync, Pagination & Compare Script -->
+  <script th:src="@{/js/property-list-filter.js}" defer></script>
+
 </div>

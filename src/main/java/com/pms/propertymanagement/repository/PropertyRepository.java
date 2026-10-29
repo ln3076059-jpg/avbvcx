@@ -1,7 +1,6 @@
 package com.pms.propertymanagement.repository;
 
 import com.pms.propertymanagement.entity.Property;
-import com.pms.propertymanagement.entity.User;
 import com.pms.propertymanagement.enums.PropertyStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -10,12 +9,11 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
-import java.util.Optional;
 
 @Repository
 public interface PropertyRepository extends JpaRepository<Property,Long> {
     List<Property> findByOwnerUsername(String ownerUsername);
-    List<Property> findByOwnerId(Long ownerId);;
+    List<Property> findByOwnerId(Long ownerId);
 
     List<Property> findByCategory_Id(Long categoryId);
 

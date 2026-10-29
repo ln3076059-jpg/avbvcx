@@ -1,10 +1,16 @@
 package com.pms.propertymanagement.service.scheduled;
 
+import com.pms.propertymanagement.entity.Contract;
+import com.pms.propertymanagement.entity.Room;
 import com.pms.propertymanagement.entity.Subscription;
 import com.pms.propertymanagement.entity.Post;
+import com.pms.propertymanagement.enums.ContractStatus;
+import com.pms.propertymanagement.enums.RoomStatus;
 import com.pms.propertymanagement.enums.SubscriptionStatus;
 import com.pms.propertymanagement.enums.SubscriptionType;
+import com.pms.propertymanagement.repository.ContractRepository;
 import com.pms.propertymanagement.repository.PostRepository;
+import com.pms.propertymanagement.repository.RoomRepository;
 import com.pms.propertymanagement.service.PropertyPolicyService;
 import com.pms.propertymanagement.service.SubscriptionPolicyService;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.annotation.Isolation;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -36,6 +43,8 @@ public class SubscriptionExpirationScheduler {
     private final SubscriptionPolicyService subscriptionPolicyService;
     private final PropertyPolicyService propertyPolicyService;
     private final PostRepository postRepository;  // Added for post expiration handling
+    private final ContractRepository contractRepository;
+    private final RoomRepository roomRepository;
 
     /**
      * Process expired subscriptions every 5 minutes
@@ -55,12 +64,42 @@ public class SubscriptionExpirationScheduler {
             // STEP 2: CRITICAL - Synchronize Post status with expiration
             synchronizePostExpiration();
 
+            // STEP 3: Expire overdue contracts and release rooms
+            processExpiredContracts();
+
             LocalDateTime endTime = LocalDateTime.now();
             log.info("Full expiration processing completed in {} ms",
                     java.time.Duration.between(startTime, endTime).toMillis());
 
         } catch (Exception e) {
             log.error("Critical error in expiration processing", e);
+        }
+    }
+
+    private void processExpiredContracts() {
+        try {
+            LocalDate today = LocalDate.now();
+            List<Contract> activeContracts = contractRepository.findByStatus(ContractStatus.ACTIVE);
+            int expiredCount = 0;
+            for (Contract contract : activeContracts) {
+                if (contract.getEndDate() != null && contract.getEndDate().isBefore(today)) {
+                    contract.setStatus(ContractStatus.EXPIRED);
+                    contract.setUpdatedAt(LocalDateTime.now());
+                    contractRepository.save(contract);
+
+                    Room room = contract.getRoom();
+                    if (room != null && room.getStatus() == RoomStatus.RENTED) {
+                        room.setStatus(RoomStatus.AVAILABLE);
+                        roomRepository.save(room);
+                    }
+                    expiredCount++;
+                }
+            }
+            if (expiredCount > 0) {
+                log.info("Expired {} overdue contracts and released rooms", expiredCount);
+            }
+        } catch (Exception e) {
+            log.error("Error processing expired contracts", e);
         }
     }
     
@@ -217,12 +256,7 @@ public class SubscriptionExpirationScheduler {
     @Scheduled(cron = "0 0 9 * * ?")
     @Transactional(readOnly = true)
     public void sendExpirationReminders() {
-        log.info("Checking for subscriptions expiring soon for reminder notifications");
-        
         try {
-            LocalDateTime now = LocalDateTime.now();
-            LocalDateTime sevenDaysFromNow = now.plusDays(7);
-            
             // FIXED LOGIC: Find ACTIVE subscriptions expiring in next 7 days
             List<Subscription> expiringSoon = subscriptionPolicyService.findExpiringWithinDays(7);
             

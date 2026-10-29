@@ -19,10 +19,10 @@ public class PostingPackage {
     @Column(nullable = false, unique = true, length = 50)
     private String code; // POST_NEW
 
-    @Column(nullable = false, columnDefinition = "nvarchar(255)")
+    @Column(nullable = false, length = 255)
     private String name;
 
-    @Column(columnDefinition = "nvarchar(1000)")
+    @Column(columnDefinition = "TEXT")
     private String description;
 
     @Column(nullable = false)

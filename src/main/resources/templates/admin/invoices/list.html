@@ -1,0 +1,145 @@
+<div th:fragment="content" class="container-fluid">
+
+    <!-- Page Heading -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <div>
+            <h1 class="h3 mb-1 text-gray-800 font-weight-bold">Quản Lý Hóa Đơn & Thu Chi</h1>
+            <p class="text-muted small mb-0">Theo dõi dòng tiền thu phòng, tiền điện, tiền nước và tình trạng thanh toán của toàn hệ thống.</p>
+        </div>
+        <div class="d-flex align-items-center" style="gap: 8px;">
+            <a th:href="@{/admin/invoices/export}" class="btn btn-success btn-sm shadow-sm font-weight-bold">
+                <i class="fas fa-file-csv mr-1"></i> Xuất CSV / Excel
+            </a>
+            <span class="badge badge-primary px-3 py-2 font-weight-bold" th:text="${invoices != null ? invoices.size() + ' hóa đơn' : '0'}">0 hóa đơn</span>
+        </div>
+    </div>
+
+    <!-- Search & Filter Card -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 bg-white">
+            <h6 class="m-0 font-weight-bold text-primary">
+                <i class="fas fa-filter mr-1"></i> Bộ Lọc & Tìm Kiếm Hóa Đơn
+            </h6>
+        </div>
+        <div class="card-body">
+            <form th:action="@{/admin/invoices}" method="get" class="form-row align-items-center">
+                <div class="col-lg-6 col-md-6 mb-2">
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <div class="input-group-text bg-light"><i class="fas fa-search text-gray-400"></i></div>
+                        </div>
+                        <input type="text" class="form-control" id="keyword" name="keyword" 
+                               th:value="${keyword}" placeholder="Nhập mã hóa đơn, tên phòng hoặc tên khách thuê...">
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-4 mb-2">
+                    <select class="form-control" id="status" name="status">
+                        <option value="">-- Tất cả trạng thái --</option>
+                        <option th:each="st : ${statuses}" 
+                                th:value="${st}" 
+                                th:text="${st.displayName}" 
+                                th:selected="${statusFilter == st.name()}">PAID</option>
+                    </select>
+                </div>
+                <div class="col-lg-2 col-md-2 mb-2">
+                    <button type="submit" class="btn btn-primary btn-block font-weight-bold">
+                        <i class="fas fa-search mr-1"></i> Lọc
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- DataTales Example (Strictly 5 Columns) -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 d-flex align-items-center justify-content-between">
+            <h6 class="m-0 font-weight-bold text-primary">
+                <i class="fas fa-file-invoice-dollar mr-1"></i> Danh Sách Hóa Đơn Toàn Hệ Thống
+            </h6>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover" id="dataTable" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th style="width: 100px;" class="text-center">Mã Hóa Đơn</th>
+                            <th>Phòng & Kỳ Thu</th>
+                            <th>Khách Thuê & SĐT</th>
+                            <th>Tổng Tiền & Trạng Thái</th>
+                            <th style="width: 150px;" class="text-center">Chức Năng</th>
+                        </tr>
+                    </thead>
+                    <tfoot>
+                        <tr>
+                            <th class="text-center">Mã Hóa Đơn</th>
+                            <th>Phòng & Kỳ Thu</th>
+                            <th>Khách Thuê & SĐT</th>
+                            <th>Tổng Tiền & Trạng Thái</th>
+                            <th class="text-center">Chức Năng</th>
+                        </tr>
+                    </tfoot>
+                    <tbody>
+                        <tr th:each="inv : ${invoices}">
+                            <!-- Cột 1: Mã Hóa Đơn -->
+                            <td class="text-center font-weight-bold">
+                                <span class="badge badge-dark px-2 py-1" th:text="${inv.invoiceCode}">INV-001</span>
+                                <div class="small text-muted mt-1">ID: <span th:text="${inv.id}">1</span></div>
+                            </td>
+
+                            <!-- Cột 2: Phòng & Kỳ Thu -->
+                            <td>
+                                <div class="font-weight-bold text-primary" 
+                                     th:text="${inv.room != null ? inv.room.name : 'N/A'}">Phòng 101</div>
+                                <div class="small text-muted mt-1">
+                                    <i class="far fa-calendar-alt mr-1 text-gray-400"></i>
+                                    Kỳ tháng: <strong class="text-dark" th:text="${inv.month + '/' + inv.year}">01/2026</strong>
+                                </div>
+                            </td>
+
+                            <!-- Cột 3: Khách Thuê & SĐT -->
+                            <td>
+                                <div class="font-weight-bold text-dark" 
+                                     th:text="${inv.tenant != null and inv.tenant.fullName != null ? inv.tenant.fullName : 'N/A'}">Khách thuê</div>
+                                <div class="small text-muted" th:if="${inv.tenant != null and inv.tenant.phone != null}">
+                                    <i class="fas fa-phone fa-xs mr-1 text-gray-400"></i>
+                                    <span th:text="${inv.tenant.phone}">0912345678</span>
+                                </div>
+                            </td>
+
+                            <!-- Cột 4: Tổng Tiền & Trạng Thái -->
+                            <td>
+                                <div class="font-weight-bold text-success" 
+                                     th:text="${inv.totalAmount != null ? #numbers.formatDecimal(inv.totalAmount, 0, 'COMMA', 0, 'POINT') + ' đ' : '0 đ'}">
+                                    3,250,000 đ
+                                </div>
+                                <div class="mt-1">
+                                    <span class="badge" 
+                                          th:classappend="${inv.status != null and inv.status.name() == 'PAID' ? 'badge-success' : (inv.status != null and inv.status.name() == 'UNPAID' ? 'badge-warning' : 'badge-danger')}"
+                                          th:text="${inv.status != null ? inv.status.displayName : 'UNPAID'}">ĐÃ THANH TOÁN</span>
+                                </div>
+                            </td>
+
+                            <!-- Cột 5: Chức Năng -->
+                            <td class="text-center action-btns">
+                                <a th:href="@{'/admin/invoices/' + ${inv.id}}" 
+                                   class="btn btn-primary btn-sm btn-circle" title="Xem chi tiết hóa đơn">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+
+                                <form th:if="${inv.status != null and inv.status.name() != 'PAID'}" 
+                                      th:action="@{'/admin/invoices/' + ${inv.id} + '/mark-paid'}" method="post" class="d-inline"
+                                      data-confirm="Xác nhận đã nhận đủ tiền cho hóa đơn này?">
+                                    <button type="submit" class="btn btn-success btn-sm btn-circle" title="Xác nhận thu đủ tiền"
+                                            data-confirm="Xác nhận đã nhận đủ tiền cho hóa đơn này?">
+                                        <i class="fas fa-check"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</div>

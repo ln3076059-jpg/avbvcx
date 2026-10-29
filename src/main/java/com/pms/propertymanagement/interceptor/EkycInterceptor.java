@@ -22,6 +22,10 @@ public class EkycInterceptor implements HandlerInterceptor {
             return true;
         }
 
+        if (uri.startsWith("/owner/contact/") && !uri.startsWith("/owner/contact/toggle/") && "POST".equalsIgnoreCase(request.getMethod())) {
+            return true;
+        }
+
         if (!(uri.startsWith("/owner") || uri.startsWith("/tenant"))) {
             return true;
         }
@@ -32,20 +36,18 @@ public class EkycInterceptor implements HandlerInterceptor {
             return false;
         }
 
-        User user = userRepository.findById(sessionUser.getId()).orElse(sessionUser);
-        request.getSession().setAttribute("user", user);
+        if (sessionUser.getRoles() == null || sessionUser.getRoles().isEmpty()) {
+            User user = userRepository.findById(sessionUser.getId()).orElse(sessionUser);
+            request.getSession().setAttribute("user", user);
+            sessionUser = user;
+        }
 
-        // eKYC check removed as per requirement: "only used for registration"
-        // if (requiresEkyc(user) && !user.isEkycVerified()) {
-        //    response.sendRedirect("/ekyc?next=" + uri);
-        //    return false;
-        // }
+        // Gắn trạng thái cảnh báo eKYC vào request/session để hiển thị nhắc nhở nghiệp vụ cho Chủ trọ chưa xác thực CCCD
+        request.setAttribute("ekycVerifiedStatus", sessionUser.isEkycVerified());
+        if (!sessionUser.isEkycVerified() && uri.startsWith("/owner")) {
+            request.setAttribute("ekycPendingWarning", "Tài khoản chưa xác thực danh tính CCCD (eKYC). Vui lòng hoàn tất tại mục Xác thực eKYC để nâng độ tin cậy pháp lý cho hợp đồng và tin đăng.");
+        }
 
         return true;
     }
-
-    private boolean requiresEkyc(User user) {
-        return user.getRoles().stream().anyMatch(r -> r.getName().equals("USER") || r.getName().equals("OWNER"));
-    }
 }
-

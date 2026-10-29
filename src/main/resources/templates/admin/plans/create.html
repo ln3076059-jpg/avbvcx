@@ -1,0 +1,119 @@
+<div th:fragment="content" class="container-fluid">
+
+    <!-- Page Heading -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <div>
+            <h1 class="h3 mb-1 text-gray-800 font-weight-bold">Tạo Gói Dịch Vụ Mới Cho Chủ Trọ</h1>
+            <p class="text-muted small mb-0">Thiết lập chính sách đăng ký, giá thuê bao định kỳ và giới hạn tài nguyên quản trị.</p>
+        </div>
+        <a th:href="@{/admin/plans}" class="btn btn-secondary btn-icon-split shadow-sm">
+            <span class="icon text-white-50">
+                <i class="fas fa-arrow-left"></i>
+            </span>
+            <span class="text font-weight-bold">Quay Lại Danh Sách</span>
+        </a>
+    </div>
+
+    <!-- Form Card -->
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 bg-white border-bottom-primary">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-box-open mr-1"></i> Thông Số Gói Dịch Vụ
+                    </h6>
+                </div>
+                <div class="card-body p-4">
+                    <form th:action="@{/admin/plans/create}" method="post">
+                        
+                        <div class="form-row">
+                            <div class="form-group col-md-6">
+                                <label for="code" class="font-weight-bold text-gray-700">
+                                    Mã định danh gói (Code) <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" class="form-control" id="code" name="code" required 
+                                       placeholder="Ví dụ: ENTERPRISE, VIP_PLUS...">
+                                <small class="form-text text-muted">Viết hoa không dấu, duy nhất trên toàn hệ thống.</small>
+                            </div>
+
+                            <div class="form-group col-md-6">
+                                <label for="name" class="font-weight-bold text-gray-700">
+                                    Tên hiển thị gói <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" class="form-control" id="name" name="name" required 
+                                       placeholder="Ví dụ: Gói Doanh Nghiệp Toàn Diện">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="description" class="font-weight-bold text-gray-700">Mô tả tóm tắt tính năng</label>
+                            <textarea class="form-control" id="description" name="description" rows="2" 
+                                      placeholder="Mô tả ưu đãi và lợi ích nổi bật của gói..."></textarea>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group col-md-6">
+                                <label for="monthlyPrice" class="font-weight-bold text-gray-700">
+                                    Giá niêm yết (VNĐ/tháng) <span class="text-danger">*</span>
+                                </label>
+                                <input type="number" class="form-control" id="monthlyPrice" name="monthlyPrice" required min="0" 
+                                       value="199000">
+                                <small class="form-text text-muted">Nhập 0 nếu đây là gói Miễn Phí (Free).</small>
+                            </div>
+
+                            <div class="form-group col-md-6">
+                                <label for="postDurationDays" class="font-weight-bold text-gray-700">
+                                    Thời hạn hiển thị tin (Ngày) <span class="text-danger">*</span>
+                                </label>
+                                <input type="number" class="form-control" id="postDurationDays" name="postDurationDays" required min="1" 
+                                       value="14">
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group col-md-4">
+                                <label for="maxProperties" class="font-weight-bold text-gray-700">
+                                    Số cơ sở trọ tối đa <span class="text-danger">*</span>
+                                </label>
+                                <input type="number" class="form-control" id="maxProperties" name="maxProperties" required 
+                                       value="5">
+                                <small class="form-text text-muted">Điền -1 nếu không giới hạn.</small>
+                            </div>
+
+                            <div class="form-group col-md-4">
+                                <label for="maxRoomsPerProperty" class="font-weight-bold text-gray-700">
+                                    Số phòng / cơ sở <span class="text-danger">*</span>
+                                </label>
+                                <input type="number" class="form-control" id="maxRoomsPerProperty" name="maxRoomsPerProperty" required 
+                                       value="20">
+                                <small class="form-text text-muted">Điền -1 nếu không giới hạn.</small>
+                            </div>
+
+                            <div class="form-group col-md-4">
+                                <label for="maxPosts" class="font-weight-bold text-gray-700">
+                                    Số bài đăng cùng lúc <span class="text-danger">*</span>
+                                </label>
+                                <input type="number" class="form-control" id="maxPosts" name="maxPosts" required 
+                                       value="5">
+                                <small class="form-text text-muted">Điền -1 nếu không giới hạn.</small>
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <div class="d-flex justify-content-end">
+                            <a th:href="@{/admin/plans}" class="btn btn-secondary mr-2">
+                                <i class="fas fa-times mr-1"></i> Hủy Bỏ
+                            </a>
+                            <button type="submit" class="btn btn-primary font-weight-bold">
+                                <i class="fas fa-save mr-1"></i> Tạo Gói Dịch Vụ
+                            </button>
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>

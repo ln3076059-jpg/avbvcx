@@ -18,6 +18,11 @@ public class AdminDashboardController {
 
     private final StatisticsService statisticsService;
 
+    @GetMapping({"", "/"})
+    public String index() {
+        return "redirect:/admin/dashboard";
+    }
+
     @GetMapping("/dashboard")
     public String dashboard(Model model) {
         AdminStatisticsDTO stats = statisticsService.getAdminStatistics();
@@ -26,6 +31,8 @@ public class AdminDashboardController {
         List<ApiStatisticDTO> apiStats = statisticsService.getApiStatistics();
         model.addAttribute("apiStats", apiStats);
         
+        model.addAttribute("activePage", "dashboard");
+        model.addAttribute("pageTitle", "Bảng Điều Khiển Tổng Quan");
         model.addAttribute("content", "admin/dashboard");
         return "layout/admin-layout";
     }

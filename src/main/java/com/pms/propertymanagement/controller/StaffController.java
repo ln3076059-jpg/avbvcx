@@ -40,7 +40,7 @@ public class StaffController {
         model.addAttribute("pendingPosts", pendingPosts);
         model.addAttribute("activeMenu", "staff-posts");
         model.addAttribute("content", "staff/post-approval");
-        return "layout/owner-layout";
+        return "layout/staff-layout";
     }
 
     /**

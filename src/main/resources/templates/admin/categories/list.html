@@ -1,0 +1,130 @@
+<div th:fragment="content" class="container-fluid">
+
+    <!-- Page Heading & Actions -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <div>
+            <h1 class="h3 mb-1 text-gray-800 font-weight-bold">Danh Mục Loại Hình Bất Động Sản</h1>
+            <p class="text-muted small mb-0">Quản lý các loại hình nhà trọ, căn hộ mini, ký túc xá phục vụ tìm kiếm và đăng tin.</p>
+        </div>
+        <a th:href="@{/admin/categories/create}" class="btn btn-primary btn-icon-split shadow-sm">
+            <span class="icon text-white-50">
+                <i class="fas fa-plus-circle"></i>
+            </span>
+            <span class="text font-weight-bold">Thêm Danh Mục Mới</span>
+        </a>
+    </div>
+
+    <!-- Search & Filter Card -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 bg-white">
+            <h6 class="m-0 font-weight-bold text-primary">
+                <i class="fas fa-filter mr-1"></i> Tìm Kiếm Danh Mục
+            </h6>
+        </div>
+        <div class="card-body">
+            <form th:action="@{/admin/categories}" method="get" class="form-row align-items-center">
+                <div class="col-md-9 mb-2">
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <div class="input-group-text bg-light"><i class="fas fa-search text-gray-400"></i></div>
+                        </div>
+                        <input type="text" class="form-control" id="keyword" name="keyword" 
+                               th:value="${keyword}" placeholder="Nhập tên loại hình: Nhà trọ, Căn hộ mini, Ký túc xá, Nhà nguyên căn...">
+                    </div>
+                </div>
+                <div class="col-md-3 mb-2">
+                    <button type="submit" class="btn btn-primary btn-block font-weight-bold">
+                        <i class="fas fa-search mr-1"></i> Tìm Kiếm
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- DataTales Example (Strictly 5 Columns) -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 d-flex align-items-center justify-content-between">
+            <h6 class="m-0 font-weight-bold text-primary">
+                <i class="fas fa-th-list mr-1"></i> Danh Sách Phân Loại Nhà Trọ
+            </h6>
+            <span class="badge badge-primary font-weight-bold" th:text="${categories != null ? categories.size() + ' danh mục' : '0'}">0 danh mục</span>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover" id="dataTable" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th style="width: 70px;" class="text-center">Mã ID</th>
+                            <th>Tên Loại Hình Bất Động Sản</th>
+                            <th class="text-center" style="width: 180px;">Số Cơ Sở Liên Kết</th>
+                            <th class="text-center" style="width: 180px;">Trạng Thái Hệ Thống</th>
+                            <th style="width: 150px;" class="text-center">Chức Năng</th>
+                        </tr>
+                    </thead>
+                    <tfoot>
+                        <tr>
+                            <th class="text-center">Mã ID</th>
+                            <th>Tên Loại Hình Bất Động Sản</th>
+                            <th class="text-center">Số Cơ Sở Liên Kết</th>
+                            <th class="text-center">Trạng Thái Hệ Thống</th>
+                            <th class="text-center">Chức Năng</th>
+                        </tr>
+                    </tfoot>
+                    <tbody>
+                        <tr th:each="cat : ${categories}">
+                            <!-- Cột 1: Mã ID -->
+                            <td class="text-center font-weight-bold text-gray-700" th:text="${cat.id}">1</td>
+
+                            <!-- Cột 2: Tên Loại Hình -->
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="mr-3">
+                                        <div class="icon-circle bg-light text-primary border">
+                                            <i class="fas fa-home"></i>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <div class="font-weight-bold text-primary" th:text="${cat.name}">Nhà trọ cho thuê</div>
+                                        <div class="small text-muted">Mã định danh hệ thống: CAT-<span th:text="${cat.id}">01</span></div>
+                                    </div>
+                                </div>
+                            </td>
+
+                            <!-- Cột 3: Số Cơ Sở Liên Kết -->
+                            <td class="text-center">
+                                <span class="badge badge-info px-3 py-2 font-weight-bold" 
+                                      th:text="${cat.properties != null ? cat.properties.size() + ' cơ sở' : '0 cơ sở'}">
+                                    0 cơ sở
+                                </span>
+                            </td>
+
+                            <!-- Cột 4: Trạng Thái Hệ Thống -->
+                            <td class="text-center">
+                                <span class="badge badge-pill badge-success px-3 py-2">
+                                    <i class="fas fa-check-circle mr-1"></i> Đang khả dụng
+                                </span>
+                            </td>
+
+                            <!-- Cột 5: Chức Năng -->
+                            <td class="text-center action-btns">
+                                <a th:href="@{'/admin/categories/' + ${cat.id} + '/edit'}" 
+                                   class="btn btn-info btn-sm btn-circle" title="Sửa danh mục">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+
+                                <form th:action="@{'/admin/categories/' + ${cat.id} + '/delete'}" method="post" class="d-inline"
+                                      data-confirm="Bạn có chắc chắn muốn xóa danh mục này?">
+                                    <button type="submit" class="btn btn-danger btn-sm btn-circle" title="Xóa danh mục"
+                                            data-confirm="Bạn có chắc chắn muốn xóa danh mục này?">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</div>

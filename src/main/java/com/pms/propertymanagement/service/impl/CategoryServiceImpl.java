@@ -1,7 +1,6 @@
 package com.pms.propertymanagement.service.impl;
 
 import com.pms.propertymanagement.dto.response.CategoryResponse;
-import com.pms.propertymanagement.entity.Category;
 import com.pms.propertymanagement.repository.CategoryRepository;
 import com.pms.propertymanagement.service.CategoryService;
 import lombok.RequiredArgsConstructor;

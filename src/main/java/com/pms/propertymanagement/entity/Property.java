@@ -28,7 +28,7 @@ public class Property {
      * Internal management name (not for public display)
      * For public display, use Post.title
      */
-    @Column(nullable = false, columnDefinition = "nvarchar(255)")
+    @Column(nullable = false, length = 255)
     private String name;
 
     @Column(nullable = false)
@@ -40,15 +40,15 @@ public class Property {
     @Column(nullable = false)
     private double acreage;
 
-    @Column(nullable = false, columnDefinition = "nvarchar(255)")
+    @Column(nullable = false, length = 255)
     private String addressNumber;
 
     // Địa chỉ đầy đủ do owner nhập (build từ addressNumber + ward + province)
-    @Column(columnDefinition = "nvarchar(500)")
+    @Column(length = 500)
     private String originalAddress;
 
     // Formatted address do OpenCage API trả về (chỉ có khi geocodeStatus = SUCCESS)
-    @Column(columnDefinition = "nvarchar(500)")
+    @Column(length = 500)
     private String normalizedAddress;
 
     //Vĩ độ — tự điền bởi hệ thống sau khi geocode thành công
@@ -80,7 +80,7 @@ public class Property {
     @OneToMany(mappedBy = "property", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Room> rooms = new ArrayList<>();
 
-    @OneToMany(mappedBy = "property", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "property", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PropertyImage> images = new ArrayList<>();
 
     @OneToMany(mappedBy = "property", cascade = CascadeType.ALL, orphanRemoval = true)

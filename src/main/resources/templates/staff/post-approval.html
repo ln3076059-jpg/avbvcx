@@ -1,240 +1,201 @@
-<div th:fragment="content" class="space-y-6">
-  <!-- Header -->
-  <div class="flex justify-between items-center">
-    <div>
-      <h1 class="text-3xl font-bold text-gray-900 mb-2">Duyệt Bài Đăng</h1>
-      <p class="text-gray-600">Xem xét và duyệt các bài đăng từ chủ nhà</p>
-    </div>
-    <div
-      class="bg-yellow-100 text-yellow-800 px-4 py-2 rounded-lg font-semibold"
-    >
-      <i class="fas fa-clock mr-2"></i>
-      <span th:text="${pendingPosts.size()} + ' bài chờ duyệt'"
-        >0 bài chờ duyệt</span
-      >
-    </div>
-  </div>
+<div class="container-fluid" th:fragment="content">
 
-  <!-- Messages -->
-  <div
-    th:if="${successMessage}"
-    class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded"
-  >
-    <i class="fas fa-check-circle mr-2"></i
-    ><span th:text="${successMessage}"></span>
-  </div>
-  <div
-    th:if="${errorMessage}"
-    class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded"
-  >
-    <i class="fas fa-times-circle mr-2"></i
-    ><span th:text="${errorMessage}"></span>
-  </div>
-
-  <!-- Pending Posts Table -->
-  <div class="bg-white rounded-lg shadow">
-    <div class="px-6 py-4 border-b border-gray-200">
-      <h2 class="text-xl font-semibold text-gray-900">Bài đăng chờ duyệt</h2>
+    <!-- Page Heading -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <div>
+            <h1 class="h3 mb-0 text-gray-800 font-weight-bold">
+                <i class="fas fa-clipboard-check text-info mr-2"></i>Kiểm Duyệt Tin Đăng Cho Thuê
+            </h1>
+            <p class="text-muted small mb-0 mt-1">Xem xét, kiểm tra nội dung và phê duyệt các bài đăng mới từ các chủ nhà trọ</p>
+        </div>
+        <div class="d-none d-sm-inline-block">
+            <span class="badge badge-warning px-3 py-2 font-weight-bold shadow-sm">
+                <i class="fas fa-clock mr-1"></i>
+                <span th:text="${pendingPosts != null ? pendingPosts.size() : 0}">0</span> Bài Chờ Duyệt
+            </span>
+        </div>
     </div>
 
-    <div class="overflow-x-auto">
-      <table class="min-w-full divide-y divide-gray-200">
-        <thead class="bg-gray-50">
-          <tr>
-            <th
-              class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-            >
-              Bài đăng
-            </th>
-            <th
-              class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-            >
-              Nhà trọ
-            </th>
-            <th
-              class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-            >
-              Chủ nhà
-            </th>
-            <th
-              class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-            >
-              Ngày tạo
-            </th>
-            <th
-              class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-            >
-              Hành động
-            </th>
-          </tr>
-        </thead>
-        <tbody class="bg-white divide-y divide-gray-200">
-          <tr th:each="post : ${pendingPosts}">
-            <!-- Post Info -->
-            <td class="px-6 py-4">
-              <div class="flex items-center">
-                <img
-                  th:src="${post.imageUrl != null ? post.imageUrl : '/images/default.jpg'}"
-                  class="h-16 w-16 rounded object-cover flex-shrink-0"
-                  alt="Property Image"
-                />
-                <div class="ml-4">
-                  <p
-                    class="font-semibold text-gray-900"
-                    th:text="${post.title}"
-                  >
-                    Tiêu đề
-                  </p>
-                  <p
-                    class="text-xs text-blue-600 mt-0.5"
-                    th:text="'/properties/' + ${post.slug}"
-                  ></p>
-                  <p
-                    class="text-sm text-gray-500 mt-1 max-w-xs line-clamp-2"
-                    th:text="${post.description}"
-                  >
-                    Mô tả...
-                  </p>
+    <!-- Search & Filter Card -->
+    <div class="search-container border-left-info">
+        <div class="row align-items-center">
+            <div class="col-md-6 mb-2 mb-md-0">
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text bg-light border-0"><i class="fas fa-search text-gray-400"></i></span>
+                    </div>
+                    <input type="text" id="staffPostSearch" class="form-control border-0 bg-light small" 
+                           placeholder="Tìm nhanh theo tiêu đề tin, tên nhà trọ, địa chỉ..." onkeyup="filterStaffPosts()">
                 </div>
-              </div>
-            </td>
-
-            <!-- Property Info -->
-            <td class="px-6 py-4">
-              <p
-                class="text-sm font-medium text-gray-900"
-                th:text="${post.propertyName}"
-              >
-                Nhà trọ
-              </p>
-              <p class="text-xs text-gray-500 mt-1">
-                <i class="fas fa-map-marker-alt mr-1"></i>
-                <span th:text="${post.wardName} + ', ' + ${post.provinceName}"
-                  >Địa chỉ</span
-                >
-              </p>
-            </td>
-
-            <!-- Owner Info (from property) -->
-            <td class="px-6 py-4">
-              <p class="text-sm text-gray-700">
-                ID: <span th:text="${post.propertyId}"></span>
-              </p>
-            </td>
-
-            <!-- Created At -->
-            <td class="px-6 py-4">
-              <p
-                class="text-sm text-gray-500"
-                th:text="${post.formattedCreatedAt}"
-              >
-                —
-              </p>
-            </td>
-
-            <!-- Actions: Approve / Reject -->
-            <td class="px-6 py-4">
-              <div class="flex flex-col space-y-2">
-                <!-- Approve -->
-                <form
-                  th:action="@{/staff/posts/{id}/approve(id=${post.postId})}"
-                  method="post"
-                >
-                  <button
-                    type="submit"
-                    class="w-full inline-flex items-center justify-center px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded transition"
-                  >
-                    <i class="fas fa-check mr-1"></i> Duyệt
-                  </button>
-                </form>
-
-                <!-- Reject with reason modal trigger -->
-                <button
-                  type="button"
-                  th:attr="onclick='openRejectModal(' + ${post.postId} + ')'"
-                  class="w-full inline-flex items-center justify-center px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded transition"
-                >
-                  <i class="fas fa-times mr-1"></i> Từ chối
-                </button>
-              </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-
-      <!-- Empty State -->
-      <div th:if="${pendingPosts.isEmpty()}" class="text-center py-16">
-        <i class="fas fa-check-double text-green-400 text-6xl mb-4"></i>
-        <p class="text-gray-500 text-lg font-semibold">
-          Không có bài đăng nào cần duyệt
-        </p>
-        <p class="text-gray-400 text-sm">Tất cả bài đăng đã được xử lý</p>
-      </div>
+            </div>
+            <div class="col-md-6 text-md-right">
+                <span class="small text-gray-600 font-weight-bold">
+                    Hiển thị <span id="staffPostCount" class="text-info font-weight-bold" th:text="${pendingPosts != null ? pendingPosts.size() : 0}">0</span> bài đăng
+                </span>
+            </div>
+        </div>
     </div>
-  </div>
+
+    <!-- DataTales Card -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 bg-white border-bottom-info d-flex justify-content-between align-items-center">
+            <h6 class="m-0 font-weight-bold text-info">
+                <i class="fas fa-list mr-1"></i>Danh Sách Tin Đăng Chờ Phê Duyệt
+            </h6>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover mb-0" id="staffPostsTable" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th style="width: 30%;">Tiêu Đề & Nội Dung Tin</th>
+                            <th style="width: 20%;">Cơ Sở Nhà Trọ & Địa Chỉ</th>
+                            <th style="width: 15%;">Mã Cơ Sở & Chi Tiết</th>
+                            <th style="width: 15%;">Ngày Gửi & Trạng Thái</th>
+                            <th style="width: 20%;" class="text-center">Chức Năng</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:if="${pendingPosts == null or #lists.isEmpty(pendingPosts)}">
+                            <td colspan="5" class="text-center py-5 text-muted">
+                                <i class="fas fa-check-circle fa-3x mb-3 text-success d-block"></i>
+                                Tất cả bài đăng đã được kiểm duyệt! Hiện tại không có bài đăng nào đang chờ duyệt.
+                            </td>
+                        </tr>
+                        <tr th:each="post : ${pendingPosts}" class="staff-post-row"
+                            th:data-title="${post.title != null ? post.title.toLowerCase() : ''}"
+                            th:data-property="${post.propertyName != null ? post.propertyName.toLowerCase() : ''}"
+                            th:data-address="${(post.wardName != null ? post.wardName.toLowerCase() : '') + ' ' + (post.provinceName != null ? post.provinceName.toLowerCase() : '')}">
+                            
+                            <!-- Cột 1: Tiêu Đề & Ảnh Thumbnail -->
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <img th:src="${post.imageUrl != null and !post.imageUrl.contains('1502005229762') ? post.imageUrl : '/images/rooms/room-1.jpg'}" 
+                                         onerror="this.onerror=null;this.src='/images/rooms/room-1.jpg';"
+                                         alt="Ảnh đại diện bài đăng" 
+                                         class="rounded mr-3 border shadow-xs" 
+                                         style="width: 65px; height: 65px; object-fit: cover;">
+                                    <div>
+                                        <a th:href="@{|/properties/${post.slug}|}" target="_blank" class="font-weight-bold text-primary text-decoration-none" th:text="${post.title}">
+                                            Phòng trọ cao cấp trung tâm
+                                        </a>
+                                        <div class="small text-muted text-truncate mt-1" style="max-width: 320px;" th:text="${post.description}">
+                                            Mô tả chi tiết bài đăng...
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+
+                            <!-- Cột 2: Cơ Sở Nhà Trọ & Địa Chỉ -->
+                            <td>
+                                <div class="font-weight-bold text-dark" th:text="${post.propertyName}">Nhà Trọ ABC</div>
+                                <div class="small text-muted mt-1">
+                                    <i class="fas fa-map-marker-alt text-danger mr-1"></i>
+                                    <span th:text="${post.wardName != null ? (post.wardName + ', ' + post.provinceName) : post.provinceName}">Hà Nội</span>
+                                </div>
+                            </td>
+
+                            <!-- Cột 3: Mã Cơ Sở & Chi Tiết -->
+                            <td>
+                                <span class="badge badge-light border text-dark font-weight-bold">
+                                    ID Cơ sở: #<span th:text="${post.propertyId}">1</span>
+                                </span>
+                                <div class="small text-muted mt-1">
+                                    ID Tin: #<span th:text="${post.postId}">1</span>
+                                </div>
+                            </td>
+
+                            <!-- Cột 4: Ngày Gửi & Trạng Thái -->
+                            <td>
+                                <div class="small text-muted">
+                                    <i class="far fa-calendar-alt mr-1"></i>
+                                    <span th:text="${post.formattedCreatedAt != null ? post.formattedCreatedAt : '-'}">01/01/2026</span>
+                                </div>
+                                <div class="mt-1">
+                                    <span class="badge badge-warning px-2 py-1 font-weight-bold">
+                                        <i class="fas fa-hourglass-half mr-1"></i>Chờ Duyệt
+                                    </span>
+                                </div>
+                            </td>
+
+                            <!-- Cột 5: Chức Năng (Duyệt / Từ Chối) -->
+                            <td class="text-center action-btns">
+                                <form th:action="@{|/staff/posts/${post.postId}/approve|}" method="post" style="display:inline-block;" class="mr-1"
+                                      data-confirm="Bạn có chắc chắn muốn DUYỆT bài đăng này? Bài đăng sẽ bắt đầu hiển thị trên hệ thống.">
+                                    <button type="submit" class="btn btn-success btn-sm shadow-sm font-weight-bold">
+                                        <i class="fas fa-check mr-1"></i>Duyệt Bài
+                                    </button>
+                                </form>
+                                <button type="button" class="btn btn-danger btn-sm shadow-sm font-weight-bold" 
+                                        th:onclick="'openRejectModal(' + ${post.postId} + ')'">
+                                    <i class="fas fa-times mr-1"></i>Từ Chối
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
 </div>
 
-<!-- Reject Modal -->
-<div
-  id="rejectModal"
-  class="fixed inset-0 z-50 hidden bg-black bg-opacity-50 flex items-center justify-center"
->
-  <div class="bg-white rounded-lg shadow-xl w-full max-w-md p-6">
-    <h3 class="text-lg font-bold text-gray-900 mb-4">
-      <i class="fas fa-times-circle text-red-500 mr-2"></i> Lý do từ chối
-    </h3>
-    <p class="text-sm text-gray-500 mb-4">
-      Chủ nhà sẽ thấy lý do này và có thể chỉnh sửa để đăng lại.
-    </p>
-
-    <form id="rejectForm" method="post">
-      <div class="mb-4">
-        <label class="block text-sm font-medium text-gray-700 mb-1"
-          >Lý do từ chối <span class="text-red-500">*</span></label
-        >
-        <textarea
-          name="reason"
-          rows="4"
-          required
-          placeholder="Ví dụ: Tiêu đề không rõ ràng, thiếu thông tin địa chỉ, ảnh không phù hợp..."
-          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 text-sm resize-none"
-        ></textarea>
-      </div>
-      <div class="flex justify-end space-x-3">
-        <button
-          type="button"
-          onclick="closeRejectModal()"
-          class="px-4 py-2 border border-gray-300 rounded text-gray-700 hover:bg-gray-50 text-sm"
-        >
-          Hủy
-        </button>
-        <button
-          type="submit"
-          class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-medium rounded text-sm"
-        >
-          Xác nhận từ chối
-        </button>
-      </div>
-    </form>
-  </div>
+<!-- Modal Từ Chối Bài Đăng -->
+<div class="modal fade" id="rejectModal" tabindex="-1" role="dialog" aria-labelledby="rejectModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <form id="rejectForm" method="post" action="">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title font-weight-bold" id="rejectModalLabel">
+                        <i class="fas fa-times-circle mr-2"></i>Từ Chối Bài Đăng
+                    </h5>
+                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body text-gray-700">
+                    <p class="mb-2">Vui lòng nhập lý do từ chối bài đăng này để thông báo đến chủ nhà trọ:</p>
+                    <div class="form-group">
+                        <label class="font-weight-bold text-gray-700 small">Lý do từ chối (bắt buộc):</label>
+                        <textarea name="reason" rows="4" class="form-control" required
+                                  placeholder="Ví dụ: Hình ảnh mờ, thông tin địa chỉ chưa chính xác, giá thuê không đúng quy định..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary font-weight-bold" data-dismiss="modal">Hủy bỏ</button>
+                    <button type="submit" class="btn btn-danger font-weight-bold">Xác Nhận Từ Chối</button>
+                </div>
+            </form>
+        </div>
+    </div>
 </div>
 
 <script>
-  function openRejectModal(postId) {
-    document.getElementById("rejectForm").action =
-      "/staff/posts/" + postId + "/reject";
-    document.getElementById("rejectModal").classList.remove("hidden");
-  }
+function filterStaffPosts() {
+    var search = document.getElementById('staffPostSearch').value.toLowerCase().trim();
+    var rows = document.querySelectorAll('.staff-post-row');
+    var count = 0;
 
-  function closeRejectModal() {
-    document.getElementById("rejectModal").classList.add("hidden");
-    document.querySelector("#rejectForm textarea").value = "";
-  }
+    rows.forEach(function(row) {
+        var title = row.getAttribute('data-title') || '';
+        var property = row.getAttribute('data-property') || '';
+        var address = row.getAttribute('data-address') || '';
 
-  // Close on backdrop click
-  document
-    .getElementById("rejectModal")
-    .addEventListener("click", function (e) {
-      if (e.target === this) closeRejectModal();
+        var match = !search || title.includes(search) || property.includes(search) || address.includes(search);
+        if (match) {
+            row.style.display = '';
+            count++;
+        } else {
+            row.style.display = 'none';
+        }
     });
+
+    document.getElementById('staffPostCount').textContent = count;
+}
+
+function openRejectModal(postId) {
+    var form = document.getElementById('rejectForm');
+    form.action = '/staff/posts/' + postId + '/reject';
+    $('#rejectModal').modal('show');
+}
 </script>

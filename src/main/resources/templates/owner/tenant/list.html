@@ -1,133 +1,258 @@
-<div th:fragment="content" class="bg-gray-50 min-h-screen">
-  <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-100 mb-6">
-    <div class="flex justify-between items-center mb-6">
-      <h2 class="text-2xl font-bold text-gray-800">Quản lý khách thuê</h2>
-      <a
-        th:href="@{/owner/tenants/create}"
-        class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg flex items-center gap-2 transition-colors shadow-md"
-      >
-        <i class="fa-solid fa-user-plus"></i>
-        Thêm khách thuê
-      </a>
+<div class="container-fluid" th:fragment="content">
+
+    <!-- Page Heading -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <div>
+            <h1 class="h3 mb-0 text-gray-800 font-weight-bold">
+                <i class="fas fa-users text-success mr-2"></i>Quản Lý Danh Sách Khách Thuê
+            </h1>
+            <p class="text-muted small mb-0 mt-1">Lưu trữ hồ sơ cư dân, số điện thoại liên lạc, CCCD và thông tin nhân khẩu học</p>
+        </div>
+        <div class="d-flex align-items-center">
+            <a th:href="@{/owner/tenants/export-ct01}" class="btn btn-sm btn-outline-primary shadow-sm font-weight-bold mr-2">
+                <i class="fas fa-file-csv mr-1"></i>Xuất Khai Báo Tạm Trú (Mẫu CT01 CSV)
+            </a>
+            <a th:href="@{/owner/tenants/create}" class="btn btn-sm btn-success shadow-sm font-weight-bold">
+                <i class="fas fa-user-plus fa-sm text-white-50 mr-1"></i>Thêm Khách Thuê Mới
+            </a>
+        </div>
     </div>
 
-    <!-- Filter Bar -->
-    <div class="flex justify-between items-center mb-4">
-      <div class="flex items-center gap-2 text-sm text-gray-600">
-        <span>Hiển thị</span>
-        <select
-          class="border border-gray-300 rounded px-2 py-1 focus:outline-none focus:border-blue-500"
-        >
-          <option>25</option>
-          <option>50</option>
-          <option>100</option>
-        </select>
-      </div>
-      <div class="relative">
-        <input
-          type="text"
-          placeholder="Tìm theo tên, SĐT, CCCD..."
-          class="border border-gray-300 rounded px-4 py-1.5 w-64 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-        />
-        <i
-          class="fa-solid fa-magnifying-glass absolute right-3 top-2.5 text-gray-400 text-xs"
-        ></i>
-      </div>
+    <!-- Alert Messages -->
+    <div th:if="${param.success}" class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+        <i class="fas fa-check-circle mr-2"></i>Thêm mới hồ sơ khách thuê thành công!
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    <div th:if="${param.deleted}" class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+        <i class="fas fa-check-circle mr-2"></i>Đã xóa hồ sơ khách thuê thành công!
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
     </div>
 
-    <!-- Table -->
-    <div class="overflow-x-auto">
-      <table class="w-full text-left border-collapse">
-        <thead>
-          <tr
-            class="border-b border-gray-200 text-sm font-semibold text-gray-700 bg-white"
-          >
-            <th class="py-3 px-4">Họ và tên</th>
-            <th class="py-3 px-4">Số điện thoại</th>
-            <th class="py-3 px-4">CCCD/CMND</th>
-            <th class="py-3 px-4">Giới tính</th>
-            <th class="py-3 px-4">Nghề nghiệp</th>
-            <th class="py-3 px-4">Ngày sinh</th>
-            <th class="py-3 px-4 text-center">Hành động</th>
-          </tr>
-        </thead>
-        <tbody class="text-sm text-gray-700">
-          <tr
-            th:if="${#lists.isEmpty(tenants)}"
-            class="border-b border-gray-100 bg-gray-50"
-          >
-            <td colspan="7" class="py-8 text-center text-gray-500">
-              Chưa có khách thuê nào
-            </td>
-          </tr>
-          <tr
-            th:each="t : ${tenants}"
-            class="border-b border-gray-100 hover:bg-gray-50 transition-colors"
-          >
-            <td
-              class="py-3 px-4 font-medium text-gray-800"
-              th:text="${t.fullName}"
-            >
-              Nguyễn Văn A
-            </td>
-            <td class="py-3 px-4" th:text="${t.phone}">0987654321</td>
-            <td class="py-3 px-4" th:text="${t.citizenId}">00109xxxxxxxx</td>
-            <td class="py-3 px-4">
-              <span
-                th:if="${t.gender.name() == 'MALE'}"
-                class="text-blue-600 font-medium"
-                >Nam</span
-              >
-              <span
-                th:if="${t.gender.name() == 'FEMALE'}"
-                class="text-pink-600 font-medium"
-                >Nữ</span
-              >
-              <span th:if="${t.gender.name() == 'OTHER'}" class="text-gray-600"
-                >Khác</span
-              >
-            </td>
-            <td class="py-3 px-4" th:text="${t.career}">Sinh viên</td>
-            <td class="py-3 px-4" th:text="${t.formattedBirthday}">
-              01/01/2000
-            </td>
-            <td class="py-3 px-4 text-center">
-              <a
-                th:href="@{/owner/tenants/delete/{id}(id=${t.id})}"
-                onclick="
-                  return confirm('Bạn có chắc chắn muốn xóa khách thuê này?');
-                "
-                class="text-red-500 hover:text-red-700 hover:bg-red-50 p-2 rounded-full transition-colors"
-                title="Xóa"
-              >
-                <i class="fa-solid fa-trash-can"></i>
-              </a>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+    <!-- Search & Filter Card -->
+    <div class="card shadow mb-4">
+        <div class="card-body py-3 border-left-success">
+            <div class="row align-items-center">
+                <div class="col-md-6 mb-2 mb-md-0">
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text bg-light border-0"><i class="fas fa-search text-gray-400"></i></span>
+                        </div>
+                        <input type="text" id="ownerTenantSearch" class="form-control border-0 bg-light small" 
+                               placeholder="Tìm nhanh theo họ tên, số điện thoại, CCCD, nghề nghiệp..." onkeyup="filterOwnerTenants()">
+                    </div>
+                </div>
+                <div class="col-md-6 text-md-right">
+                    <span class="small text-gray-600 font-weight-bold">
+                        Tổng số: <span id="tenantFilteredCount" class="text-success font-weight-bold" th:text="${tenants != null ? tenants.size() : 0}">0</span> khách thuê
+                    </span>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <div class="mt-4 text-xs text-gray-500">
-      Hiển thị <span th:text="${tenants.size()}">0</span> mục
-    </div>
-  </div>
+    <!-- DataTales Card -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 bg-white border-bottom-success d-flex justify-content-between align-items-center">
+            <h6 class="m-0 font-weight-bold text-success">
+                <i class="fas fa-address-book mr-1"></i>Hồ Sơ Khách Thuê
+            </h6>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover mb-0" id="ownerTenantsTable" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th style="width: 25%;">Họ Và Tên Khách Thuê</th>
+                            <th style="width: 25%;">Số Điện Thoại & Địa Chỉ</th>
+                            <th style="width: 20%;">CCCD / CMND & Ngày Sinh</th>
+                            <th style="width: 15%;">Giới Tính & Nghề Nghiệp</th>
+                            <th style="width: 15%;" class="text-center">Chức Năng</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:if="${tenants == null or #lists.isEmpty(tenants)}">
+                            <td colspan="5" class="text-center py-5 text-muted">
+                                <i class="fas fa-user-slash fa-3x mb-3 text-gray-300 d-block"></i>
+                                Bạn chưa có hồ sơ khách thuê nào. Nhấn <strong>"Thêm Khách Thuê Mới"</strong> để bắt đầu tạo hồ sơ.
+                            </td>
+                        </tr>
+                        <tr th:each="t : ${tenants}" class="owner-tenant-row"
+                            th:data-name="${t.fullName != null ? t.fullName.toLowerCase() : ''}"
+                            th:data-phone="${t.phone != null ? t.phone : ''}"
+                            th:data-citizen="${t.citizenId != null ? t.citizenId : ''}"
+                            th:data-career="${t.career != null ? t.career.toLowerCase() : ''}">
+                            
+                            <!-- Cột 1: Mã & Họ Tên -->
+                            <td>
+                                <div class="font-weight-bold text-dark" style="font-size: 1rem;" th:text="${t.fullName}">Nguyễn Văn An</div>
+                                <div class="small text-muted font-mono" th:text="'Mã hồ sơ: #' + ${t.id}">#1</div>
+                            </td>
 
-  {{/*
-  <!-- Alert Success -->
-  <div
-    th:if="${param.success}"
-    class="fixed bottom-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg animate-bounce z-50 flex items-center gap-2"
-  >
-    <i class="fa-solid fa-circle-check"></i>
-    <span>Thêm khách thuê thành công!</span>
-  </div>
-  <div
-    th:if="${param.deleted}"
-    class="fixed bottom-4 right-4 bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg animate-bounce z-50 flex items-center gap-2"
-  >
-    <i class="fa-solid fa-trash"></i>
-    <span>Đã xóa khách thuê!</span>
-  </div>
-  */}}
+                            <!-- Cột 2: SĐT & Địa chỉ -->
+                            <td>
+                                <div>
+                                    <i class="fas fa-phone-alt text-success mr-1"></i>
+                                    <a th:href="'tel:' + ${t.phone}" class="text-success font-weight-bold font-mono" th:text="${t.phone}">0912345678</a>
+                                </div>
+                                <div class="small text-muted mt-1 text-truncate" style="max-width: 260px;" th:if="${t.permanentAddress != null}" th:title="${t.permanentAddress}">
+                                    <i class="fas fa-map-marker-alt text-secondary mr-1"></i>
+                                    <span th:text="${t.permanentAddress}">Hà Nội</span>
+                                </div>
+                            </td>
+
+                            <!-- Cột 3: CCCD & Ngày sinh -->
+                            <td>
+                                <div class="font-mono font-weight-bold text-gray-800" th:text="${t.citizenId ?: '-'}">001200000000</div>
+                                <div class="small text-muted mt-1">
+                                    <i class="far fa-calendar text-info mr-1"></i>
+                                    <span th:text="${t.formattedBirthday ?: '-'}">01/01/2000</span>
+                                </div>
+                            </td>
+
+                            <!-- Cột 4: Giới tính & Nghề nghiệp -->
+                            <td>
+                                <div>
+                                    <span class="badge" 
+                                          th:classappend="${t.gender != null and t.gender.name() == 'MALE' ? 'badge-primary' : (t.gender != null and t.gender.name() == 'FEMALE' ? 'badge-info' : 'badge-secondary')}" 
+                                          th:text="${t.gender != null and t.gender.name() == 'MALE' ? 'Nam' : (t.gender != null and t.gender.name() == 'FEMALE' ? 'Nữ' : 'Khác')}">
+                                        Nam
+                                    </span>
+                                </div>
+                                <div class="small text-gray-700 mt-1 font-weight-bold" th:text="${t.career ?: '-'}">Sinh viên</div>
+                            </td>
+
+                            <!-- Cột 5: Chức Năng (Thao Tác) -->
+                            <td class="text-center action-btns">
+                                <button type="button" class="btn btn-outline-info btn-sm mr-1 shadow-sm"
+                                        onclick="openEditTenantModal(this)"
+                                        th:attr="data-id=${t.id},data-name=${t.fullName},data-phone=${t.phone},data-email=${t.email ?: ''},data-cccd=${t.citizenId ?: ''},data-gender=${t.gender ?: 'OTHER'},data-address=${t.permanentAddress ?: ''},data-career=${t.career ?: ''}"
+                                        title="Chỉnh sửa thông tin khách thuê">
+                                    <i class="fas fa-user-edit mr-1"></i>Sửa
+                                </button>
+                                <a th:href="@{/owner/contracts/create(tenantId=${t.id})}" class="btn btn-success btn-sm shadow-sm font-weight-bold" title="Lập hợp đồng thuê cho khách này">
+                                    <i class="fas fa-file-contract mr-1"></i>Lập HĐ
+                                </a>
+                                <form th:action="@{|/owner/tenants/delete/${t.id}|}" method="post" style="display:inline-block;"
+                                      data-confirm="Bạn có chắc chắn muốn xóa hồ sơ khách thuê này?">
+                                    <button type="submit" class="btn btn-danger btn-sm shadow-sm" title="Xóa hồ sơ"
+                                            data-confirm="Bạn có chắc chắn muốn xóa hồ sơ khách thuê này?">
+                                        <i class="fas fa-trash-alt mr-1"></i>Xóa
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Chỉnh Sửa Nhanh Khách Thuê -->
+    <div class="modal fade" id="editTenantModal" tabindex="-1" role="dialog" aria-labelledby="editTenantModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content border-0 shadow">
+                <form id="editTenantForm" method="post">
+                    <div class="modal-header text-white" style="background: #1b6c80;">
+                        <h5 class="modal-title font-weight-bold" id="editTenantModalLabel">
+                            <i class="fas fa-user-edit mr-2"></i>Cập Nhật Hồ Sơ Khách Thuê
+                        </h5>
+                        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-row">
+                            <div class="form-group col-md-6">
+                                <label class="font-weight-bold small text-gray-700">Họ Và Tên <span class="text-danger">*</span></label>
+                                <input type="text" name="fullName" id="editTenantName" class="form-control" required>
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label class="font-weight-bold small text-gray-700">Số Điện Thoại <span class="text-danger">*</span></label>
+                                <input type="text" name="phone" id="editTenantPhone" class="form-control font-mono" required>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group col-md-6">
+                                <label class="font-weight-bold small text-gray-700">Số CCCD / CMND</label>
+                                <input type="text" name="citizenId" id="editTenantCccd" class="form-control font-mono">
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label class="font-weight-bold small text-gray-700">Email Liên Hệ</label>
+                                <input type="email" name="email" id="editTenantEmail" class="form-control">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group col-md-6">
+                                <label class="font-weight-bold small text-gray-700">Giới Tính</label>
+                                <select name="gender" id="editTenantGender" class="form-control custom-select">
+                                    <option value="MALE">Nam</option>
+                                    <option value="FEMALE">Nữ</option>
+                                    <option value="OTHER">Khác</option>
+                                </select>
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label class="font-weight-bold small text-gray-700">Nghề Nghiệp / Nơi Công Tác</label>
+                                <input type="text" name="career" id="editTenantCareer" class="form-control">
+                            </div>
+                        </div>
+                        <div class="form-group mb-0">
+                            <label class="font-weight-bold small text-gray-700">Địa Chỉ Thường Trú</label>
+                            <input type="text" name="permanentAddress" id="editTenantAddress" class="form-control" placeholder="Số nhà, xã/phường, tỉnh/thành phố...">
+                        </div>
+                    </div>
+                    <div class="modal-footer bg-light">
+                        <button type="button" class="btn btn-secondary font-weight-bold" data-dismiss="modal">
+                            <i class="fas fa-times mr-1"></i>Hủy Bỏ
+                        </button>
+                        <button type="submit" class="btn btn-success font-weight-bold shadow-sm">
+                            <i class="fas fa-save mr-1"></i>Lưu Hồ Sơ
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    function openEditTenantModal(btn) {
+        var id = btn.getAttribute('data-id');
+        document.getElementById('editTenantForm').action = '/owner/tenants/update/' + id;
+        document.getElementById('editTenantName').value = btn.getAttribute('data-name') || '';
+        document.getElementById('editTenantPhone').value = btn.getAttribute('data-phone') || '';
+        document.getElementById('editTenantEmail').value = btn.getAttribute('data-email') || '';
+        document.getElementById('editTenantCccd').value = btn.getAttribute('data-cccd') || '';
+        document.getElementById('editTenantGender').value = btn.getAttribute('data-gender') || 'OTHER';
+        document.getElementById('editTenantAddress').value = btn.getAttribute('data-address') || '';
+        document.getElementById('editTenantCareer').value = btn.getAttribute('data-career') || '';
+        $('#editTenantModal').modal('show');
+    }
+
+    function filterOwnerTenants() {
+        var search = document.getElementById('ownerTenantSearch').value.toLowerCase().trim();
+        var rows = document.querySelectorAll('.owner-tenant-row');
+        var count = 0;
+
+        rows.forEach(function(row) {
+            var name = row.getAttribute('data-name') || '';
+            var phone = row.getAttribute('data-phone') || '';
+            var citizen = row.getAttribute('data-citizen') || '';
+            var career = row.getAttribute('data-career') || '';
+
+            var match = !search || name.includes(search) || phone.includes(search) || citizen.includes(search) || career.includes(search);
+            if (match) {
+                row.style.display = '';
+                count++;
+            } else {
+                row.style.display = 'none';
+            }
+        });
+
+        document.getElementById('tenantFilteredCount').textContent = count;
+    }
+    </script>
+
 </div>

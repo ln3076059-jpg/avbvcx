@@ -5,6 +5,7 @@ import com.pms.propertymanagement.entity.PostingPackage;
 import com.pms.propertymanagement.entity.User;
 import com.pms.propertymanagement.service.PostingPackageService;
 import com.pms.propertymanagement.service.PostingOrderService;
+import com.pms.propertymanagement.service.WalletService;
 
 import java.util.List;
 import jakarta.servlet.http.HttpServletRequest;
@@ -25,6 +26,7 @@ public class OwnerPostingPackageController {
 
     private final PostingPackageService postingPackageService;
     private final PostingOrderService postingOrderService;
+    private final WalletService walletService;
 
     @GetMapping
     public String listPackages(Model model, HttpSession session) {
@@ -34,7 +36,8 @@ public class OwnerPostingPackageController {
         // Load all posting packages using service
         List<PostingPackage> packages = postingPackageService.findAll();
         model.addAttribute("postingPackages", packages);
-        
+        model.addAttribute("walletBalance", walletService.getOrCreateWallet(user).getBalance());
+
         model.addAttribute("content", "owner/package/list");
         model.addAttribute("activeMenu", "packages");
         return "layout/owner-layout";
@@ -74,6 +77,7 @@ public class OwnerPostingPackageController {
         model.addAttribute("priceText", priceText);
         model.addAttribute("orderId", order.getId());
         model.addAttribute("today", LocalDate.now());
+        model.addAttribute("walletBalance", walletService.getOrCreateWallet(user).getBalance());
 
         model.addAttribute("content", "owner/package/checkout");
         return "layout/owner-layout";

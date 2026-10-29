@@ -51,7 +51,7 @@ public class Contract {
 
     private Integer bedCount; // Số giường
 
-    @Column(columnDefinition = "nvarchar(MAX)")
+    @Column(columnDefinition = "TEXT")
     private String note; // Ghi chú
 
     @Enumerated(EnumType.STRING)

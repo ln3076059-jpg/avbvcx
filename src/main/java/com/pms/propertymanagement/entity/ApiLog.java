@@ -31,6 +31,6 @@ public class ApiLog {
     @Column(nullable = false)
     private LocalDateTime timestamp;
 
-    @Column(columnDefinition = "nvarchar(MAX)")
+    @Column(columnDefinition = "TEXT")
     private String errorMessage;
 }

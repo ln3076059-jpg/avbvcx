@@ -1,30 +1,60 @@
-<!DOCTYPE html>
-<html lang="vi" xmlns:th="http://www.thymeleaf.org">
-<body>
-<div class="max-w-3xl mx-auto bg-white rounded-xl shadow p-6">
-    <h2 class="text-xl font-bold mb-4">Chi tiết gói đăng tin</h2>
+﻿<div class="container-fluid" th:fragment="content">
+<!-- Page Heading -->
+        <div class="d-sm-flex align-items-center justify-content-between mb-4">
+            <div>
+                <a th:href="@{/owner/properties}" class="btn btn-sm btn-outline-secondary mb-2">
+                    <i class="fas fa-arrow-left fa-sm mr-1"></i> Quay lại
+                </a>
+                <h1 class="h3 mb-0 text-gray-800 font-weight-bold">
+                    <i class="fas fa-receipt text-success mr-2"></i>Thanh Toán Gói Đăng Tin
+                </h1>
+                <p class="text-muted small mb-0 mt-1">Xác nhận thông tin giao dịch đăng ký gói dịch vụ tin đăng.</p>
+            </div>
+        </div>
 
-    <div class="space-y-3 text-gray-700">
-        <div><span class="font-semibold">Tên gói:</span> <span th:text="${pkg.name}"></span></div>
-        <div><span class="font-semibold">Tên người mua:</span> <span th:text="${buyerName}"></span></div>
-        <div><span class="font-semibold">Giới hạn:</span> Sử dụng 1 lần</div>
-        <div><span class="font-semibold">Giá tiền:</span> <span th:text="${priceText}"></span></div>
-        <div><span class="font-semibold">Hình thức thanh toán:</span> VNPAY Sandbox</div>
-    </div>
+        <div class="row justify-content-center">
+            <div class="col-lg-6">
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3 bg-white border-bottom-success">
+                        <h6 class="m-0 font-weight-bold text-success">
+                            <i class="fas fa-file-invoice-dollar mr-2"></i>Chi Tiết Giao Dịch
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between py-2 border-bottom">
+                            <span class="text-muted small">Tên gói dịch vụ:</span>
+                            <span class="font-weight-bold text-dark" th:text="${pkg.name}">Gói tin</span>
+                        </div>
+                        <div class="d-flex justify-content-between py-2 border-bottom">
+                            <span class="text-muted small">Người thanh toán:</span>
+                            <span class="font-weight-bold text-dark" th:text="${buyerName}">Người dùng</span>
+                        </div>
+                        <div class="d-flex justify-content-between py-2 border-bottom">
+                            <span class="text-muted small">Thời hạn / Giới hạn:</span>
+                            <span class="font-weight-bold text-dark">Sử dụng 1 lần</span>
+                        </div>
+                        <div class="d-flex justify-content-between py-2 border-bottom">
+                            <span class="text-muted small">Phương thức thanh toán:</span>
+                            <span class="badge badge-primary px-2 py-1 font-weight-bold">Cổng VNPay</span>
+                        </div>
+                        <div class="d-flex justify-content-between pt-3 pb-2">
+                            <span class="font-weight-bold text-dark">Tổng chi phí:</span>
+                            <span class="h4 font-weight-bold text-success mb-0" th:text="${priceText}">0 đ</span>
+                        </div>
 
-    <div class="flex justify-end gap-3 mt-6">
-        <a th:href="@{/owner/properties}"
-           class="px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-50">
-            Quay lại / Hủy
-        </a>
-
-        <form th:action="@{/owner/posting-packages/checkout/{orderId}/pay(orderId=${orderId})}" method="post">
-            <button type="submit"
-                    class="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold">
-                Thanh toán
-            </button>
-        </form>
-    </div>
+                        <div class="d-flex justify-content-end mt-4">
+                            <a th:href="@{/owner/properties}" class="btn btn-outline-secondary mr-2">
+                                <i class="fas fa-times mr-1"></i> Hủy Bỏ
+                            </a>
+                            <form th:action="@{/owner/posting-packages/checkout/{orderId}/pay(orderId=${orderId})}" method="post">
+                                <button type="submit" class="btn btn-success shadow-sm font-weight-bold px-4">
+                                    <i class="fas fa-credit-card mr-1"></i> Tiến Hành Thanh Toán
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 </div>
-</body>
-</html>
+

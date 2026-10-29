@@ -1,0 +1,109 @@
+<div th:fragment="content" class="container-fluid">
+
+    <!-- Page Heading -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <div>
+            <h1 class="h3 mb-1 text-gray-800 font-weight-bold">
+                Chi Tiết Sự Cố: <span class="text-primary" th:text="${req.code != null ? req.code : 'YC-' + req.id}">YC-001</span>
+            </h1>
+            <p class="text-muted small mb-0">Hồ sơ phản ánh sửa chữa, phân công kỹ thuật và xác nhận hoàn tất.</p>
+        </div>
+        <a th:href="@{/admin/maintenance}" class="btn btn-secondary btn-sm shadow-sm font-weight-bold">
+            <i class="fas fa-arrow-left mr-1"></i> Quay Lại Danh Sách
+        </a>
+    </div>
+
+    <div class="row">
+        <!-- Chi tiết sự cố -->
+        <div class="col-lg-7 mb-4">
+            <div class="card shadow h-100">
+                <div class="card-header py-3 bg-white border-bottom-primary d-flex align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-tools mr-1"></i> Nội Dung Sự Cố Kỹ Thuật
+                    </h6>
+                    <span class="badge badge-info" th:text="${req.status != null ? req.status.displayName : 'PENDING'}">PENDING</span>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <span class="small text-muted font-weight-bold">Phân loại sự cố:</span>
+                        <span class="badge badge-dark ml-1" th:text="${req.category}">ĐIỆN NƯỚC</span>
+                    </div>
+
+                    <div class="p-3 bg-light rounded border text-gray-800 mb-4" style="line-height: 1.7;">
+                        <h6 class="font-weight-bold text-primary mb-2">Mô tả hiện tượng từ khách thuê:</h6>
+                        <div th:text="${req.description}">Mô tả sự cố...</div>
+                    </div>
+
+                    <!-- Form cập nhật trạng thái bởi Admin -->
+                    <div class="card border-left-success shadow-sm p-3">
+                        <h6 class="font-weight-bold text-success mb-3">
+                            <i class="fas fa-edit mr-1"></i> Cập Nhật Trạng Thái & Ghi Chú Kỹ Thuật (Quyền Admin)
+                        </h6>
+                        <form th:action="@{'/admin/maintenance/' + ${req.id} + '/update-status'}" method="post">
+                            <div class="form-group">
+                                <label for="status" class="font-weight-bold text-gray-700">Trạng thái xử lý:</label>
+                                <select class="form-control" id="status" name="status" required>
+                                    <option th:each="st : ${statuses}" 
+                                            th:value="${st}" 
+                                            th:text="${st.displayName}" 
+                                            th:selected="${req.status == st}">PENDING</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="completionNote" class="font-weight-bold text-gray-700">Ghi chú xử lý nghiệm thu:</label>
+                                <textarea class="form-control" id="completionNote" name="completionNote" rows="2" 
+                                          th:text="${req.completionNote}" placeholder="Ghi chú hoàn thành hoặc hướng giải quyết..."></textarea>
+                            </div>
+                            <div class="text-right">
+                                <button type="submit" class="btn btn-success font-weight-bold">
+                                    <i class="fas fa-save mr-1"></i> Lưu Cập Nhật
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Thông tin phòng & người báo -->
+        <div class="col-lg-5 mb-4">
+            <div class="card shadow h-100">
+                <div class="card-header py-3 bg-white border-bottom-info">
+                    <h6 class="m-0 font-weight-bold text-info">
+                        <i class="fas fa-home mr-1"></i> Vị Trí & Người Phản Ánh
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <span class="small text-muted">Phòng xảy ra sự cố:</span><br>
+                        <strong class="h5 text-primary" th:text="${req.room != null ? req.room.name : 'N/A'}">Phòng 101</strong>
+                        <div class="small text-muted" th:if="${req.room != null and req.room.property != null}">
+                            Khu trọ: <strong th:text="${req.room.property.name}">Nhà trọ A</strong>
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <div class="mb-3">
+                        <span class="small text-muted">Khách thuê phản ánh:</span><br>
+                        <strong class="text-dark" th:text="${req.tenant != null ? req.tenant.fullName : 'N/A'}">Nguyễn Văn B</strong>
+                        <div class="small text-muted" th:if="${req.tenant != null and req.tenant.phone != null}">
+                            SĐT: <span th:text="${req.tenant.phone}">0912345678</span>
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <div class="mb-3">
+                        <span class="small text-muted">Kỹ thuật viên phụ trách:</span><br>
+                        <strong class="text-info" th:text="${req.staff != null ? req.staff.fullName : 'Chưa phân công nhân viên'}">Nhân viên</strong>
+                        <div class="small text-muted" th:if="${req.staff != null and req.staff.phone != null}">
+                            SĐT thợ: <span th:text="${req.staff.phone}">0900000000</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>

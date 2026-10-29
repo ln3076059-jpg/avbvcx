@@ -45,10 +45,10 @@ public class FileUploadServiceImpl implements FileUploadService {
 
     @Override
     public String uploadToVNPT(MultipartFile file, String title) throws IOException {
-
+        File resizedFile = null;
         try {
 
-            File resizedFile = ImageUtil.resizeImage(file);
+            resizedFile = ImageUtil.resizeImage(file);
 
             HttpHeaders headers = new HttpHeaders();
             String raw = accessToken == null ? "" : accessToken.trim();
@@ -95,6 +95,10 @@ public class FileUploadServiceImpl implements FileUploadService {
             throw new RuntimeException("Lỗi upload ảnh lên VNPT: " + VnptErrorUtil.extractErrorMessage(e));
         } catch (Exception e) {
             throw new RuntimeException(e);
+        } finally {
+            if (resizedFile != null && resizedFile.exists()) {
+                resizedFile.delete();
+            }
         }
     }
 }

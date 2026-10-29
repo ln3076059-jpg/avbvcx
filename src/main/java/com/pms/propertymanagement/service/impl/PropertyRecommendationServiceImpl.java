@@ -42,7 +42,7 @@ import java.util.stream.Collectors;
 public class PropertyRecommendationServiceImpl implements PropertyRecommendationService {
 
     private static final List<PostStatus> RECOMMENDATION_FALLBACK_STATUSES =
-            List.of(PostStatus.ACTIVE, PostStatus.EXPIRED);
+            List.of(PostStatus.ACTIVE);
 
     private final PostRepository postRepository;
 
@@ -59,87 +59,77 @@ public class PropertyRecommendationServiceImpl implements PropertyRecommendation
     @Override
     @Transactional(readOnly = true)
     public long countProvinceResults(ChatSessionState state) {
-        long liveCount = postRepository.countByProvinceAndBudget(
-                LocalDateTime.now(), state.getBudget(), state.getProvinceCode());
-        if (liveCount > 0 || state.getProvinceCode() == null) {
-            return liveCount;
+        if (state.getProvinceCode() == null) {
+            return 0L;
         }
-
-        long fallbackCount = postRepository.findByStatusIn(RECOMMENDATION_FALLBACK_STATUSES).stream()
-                .filter(post -> matchesProvinceBudgetFallback(post, state.getProvinceCode(), state.getBudget()))
-                .count();
-        if (fallbackCount > 0) {
-            log.warn(
-                    "Recommendation count fallback activated for province={} because demo posts are expired",
-                    state.getProvinceCode()
-            );
+        try {
+            List<Post> activePosts = postRepository.findByStatusIn(RECOMMENDATION_FALLBACK_STATUSES);
+            long count = activePosts.stream()
+                    .filter(post -> matchesProvinceBudgetFallback(post, state.getProvinceCode(), state.getBudget()))
+                    .count();
+            if (count > 0) {
+                return count;
+            }
+            // Also check with relaxed budget so user isn't told 0 when slightly above budget
+            Double relaxed = state.getBudget() != null ? state.getBudget() * relaxedBudgetMultiplier : null;
+            return activePosts.stream()
+                    .filter(post -> matchesProvinceBudgetFallback(post, state.getProvinceCode(), relaxed))
+                    .count();
+        } catch (Exception e) {
+            log.warn("countProvinceResults fallback triggered: {}", e.getMessage());
+            return 0L;
         }
-        return fallbackCount;
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<PropertySummaryForChat> findRecommendations(ChatSessionState state) {
-        LocalDateTime now = LocalDateTime.now();
         Double budget = state.getBudget();
-        List<String> wardCodes = state.getResolvedWardCodes();
-        Long categoryId = state.getCategoryId();
-        List<Long> amenityIds = state.getAmenityIds();
-        long amenityMatchCount = amenityIds != null ? amenityIds.size() : 0L;
+        double relaxedBudget = budget != null ? budget * relaxedBudgetMultiplier : Double.MAX_VALUE;
 
-        List<Post> posts;
+        List<Post> posts = List.of();
 
-        // ----- Tier 1: strict -----
-        if (state.hasCoordinates()) {
-            posts = queryBoundingBox(state, now, budget, true);
-        } else {
-            posts = postRepository.findRecommendedPosts(
-                    now, budget, state.getProvinceCode(), wardCodes, categoryId, amenityIds, amenityMatchCount);
-        }
-        log.debug("Tier1 strict → {} posts", posts.size());
-
-        // ----- Tier 2: relaxed budget + drop amenity -----
-        if (posts.isEmpty()) {
-            double relaxedBudget = budget * relaxedBudgetMultiplier;
-            if (state.hasCoordinates()) {
-                // applyAmenityFilter=false: amenity requirement dropped for relaxed tier
-                posts = queryBoundingBox(state, now, relaxedBudget, false);
-            } else {
-                posts = postRepository.findRecommendedPosts(
-                        now, relaxedBudget, state.getProvinceCode(), wardCodes, categoryId, null, 0L);
-            }
-            log.debug("Tier2 relaxed-budget → {} posts (budget×{})", posts.size(), relaxedBudgetMultiplier);
-        }
-
-        // ----- Tier 3: province-wide cheapest -----
-        if (posts.isEmpty()) {
-            double relaxedBudget = budget * relaxedBudgetMultiplier;
-            posts = postRepository.findRelaxedRecommendedPosts(now, relaxedBudget, state.getProvinceCode());
-            log.debug("Tier3 province-wide → {} posts", posts.size());
-        }
-
-        if (posts.isEmpty()) {
+        try {
+            // Tier 1: strict match (province + ward/coordinates + budget + category + amenities)
             posts = findFallbackPosts(state, budget, true, false);
-            log.debug("Tier4 fallback-live-demo -> {} posts", posts.size());
-        }
+            log.debug("Tier1 strict in-memory -> {} posts", posts.size());
 
-        if (posts.isEmpty()) {
-            double relaxedBudget = budget * relaxedBudgetMultiplier;
-            posts = findFallbackPosts(state, relaxedBudget, false, false);
-            log.debug("Tier5 fallback-relaxed -> {} posts", posts.size());
-        }
+            // Tier 2: relaxed budget (x1.2) + drop amenity filter
+            if (posts.isEmpty()) {
+                posts = findFallbackPosts(state, relaxedBudget, false, false);
+                log.debug("Tier2 relaxed-budget -> {} posts", posts.size());
+            }
 
-        if (posts.isEmpty()) {
-            double relaxedBudget = budget * relaxedBudgetMultiplier;
-            posts = findFallbackPosts(state, relaxedBudget, false, true);
-            log.debug("Tier6 fallback-province-wide -> {} posts", posts.size());
+            // Tier 3: province-wide within relaxed budget (drop ward/coordinate filter)
+            if (posts.isEmpty()) {
+                posts = findFallbackPosts(state, relaxedBudget, false, true);
+                log.debug("Tier3 province-wide relaxed-budget -> {} posts", posts.size());
+            }
+
+            // Tier 4: province-wide any budget (cheapest available in the requested province)
+            if (posts.isEmpty() && state.getProvinceCode() != null) {
+                ChatSessionState provinceWideState = new ChatSessionState(state.getGuestId());
+                provinceWideState.setProvinceCode(state.getProvinceCode());
+                posts = findFallbackPosts(provinceWideState, null, false, true);
+                log.debug("Tier4 province-wide any-budget -> {} posts", posts.size());
+            }
+
+            // Tier 5: nationwide within relaxed budget if requested province has no demo data
+            if (posts.isEmpty()) {
+                ChatSessionState nationwideState = new ChatSessionState(state.getGuestId());
+                posts = findFallbackPosts(nationwideState, relaxedBudget, false, true);
+                log.debug("Tier5 nationwide fallback -> {} posts", posts.size());
+            }
+        } catch (Exception e) {
+            log.error("Error in findRecommendations, returning empty list: {}", e.getMessage(), e);
+            return List.of();
         }
 
         if (posts.isEmpty()) {
             return List.of();
         }
 
-        // Convert → score → sort → limit → assign displayIndex
+        // Convert -> score -> sort -> limit -> assign displayIndex
         List<PropertySummaryForChat> summaries = posts.stream()
                 .map(post -> toSummary(post, state))
                 .filter(Objects::nonNull)

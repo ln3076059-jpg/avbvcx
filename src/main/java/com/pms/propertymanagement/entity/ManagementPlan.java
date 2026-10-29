@@ -22,10 +22,10 @@ public class ManagementPlan {
     @Column(unique = true, nullable = false, length = 50)
     private String code; // FREE, PRO, BUSINESS
     
-    @Column(nullable = false, columnDefinition = "nvarchar(255)")
+    @Column(nullable = false, length = 255)
     private String name; // "Free", "Pro", "Business"
     
-    @Column(columnDefinition = "nvarchar(1000)")
+    @Column(columnDefinition = "TEXT")
     private String description;
     
     @Column(nullable = false)

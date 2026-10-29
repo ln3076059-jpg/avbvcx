@@ -1,0 +1,122 @@
+<div th:fragment="content" class="container-fluid">
+
+    <!-- Page Heading -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <div>
+            <h1 class="h3 mb-1 text-gray-800 font-weight-bold">
+                Chi Tiết Hợp Đồng: <span class="text-primary" th:text="${contract.code}">HD-001</span>
+            </h1>
+            <p class="text-muted small mb-0">Hồ sơ pháp lý hợp đồng thuê phòng giữa bên cho thuê và bên thuê.</p>
+        </div>
+        <a th:href="@{/admin/contracts}" class="btn btn-secondary btn-sm shadow-sm font-weight-bold">
+            <i class="fas fa-arrow-left mr-1"></i> Quay Lại Danh Sách
+        </a>
+    </div>
+
+    <div class="row">
+        <!-- Thông tin hợp đồng -->
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow h-100">
+                <div class="card-header py-3 bg-white border-bottom-primary d-flex align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-file-contract mr-1"></i> Thông Tin Hợp Đồng
+                    </h6>
+                    <span class="badge badge-success" th:text="${contract.status != null ? contract.status.displayName : 'ACTIVE'}">HIỆU LỰC</span>
+                </div>
+                <div class="card-body">
+                    <table class="table table-borderless table-sm mb-0">
+                        <tbody>
+                            <tr>
+                                <th style="width: 40%;" class="text-gray-600">Mã hợp đồng:</th>
+                                <td class="font-weight-bold text-dark" th:text="${contract.code}">HD-001</td>
+                            </tr>
+                            <tr>
+                                <th class="text-gray-600">Phòng thuê:</th>
+                                <td class="font-weight-bold text-primary" th:text="${contract.room != null ? contract.room.name : 'N/A'}">Phòng 101</td>
+                            </tr>
+                            <tr>
+                                <th class="text-gray-600">Cơ sở nhà trọ:</th>
+                                <td th:text="${contract.room != null and contract.room.property != null ? contract.room.property.name : 'N/A'}">Nhà trọ A</td>
+                            </tr>
+                            <tr>
+                                <th class="text-gray-600">Ngày bắt đầu thuê:</th>
+                                <td th:text="${contract.startDate != null ? #temporals.format(contract.startDate, 'dd/MM/yyyy') : 'N/A'}">01/01/2026</td>
+                            </tr>
+                            <tr>
+                                <th class="text-gray-600">Ngày kết thúc:</th>
+                                <td th:text="${contract.endDate != null ? #temporals.format(contract.endDate, 'dd/MM/yyyy') : 'N/A'}">01/01/2027</td>
+                            </tr>
+                            <tr>
+                                <th class="text-gray-600">Giá thuê thỏa thuận:</th>
+                                <td class="font-weight-bold text-success" 
+                                    th:text="${contract.rentPrice != null ? #numbers.formatDecimal(contract.rentPrice, 0, 'COMMA', 0, 'POINT') + ' đ/tháng' : '0 đ'}">2,500,000 đ</td>
+                            </tr>
+                            <tr>
+                                <th class="text-gray-600">Tiền đặt cọc:</th>
+                                <td class="font-weight-bold text-info" 
+                                    th:text="${contract.deposit != null ? #numbers.formatDecimal(contract.deposit, 0, 'COMMA', 0, 'POINT') + ' đ' : '0 đ'}">2,500,000 đ</td>
+                            </tr>
+                            <tr>
+                                <th class="text-gray-600">Chu kỳ thu tiền:</th>
+                                <td th:text="${contract.paymentCycle != null ? contract.paymentCycle + ' tháng/lần' : '1 tháng/lần'}">1 tháng/lần</td>
+                            </tr>
+                            <tr>
+                                <th class="text-gray-600">Ghi chú hợp đồng:</th>
+                                <td class="text-muted" th:text="${contract.note != null ? contract.note : 'Không có ghi chú thêm.'}">Ghi chú</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Khách thuê đại diện -->
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow h-100">
+                <div class="card-header py-3 bg-white border-bottom-info">
+                    <h6 class="m-0 font-weight-bold text-info">
+                        <i class="fas fa-user-friends mr-1"></i> Thông Tin Khách Thuê Đại Diện
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div th:if="${contract.representative != null}">
+                        <div class="d-flex align-items-center mb-4">
+                            <div class="mr-3">
+                                <i class="fas fa-user-circle fa-3x text-primary"></i>
+                            </div>
+                            <div>
+                                <h5 class="font-weight-bold text-dark mb-0" th:text="${contract.representative.fullName}">Nguyễn Văn B</h5>
+                                <div class="text-muted small">Khách đại diện đứng tên hợp đồng</div>
+                            </div>
+                        </div>
+
+                        <table class="table table-borderless table-sm">
+                            <tbody>
+                                <tr>
+                                    <th style="width: 35%;" class="text-gray-600">Số điện thoại:</th>
+                                    <td class="font-weight-bold" th:text="${contract.representative.phone != null ? contract.representative.phone : 'N/A'}">0901234567</td>
+                                </tr>
+                                <tr>
+                                    <th class="text-gray-600">Email:</th>
+                                    <td th:text="${contract.representative.email != null ? contract.representative.email : 'N/A'}">khachthue@tromoi.vn</td>
+                                </tr>
+                                <tr>
+                                    <th class="text-gray-600">Số CCCD/CMND:</th>
+                                    <td th:text="${contract.representative.citizenId != null ? contract.representative.citizenId : 'N/A'}">001201000123</td>
+                                </tr>
+                                <tr>
+                                    <th class="text-gray-600">Địa chỉ thường trú:</th>
+                                    <td th:text="${contract.representative.permanentAddress != null ? contract.representative.permanentAddress : 'N/A'}">Hà Nội</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div th:unless="${contract.representative != null}" class="text-muted small py-4 text-center">
+                        Chưa có thông tin khách thuê đại diện.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>

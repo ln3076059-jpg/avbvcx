@@ -1,0 +1,718 @@
+<div class="container-fluid mb-4" th:fragment="content">
+
+    <!-- Page Heading -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <div>
+            <h1 class="h3 mb-0 text-gray-800 font-weight-bold">
+                <i class="fas fa-file-invoice-dollar text-success mr-2"></i>Lập Hóa Đơn Tiền Nhà & Dịch Vụ
+            </h1>
+            <p class="text-muted small mb-0 mt-1">
+                Tự động tổng hợp tiền phòng, đối soát chỉ số điện nước theo kỳ và các khoản phí dịch vụ cố định
+            </p>
+        </div>
+        <div class="d-flex align-items-center">
+            <a th:href="@{/owner/invoices/batch-create}" class="btn btn-outline-success btn-sm shadow-sm font-weight-bold mr-2">
+                <i class="fas fa-magic mr-1"></i>Sinh Hàng Loạt
+            </a>
+            <a th:href="@{/owner/invoices}" class="btn btn-secondary btn-sm shadow-sm font-weight-bold">
+                <i class="fas fa-arrow-left mr-1"></i>Danh Sách HĐ
+            </a>
+        </div>
+    </div>
+
+    <!-- Main Split-Screen Layout (BA & UX Optimized) -->
+    <form th:action="@{/owner/invoices/create}" th:object="${invoiceRequest}" method="post" id="invoiceCreateForm">
+        <div class="row">
+
+            <!-- CỘT TRÁI (COL-LG-7): FORM NHẬP LIỆU CẤU HÌNH -->
+            <div class="col-lg-7">
+                
+                <!-- Card 1: Chọn Nhà & Phòng Thu -->
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3 bg-white border-bottom-success d-flex justify-content-between align-items-center">
+                        <h6 class="m-0 font-weight-bold text-success">
+                            <i class="fas fa-door-open mr-2"></i>1. Thông Tin Phòng & Kỳ Thu
+                        </h6>
+                        <span class="badge badge-light text-muted font-weight-normal border">Bước 1/2</span>
+                    </div>
+                    <div class="card-body">
+                        <!-- Lọc 2 cấp: Cơ sở -> Phòng -->
+                        <div class="form-row">
+                            <div class="form-group col-md-5">
+                                <label class="font-weight-bold small text-gray-700">
+                                    <i class="fas fa-building text-secondary mr-1"></i>Cơ Sở Nhà Trọ
+                                </label>
+                                <select id="propertyFilterSelect" class="form-control custom-select">
+                                    <option value="">-- Tất cả cơ sở --</option>
+                                    <option th:each="p : ${properties}" th:value="${p.id}" th:text="${p.name}"></option>
+                                </select>
+                            </div>
+                            <div class="form-group col-md-7">
+                                <label class="font-weight-bold small text-gray-700">
+                                    <i class="fas fa-key text-success mr-1"></i>Phòng Đang Thuê (HĐ Hiệu Lực) <span class="text-danger">*</span>
+                                </label>
+                                <select th:field="*{roomId}" id="invoiceRoomSelect" class="form-control custom-select" required>
+                                    <option value="">-- Chọn phòng cần lập hóa đơn --</option>
+                                    <option th:each="c : ${activeContracts}" 
+                                            th:value="${c.room.id}"
+                                            th:data-property="${c.room.property.id}"
+                                            th:data-price="${c.rentPrice}"
+                                            th:data-tenant="${c.representative != null ? c.representative.fullName : 'N/A'}"
+                                            th:data-phone="${c.representative != null ? (c.representative.phone ?: '') : ''}"
+                                            th:data-roomname="${c.room.name}"
+                                            th:data-propname="${c.room.property.name}"
+                                            th:text="${c.room.name + ' (' + c.room.property.name + ') - ' + (c.representative != null ? c.representative.fullName : 'N/A')}">
+                                    </option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Mini Card: Thông tin hợp đồng sau khi chọn phòng -->
+                        <div id="roomContractInfoCard" class="alert alert-light border shadow-sm p-3 mb-3" style="display: none;">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <span class="badge badge-success font-weight-bold px-2 py-1">
+                                    <i class="fas fa-check-circle mr-1"></i>Hợp đồng Active
+                                </span>
+                                <span class="small text-muted font-mono" id="infoPropertyText">Nhà trọ</span>
+                            </div>
+                            <div class="row small mt-2">
+                                <div class="col-sm-6 mb-1">
+                                    <span class="text-muted">Đại diện thuê:</span>
+                                    <strong class="text-dark ml-1" id="infoTenantName">--</strong>
+                                    <span class="text-muted ml-1" id="infoTenantPhone"></span>
+                                </div>
+                                <div class="col-sm-6 mb-1 text-sm-right">
+                                    <span class="text-muted">Giá thuê gốc:</span>
+                                    <strong class="text-success ml-1 font-mono" id="infoRentPrice">-- đ</strong>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Cảnh báo nếu phòng này đã có hóa đơn kỳ này -->
+                        <div id="duplicateInvoiceAlert" class="alert alert-danger shadow-sm py-2 px-3 mb-3" style="display: none;">
+                            <i class="fas fa-ban mr-2"></i>
+                            <strong>Chú ý:</strong> Phòng này đã có hóa đơn cho kỳ tháng được chọn. Bạn không thể lập thêm hóa đơn trùng!
+                        </div>
+
+                        <!-- Kỳ tháng & Hạn thanh toán -->
+                        <div class="form-row">
+                            <div class="form-group col-md-4">
+                                <label class="font-weight-bold small text-gray-700">Kỳ Tháng Thu <span class="text-danger">*</span></label>
+                                <select th:field="*{month}" id="monthSelect" class="form-control custom-select" required>
+                                    <option th:each="m : ${#numbers.sequence(1, 12)}" th:value="${m}" th:text="'Tháng ' + ${m}"></option>
+                                </select>
+                            </div>
+                            <div class="form-group col-md-4">
+                                <label class="font-weight-bold small text-gray-700">Năm Thu <span class="text-danger">*</span></label>
+                                <input type="number" th:field="*{year}" id="yearInput" class="form-control font-mono font-weight-bold" required min="2020" max="2035">
+                            </div>
+                            <div class="form-group col-md-4">
+                                <label class="font-weight-bold small text-gray-700">Hạn Thanh Toán <span class="text-danger">*</span></label>
+                                <input type="date" th:field="*{dueDate}" id="dueDateInput" class="form-control font-mono" required>
+                                <small class="text-muted">Mặc định sau 5 ngày</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 2: Tiền Phòng & Điều Chỉnh Phát Sinh -->
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3 bg-white border-bottom-warning d-flex justify-content-between align-items-center">
+                        <h6 class="m-0 font-weight-bold text-dark">
+                            <i class="fas fa-coins text-warning mr-2"></i>2. Giá Phòng & Khoản Thu Phát Sinh
+                        </h6>
+                        <span class="badge badge-light text-muted font-weight-normal border">Bước 2/2</span>
+                    </div>
+                    <div class="card-body">
+                        
+                        <div class="form-row">
+                            <div class="form-group col-md-6">
+                                <label class="font-weight-bold small text-gray-700">Tiền Thuê Phòng Tháng Này (VNĐ)</label>
+                                <div class="input-group">
+                                    <input type="number" step="1000" th:field="*{roomPrice}" id="roomPriceInput" 
+                                           class="form-control font-mono font-weight-bold text-success" placeholder="Lấy theo giá hợp đồng">
+                                    <div class="input-group-append">
+                                        <span class="input-group-text font-weight-bold">đ</span>
+                                    </div>
+                                </div>
+                                <small class="form-text text-muted" id="roomPriceFormattedHint">Mặc định áp dụng giá chuẩn trong hợp đồng.</small>
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label class="font-weight-bold small text-gray-700">Phụ Thu / Phát Sinh Khác (VNĐ)</label>
+                                <div class="input-group">
+                                    <input type="number" step="1000" th:field="*{otherAmount}" id="otherAmountInput" 
+                                           class="form-control font-mono" value="0">
+                                    <div class="input-group-append">
+                                        <span class="input-group-text font-weight-bold">đ</span>
+                                    </div>
+                                </div>
+                                <small class="form-text text-muted">Khoản phụ thu khác ngoài điện nước & dịch vụ cố định.</small>
+                            </div>
+                        </div>
+
+                        <!-- Lựa chọn tính tiền lẻ ngày (Prorated) -->
+                        <div class="card bg-light border p-3 mb-3">
+                            <div class="custom-control custom-checkbox">
+                                <input type="checkbox" class="custom-control-input" th:field="*{isProrated}" id="isProratedCheck">
+                                <label class="custom-control-label font-weight-bold text-dark small" for="isProratedCheck">
+                                    <i class="fas fa-calendar-day text-primary mr-1"></i>Tính tiền phòng theo ngày ở thực tế (Khách vào/ra giữa tháng)
+                                </label>
+                            </div>
+
+                            <div id="proratedSection" style="display: none;" class="mt-3 pt-3 border-top">
+                                <div class="form-row">
+                                    <div class="form-group col-md-4 mb-2">
+                                        <label class="font-weight-bold small text-gray-700">Từ ngày ở:</label>
+                                        <input type="date" id="prorateStartDate" class="form-control form-control-sm">
+                                    </div>
+                                    <div class="form-group col-md-4 mb-2">
+                                        <label class="font-weight-bold small text-gray-700">Đến ngày ở:</label>
+                                        <input type="date" id="prorateEndDate" class="form-control form-control-sm">
+                                    </div>
+                                    <div class="form-group col-md-4 mb-2">
+                                        <label class="font-weight-bold small text-gray-700">Số ngày tính tiền:</label>
+                                        <input type="number" th:field="*{actualDays}" id="actualDaysInput" 
+                                               class="form-control form-control-sm font-weight-bold text-primary" min="1" max="31" placeholder="Ví dụ: 15">
+                                    </div>
+                                </div>
+                                <div class="alert alert-info py-2 px-3 mb-0 small" id="proratedFormulaHint">
+                                    <i class="fas fa-calculator mr-1"></i>
+                                    Công thức: <strong>(Giá phòng gốc / Số ngày trong tháng) &times; Số ngày ở</strong>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group mb-0">
+                            <label class="font-weight-bold small text-gray-700">Ghi Chú Cho Khoản Phát Sinh (Nếu Có)</label>
+                            <input type="text" th:field="*{note}" id="invoiceNoteInput" class="form-control" 
+                                   placeholder="Ví dụ: Phạt làm hỏng rèm cửa, phụ thu gửi xe ngoài, trừ tiền khuyến mãi...">
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- CỘT PHẢI (COL-LG-5): LIVE BILL PREVIEW MOCKUP (TỜ HÓA ĐƠN TRỰC QUAN THỜI GIAN THỰC) -->
+            <div class="col-lg-5">
+                <div class="card shadow mb-4 border-left-success sticky-top" style="top: 25px; z-index: 10;">
+                    
+                    <div class="card-header py-3 bg-white border-bottom d-flex justify-content-between align-items-center">
+                        <h6 class="m-0 font-weight-bold text-success">
+                            <i class="fas fa-file-invoice mr-1"></i>Xem Trước Hóa Đơn Tạm Tính
+                        </h6>
+                        <span class="badge badge-success px-2 py-1 font-mono">DRAFT PREVIEW</span>
+                    </div>
+
+                    <div class="card-body p-4 bg-white" id="invoicePaperMockup">
+
+                        <!-- Mockup Header -->
+                        <div class="text-center border-bottom pb-3 mb-3">
+                            <h5 class="font-weight-bold text-dark text-uppercase mb-1" id="previewRoomNameHeader">HÓA ĐƠN TIỀN NHÀ</h5>
+                            <div class="text-muted small" id="previewPropertyHeader">Cơ sở: Chưa chọn phòng</div>
+                            <div class="text-muted small font-weight-bold mt-1">
+                                Kỳ thu: <span class="text-primary font-mono" id="previewPeriod">Tháng --/----</span>
+                            </div>
+                        </div>
+
+                        <!-- Mục 1: Tiền thuê phòng -->
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <div>
+                                <strong class="text-dark small"><i class="fas fa-home text-primary mr-1"></i>Tiền phòng:</strong>
+                                <div class="text-muted" style="font-size: 0.75rem;" id="previewRoomSub">Theo hợp đồng</div>
+                            </div>
+                            <span class="font-mono font-weight-bold text-dark" id="previewRoomAmount">0 đ</span>
+                        </div>
+
+                        <!-- Mục 2: Tiền Điện Nước (Đối soát trực tiếp chỉ số tháng này) -->
+                        <div class="border rounded p-2 mb-3 bg-light" id="previewMeterSection">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <strong class="small text-dark">
+                                    <i class="fas fa-bolt text-warning mr-1"></i>Điện & Nước tháng này:
+                                </strong>
+                                <span id="previewMeterStatusBadge" class="badge badge-secondary">Chưa kiểm tra</span>
+                            </div>
+
+                            <!-- Khi đã có chỉ số điện nước -->
+                            <div id="previewMeterDetails" style="display: none;">
+                                <div class="d-flex justify-content-between align-items-center small text-muted font-mono mt-1">
+                                    <span>Điện (<span id="prevElecUsage">0</span> kWh &times; <span id="prevElecPrice">0</span>đ):</span>
+                                    <strong class="text-warning" id="prevElecAmount">0 đ</strong>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center small text-muted font-mono mt-1">
+                                    <span>Nước (<span id="prevWaterUsage">0</span> m³ &times; <span id="prevWaterPrice">0</span>đ):</span>
+                                    <strong class="text-info" id="prevWaterAmount">0 đ</strong>
+                                </div>
+                            </div>
+
+                            <!-- Cảnh báo khi chưa ghi chỉ số tháng này -->
+                            <div id="previewMeterMissingWarning" class="alert alert-warning py-2 px-2 mt-2 mb-0 small" style="display: none;">
+                                <i class="fas fa-exclamation-triangle mr-1"></i>
+                                <span>Phòng này <strong>chưa ghi chỉ số điện nước</strong> kỳ này. Tiền điện nước đang tạm tính 0 đ.</span>
+                                <div class="mt-1">
+                                    <a id="btnGoToRecordMeter" href="/owner/meters/create" target="_blank" class="btn btn-xs btn-outline-dark font-weight-bold">
+                                        <i class="fas fa-external-link-alt mr-1"></i>Ghi chỉ số ngay
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Mục 3: Dịch vụ cố định -->
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <strong class="text-dark small"><i class="fas fa-concierge-bell text-info mr-1"></i>Dịch vụ cố định:</strong>
+                                <span class="font-mono text-muted small" id="previewServiceTotal">0 đ</span>
+                            </div>
+                            <div id="previewServiceList" class="small text-muted pl-3">
+                                <em>Chưa có dịch vụ nào</em>
+                            </div>
+                        </div>
+
+                        <!-- Mục 4: Phát sinh khác (nếu có) -->
+                        <div class="d-flex justify-content-between align-items-center mb-2" id="previewOtherRow" style="display: none !important;">
+                            <div>
+                                <strong class="text-dark small"><i class="fas fa-plus-circle text-secondary mr-1"></i>Phát sinh khác:</strong>
+                                <div class="text-muted" style="font-size: 0.75rem;" id="previewOtherNote">Phụ thu</div>
+                            </div>
+                            <span class="font-mono font-weight-bold text-dark" id="previewOtherAmount">0 đ</span>
+                        </div>
+
+                        <!-- Mục 5: Nợ cũ kỳ trước (nếu có) -->
+                        <div id="previewDebtRow" class="alert alert-danger py-2 px-3 mb-3 small" style="display: none;">
+                            <i class="fas fa-history mr-1"></i>
+                            <strong>Nợ kỳ trước chưa thanh toán:</strong> 
+                            <span class="font-mono font-weight-bold float-right" id="previewDebtAmount">0 đ</span>
+                        </div>
+
+                        <!-- Divider & Total -->
+                        <div class="border-top pt-3 mt-3">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <span class="text-muted small text-uppercase font-weight-bold">TỔNG TIỀN HÓA ĐƠN:</span>
+                                <h3 class="font-weight-bold text-success font-mono mb-0" id="previewGrandTotal">0 đ</h3>
+                            </div>
+                            <div class="small text-muted text-right font-italic" id="previewTotalWords">Bằng chữ: Không đồng</div>
+                        </div>
+
+                        <!-- CTA Buttons -->
+                        <div class="mt-4 pt-2">
+                            <button type="submit" id="btnSubmitInvoice" class="btn btn-success btn-block py-2 font-weight-bold shadow-sm" disabled>
+                                <i class="fas fa-check-circle mr-2"></i>Tiến Hành Lập Hóa Đơn
+                            </button>
+                            <a th:href="@{/owner/invoices}" class="btn btn-outline-secondary btn-block mt-2">
+                                <i class="fas fa-times mr-1"></i>Hủy Bỏ
+                            </a>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </form>
+
+<!-- SCRIPT TÍNH TOÁN REAL-TIME & ĐỐI SOÁT CHỈ SỐ -->
+<script th:inline="javascript">
+function readVietnameseMoney(amount) {
+    var num = Math.round(Number(amount) || 0);
+    if (num <= 0) return 'Không đồng';
+    var digits = ['không', 'một', 'hai', 'ba', 'bốn', 'năm', 'sáu', 'bảy', 'tám', 'chín'];
+    var units = ['', 'nghìn', 'triệu', 'tỷ', 'nghìn tỷ'];
+
+    function readTriple(n, full) {
+        var tram = Math.floor(n / 100);
+        var chuc = Math.floor((n % 100) / 10);
+        var donvi = n % 10;
+        var res = '';
+        if (full || tram > 0) {
+            res += digits[tram] + ' trăm ';
+        }
+        if (chuc > 1) {
+            res += digits[chuc] + ' mươi ';
+            if (donvi === 1) res += 'mốt ';
+            else if (donvi === 5) res += 'lăm ';
+            else if (donvi > 0) res += digits[donvi] + ' ';
+        } else if (chuc === 1) {
+            res += 'mười ';
+            if (donvi === 5) res += 'lăm ';
+            else if (donvi > 0) res += digits[donvi] + ' ';
+        } else if (chuc === 0 && donvi > 0) {
+            if (full || tram > 0) res += 'lẻ ';
+            res += digits[donvi] + ' ';
+        }
+        return res.trim();
+    }
+
+    var groups = [];
+    var temp = num;
+    while (temp > 0) {
+        groups.push(temp % 1000);
+        temp = Math.floor(temp / 1000);
+    }
+
+    var parts = [];
+    for (var i = groups.length - 1; i >= 0; i--) {
+        if (groups[i] > 0) {
+            var isFull = (i < groups.length - 1);
+            var blockText = readTriple(groups[i], isFull);
+            if (units[i]) blockText += ' ' + units[i];
+            parts.push(blockText);
+        }
+    }
+
+    var str = parts.join(' ').trim() + ' đồng';
+    return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+    var propFilter = document.getElementById('propertyFilterSelect');
+    var roomSelect = document.getElementById('invoiceRoomSelect');
+    var roomIdSelect = roomSelect;
+    var monthSelect = document.getElementById('monthSelect');
+    var yearInput = document.getElementById('yearInput');
+    var dueDateInput = document.getElementById('dueDateInput');
+
+    var roomPriceInput = document.getElementById('roomPriceInput');
+    var otherAmountInput = document.getElementById('otherAmountInput');
+    var invoiceNoteInput = document.getElementById('invoiceNoteInput');
+
+    var isProratedCheck = document.getElementById('isProratedCheck');
+    var proratedSection = document.getElementById('proratedSection');
+    var prorateStartDate = document.getElementById('prorateStartDate');
+    var prorateEndDate = document.getElementById('prorateEndDate');
+    var actualDaysInput = document.getElementById('actualDaysInput');
+
+    var roomContractInfoCard = document.getElementById('roomContractInfoCard');
+    var duplicateAlert = document.getElementById('duplicateInvoiceAlert');
+    var btnSubmit = document.getElementById('btnSubmitInvoice');
+
+    // State lưu trữ dữ liệu chi tiết của phòng đang chọn
+    var currentRoomData = {
+        rentPrice: 0,
+        hasMeterReading: false,
+        electricityAmount: 0,
+        waterAmount: 0,
+        serviceTotal: 0,
+        services: [],
+        previousDebt: 0
+    };
+
+    // 1. Khởi tạo: Lọc phòng theo cơ sở
+    function filterRoomsByProperty() {
+        var selectedPropId = propFilter.value;
+        var options = roomSelect.querySelectorAll('option');
+        var count = 0;
+        options.forEach(function (opt) {
+            if (!opt.value) return; // Bỏ qua option đầu
+            var propId = opt.getAttribute('data-property');
+            if (!selectedPropId || propId === selectedPropId) {
+                opt.style.display = '';
+                count++;
+            } else {
+                opt.style.display = 'none';
+            }
+        });
+        // Nếu phòng hiện tại bị ẩn thì reset select
+        var currentOpt = roomSelect.options[roomSelect.selectedIndex];
+        if (currentOpt && currentOpt.value && currentOpt.style.display === 'none') {
+            roomSelect.value = '';
+            onRoomChange();
+        }
+    }
+
+    if (propFilter) {
+        propFilter.addEventListener('change', filterRoomsByProperty);
+    }
+
+    // 2. Khi chọn phòng
+    function onRoomChange() {
+        var opt = roomSelect.options[roomSelect.selectedIndex];
+        if (!opt || !opt.value) {
+            roomContractInfoCard.style.display = 'none';
+            btnSubmit.disabled = true;
+            resetPreview();
+            return;
+        }
+
+        var roomId = opt.value;
+        var propName = opt.getAttribute('data-propname') || '';
+        var roomName = opt.getAttribute('data-roomname') || '';
+        var tenant = opt.getAttribute('data-tenant') || 'N/A';
+        var phone = opt.getAttribute('data-phone') || '';
+        var price = parseFloat(opt.getAttribute('data-price')) || 0;
+
+        // Cập nhật card info
+        document.getElementById('infoPropertyText').textContent = propName;
+        document.getElementById('infoTenantName').textContent = tenant;
+        document.getElementById('infoTenantPhone').textContent = phone ? '(' + phone + ')' : '';
+        document.getElementById('infoRentPrice').textContent = price.toLocaleString('vi-VN') + ' đ';
+        roomContractInfoCard.style.display = 'block';
+
+        // Gán giá phòng mặc định nếu người dùng chưa sửa
+        roomPriceInput.value = price;
+        updateRoomPriceFormattedHint(price);
+
+        // Nút chuyển sang ghi chỉ số
+        var btnMeter = document.getElementById('btnGoToRecordMeter');
+        if (btnMeter) {
+            btnMeter.href = '/owner/meters/create?propertyId=' + (opt.getAttribute('data-property') || '') + '&roomId=' + roomId;
+        }
+
+        // Gọi API lấy thông tin chỉ số điện nước & dịch vụ
+        fetchRoomApiDetails(roomId);
+    }
+
+    // 3. Gọi API lấy dữ liệu điện nước, dịch vụ & nợ cũ
+    function fetchRoomApiDetails(roomId) {
+        var m = monthSelect.value;
+        var y = yearInput.value;
+        if (!roomId || !m || !y) return;
+
+        fetch('/owner/invoices/api/room-details?roomId=' + roomId + '&month=' + m + '&year=' + y)
+            .then(function (res) { return res.json(); })
+            .then(function (data) {
+                // Kiểm tra trùng hóa đơn
+                if (data.invoiceExists) {
+                    duplicateAlert.style.display = 'block';
+                    btnSubmit.disabled = true;
+                } else {
+                    duplicateAlert.style.display = 'none';
+                    btnSubmit.disabled = false;
+                }
+
+                currentRoomData.rentPrice = data.rentPrice || parseFloat(roomPriceInput.value) || 0;
+                currentRoomData.hasMeterReading = data.hasMeterReading || false;
+                currentRoomData.electricityAmount = data.electricityAmount || 0;
+                currentRoomData.waterAmount = data.waterAmount || 0;
+                currentRoomData.serviceTotal = data.totalServiceAmount || 0;
+                currentRoomData.services = data.services || [];
+                currentRoomData.previousDebt = data.previousDebtAmount || 0;
+
+                // Cập nhật hiển thị điện nước
+                var statusBadge = document.getElementById('previewMeterStatusBadge');
+                var meterDetails = document.getElementById('previewMeterDetails');
+                var meterMissing = document.getElementById('previewMeterMissingWarning');
+
+                if (data.hasMeterReading) {
+                    statusBadge.className = 'badge badge-success';
+                    statusBadge.textContent = 'Đã chốt chỉ số';
+                    meterDetails.style.display = 'block';
+                    meterMissing.style.display = 'none';
+
+                    document.getElementById('prevElecUsage').textContent = (data.electricityUsage || 0);
+                    document.getElementById('prevElecPrice').textContent = (data.electricityPrice || 0).toLocaleString('vi-VN');
+                    document.getElementById('prevElecAmount').textContent = (data.electricityAmount || 0).toLocaleString('vi-VN') + ' đ';
+
+                    document.getElementById('prevWaterUsage').textContent = (data.waterUsage || 0);
+                    document.getElementById('prevWaterPrice').textContent = (data.waterPrice || 0).toLocaleString('vi-VN');
+                    document.getElementById('prevWaterAmount').textContent = (data.waterAmount || 0).toLocaleString('vi-VN') + ' đ';
+                } else {
+                    statusBadge.className = 'badge badge-warning';
+                    statusBadge.textContent = 'Chưa ghi chỉ số';
+                    meterDetails.style.display = 'none';
+                    meterMissing.style.display = 'block';
+                }
+
+                // Cập nhật hiển thị dịch vụ cố định
+                function escapeHtml(str) {
+                    return String(str == null ? '' : str)
+                        .replace(/&/g, '&amp;')
+                        .replace(/</g, '&lt;')
+                        .replace(/>/g, '&gt;')
+                        .replace(/"/g, '&quot;')
+                        .replace(/'/g, '&#39;');
+                }
+                var serviceListEl = document.getElementById('previewServiceList');
+                if (data.services && data.services.length > 0) {
+                    var html = '';
+                    data.services.forEach(function (s) {
+                        html += '<div class="d-flex justify-content-between mb-1">' +
+                                '<span>' + escapeHtml(s.name) + ' (' + escapeHtml(s.unit) + '):</span>' +
+                                '<strong class="font-mono">' + (s.price || 0).toLocaleString('vi-VN') + ' đ</strong>' +
+                                '</div>';
+                    });
+                    serviceListEl.innerHTML = html;
+                } else {
+                    serviceListEl.innerHTML = '<em>Không phát sinh phí dịch vụ cố định</em>';
+                }
+                document.getElementById('previewServiceTotal').textContent = (data.totalServiceAmount || 0).toLocaleString('vi-VN') + ' đ';
+
+                // Nợ cũ
+                var debtRow = document.getElementById('previewDebtRow');
+                if (data.hasPreviousDebt && data.previousDebtAmount > 0) {
+                    debtRow.style.display = 'block';
+                    document.getElementById('previewDebtAmount').textContent = data.previousDebtAmount.toLocaleString('vi-VN') + ' đ';
+                } else {
+                    debtRow.style.display = 'none';
+                }
+
+                recalcLivePreview();
+            })
+            .catch(function (err) {
+                console.error('Error fetching room details:', err);
+                btnSubmit.disabled = false;
+                recalcLivePreview();
+            });
+    }
+
+    // 4. Tính toán Live Preview
+    function recalcLivePreview() {
+        var opt = roomSelect.options[roomSelect.selectedIndex];
+        var roomName = opt && opt.value ? opt.getAttribute('data-roomname') : 'Chưa chọn';
+        var propName = opt && opt.value ? opt.getAttribute('data-propname') : 'Chưa chọn';
+
+        document.getElementById('previewRoomNameHeader').textContent = 'HÓA ĐƠN ' + roomName.toUpperCase();
+        document.getElementById('previewPropertyHeader').textContent = 'Cơ sở: ' + propName;
+        document.getElementById('previewPeriod').textContent = 'Tháng ' + monthSelect.value + '/' + yearInput.value;
+
+        // Tiền phòng
+        var rPrice = parseFloat(roomPriceInput.value) || 0;
+        document.getElementById('previewRoomAmount').textContent = rPrice.toLocaleString('vi-VN') + ' đ';
+
+        var roomSub = document.getElementById('previewRoomSub');
+        if (isProratedCheck && isProratedCheck.checked) {
+            var days = parseInt(actualDaysInput.value) || 0;
+            roomSub.textContent = 'Tính lẻ: ' + days + ' ngày ở';
+        } else {
+            roomSub.textContent = 'Giá thuê trọn tháng';
+        }
+
+        // Phát sinh khác
+        var other = parseFloat(otherAmountInput.value) || 0;
+        var otherRow = document.getElementById('previewOtherRow');
+        if (other > 0) {
+            otherRow.style.setProperty('display', 'flex', 'important');
+            document.getElementById('previewOtherAmount').textContent = other.toLocaleString('vi-VN') + ' đ';
+            var note = invoiceNoteInput.value.trim() || 'Phụ thu phát sinh';
+            document.getElementById('previewOtherNote').textContent = note;
+        } else {
+            otherRow.style.setProperty('display', 'none', 'important');
+        }
+
+        // Điện nước + Dịch vụ
+        var elecCost = currentRoomData.hasMeterReading ? currentRoomData.electricityAmount : 0;
+        var waterCost = currentRoomData.hasMeterReading ? currentRoomData.waterAmount : 0;
+        var serviceCost = currentRoomData.serviceTotal || 0;
+
+        // Tổng cộng
+        var grandTotal = rPrice + elecCost + waterCost + serviceCost + other;
+        document.getElementById('previewGrandTotal').textContent = grandTotal.toLocaleString('vi-VN') + ' đ';
+        var wordsEl = document.getElementById('previewTotalWords');
+        if (wordsEl) {
+            wordsEl.textContent = 'Bằng chữ: ' + readVietnameseMoney(grandTotal);
+        }
+    }
+
+    // 5. Tính toán Prorated Days
+    function recalcProrated() {
+        if (!isProratedCheck || !isProratedCheck.checked) return;
+        var opt = roomSelect.options[roomSelect.selectedIndex];
+        var basePrice = opt && opt.getAttribute('data-price') ? parseFloat(opt.getAttribute('data-price')) : parseFloat(roomPriceInput.value);
+        var m = parseInt(monthSelect.value) || 1;
+        var y = parseInt(yearInput.value) || 2026;
+        var daysInMonth = new Date(y, m, 0).getDate();
+        var days = parseInt(actualDaysInput.value) || 0;
+
+        if (basePrice > 0 && days > 0) {
+            var calcPrice = Math.round((basePrice / daysInMonth) * days);
+            roomPriceInput.value = calcPrice;
+            updateRoomPriceFormattedHint(calcPrice);
+            var formulaHint = document.getElementById('proratedFormulaHint');
+            if (formulaHint) {
+                formulaHint.innerHTML = '<i class="fas fa-check-circle text-success mr-1"></i>' +
+                    '<strong>' + days + '/' + daysInMonth + ' ngày</strong>: ' +
+                    '<span class="text-success font-weight-bold font-mono">' + calcPrice.toLocaleString('vi-VN') + ' đ</span> ' +
+                    '(Giá gốc: ' + basePrice.toLocaleString('vi-VN') + ' đ)';
+            }
+        }
+        recalcLivePreview();
+    }
+
+    function onDateRangeChange() {
+        if (prorateStartDate.value && prorateEndDate.value) {
+            var start = new Date(prorateStartDate.value);
+            var end = new Date(prorateEndDate.value);
+            if (end >= start) {
+                var diffTime = Math.abs(end - start);
+                var diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1; // Tính cả ngày bắt đầu
+                actualDaysInput.value = diffDays;
+                recalcProrated();
+            }
+        }
+    }
+
+    function toggleProrated() {
+        if (isProratedCheck && proratedSection) {
+            proratedSection.style.display = isProratedCheck.checked ? 'block' : 'none';
+            if (!isProratedCheck.checked) {
+                var opt = roomSelect.options[roomSelect.selectedIndex];
+                var basePrice = opt ? opt.getAttribute('data-price') : null;
+                if (basePrice) {
+                    roomPriceInput.value = basePrice;
+                    updateRoomPriceFormattedHint(basePrice);
+                }
+            } else {
+                recalcProrated();
+            }
+            recalcLivePreview();
+        }
+    }
+
+    function updateRoomPriceFormattedHint(val) {
+        var hint = document.getElementById('roomPriceFormattedHint');
+        if (hint && val) {
+            hint.innerHTML = 'Thành tiền: <strong class="text-success font-mono">' + parseFloat(val).toLocaleString('vi-VN') + ' VNĐ</strong>';
+        }
+    }
+
+    function resetPreview() {
+        document.getElementById('previewRoomNameHeader').textContent = 'HÓA ĐƠN TIỀN NHÀ';
+        document.getElementById('previewPropertyHeader').textContent = 'Cơ sở: Chưa chọn phòng';
+        document.getElementById('previewPeriod').textContent = 'Tháng --/----';
+        document.getElementById('previewRoomAmount').textContent = '0 đ';
+        document.getElementById('previewGrandTotal').textContent = '0 đ';
+        var wordsEl = document.getElementById('previewTotalWords');
+        if (wordsEl) wordsEl.textContent = 'Bằng chữ: Không đồng';
+    }
+
+    // Event Listeners
+    roomSelect.addEventListener('change', onRoomChange);
+    monthSelect.addEventListener('change', function () {
+        if (roomSelect.value) fetchRoomApiDetails(roomSelect.value);
+        if (isProratedCheck && isProratedCheck.checked) recalcProrated();
+    });
+    yearInput.addEventListener('change', function () {
+        if (roomSelect.value) fetchRoomApiDetails(roomSelect.value);
+        if (isProratedCheck && isProratedCheck.checked) recalcProrated();
+    });
+    roomPriceInput.addEventListener('input', function () {
+        updateRoomPriceFormattedHint(this.value);
+        recalcLivePreview();
+    });
+    otherAmountInput.addEventListener('input', recalcLivePreview);
+    invoiceNoteInput.addEventListener('input', recalcLivePreview);
+
+    isProratedCheck.addEventListener('change', toggleProrated);
+    if (actualDaysInput) actualDaysInput.addEventListener('input', recalcProrated);
+    if (prorateStartDate) prorateStartDate.addEventListener('change', onDateRangeChange);
+    if (prorateEndDate) prorateEndDate.addEventListener('change', onDateRangeChange);
+
+    // Chặn submit đúp
+    var form = document.getElementById('invoiceCreateForm');
+    if (form) {
+        form.addEventListener('submit', function () {
+            btnSubmit.disabled = true;
+            btnSubmit.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Đang lập hóa đơn...';
+        });
+    }
+
+    // Trigger load nếu đã có phòng được chọn sẵn (từ URL param)
+    var selectedRoomIdFromParam = /*[[${selectedRoomId}]]*/ null;
+    if (!roomIdSelect.value && selectedRoomIdFromParam) {
+        roomIdSelect.value = String(selectedRoomIdFromParam);
+    }
+    if (roomIdSelect.value) {
+        roomIdSelect.dispatchEvent(new Event('change'));
+    }
+});
+</script>
+</div>

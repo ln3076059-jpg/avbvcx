@@ -1,0 +1,200 @@
+<div class="container-fluid" th:fragment="content">
+
+    <!-- Page Heading -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <div>
+            <h1 class="h3 mb-0 text-gray-800 font-weight-bold">
+                <i class="fas fa-receipt text-success mr-2"></i>Lịch Sử Thu Tiền & Thanh Toán
+            </h1>
+            <p class="text-muted small mb-0 mt-1">Theo dõi toàn bộ các khoản thu tiền phòng, tiền điện nước và dịch vụ đã thanh toán từ khách thuê</p>
+        </div>
+        <div class="d-flex flex-wrap align-items-center" style="gap: 8px;">
+            <button type="button" onclick="window.print()" class="btn btn-sm btn-outline-secondary shadow-sm font-weight-bold">
+                <i class="fas fa-print mr-1"></i>In Bảng Kê Thu Tiền (PDF)
+            </button>
+            <a th:href="@{/owner/payments/settings}" class="btn btn-sm btn-success shadow-sm font-weight-bold">
+                <i class="fas fa-qrcode mr-1"></i>Cài Đặt VietQR
+            </a>
+            <a th:href="@{/owner/invoices}" class="btn btn-sm btn-outline-success shadow-sm font-weight-bold">
+                <i class="fas fa-file-invoice mr-1"></i>Xem Hóa Đơn
+            </a>
+        </div>
+    </div>
+
+    <!-- Filter Card -->
+    <div class="search-container border-left-success">
+        <form th:action="@{/owner/payments}" method="get" class="row align-items-end">
+            <div class="col-md-3 col-sm-6 mb-2">
+                <label class="small font-weight-bold text-gray-700 mb-1">Cơ Sở Nhà Trọ:</label>
+                <select name="propertyId" class="form-control custom-select" onchange="this.form.submit()">
+                    <option value="">-- Tất cả nhà trọ --</option>
+                    <option th:each="prop : ${properties}" th:value="${prop.id}" th:text="${prop.name}" th:selected="${selectedPropertyId == prop.id}"></option>
+                </select>
+            </div>
+            <div class="col-md-3 col-sm-6 mb-2">
+                <label class="small font-weight-bold text-gray-700 mb-1">Khách Thuê:</label>
+                <select name="tenantId" class="form-control custom-select" onchange="this.form.submit()">
+                    <option value="">-- Tất cả khách thuê --</option>
+                    <option th:each="t : ${tenants}" th:value="${t.id}" th:text="${t.fullName}" th:selected="${selectedTenantId == t.id}"></option>
+                </select>
+            </div>
+            <div class="col-md-3 mb-2">
+                <button type="submit" class="btn btn-success btn-block font-weight-bold shadow-sm">
+                    <i class="fas fa-filter mr-1"></i>Lọc
+                </button>
+            </div>
+            <div class="col-md-3 mb-2 text-right">
+                <a th:href="@{/owner/payments}" class="btn btn-outline-secondary btn-block font-weight-bold" title="Xóa bộ lọc">
+                    <i class="fas fa-redo mr-1"></i>Làm Mới
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <!-- DataTales Card -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 bg-white border-bottom-success d-flex justify-content-between align-items-center">
+            <h6 class="m-0 font-weight-bold text-success">
+                <i class="fas fa-file-invoice-dollar mr-1"></i>Lịch Sử Giao Dịch Thu Tiền
+            </h6>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover mb-0" id="ownerPaymentsTable" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th style="width: 20%;">Thời Gian & Mã Phiếu</th>
+                            <th style="width: 20%;">Mã Hóa Đơn & Kỳ Thu</th>
+                            <th style="width: 20%;">Phòng & Người Nộp Tiền</th>
+                            <th style="width: 25%;" class="text-right">Số Tiền Đã Thu & Hình Thức</th>
+                            <th style="width: 15%;" class="text-center">Chức Năng</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:if="${payments == null or payments.empty}">
+                            <td colspan="5" class="text-center py-5 text-muted">
+                                <i class="fas fa-receipt fa-3x mb-3 text-gray-300 d-block"></i>
+                                Chưa có giao dịch thu tiền nào được ghi nhận.
+                            </td>
+                        </tr>
+                        <tr th:each="p : ${payments}">
+                            <!-- Cột 1: Thời gian & Mã phiếu -->
+                            <td>
+                                <strong class="text-primary font-mono" th:text="'#PT-' + ${p.id}">#PT-01</strong>
+                                <div class="small text-muted font-mono mt-1">
+                                    <i class="far fa-clock text-secondary mr-1"></i>
+                                    <span th:text="${#temporals.format(p.paymentDate, 'dd/MM/yyyy HH:mm')}">01/01/2026</span>
+                                </div>
+                            </td>
+
+                            <!-- Cột 2: Mã HĐ & Kỳ -->
+                            <td>
+                                <div class="font-weight-bold font-mono text-dark" th:text="${p.invoice != null ? p.invoice.invoiceCode : ('#INV-' + p.invoice?.id)}">INV-01</div>
+                                <div class="small text-muted font-mono mt-1" th:if="${p.invoice != null}">
+                                    Kỳ: <span th:text="${p.invoice.month + '/' + p.invoice.year}">03/2026</span>
+                                </div>
+                            </td>
+
+                            <!-- Cột 3: Phòng & Khách -->
+                            <td>
+                                <div class="font-weight-bold text-dark" th:text="${p.invoice != null and p.invoice.room != null ? p.invoice.room.name : 'N/A'}">Phòng 101</div>
+                                <div class="small text-gray-700" th:text="${p.invoice != null and p.invoice.tenant != null ? p.invoice.tenant.fullName : 'Khách thuê'}">Anh B</div>
+                            </td>
+
+                            <!-- Cột 4: Số tiền & Hình thức -->
+                            <td class="text-right">
+                                <div class="font-weight-bold text-success font-mono" style="font-size: 1.05rem;"
+                                     th:text="${#numbers.formatDecimal(p.amount != null ? p.amount : 0, 0, 'COMMA', 0, 'POINT')} + ' đ'">
+                                    3.000.000 đ
+                                </div>
+                                <div class="mt-1">
+                                    <span class="badge badge-light border text-dark font-weight-bold">
+                                        <i class="fas fa-credit-card mr-1 text-primary"></i>
+                                        <span th:text="${p.paymentMethod != null ? p.paymentMethod.displayName : 'Tiền mặt'}">Tiền mặt</span>
+                                    </span>
+                                </div>
+                                <div class="small text-muted text-truncate mt-1" style="max-width: 200px;" th:if="${p.note != null}" th:text="${p.note}"></div>
+                            </td>
+
+                            <!-- Cột 5: Chức Năng (Thao Tác) -->
+                            <td class="text-center action-btns">
+                                <button type="button" class="btn btn-outline-secondary btn-sm shadow-sm font-weight-bold mr-1"
+                                        onclick="printPaymentReceipt(this)"
+                                        th:attr="data-id=${'#PT-' + p.id},
+                                                 data-date=${#temporals.format(p.paymentDate, 'dd/MM/yyyy HH:mm')},
+                                                 data-invoice=${p.invoice != null ? p.invoice.invoiceCode : ('#INV-' + p.invoice?.id)},
+                                                 data-period=${p.invoice != null ? (p.invoice.month + '/' + p.invoice.year) : '-'},
+                                                 data-room=${p.invoice != null and p.invoice.room != null ? p.invoice.room.name : 'N/A'},
+                                                 data-tenant=${p.invoice != null and p.invoice.tenant != null ? p.invoice.tenant.fullName : 'Khách thuê'},
+                                                 data-amount=${#numbers.formatDecimal(p.amount != null ? p.amount : 0, 0, 'COMMA', 0, 'POINT') + ' đ'},
+                                                 data-method=${p.paymentMethod != null ? p.paymentMethod.displayName : 'Tiền mặt'},
+                                                 data-note=${p.note != null ? p.note : 'Đã thu đủ theo phiếu'}"
+                                        title="In phiếu thu tiền">
+                                    <i class="fas fa-print mr-1"></i>In Phiếu
+                                </button>
+                                <a th:if="${p.invoice != null}" th:href="@{|/owner/invoices/${p.invoice.id}|}" 
+                                   class="btn btn-info btn-sm shadow-sm" title="Xem hóa đơn chi tiết">
+                                    <i class="fas fa-eye mr-1"></i>Hóa Đơn
+                                </a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Phân trang SB Admin 2 -->
+            <div class="d-flex justify-content-between align-items-center p-3 border-top" th:if="${payments != null and payments.totalPages > 1}">
+                <div class="small text-muted">
+                    Trang <span th:text="${currentPage}">1</span> / <span th:text="${payments.totalPages}">1</span>
+                </div>
+                <ul class="pagination pagination-sm m-0">
+                    <li class="page-item" th:classappend="${currentPage <= 1} ? 'disabled' : ''">
+                        <a class="page-link" th:href="@{/owner/payments(page=${currentPage - 1}, propertyId=${selectedPropertyId}, roomId=${selectedRoomId}, tenantId=${selectedTenantId})}">Trước</a>
+                    </li>
+                    <li class="page-item" th:each="p : ${#numbers.sequence(1, payments.totalPages)}" th:classappend="${p == currentPage} ? 'active' : ''">
+                        <a class="page-link" th:href="@{/owner/payments(page=${p}, propertyId=${selectedPropertyId}, roomId=${selectedRoomId}, tenantId=${selectedTenantId})}" th:text="${p}">1</a>
+                    </li>
+                    <li class="page-item" th:classappend="${currentPage >= payments.totalPages} ? 'disabled' : ''">
+                        <a class="page-link" th:href="@{/owner/payments(page=${currentPage + 1}, propertyId=${selectedPropertyId}, roomId=${selectedRoomId}, tenantId=${selectedTenantId})}">Sau</a>
+                    </li>
+                </ul>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+    function printPaymentReceipt(btn) {
+        var id = btn.getAttribute('data-id') || '';
+        var date = btn.getAttribute('data-date') || '';
+        var invoice = btn.getAttribute('data-invoice') || '';
+        var period = btn.getAttribute('data-period') || '';
+        var room = btn.getAttribute('data-room') || '';
+        var tenant = btn.getAttribute('data-tenant') || '';
+        var amount = btn.getAttribute('data-amount') || '';
+        var method = btn.getAttribute('data-method') || '';
+        var note = btn.getAttribute('data-note') || '';
+
+        var win = window.open('', '_blank', 'width=720,height=600');
+        win.document.write('<html><head><title>Phiếu Thu Tiền ' + id + '</title>');
+        win.document.write('<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">');
+        win.document.write('</head><body class="p-4">');
+        win.document.write('<div class="border rounded p-4">');
+        win.document.write('<h4 class="text-center font-weight-bold mb-1">PHIẾU THU TIỀN NHÀ TRỌ</h4>');
+        win.document.write('<p class="text-center text-muted small mb-4">Mã phiếu: <strong>' + id + '</strong> • Ngày thu: ' + date + '</p>');
+        win.document.write('<table class="table table-bordered mb-3">');
+        win.document.write('<tr><th style="width:35%">Phòng trọ</th><td><strong>' + room + '</strong></td></tr>');
+        win.document.write('<tr><th>Người nộp tiền</th><td>' + tenant + '</td></tr>');
+        win.document.write('<tr><th>Hóa đơn &amp; Kỳ thu</th><td>' + invoice + ' (Kỳ ' + period + ')</td></tr>');
+        win.document.write('<tr><th>Hình thức thanh toán</th><td>' + method + '</td></tr>');
+        win.document.write('<tr><th>Số tiền đã thu</th><td class="font-weight-bold text-success">' + amount + '</td></tr>');
+        win.document.write('<tr><th>Ghi chú</th><td>' + note + '</td></tr>');
+        win.document.write('</table>');
+        win.document.write('<div class="row text-center mt-4 pt-2"><div class="col-6"><strong>Người nộp tiền</strong><br><small class="text-muted">(Ký, ghi rõ họ tên)</small></div><div class="col-6"><strong>Chủ nhà trọ / Người lập phiếu</strong><br><small class="text-muted">(Ký, xác nhận đã thu đủ)</small></div></div>');
+        win.document.write('</div></body></html>');
+        win.document.close();
+        setTimeout(function() { win.print(); }, 300);
+    }
+    </script>
+
+</div>

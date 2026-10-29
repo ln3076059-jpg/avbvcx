@@ -1,0 +1,133 @@
+<div class="container-fluid" th:fragment="content">
+
+    <!-- Page Heading -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <div>
+            <h1 class="h3 mb-0 text-gray-800 font-weight-bold">
+                <i class="fas fa-qrcode text-success mr-2"></i>Cài Đặt Tài Khoản Nhận Tiền VietQR
+            </h1>
+            <p class="text-muted small mb-0 mt-1">Thiết lập tài khoản ngân hàng thụ hưởng để tự động tạo mã Napas VietQR trên hóa đơn của khách thuê</p>
+        </div>
+        <div class="d-none d-sm-inline-block">
+            <a th:href="@{/owner/payments}" class="btn btn-sm btn-outline-secondary shadow-sm font-weight-bold mr-2">
+                <i class="fas fa-arrow-left mr-1"></i>Lịch Sử Thu Tiền
+            </a>
+            <a th:href="@{/owner/invoices}" class="btn btn-sm btn-outline-success shadow-sm font-weight-bold">
+                <i class="fas fa-file-invoice mr-1"></i>Xem Hóa Đơn
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Form Cài Đặt -->
+        <div class="col-lg-7">
+            <div class="card shadow mb-4 border-left-success">
+                <div class="card-header py-3 bg-white">
+                    <h6 class="m-0 font-weight-bold text-success">
+                        <i class="fas fa-university mr-1"></i>Thông Tin Tài Khoản Thụ Hưởng
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <form th:action="@{/owner/payments/settings}" method="post">
+                        <!-- Chọn ngân hàng -->
+                        <div class="form-group mb-3">
+                            <label class="small font-weight-bold text-gray-700">Ngân Hàng Thụ Hưởng <span class="text-danger">*</span></label>
+                            <select name="bankCode" id="bankCode" class="form-control custom-select" required onchange="updatePreview()">
+                                <option value="MB" th:selected="${ownerUser.bankCode == 'MB' or ownerUser.bankCode == null}">MB Bank (Ngân hàng Quân Đội)</option>
+                                <option value="VCB" th:selected="${ownerUser.bankCode == 'VCB'}">Vietcombank (Ngoại Thương Việt Nam)</option>
+                                <option value="TCB" th:selected="${ownerUser.bankCode == 'TCB'}">Techcombank (Kỹ Thương Việt Nam)</option>
+                                <option value="ICB" th:selected="${ownerUser.bankCode == 'ICB'}">VietinBank (Công Thương Việt Nam)</option>
+                                <option value="BIDV" th:selected="${ownerUser.bankCode == 'BIDV'}">BIDV (Đầu tư & Phát triển Việt Nam)</option>
+                                <option value="ACB" th:selected="${ownerUser.bankCode == 'ACB'}">ACB (Á Châu)</option>
+                                <option value="VPB" th:selected="${ownerUser.bankCode == 'VPB'}">VPBank (Việt Nam Thịnh Vượng)</option>
+                                <option value="TPB" th:selected="${ownerUser.bankCode == 'TPB'}">TPBank (Tiên Phong)</option>
+                                <option value="STB" th:selected="${ownerUser.bankCode == 'STB'}">Sacombank (Sài Gòn Thương Tín)</option>
+                                <option value="HDB" th:selected="${ownerUser.bankCode == 'HDB'}">HDBank (Phát triển TP.HCM)</option>
+                                <option value="VIB" th:selected="${ownerUser.bankCode == 'VIB'}">VIB (Quốc tế Việt Nam)</option>
+                                <option value="MSB" th:selected="${ownerUser.bankCode == 'MSB'}">MSB (Hàng Hải Việt Nam)</option>
+                                <option value="SHB" th:selected="${ownerUser.bankCode == 'SHB'}">SHB (Sài Gòn - Hà Nội)</option>
+                                <option value="OCB" th:selected="${ownerUser.bankCode == 'OCB'}">OCB (Phương Đông)</option>
+                                <option value="TIMO" th:selected="${ownerUser.bankCode == 'TIMO'}">Timo by BVBank</option>
+                            </select>
+                            <small class="text-muted">Mã chuẩn Napas của ngân hàng nhận tiền.</small>
+                        </div>
+
+                        <!-- Số tài khoản -->
+                        <div class="form-group mb-3">
+                            <label class="small font-weight-bold text-gray-700">Số Tài Khoản Nhận Tiền <span class="text-danger">*</span></label>
+                            <input type="text" name="bankAccountNumber" id="bankAccountNumber" 
+                                   class="form-control font-weight-bold font-mono" 
+                                   placeholder="Nhập số tài khoản ngân hàng..."
+                                   th:value="${ownerUser.bankAccountNumber ?: ownerUser.phone}" 
+                                   required oninput="updatePreview()">
+                            <small class="text-muted">Khách thuê sẽ quét mã VietQR chuyển tiền trực tiếp vào số tài khoản này.</small>
+                        </div>
+
+                        <!-- Tên chủ tài khoản -->
+                        <div class="form-group mb-4">
+                            <label class="small font-weight-bold text-gray-700">Tên Chủ Tài Khoản (Không dấu) <span class="text-danger">*</span></label>
+                            <input type="text" name="bankAccountName" id="bankAccountName" 
+                                   class="form-control font-weight-bold text-uppercase" 
+                                   placeholder="VD: NGUYEN VAN A"
+                                   th:value="${ownerUser.bankAccountName ?: ownerUser.fullName}" 
+                                   required oninput="updatePreview()">
+                            <small class="text-muted">Tên in hoa không dấu đúng như trên thẻ/tài khoản ngân hàng.</small>
+                        </div>
+
+                        <div class="text-right">
+                            <button type="submit" class="btn btn-success font-weight-bold px-4 shadow-sm">
+                                <i class="fas fa-save mr-1"></i>Lưu Cài Đặt Nhận Tiền
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Xem trước Demo VietQR -->
+        <div class="col-lg-5">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 bg-white">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-eye mr-1"></i>Xem Trước Mã VietQR Trên Hóa Đơn
+                    </h6>
+                </div>
+                <div class="card-body text-center p-4">
+                    <div class="p-3 bg-light rounded border d-inline-block mb-3">
+                        <img id="qrPreview" 
+                             th:src="@{'https://img.vietqr.io/image/' + ${ownerUser.effectiveBankCode} + '-' + ${ownerUser.effectiveBankAccountNumber} + '-compact2.png(amount=2500000,addInfo=DEMO-HD,accountName=' + ${ownerUser.effectiveBankAccountName} + ')'}" 
+                             alt="QR Preview" 
+                             class="img-fluid rounded shadow-sm" style="max-height: 250px;">
+                    </div>
+                    <div class="text-left small bg-light p-3 rounded border">
+                        <div class="mb-1"><strong>Ngân hàng:</strong> <span id="lblBank" th:text="${ownerUser.effectiveBankCode}">MB</span></div>
+                        <div class="mb-1"><strong>Số tài khoản:</strong> <span id="lblAcc" class="font-mono font-weight-bold" th:text="${ownerUser.effectiveBankAccountNumber}">...</span></div>
+                        <div class="mb-1"><strong>Chủ tài khoản:</strong> <span id="lblName" class="text-uppercase" th:text="${ownerUser.effectiveBankAccountName}">...</span></div>
+                        <div class="text-success mt-2 font-weight-bold">
+                            <i class="fas fa-shield-alt mr-1"></i>Khách thuê quét mã này trên ứng dụng ngân hàng sẽ tự động điền đúng STK và tên người nhận.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- Preview Script -->
+<script>
+    function updatePreview() {
+        const bank = document.getElementById('bankCode').value || 'MB';
+        const acc = document.getElementById('bankAccountNumber').value || '0975893248';
+        const name = (document.getElementById('bankAccountName').value || 'CHU NHA').toUpperCase();
+
+        document.getElementById('lblBank').innerText = bank;
+        document.getElementById('lblAcc').innerText = acc;
+        document.getElementById('lblName').innerText = name;
+
+        const qrImg = document.getElementById('qrPreview');
+        if (qrImg) {
+            qrImg.src = `https://img.vietqr.io/image/${bank}-${encodeURIComponent(acc)}-compact2.png?amount=2500000&addInfo=DEMO-HD&accountName=${encodeURIComponent(name)}`;
+        }
+    }
+</script>

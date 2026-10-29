@@ -1,0 +1,205 @@
+<div th:fragment="content" class="container-fluid">
+
+    <!-- Page Heading -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <div>
+            <h1 class="h3 mb-1 text-gray-800 font-weight-bold">Quản Lý Cơ Sở Nhà Trọ</h1>
+            <p class="text-muted small mb-0">Theo dõi danh sách toàn bộ các toà nhà, khu trọ, số lượng phòng và chủ nhà trên hệ thống.</p>
+        </div>
+        <div>
+            <a th:href="@{/admin/properties/create}" class="btn btn-primary btn-icon-split shadow-sm mr-2">
+                <span class="icon text-white-50">
+                    <i class="fas fa-plus-circle"></i>
+                </span>
+                <span class="text font-weight-bold">Thêm Cơ Sở Mới</span>
+            </a>
+            <span class="badge badge-primary px-3 py-2 font-weight-bold" th:text="${properties != null ? properties.size() + ' cơ sở hoạt động' : '0'}">0 cơ sở</span>
+        </div>
+    </div>
+
+    <!-- 3-Card KPI Summary Strip -->
+    <div class="row mb-4">
+        <div class="col-md-4 mb-3 mb-md-0">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body py-2">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Tổng số cơ sở</div>
+                            <div class="h4 mb-0 font-weight-bold text-gray-800" th:text="${properties != null ? properties.size() : 0}">0</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-hotel fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3 mb-md-0">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body py-2">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Tổng số phòng khai thác</div>
+                            <div class="h4 mb-0 font-weight-bold text-gray-800"
+                                 th:text="${properties != null and !properties.empty ? #aggregates.sum(properties.![numberOfRooms != null ? numberOfRooms : 0]) : 0}">0</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-door-open fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body py-2">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Loại hình bất động sản</div>
+                            <div class="h4 mb-0 font-weight-bold text-gray-800" th:text="${categories != null ? categories.size() : 0}">0</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-layer-group fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search & Filter Card -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 bg-white">
+            <h6 class="m-0 font-weight-bold text-primary">
+                <i class="fas fa-filter mr-1"></i> Bộ Lọc Cơ Sở Nhà Trọ
+            </h6>
+        </div>
+        <div class="card-body">
+            <form th:action="@{/admin/properties}" method="get" class="form-row align-items-center">
+                <div class="col-lg-6 col-md-6 mb-2">
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <div class="input-group-text bg-light"><i class="fas fa-search text-gray-400"></i></div>
+                        </div>
+                        <input type="text" class="form-control" id="keyword" name="keyword" 
+                               th:value="${keyword}" placeholder="Nhập tên cơ sở, địa chỉ, hoặc tên chủ nhà trọ...">
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-4 mb-2">
+                    <select class="form-control" id="categoryId" name="categoryId">
+                        <option value="">-- Tất cả loại hình --</option>
+                        <option th:each="cat : ${categories}" 
+                                th:value="${cat.id}" 
+                                th:text="${cat.name}" 
+                                th:selected="${categoryId == cat.id}">Nhà trọ</option>
+                    </select>
+                </div>
+                <div class="col-lg-2 col-md-2 mb-2">
+                    <button type="submit" class="btn btn-primary btn-block font-weight-bold">
+                        <i class="fas fa-search mr-1"></i> Lọc
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- DataTales Example (Strictly 5 Columns) -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 d-flex align-items-center justify-content-between">
+            <h6 class="m-0 font-weight-bold text-primary">
+                <i class="fas fa-hotel mr-1"></i> Danh Sách Toàn Bộ Cơ Sở Nhà Trọ
+            </h6>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover" id="dataTable" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th style="width: 70px;" class="text-center">Mã Số</th>
+                            <th>Tên Cơ Sở & Loại Hình</th>
+                            <th>Chủ Sở Hữu</th>
+                            <th>Địa Chỉ & Quy Mô</th>
+                            <th style="width: 170px;" class="text-center">Chức Năng</th>
+                        </tr>
+                    </thead>
+                    <tfoot>
+                        <tr>
+                            <th class="text-center">Mã Số</th>
+                            <th>Tên Cơ Sở & Loại Hình</th>
+                            <th>Chủ Sở Hữu</th>
+                            <th>Địa Chỉ & Quy Mô</th>
+                            <th class="text-center">Chức Năng</th>
+                        </tr>
+                    </tfoot>
+                    <tbody>
+                        <tr th:each="prop : ${properties}">
+                            <!-- Cột 1: Mã Số -->
+                            <td class="text-center font-weight-bold text-gray-700" th:text="${prop.id}">1</td>
+
+                            <!-- Cột 2: Tên Cơ Sở & Loại Hình -->
+                            <td>
+                                <div class="font-weight-bold text-primary" th:text="${prop.name}">Nhà trọ Hòa Bình</div>
+                                <div class="mt-1">
+                                    <span class="badge badge-info" 
+                                          th:text="${prop.category != null ? prop.category.name : 'Chưa phân loại'}">Nhà trọ</span>
+                                    <span class="small text-muted ml-1" th:text="${prop.acreage != null ? prop.acreage + ' m²' : ''}">25 m²</span>
+                                </div>
+                            </td>
+
+                            <!-- Cột 3: Chủ Sở Hữu -->
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="mr-2">
+                                        <i class="fas fa-user-tie text-secondary"></i>
+                                    </div>
+                                    <div>
+                                        <span class="font-weight-bold text-dark" 
+                                              th:text="${prop.owner != null and prop.owner.fullName != null ? prop.owner.fullName : (prop.owner != null ? prop.owner.username : 'N/A')}">Chủ trọ</span>
+                                        <div class="small text-muted" th:text="${prop.owner != null and prop.owner.phone != null ? prop.owner.phone : ''}">0912345678</div>
+                                    </div>
+                                </div>
+                            </td>
+
+                            <!-- Cột 4: Địa Chỉ & Quy Mô -->
+                            <td>
+                                <div class="small text-gray-800 mb-1">
+                                    <i class="fas fa-map-marker-alt text-danger mr-1"></i>
+                                    <span th:text="${prop.originalAddress != null ? prop.originalAddress : (prop.normalizedAddress != null ? prop.normalizedAddress : prop.addressNumber)}">Hà Nội</span>
+                                </div>
+                                <div class="d-flex align-items-center">
+                                    <span class="badge badge-light border mr-2 font-weight-bold">
+                                        <i class="fas fa-door-closed mr-1 text-primary"></i> <span th:text="${prop.numberOfRooms}">10</span> phòng
+                                    </span>
+                                    <span class="small font-weight-bold text-success" 
+                                          th:text="${#numbers.formatDecimal(prop.price, 0, 'COMMA', 0, 'POINT')} + ' đ/tháng'">3,000,000 đ</span>
+                                </div>
+                            </td>
+
+                            <!-- Cột 5: Chức Năng -->
+                            <td class="text-center action-btns">
+                                <a th:href="@{'/admin/properties/' + ${prop.id}}" 
+                                   class="btn btn-primary btn-sm btn-circle" title="Xem chi tiết cơ sở">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+
+                                <a th:href="@{'/admin/properties/' + ${prop.id} + '/edit'}" 
+                                   class="btn btn-info btn-sm btn-circle" title="Chỉnh sửa thông tin">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+
+                                <form th:action="@{'/admin/properties/' + ${prop.id} + '/delete'}" method="post" class="d-inline"
+                                      data-confirm="CẢNH BÁO: Xóa cơ sở này có thể ảnh hưởng đến các phòng và hợp đồng. Bạn có chắc không?">
+                                    <button type="submit" class="btn btn-danger btn-sm btn-circle" title="Xóa cơ sở"
+                                            data-confirm="CẢNH BÁO: Xóa cơ sở này có thể ảnh hưởng đến các phòng và hợp đồng. Bạn có chắc không?">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</div>

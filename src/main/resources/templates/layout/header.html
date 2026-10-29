@@ -1,131 +1,275 @@
-<header th:fragment="header-main" class="public-header sticky top-0 z-50 border-b border-white/60">
-  <div class="container mx-auto px-4 md:px-6 lg:px-8">
-    <div class="flex flex-col gap-4 py-4 lg:flex-row lg:items-center lg:justify-between">
-      <div class="flex items-center justify-between gap-4">
-        <a th:href="@{/}" class="flex items-center gap-3">
-          <div class="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-sky-500 to-blue-700 text-white shadow-lg shadow-sky-500/30">
-            <i class="fa-solid fa-house-chimney-window text-lg"></i>
+<header th:fragment="header-main" id="header" class="header_section">
+  <div class="header">
+    <!-- Rhino Top Bar -->
+    <div class="header_top">
+      <div class="container">
+        <div class="row align-items-center">
+          <div class="col-md-4 col-6">
+            <ul class="contat_infoma mb-0">
+              <li>
+                <i class="fa fa-phone" aria-hidden="true"></i>
+                <span>Call : 0988 123 456</span>
+              </li>
+            </ul>
           </div>
-          <div>
-            <p class="text-xs font-semibold uppercase tracking-[0.3em] text-sky-700">PMS Marketplace</p>
-            <p class="text-2xl font-extrabold tracking-tight text-slate-900">Trọ Mới</p>
+          <div class="col-md-4 d-none d-md-block">
+            <ul class="social_icon_top text_align_center mb-0">
+              <li><a th:href="@{/properties}" title="Facebook" aria-label="Facebook"><i class="fa-brands fa-facebook-f" aria-hidden="true"></i></a></li>
+              <li><a th:href="@{/video-review}" title="Twitter" aria-label="Twitter"><i class="fa-brands fa-twitter" aria-hidden="true"></i></a></li>
+              <li><a th:href="@{/portal/login}" title="LinkedIn" aria-label="LinkedIn"><i class="fa-brands fa-linkedin-in" aria-hidden="true"></i></a></li>
+              <li><a th:href="@{/video-review}" title="Instagram" aria-label="Instagram"><i class="fa-brands fa-instagram" aria-hidden="true"></i></a></li>
+            </ul>
           </div>
-        </a>
-
-        <a
-          th:if="${session.user == null or (session.user.roles.?[name == 'OWNER'].size() == 0 and session.user.roles.?[name == 'STAFF'].size() == 0)}"
-          href="/login/owner"
-          class="inline-flex items-center gap-2 rounded-full bg-slate-900 px-4 py-2 text-sm font-semibold text-white transition hover:-translate-y-0.5 hover:bg-blue-700 lg:hidden"
-        >
-          <i class="fa-solid fa-plus"></i>
-          Đăng nhà trọ
-        </a>
-      </div>
-
-      <nav class="hidden items-center gap-6 lg:flex">
-        <th:block th:each="cat : ${categories}">
-          <th:block th:if="${cat instanceof T(com.pms.propertymanagement.dto.response.CategoryResponse)}">
-            <a
-              th:href="@{/public/category/{id}(id=${cat.id})}"
-              class="group relative text-sm font-semibold text-slate-700 transition hover:text-blue-700"
-            >
-              <span th:text="${cat.name}">Nha tro</span>
-              <span class="absolute -bottom-2 left-0 h-0.5 w-full origin-left scale-x-0 rounded-full bg-gradient-to-r from-sky-500 to-blue-700 transition duration-300 group-hover:scale-x-100"></span>
-            </a>
-          </th:block>
-        </th:block>
-        <a href="/video-review" class="group relative text-sm font-semibold text-slate-700 transition hover:text-blue-700">
-          Video review
-          <span class="absolute -bottom-2 left-0 h-0.5 w-full origin-left scale-x-0 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 transition duration-300 group-hover:scale-x-100"></span>
-        </a>
-      </nav>
-
-      <div class="flex flex-wrap items-center gap-3">
-        <div th:if="${session.user == null}" class="flex flex-wrap items-center gap-3">
-          <a
-            href="/login"
-            class="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/90 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:-translate-y-0.5 hover:border-sky-200 hover:text-blue-700"
-          >
-            <i class="fa-solid fa-right-to-bracket"></i>
-            Đăng nhập
-          </a>
-
-          <a
-            href="/register"
-            class="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/90 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:-translate-y-0.5 hover:border-sky-200 hover:text-blue-700"
-          >
-            <i class="fa-solid fa-user-plus"></i>
-            Đăng ký
-          </a>
+          <div class="col-md-4 col-6">
+            <ul class="contat_infoma text_align_right justify-content-end mb-0">
+              <li>
+                <a href="mailto:admin@gmail.com">
+                  <i class="fa fa-envelope" aria-hidden="true"></i>
+                  <span>admin@gmail.com</span>
+                </a>
+              </li>
+            </ul>
+          </div>
         </div>
-
-        <div th:if="${session.user != null}" class="flex flex-wrap items-center gap-3">
-          <div class="rounded-full bg-white/90 px-4 py-2 text-sm text-slate-700 shadow-sm">
-            Xin chào,
-            <span class="font-semibold" th:text="${session.user.fullName != null ? session.user.fullName : session.user.username}">Người dùng</span>
-          </div>
-
-          <a
-            th:if="${session.user.roles.?[name == 'OWNER'].size() > 0}"
-            href="/owner"
-            class="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/90 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-sky-200 hover:text-blue-700"
-          >
-            Quản lý
-          </a>
-
-          <a
-            th:if="${session.user.roles.?[name == 'STAFF'].size() > 0}"
-            href="/staff/maintenance"
-            class="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/90 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-sky-200 hover:text-blue-700"
-          >
-            Công việc
-          </a>
-
-          <a
-            th:if="${session.user.roles.?[name == 'OWNER'].size() == 0 and session.user.roles.?[name == 'STAFF'].size() == 0}"
-            href="/tenant/rooms"
-            class="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/90 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-sky-200 hover:text-blue-700"
-          >
-            Phòng của tôi
-          </a>
-
-          <form th:action="@{/logout}" method="post">
-            <button
-              type="submit"
-              class="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/90 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-rose-200 hover:text-rose-600"
-            >
-              <i class="fa-solid fa-right-from-bracket"></i>
-              Đăng xuất
-            </button>
-          </form>
-        </div>
-
-        <a
-          th:if="${session.user == null or (session.user.roles.?[name == 'OWNER'].size() == 0 and session.user.roles.?[name == 'STAFF'].size() == 0)}"
-          href="/login/owner"
-          class="hidden items-center gap-2 rounded-full bg-gradient-to-r from-sky-500 to-blue-700 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-sky-500/30 transition hover:-translate-y-0.5 hover:shadow-xl hover:shadow-sky-500/40 lg:inline-flex"
-        >
-          <i class="fa-solid fa-building"></i>
-          Đăng nhà trọ
-        </a>
       </div>
     </div>
 
-    <div class="no-scrollbar flex gap-3 overflow-x-auto pb-4 lg:hidden">
-      <th:block th:each="cat : ${categories}">
-        <th:block th:if="${cat instanceof T(com.pms.propertymanagement.dto.response.CategoryResponse)}">
-          <a
-            th:href="@{/public/category/{id}(id=${cat.id})}"
-            class="whitespace-nowrap rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm"
-            th:text="${cat.name}"
+    <!-- Rhino Bottom Navigation Bar (Single-Line Desktop, Clean Mobile Toggle) -->
+    <div class="header_bottom">
+      <div class="container">
+        <nav class="navigation navbar navbar-expand-xl p-0 d-flex flex-wrap flex-xl-nowrap align-items-center justify-content-between w-100">
+          <div class="logo">
+            <a th:href="@{/}">
+              <span class="d-inline-flex align-items-center justify-content-center" style="width: 36px; height: 36px; border-radius: 9px; background-color: #fe9901; color: #ffffff; font-size: 16px; box-shadow: 0 4px 12px rgba(254, 153, 1, 0.3);">
+                <i class="fa-solid fa-building" aria-hidden="true"></i>
+              </span>
+              <span>TRỌ MỚI</span>
+            </a>
+          </div>
+
+          <button
+            class="navbar-toggler d-xl-none d-inline-flex align-items-center justify-content-center"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#navbarsExample04"
+            aria-controls="navbarsExample04"
+            aria-expanded="false"
+            aria-label="Mở menu điều hướng"
+            style="width: 42px; height: 42px; border: 1px solid #e2e8f0; border-radius: 8px; background-color: #f8fafc; color: #161825;"
           >
-            Nha tro
-          </a>
-        </th:block>
-      </th:block>
-      <a href="/video-review" class="whitespace-nowrap rounded-full border border-amber-200 bg-amber-50 px-4 py-2 text-sm font-semibold text-amber-700 shadow-sm">
-        Video review
-      </a>
+            <i class="fa fa-bars" aria-hidden="true" style="font-size: 18px; color: #161825;"></i>
+          </button>
+
+          <div class="collapse navbar-collapse justify-content-end" id="navbarsExample04">
+            <ul class="navbar-nav align-items-xl-center">
+              <li class="nav-item">
+                <a class="nav-link text-nowrap" th:href="@{/}" data-nav-path="/">Trang chủ</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link text-nowrap" th:href="@{/properties}" data-nav-path="/properties">Bất động sản</a>
+              </li>
+              <li class="nav-item dropdown">
+                <a
+                  class="nav-link dropdown-toggle text-nowrap"
+                  href="/properties"
+                  id="categoryDropdown"
+                  role="button"
+                  data-bs-toggle="dropdown"
+                  aria-expanded="false"
+                >
+                  Loại hình
+                </a>
+                <ul class="dropdown-menu" aria-labelledby="categoryDropdown">
+                  <th:block th:if="${categories != null and !categories.isEmpty()}">
+                    <li th:each="cat : ${categories}">
+                      <a class="dropdown-item" th:href="@{/public/category/{id}(id=${cat.id})}" th:text="${cat.name}">Phòng trọ</a>
+                    </li>
+                  </th:block>
+                  <th:block th:if="${categories == null or categories.isEmpty()}">
+                    <li><a class="dropdown-item" href="/public/category/1">Nhà trọ &amp; Phòng trọ</a></li>
+                    <li><a class="dropdown-item" href="/public/category/2">Căn hộ dịch vụ</a></li>
+                    <li><a class="dropdown-item" href="/public/category/3">Nhà nguyên căn</a></li>
+                    <li><a class="dropdown-item" href="/public/category/4">Ký túc xá / Sleepbox</a></li>
+                  </th:block>
+                </ul>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link text-nowrap" th:href="@{/video-review}" data-nav-path="/video-review">Video Review</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link d-inline-flex align-items-center text-nowrap" href="/properties?saved=1" title="Phòng đã lưu">
+                  <span>Đã lưu</span>
+                  <span id="headerWishlistCount" class="badge rounded-pill ms-1 tabular-nums" style="background-color: #fe9901; color: #ffffff; font-size: 12px; font-weight: 700; padding: 3px 8px;">0</span>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link d-inline-flex align-items-center text-nowrap" th:href="@{/my-bookings}" data-nav-path="/my-bookings" title="Giỏ hàng đơn đặt phòng">
+                  <i class="fa-solid fa-cart-shopping me-1" style="font-size: 13px;"></i>
+                  <span>Giỏ phòng</span>
+                </a>
+              </li>
+
+              <!-- Guest State -->
+              <th:block th:if="${session.user == null}">
+                <li class="nav-item dropdown">
+                  <a
+                    class="nav-link dropdown-toggle text-nowrap"
+                    th:href="@{/login}"
+                    id="guestLoginDropdown"
+                    role="button"
+                    data-bs-toggle="dropdown"
+                    aria-expanded="false"
+                  >
+                    <i class="fa fa-user me-1" aria-hidden="true"></i>Đăng nhập
+                  </a>
+                  <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="guestLoginDropdown">
+                    <li><a class="dropdown-item" th:href="@{/login}"><i class="bi bi-box-arrow-in-right me-2"></i>Đăng nhập Khách thuê</a></li>
+                    <li><a class="dropdown-item" th:href="@{/portal/login}"><i class="bi bi-shield-lock me-2"></i>Cổng Chủ trọ &amp; Quản trị</a></li>
+                    <li><hr class="dropdown-divider" /></li>
+                    <li><a class="dropdown-item" th:href="@{/register}"><i class="bi bi-person-plus me-2"></i>Đăng ký Khách thuê</a></li>
+                    <li><a class="dropdown-item" th:href="@{/register/owner}"><i class="bi bi-building-add me-2"></i>Đăng ký Chủ nhà trọ</a></li>
+                  </ul>
+                </li>
+              </th:block>
+
+              <!-- Logged In State -->
+              <th:block th:if="${session.user != null}">
+                <li class="nav-item dropdown">
+                  <a
+                    class="nav-link dropdown-toggle text-nowrap"
+                    href="#"
+                    id="userAccountDropdown"
+                    role="button"
+                    data-bs-toggle="dropdown"
+                    aria-expanded="false"
+                  >
+                    <i class="fa fa-user me-1" aria-hidden="true"></i>
+                    <span class="d-inline-block text-truncate align-middle" style="max-width: 120px;" th:text="${session.user.fullName ?: session.user.username}">Tài khoản</span>
+                  </a>
+                  <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userAccountDropdown">
+                    <li class="px-3 py-2 border-bottom small text-muted">
+                      <strong class="d-block text-dark" th:text="${session.user.fullName ?: session.user.username}">User</strong>
+                      <span th:text="${session.user.email ?: 'Thành viên TrọMới'}">email</span>
+                    </li>
+                    <li>
+                      <a class="dropdown-item" th:href="@{/my-bookings}"><i class="bi bi-bag-check me-2"></i>Đơn đặt thuê phòng của tôi</a>
+                    </li>
+                    <li th:if="${session.user.roles.?[name == 'ADMIN'].size() > 0}">
+                      <a class="dropdown-item" th:href="@{/admin/dashboard}"><i class="bi bi-shield-lock me-2"></i>Quản trị viên (Toàn quyền)</a>
+                    </li>
+                    <li th:if="${session.user.roles.?[name == 'OWNER'].size() > 0 or session.user.roles.?[name == 'ADMIN'].size() > 0}">
+                      <a class="dropdown-item" th:href="@{/owner/dashboard}"><i class="bi bi-speedometer2 me-2"></i>Bàn làm việc Chủ nhà trọ</a>
+                    </li>
+                    <li th:if="${session.user.roles.?[name == 'USER'].size() > 0 or session.user.roles.?[name == 'TENANT'].size() > 0 or session.user.roles.?[name == 'ADMIN'].size() > 0}">
+                      <a class="dropdown-item" th:href="@{/tenant/dashboard}"><i class="bi bi-house-heart me-2"></i>Khu vực Khách hàng</a>
+                    </li>
+                    <li th:if="${session.originalAdminUser != null}">
+                      <a class="dropdown-item fw-bold text-warning" th:href="@{/admin/impersonate/exit}"><i class="bi bi-arrow-left-circle me-2"></i>Quay lại quyền Admin</a>
+                    </li>
+                    <li><hr class="dropdown-divider" /></li>
+                    <li>
+                      <a class="dropdown-item text-danger fw-bold" th:href="@{/logout}"><i class="bi bi-box-arrow-right me-2"></i>Đăng xuất</a>
+                    </li>
+                  </ul>
+                </li>
+              </th:block>
+
+              <li class="nav-item ms-xl-2 mt-2 mt-xl-0">
+                <a
+                  th:href="${session.user != null and (session.user.roles.?[name == 'OWNER'].size() > 0 or session.user.roles.?[name == 'ADMIN'].size() > 0)} ? @{/owner/posts} : @{/login/owner}"
+                  class="btn-estate-nav text-decoration-none text-nowrap"
+                >
+                  <i class="fa fa-plus-circle"></i>
+                  <span>Đăng tin</span>
+                </a>
+              </li>
+            </ul>
+
+            <ul class="search mb-0 d-none d-xl-flex align-items-center">
+              <li>
+                <a th:href="@{/properties}" title="Tìm kiếm phòng" aria-label="Tìm kiếm phòng">
+                  <i class="fa fa-search" aria-hidden="true"></i>
+                </a>
+              </li>
+            </ul>
+          </div>
+        </nav>
+      </div>
     </div>
   </div>
+
+  <script>
+    (function () {
+      var curPath = window.location.pathname || '/';
+      document.querySelectorAll('#header a[data-nav-path]').forEach(function (link) {
+        var navPath = link.getAttribute('data-nav-path');
+        if (navPath === '/' && curPath === '/') {
+          link.classList.add('active');
+          if (link.parentElement) link.parentElement.classList.add('active');
+        } else if (navPath !== '/' && (curPath.indexOf(navPath) === 0 || (navPath === '/properties' && curPath.indexOf('/public/') === 0))) {
+          link.classList.add('active');
+          if (link.parentElement) link.parentElement.classList.add('active');
+        }
+      });
+
+      function getWishlistItems() {
+        try {
+          return JSON.parse(localStorage.getItem('tm_wishlist') || '[]');
+        } catch (e) {
+          return [];
+        }
+      }
+
+      function syncHeaderWishlistUI() {
+        var list = getWishlistItems();
+        var badge = document.getElementById('headerWishlistCount');
+        if (badge) {
+          badge.textContent = list.length;
+        }
+        document.querySelectorAll('[onclick*="toggleWishlist"]').forEach(function (btn) {
+          var slug = btn.getAttribute('data-slug') || '';
+          var isSaved = list.some(function (it) {
+            return (typeof it === 'string' ? it : it.slug) === slug;
+          });
+          var icon = btn.querySelector('i');
+          var label = btn.querySelector('span');
+          if (icon) {
+            icon.className = isSaved ? 'fa-solid fa-bookmark text-[#fe9901]' : 'fa-regular fa-bookmark';
+          }
+          if (label) {
+            label.textContent = isSaved ? 'Đã lưu' : 'Lưu tin';
+          }
+        });
+      }
+
+      window.toggleWishlist = function (event, btn) {
+        if (event) {
+          event.preventDefault();
+          event.stopPropagation();
+        }
+        if (!btn) return;
+        var slug = btn.getAttribute('data-slug') || '';
+        var title = btn.getAttribute('data-title') || '';
+        if (!slug) return;
+        var list = getWishlistItems();
+        var idx = list.findIndex(function (it) {
+          return (typeof it === 'string' ? it : it.slug) === slug;
+        });
+        if (idx >= 0) {
+          list.splice(idx, 1);
+        } else {
+          list.push({ slug: slug, title: title, savedAt: Date.now() });
+        }
+        localStorage.setItem('tm_wishlist', JSON.stringify(list));
+        window.dispatchEvent(new CustomEvent('wishlist-updated'));
+      };
+
+      window.addEventListener('wishlist-updated', syncHeaderWishlistUI);
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', syncHeaderWishlistUI);
+      } else {
+        syncHeaderWishlistUI();
+      }
+    })();
+  </script>
 </header>

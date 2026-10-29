@@ -46,11 +46,14 @@ public class TenantMaintenanceServiceImpl implements TenantMaintenanceService {
 
     @Override
     public List<Room> getRoomsForTenant(User tenant) {
+        if (tenant == null) return List.of();
         Optional<Tenant> tenantProfile = findTenantProfile(tenant);
-        if (tenantProfile.isEmpty()) {
+        Long tenantId = tenantProfile.map(Tenant::getId).orElse(null);
+        String phone = tenant.getPhone() != null ? tenant.getPhone().trim() : null;
+        if (tenantId == null && (phone == null || phone.isBlank())) {
             return List.of();
         }
-        return contractRepository.findActiveRoomsByTenantId(tenantProfile.get().getId());
+        return contractRepository.findActiveRoomsByTenantIdOrPhone(tenantId, phone);
     }
 
     @Override
@@ -69,10 +72,12 @@ public class TenantMaintenanceServiceImpl implements TenantMaintenanceService {
             return false;
         }
         Optional<Tenant> tenantProfile = findTenantProfile(tenant);
-        if (tenantProfile.isEmpty()) {
+        Long tenantId = tenantProfile.map(Tenant::getId).orElse(null);
+        String phone = tenant.getPhone() != null ? tenant.getPhone().trim() : null;
+        if (tenantId == null && (phone == null || phone.isBlank())) {
             return false;
         }
-        return contractRepository.countActiveContractsByTenantIdAndRoomId(tenantProfile.get().getId(), roomId) > 0;
+        return contractRepository.countActiveContractsByTenantOrPhoneAndRoomId(tenantId, phone, roomId) > 0;
     }
 
     @Override
@@ -98,7 +103,7 @@ public class TenantMaintenanceServiceImpl implements TenantMaintenanceService {
             throw new ForbiddenException("Bạn chỉ có thể tạo yêu cầu cho phòng đang thuê");
         }
         if (hasUnresolvedRequestForRoom(roomId)) {
-            throw new IllegalStateException("Phòng này đang có yêu cầu chưa được xử lý xong");
+            throw new IllegalStateException("Phòng này hiện đã có tối đa 3 yêu cầu đang chờ xử lý. Vui lòng liên hệ trực tiếp chủ trọ nếu có sự cố khẩn cấp!");
         }
         Room room = roomRepository.findById(roomId).orElseThrow(() -> new ResourceNotFoundException("Room not found"));
         MaintenanceRequest req = new MaintenanceRequest();
@@ -206,9 +211,11 @@ public class TenantMaintenanceServiceImpl implements TenantMaintenanceService {
         List<MaintenanceStatus> statuses = List.of(
                 MaintenanceStatus.PENDING,
                 MaintenanceStatus.ASSIGNED,
-                MaintenanceStatus.IN_PROGRESS
+                MaintenanceStatus.IN_PROGRESS,
+                MaintenanceStatus.REOPENED
         );
-        return maintenanceRequestRepository.countByRoom_IdAndStatusIn(roomId, statuses) > 0;
+        // Cho phép tối đa 3 yêu cầu chưa xử lý cùng lúc để tránh chặn các sự cố khẩn cấp phát sinh
+        return maintenanceRequestRepository.countByRoom_IdAndStatusIn(roomId, statuses) >= 3;
     }
 
     @Override
@@ -224,14 +231,33 @@ public class TenantMaintenanceServiceImpl implements TenantMaintenanceService {
         if (tenantUser == null) {
             return Optional.empty();
         }
+        if (tenantUser.getId() != null) {
+            Optional<Tenant> byAccount = tenantRepository.findFirstByAccount_Id(tenantUser.getId());
+            if (byAccount.isPresent()) {
+                return byAccount;
+            }
+        }
         if (StringUtils.hasText(tenantUser.getPhone())) {
             Optional<Tenant> byPhone = tenantRepository.findFirstByPhone(tenantUser.getPhone().trim());
             if (byPhone.isPresent()) {
-                return byPhone;
+                Tenant t = byPhone.get();
+                if (t.getAccount() == null && tenantUser.getId() != null) {
+                    t.setAccount(tenantUser);
+                    tenantRepository.save(t);
+                }
+                return Optional.of(t);
             }
         }
         if (StringUtils.hasText(tenantUser.getEmail())) {
-            return tenantRepository.findFirstByEmail(tenantUser.getEmail().trim());
+            Optional<Tenant> byEmail = tenantRepository.findFirstByEmail(tenantUser.getEmail().trim());
+            if (byEmail.isPresent()) {
+                Tenant t = byEmail.get();
+                if (t.getAccount() == null && tenantUser.getId() != null) {
+                    t.setAccount(tenantUser);
+                    tenantRepository.save(t);
+                }
+                return Optional.of(t);
+            }
         }
         return Optional.empty();
     }

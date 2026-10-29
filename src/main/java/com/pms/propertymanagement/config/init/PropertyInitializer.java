@@ -263,34 +263,16 @@ public class PropertyInitializer {
             p.setTargetTenants(new HashSet<>(allTargets.subList(0, Math.min(allTargets.size(), random.nextInt(3) + 1))));
         }
 
-        List<PropertyImage> images = new ArrayList<>();
-        // Sample images (Placeholders or real valid URLs if available)
         String[] sampleImages = {
-            "https://tromoi.com/uploads/static/phong_tro_hcm/Quan_11/153%20tran%20quy/img_3410.jpg",
-            "https://tromoi.com/uploads/static/phong_tro_hcm/Quan_1/54-3-NguyenBinhKhiem/54_3_nguyenbinhkhiem9.jpg",
-            "https://tromoi.com/uploads/static/phong-tro-ha-noi/1-Ba-Dinh/Ngo266DoiCan/ngo266doican3.jpg",
-            "https://tromoi.com/uploads/static/phong-tro-ha-noi/1-Tay-Ho/pho-tu-lien-duong-au-co/pho_tu_lien1(1).jpg",
-            "https://tromoi.com/uploads/guest/1768900126374_13c85297fc2c73722a3d18.jpg",
-            "https://tromoi.com/uploads/static/phong_tro_hcm/Quan_6/633.12.29/img_2469.jpg",
-            "https://tromoi.com/uploads/static/phong_tro_hcm/Quan_4/170-32/img_2217.jpg",
-            "https://tromoi.com/uploads/static/phong-tro-ha-noi/1-Bac-Tu-Liem/So24-Ngo155XuanDinh/so24_ngo155xuandinh12.jpg",
-            "https://tromoi.com/uploads/static/phong-tro-ha-noi/1-Ba-Dinh/Ngo266DoiCan/ngo266doican3.jpg",
-            "https://tromoi.com/uploads/static/phong_tro_hcm/Quan_6/59.14/1_3.png",
-            "https://tromoi.com/uploads/guest/69aea8289320d-image1.png",
-            "https://tromoi.com/uploads/static/phong_tro_hcm/Quan_Tan_Binh/622.40.4A-CongHoa-canchung/622_40_4A-CongHoa-canchung8.jpg",
-            "https://tromoi.com/uploads/static/phong_tro_hcm/Quan_Tan_Binh/120.12%20bui%20thi%20xuan/img_2293.jpg",
-            "https://tromoi.com/uploads/guest/1772956167753_112063646_868692700290270_7371760822449243675_n.jpg",
-            "https://tromoi.com/uploads/guest/1773049163579_img_1769847478963_1769847522030.jpg",
-            "https://tromoi.com/uploads/static/phong_tro_hcm/Quan_Tan_Binh/622.40.4A-CongHoa-canrieng/622_40_4A-CongHoa-canrieng4.jpg",
-            "https://tromoi.com/uploads/static/phong-tro-ha-noi/1-Cau-Giay/S%E1%BB%91%2022%20Nghach%2014%20Ngo%2079/z7565442358425_9ada4c7702d80c659f52d366ff822df1.jpg",
-
+            "/images/rooms/room-1.jpg", "/images/rooms/room-2.jpg", "/images/rooms/room-3.jpg", "/images/rooms/room-4.jpg",
+            "/images/rooms/room-5.jpg", "/images/rooms/room-6.jpg", "/images/rooms/room-7.jpg", "/images/rooms/room-8.jpg",
+            "/images/rooms/room-9.jpg", "/images/rooms/room-10.jpg", "/images/rooms/room-11.jpg", "/images/rooms/room-12.jpg"
         };
-        
-        // Add 2-3 images
-        int imgCount = random.nextInt(2) + 2;
-        for (int i = 0; i < imgCount; i++) {
+        List<PropertyImage> images = new ArrayList<>();
+        int baseIdx = random.nextInt(sampleImages.length);
+        for (int i = 0; i < 4; i++) {
             PropertyImage img = new PropertyImage();
-            img.setImageUrl(sampleImages[random.nextInt(sampleImages.length)]);
+            img.setImageUrl(sampleImages[(baseIdx + i) % sampleImages.length]);
             img.setIsPrimary(i == 0);
             img.setProperty(p);
             images.add(img);
@@ -358,30 +340,15 @@ public class PropertyInitializer {
         }
 
        String[] sampleImages = {
-            "https://tromoi.com/uploads/static/phong_tro_hcm/Quan_11/153%20tran%20quy/img_3410.jpg",
-            "https://tromoi.com/uploads/static/phong_tro_hcm/Quan_1/54-3-NguyenBinhKhiem/54_3_nguyenbinhkhiem9.jpg",
-            "https://tromoi.com/uploads/static/phong-tro-ha-noi/1-Ba-Dinh/Ngo266DoiCan/ngo266doican3.jpg",
-            "https://tromoi.com/uploads/static/phong-tro-ha-noi/1-Tay-Ho/pho-tu-lien-duong-au-co/pho_tu_lien1(1).jpg",
-            "https://tromoi.com/uploads/guest/1768900126374_13c85297fc2c73722a3d18.jpg",
-            "https://tromoi.com/uploads/static/phong_tro_hcm/Quan_6/633.12.29/img_2469.jpg",
-            "https://tromoi.com/uploads/static/phong_tro_hcm/Quan_4/170-32/img_2217.jpg",
-            "https://tromoi.com/uploads/static/phong-tro-ha-noi/1-Bac-Tu-Liem/So24-Ngo155XuanDinh/so24_ngo155xuandinh12.jpg",
-            "https://tromoi.com/uploads/static/phong-tro-ha-noi/1-Ba-Dinh/Ngo266DoiCan/ngo266doican3.jpg",
-            "https://tromoi.com/uploads/static/phong_tro_hcm/Quan_6/59.14/1_3.png",
-            "https://tromoi.com/uploads/guest/69aea8289320d-image1.png",
-            "https://tromoi.com/uploads/static/phong_tro_hcm/Quan_Tan_Binh/622.40.4A-CongHoa-canchung/622_40_4A-CongHoa-canchung8.jpg",
-            "https://tromoi.com/uploads/static/phong_tro_hcm/Quan_Tan_Binh/120.12%20bui%20thi%20xuan/img_2293.jpg",
-            "https://tromoi.com/uploads/guest/1772956167753_112063646_868692700290270_7371760822449243675_n.jpg",
-            "https://tromoi.com/uploads/guest/1773049163579_img_1769847478963_1769847522030.jpg",
-            "https://tromoi.com/uploads/static/phong_tro_hcm/Quan_Tan_Binh/622.40.4A-CongHoa-canrieng/622_40_4A-CongHoa-canrieng4.jpg",
-            "https://tromoi.com/uploads/static/phong-tro-ha-noi/1-Cau-Giay/S%E1%BB%91%2022%20Nghach%2014%20Ngo%2079/z7565442358425_9ada4c7702d80c659f52d366ff822df1.jpg",
-            
+            "/images/rooms/room-1.jpg", "/images/rooms/room-2.jpg", "/images/rooms/room-3.jpg", "/images/rooms/room-4.jpg",
+            "/images/rooms/room-5.jpg", "/images/rooms/room-6.jpg", "/images/rooms/room-7.jpg", "/images/rooms/room-8.jpg",
+            "/images/rooms/room-9.jpg", "/images/rooms/room-10.jpg", "/images/rooms/room-11.jpg", "/images/rooms/room-12.jpg"
         };
         List<PropertyImage> images = new ArrayList<>();
-        int imgCount = random.nextInt(2) + 2;
-        for (int i = 0; i < imgCount; i++) {
+        int baseIdx = random.nextInt(sampleImages.length);
+        for (int i = 0; i < 4; i++) {
             PropertyImage img = new PropertyImage();
-            img.setImageUrl(sampleImages[random.nextInt(sampleImages.length)]);
+            img.setImageUrl(sampleImages[(baseIdx + i) % sampleImages.length]);
             img.setIsPrimary(i == 0);
             img.setProperty(p);
             images.add(img);

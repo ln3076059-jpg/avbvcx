@@ -11,9 +11,14 @@ public class SlugUtil {
                 .replaceAll("[úùủũụưứừửữự]", "u")
                 .replaceAll("[ýỳỷỹỵ]", "y")
                 .replaceAll("đ", "d")
-                .replaceAll("[^a-z0-9\\s]", "")
+                .replaceAll("[^a-z0-9\\s-]", "")
                 .replaceAll("\\s+", "-")
+                .replaceAll("-+", "-")
                 .trim()
                 .replaceAll("^-+|-+$", "");
+    }
+
+    public static String toSlug(String input) {
+        return makeSlug(input);
     }
 }

@@ -1,0 +1,124 @@
+<div th:fragment="content" class="container-fluid">
+
+    <!-- Page Heading -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <div>
+            <h1 class="h3 mb-1 text-gray-800 font-weight-bold">
+                Chi Tiết Cơ Sở: <span class="text-primary" th:text="${property.name}">Nhà trọ Hòa Bình</span>
+            </h1>
+            <p class="text-muted small mb-0">Hồ sơ dữ liệu toà nhà, danh sách phòng và tiện ích được cung cấp.</p>
+        </div>
+        <div>
+            <a th:href="@{'/admin/properties/' + ${property.id} + '/edit'}" class="btn btn-info btn-sm shadow-sm mr-2 font-weight-bold">
+                <i class="fas fa-edit mr-1"></i> Chỉnh Sửa
+            </a>
+            <a th:href="@{/admin/properties}" class="btn btn-secondary btn-sm shadow-sm font-weight-bold">
+                <i class="fas fa-arrow-left mr-1"></i> Quay Lại
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Thông tin tổng quan -->
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow h-100">
+                <div class="card-header py-3 bg-white border-bottom-primary">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-info-circle mr-1"></i> Thông Tin Cơ Bản Cơ Sở
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <table class="table table-borderless table-sm mb-0">
+                        <tbody>
+                            <tr>
+                                <th style="width: 35%;" class="text-gray-600">Mã cơ sở:</th>
+                                <td class="font-weight-bold text-primary" th:text="'PROP-' + ${property.id}">PROP-1</td>
+                            </tr>
+                            <tr>
+                                <th class="text-gray-600">Tên cơ sở:</th>
+                                <td class="font-weight-bold text-dark" th:text="${property.name}">Nhà trọ A</td>
+                            </tr>
+                            <tr>
+                                <th class="text-gray-600">Loại hình trọ:</th>
+                                <td>
+                                    <span class="badge badge-info" th:text="${property.category != null ? property.category.name : 'N/A'}">Nhà trọ</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th class="text-gray-600">Chủ sở hữu:</th>
+                                <td>
+                                    <strong class="text-dark" th:text="${property.owner != null ? (property.owner.fullName != null ? property.owner.fullName : property.owner.username) : 'N/A'}">Nguyễn Văn A</strong>
+                                    <span class="text-muted small ml-1" th:text="${property.owner != null and property.owner.phone != null ? '(' + property.owner.phone + ')' : ''}"></span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th class="text-gray-600">Giá phòng trung bình:</th>
+                                <td class="font-weight-bold text-success" 
+                                    th:text="${#numbers.formatDecimal(property.price, 0, 'COMMA', 0, 'POINT')} + ' VNĐ/tháng'">
+                                    2,500,000 VNĐ
+                                </td>
+                            </tr>
+                            <tr>
+                                <th class="text-gray-600">Diện tích khuôn viên:</th>
+                                <td th:text="${property.acreage != null ? property.acreage + ' m²' : 'N/A'}">30 m²</td>
+                            </tr>
+                            <tr>
+                                <th class="text-gray-600">Địa chỉ đầy đủ:</th>
+                                <td class="text-gray-800" th:text="${property.originalAddress != null ? property.originalAddress : (property.normalizedAddress != null ? property.normalizedAddress : property.addressNumber)}">
+                                    Số 10, Ngõ 5, Đường Cầu Giấy, Hà Nội
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quy mô phòng và tiện ích -->
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow h-100">
+                <div class="card-header py-3 bg-white border-bottom-success">
+                    <h6 class="m-0 font-weight-bold text-success">
+                        <i class="fas fa-door-open mr-1"></i> Quy Mô & Danh Sách Phòng
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <span class="text-gray-700">Tổng số lượng phòng khai báo:</span>
+                        <span class="badge badge-success px-3 py-2 font-weight-bold" th:text="${property.numberOfRooms} + ' phòng'">10 phòng</span>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-sm">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th>Mã Phòng</th>
+                                    <th>Tên / Số Phòng</th>
+                                    <th>Giá Thuê</th>
+                                    <th>Trạng Thái</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="room : ${property.rooms}">
+                                    <td class="font-weight-bold" th:text="${room.id}">1</td>
+                                    <td th:text="${room.name}">Phòng 101</td>
+                                    <td class="text-success font-weight-bold" 
+                                        th:text="${#numbers.formatDecimal(room.price, 0, 'COMMA', 0, 'POINT')} + ' đ'">2,000,000 đ</td>
+                                    <td>
+                                        <span class="badge" 
+                                              th:classappend="${room.status != null and room.status.name() == 'RENTED' ? 'badge-danger' : 'badge-success'}"
+                                              th:text="${room.status != null ? room.status : 'AVAILABLE'}">TRỐNG</span>
+                                    </td>
+                                </tr>
+                                <tr th:if="${property.rooms == null or #lists.isEmpty(property.rooms)}">
+                                    <td colspan="4" class="text-center text-muted small py-3">Chưa có thông tin từng phòng riêng lẻ trong cơ sở này.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>

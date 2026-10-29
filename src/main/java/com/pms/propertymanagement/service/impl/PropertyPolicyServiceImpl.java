@@ -6,6 +6,7 @@ import com.pms.propertymanagement.enums.PropertyStatus;
 import com.pms.propertymanagement.repository.PropertyRepository;
 import com.pms.propertymanagement.service.PropertyPolicyService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -13,6 +14,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class PropertyPolicyServiceImpl implements PropertyPolicyService {
 
     private final PropertyRepository propertyRepository;
@@ -73,7 +75,7 @@ public class PropertyPolicyServiceImpl implements PropertyPolicyService {
         int updatedCount = propertyRepository.updateStatusByOwnerIdAndCurrentStatus(
                 userId, PropertyStatus.ACTIVE, PropertyStatus.PLAN_LOCKED);
         if (updatedCount > 0) {
-            System.out.printf("Locked %d properties for user %d due to plan expiration%n", updatedCount, userId);
+            log.info("Locked {} properties for user {} due to plan expiration", updatedCount, userId);
         }
     }
 
@@ -83,7 +85,7 @@ public class PropertyPolicyServiceImpl implements PropertyPolicyService {
         int updatedCount = propertyRepository.updateStatusByOwnerIdAndCurrentStatus(
                 userId, PropertyStatus.PLAN_LOCKED, PropertyStatus.ACTIVE);
         if (updatedCount > 0) {
-            System.out.printf("Unlocked %d properties for user %d due to plan upgrade%n", updatedCount, userId);
+            log.info("Unlocked {} properties for user {} due to plan upgrade", updatedCount, userId);
         }
     }
 

@@ -44,7 +44,7 @@ public class Post {
      * Marketing title for marketplace display
      * Can be different from Property.name (internal management name)
      */
-    @Column(nullable = false, columnDefinition = "nvarchar(255)")
+    @Column(nullable = false, length = 255)
     private String title;
 
     /**
@@ -58,7 +58,7 @@ public class Post {
      * Marketing description for marketplace listing
      * Rich text content optimized for tenant conversion
      */
-    @Column(columnDefinition = "nvarchar(max)")
+    @Column(columnDefinition = "TEXT")
     private String description;
 
     /**
@@ -94,7 +94,7 @@ public class Post {
      * Staff rejection reason - populated when status = REJECTED
      * Owner can see this to understand what needs to be fixed
      */
-    @Column(name = "rejection_reason", columnDefinition = "nvarchar(500)")
+    @Column(name = "rejection_reason", length = 500)
     private String rejectionReason;
 
     /**
@@ -210,9 +210,10 @@ public class Post {
      * Extend post duration (when purchasing new PostPackage)
      */
     public void extendDuration(int additionalDays) {
-        LocalDateTime newExpiry = (postExpiredAt.isAfter(LocalDateTime.now())) 
-            ? postExpiredAt.plusDays(additionalDays)
-            : LocalDateTime.now().plusDays(additionalDays);
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime newExpiry = (this.postExpiredAt != null && this.postExpiredAt.isAfter(now)) 
+            ? this.postExpiredAt.plusDays(additionalDays)
+            : now.plusDays(additionalDays);
         this.postExpiredAt = newExpiry;
     }
 

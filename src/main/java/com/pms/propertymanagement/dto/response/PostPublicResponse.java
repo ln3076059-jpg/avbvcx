@@ -52,14 +52,56 @@ public class PostPublicResponse {
 
     // ── Factory ───────────────────────────────────────────────────────────
 
+    private static final String[] FALLBACK_ROOM_IMAGES = {
+            "/images/rooms/room-1.jpg",
+            "/images/rooms/room-2.jpg",
+            "/images/rooms/room-3.jpg",
+            "/images/rooms/room-4.jpg",
+            "/images/rooms/room-5.jpg",
+            "/images/rooms/room-6.jpg",
+            "/images/rooms/room-7.jpg",
+            "/images/rooms/room-8.jpg",
+            "/images/rooms/room-9.jpg",
+            "/images/rooms/room-10.jpg",
+            "/images/rooms/room-11.jpg",
+            "/images/rooms/room-12.jpg"
+    };
+
+    private static boolean isUsableImageUrl(String url) {
+        if (url == null || url.isBlank()) return false;
+        String trimmed = url.trim();
+        if (trimmed.contains("picsum.photos")
+                || trimmed.contains("photo-1502005229762")
+                || trimmed.endsWith("/no-image.jpg")
+                || trimmed.endsWith("/default.jpg")) {
+            return false;
+        }
+        return true;
+    }
+
     public static PostPublicResponse from(Post post) {
         Property prop = post.getProperty();
 
-        List<String> urls = (prop.getImages() != null)
-                ? prop.getImages().stream().map(PropertyImage::getImageUrl).collect(Collectors.toList())
-                : Collections.emptyList();
+        java.util.List<String> urls = new java.util.ArrayList<>();
+        if (prop.getImages() != null) {
+            for (PropertyImage img : prop.getImages()) {
+                if (img != null && isUsableImageUrl(img.getImageUrl())) {
+                    urls.add(img.getImageUrl().trim());
+                }
+            }
+        }
 
-        String thumbnail = urls.isEmpty() ? "/images/no-image.jpg" : urls.get(0);
+        int seed = Math.abs((prop.getId() != null ? prop.getId().intValue() : 1) * 3);
+        int offset = 0;
+        while (urls.size() < 4) {
+            String fallback = FALLBACK_ROOM_IMAGES[(seed + offset) % FALLBACK_ROOM_IMAGES.length];
+            if (!urls.contains(fallback) || offset >= FALLBACK_ROOM_IMAGES.length) {
+                urls.add(fallback);
+            }
+            offset++;
+        }
+
+        String thumbnail = urls.get(0);
 
         String wardName     = (prop.getWard() != null) ? prop.getWard().getName() : "";
         String provinceName = (prop.getWard() != null && prop.getWard().getProvince() != null)

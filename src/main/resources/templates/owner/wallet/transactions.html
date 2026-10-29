@@ -1,247 +1,254 @@
-<!doctype html>
-<div th:fragment="content" class="space-y-6">
-  <!-- Page Header -->
-  <div class="flex items-center justify-between">
-    <div>
-      <h1 class="text-2xl font-bold text-gray-900 mb-1">
-        <i class="fa-solid fa-list mr-3"></i>
-        Lịch sử giao dịch
-      </h1>
-      <p class="text-gray-600">Theo dõi tất cả giao dịch của bạn</p>
-    </div>
-    <div class="text-right">
-      <p class="text-sm text-gray-600">Số dư hiện tại</p>
-      <p
-        class="text-2xl font-bold text-blue-600"
-        th:text="${#numbers.formatDecimal(currentBalance, 0, 'COMMA', 0, 'POINT')} + ' đ'"
-      >
-        0 đ
-      </p>
-    </div>
-  </div>
+<div class="container-fluid" th:fragment="content">
 
-  <!-- Quick Actions -->
-  <div class="flex gap-3">
-    <a
-      href="/owner/wallet"
-      class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-    >
-      <i class="fa-solid fa-arrow-left mr-2"></i>
-      Quay lại ví
-    </a>
-    <a
-      href="/owner/wallet/topup"
-      class="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
-    >
-      <i class="fa-solid fa-plus mr-2"></i>
-      Nạp tiền
-    </a>
-  </div>
-
-  <!-- Filters (Future Enhancement) -->
-  <div class="bg-white rounded-lg border border-gray-200 p-4">
-    <div class="flex items-center gap-4">
-      <div class="flex items-center gap-2">
-        <i class="fa-solid fa-filter text-gray-500"></i>
-        <span class="text-sm font-medium text-gray-700">Bộ lọc:</span>
-      </div>
-      <select class="border border-gray-300 rounded px-3 py-1 text-sm">
-        <option value="">Tất cả giao dịch</option>
-        <option value="DEPOSIT">Nạp tiền</option>
-        <option value="PAYMENT">Thanh toán</option>
-        <option value="REFUND">Hoàn tiền</option>
-      </select>
-      <select class="border border-gray-300 rounded px-3 py-1 text-sm">
-        <option value="">30 ngày gần đây</option>
-        <option value="today">Hôm nay</option>
-        <option value="week">Tuần này</option>
-        <option value="month">Tháng này</option>
-        <option value="all">Tất cả</option>
-      </select>
-    </div>
-  </div>
-
-  <!-- Transaction List -->
-  <div class="bg-white rounded-lg border border-gray-200">
-    <div class="px-6 py-4 border-b border-gray-200">
-      <h3 class="text-lg font-semibold text-gray-900">
-        Danh sách giao dịch
-        <span
-          class="text-sm font-normal text-gray-600 ml-2"
-          th:text="'(' + ${transactions.totalElements} + ' giao dịch)'"
-        >
-          (0 giao dịch)
-        </span>
-      </h3>
-    </div>
-
-    <div class="divide-y divide-gray-200">
-      <!-- Empty State -->
-      <div th:if="${transactions.empty}" class="p-12 text-center">
-        <div class="text-gray-400 mb-4">
-          <i class="fa-solid fa-receipt text-6xl"></i>
+        <!-- Page Heading -->
+        <div class="d-sm-flex align-items-center justify-content-between mb-4">
+            <div>
+                <a th:href="@{/owner/wallet}" class="btn btn-sm btn-outline-secondary mb-2">
+                    <i class="fas fa-arrow-left fa-sm mr-1"></i> Quay lại ví điện tử
+                </a>
+                <h1 class="h3 mb-0 text-gray-800 font-weight-bold">
+                    <i class="fas fa-list-alt text-success mr-2"></i>Lịch Sử Giao Dịch Ví
+                </h1>
+                <p class="text-muted small mb-0 mt-1">Tra cứu đầy đủ toàn bộ lịch sử nạp tiền, trừ tiền dịch vụ và hoàn tiền vào ví.</p>
+            </div>
+            <div class="d-flex align-items-center">
+                <div class="mr-3 text-right">
+                    <div class="text-xs text-uppercase font-weight-bold text-muted">Số Dư Hiện Tại</div>
+                    <div class="h5 mb-0 font-weight-bold text-success" th:text="${#numbers.formatDecimal(currentBalance, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</div>
+                </div>
+                <a th:href="@{/owner/wallet/topup}" class="btn btn-success shadow-sm font-weight-bold">
+                    <i class="fas fa-plus-circle fa-sm mr-1"></i> Nạp Tiền
+                </a>
+            </div>
         </div>
-        <h3 class="text-lg font-medium text-gray-900 mb-2">
-          Chưa có giao dịch nào
-        </h3>
-        <p class="text-gray-600 mb-6">
-          Bạn chưa thực hiện giao dịch nào. Hãy bắt đầu bằng việc nạp tiền vào
-          ví.
-        </p>
-        <a
-          href="/owner/wallet/topup"
-          class="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-        >
-          <i class="fa-solid fa-plus mr-2"></i>
-          Nạp tiền ngay
-        </a>
-      </div>
 
-      <!-- Transaction Items -->
-      <div
-        th:each="transaction, iterStat : ${transactions.content}"
-        class="p-6 hover:bg-gray-50 transition-colors"
-      >
-        <div class="flex items-center justify-between">
-          <div class="flex items-center flex-1">
-            <!-- Transaction Icon -->
-            <div
-              class="w-12 h-12 rounded-full flex items-center justify-center mr-4 flex-shrink-0"
-              th:classappend="${transaction.type == T(com.pms.propertymanagement.enums.TransactionType).DEPOSIT} ? 'bg-green-100' : 
-                             (${transaction.type == T(com.pms.propertymanagement.enums.TransactionType).PAYMENT} ? 'bg-red-100' : 'bg-blue-100')"
-            >
-              <i
-                class="text-lg"
-                th:classappend="${transaction.type == T(com.pms.propertymanagement.enums.TransactionType).DEPOSIT} ? 'fa-solid fa-arrow-up text-green-600' : 
-                               (${transaction.type == T(com.pms.propertymanagement.enums.TransactionType).PAYMENT} ? 'fa-solid fa-arrow-down text-red-600' : 'fa-solid fa-rotate-left text-blue-600')"
-              ></i>
+        <!-- Filter Box -->
+        <div class="search-container shadow-sm mb-4">
+            <div class="row align-items-center">
+                <div class="col-md-6 mb-2 mb-md-0">
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text bg-light border-right-0"><i class="fas fa-search text-gray-400"></i></span>
+                        </div>
+                        <input type="text" id="liveSearchInput" class="form-control bg-light border-left-0 small" placeholder="Lọc nhanh mã giao dịch, mô tả hoặc loại giao dịch...">
+                    </div>
+                </div>
+                <div class="col-md-3 mb-2 mb-md-0">
+                    <select id="typeFilter" class="form-control form-control-sm">
+                        <option value="">Tất cả loại giao dịch</option>
+                        <option value="Nạp tiền">Nạp tiền</option>
+                        <option value="Thanh toán">Thanh toán</option>
+                        <option value="Hoàn tiền">Hoàn tiền</option>
+                    </select>
+                </div>
+                <div class="col-md-3 text-md-right text-muted small">
+                    Tổng cộng: <strong class="text-dark" th:text="${transactions.totalElements}">0</strong> giao dịch
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Data Table (Strict 5 Columns) -->
+        <div class="card shadow mb-4">
+            <div class="card-header py-3 bg-white border-bottom-success d-flex justify-content-between align-items-center">
+                <h6 class="m-0 font-weight-bold text-success">
+                    <i class="fas fa-receipt mr-2"></i>Danh Sách Giao Dịch
+                </h6>
+                <span class="badge badge-success px-2 py-1" th:text="'Trang ' + (${transactions.number + 1}) + ' / ' + (${transactions.totalPages > 0 ? transactions.totalPages : 1})">Trang 1</span>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover table-bordered mb-0" id="txTable">
+                        <thead class="thead-light">
+                            <tr>
+                                <th style="width: 20%;">Mã GD & Thời Gian</th>
+                                <th style="width: 18%;">Loại Giao Dịch</th>
+                                <th style="width: 28%;">Nội Dung / Diễn Giải</th>
+                                <th style="width: 18%;" class="text-right">Số Tiền & Số Dư Sau</th>
+                                <th style="width: 16%;" class="text-center">Chức Năng</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Empty state -->
+                            <tr th:if="${transactions.empty}">
+                                <td colspan="5" class="text-center py-5 text-muted">
+                                    <i class="fas fa-receipt fa-3x text-gray-300 mb-3 d-block"></i>
+                                    Bạn chưa thực hiện giao dịch nào. Hãy bắt đầu bằng việc nạp tiền vào ví.
+                                </td>
+                            </tr>
+
+                            <!-- Row Items -->
+                            <tr th:each="tx : ${transactions.content}">
+                                <!-- Cột 1: Mã GD & Thời gian -->
+                                <td>
+                                    <div class="font-weight-bold text-dark font-monospace" th:text="${tx.vnpayTxnRef ?: ('TX-' + tx.id)}">TX-123</div>
+                                    <small class="text-muted">
+                                        <i class="far fa-clock mr-1"></i>
+                                        <span th:text="${#temporals.format(tx.createdAt, 'dd/MM/yyyy HH:mm:ss')}">01/01/2026</span>
+                                    </small>
+                                </td>
+
+                                <!-- Cột 2: Loại GD -->
+                                <td>
+                                    <span class="badge" th:classappend="${tx.type == T(com.pms.propertymanagement.enums.TransactionType).DEPOSIT ? 'badge-success' : (tx.type == T(com.pms.propertymanagement.enums.TransactionType).PAYMENT ? 'badge-danger' : 'badge-primary')}"
+                                          th:text="${tx.type.displayName}">Loại GD</span>
+                                    <div class="small text-muted mt-1 font-weight-bold" th:text="${tx.status.displayName}">Thành công</div>
+                                </td>
+
+                                <!-- Cột 3: Nội dung -->
+                                <td>
+                                    <span class="text-gray-800" th:text="${tx.description ?: tx.type.description}">Nội dung diễn giải</span>
+                                    <div th:if="${tx.vnpayTxnRef}" class="small text-muted">
+                                        Ref: <span class="font-monospace" th:text="${tx.vnpayTxnRef}">REF</span>
+                                    </div>
+                                </td>
+
+                                <!-- Cột 4: Số tiền & Số dư -->
+                                <td class="text-right">
+                                    <div class="font-weight-bold h6 mb-0" th:classappend="${tx.type == T(com.pms.propertymanagement.enums.TransactionType).DEPOSIT ? 'text-success' : 'text-danger'}"
+                                         th:text="${(tx.type == T(com.pms.propertymanagement.enums.TransactionType).DEPOSIT ? '+' : '-') + #numbers.formatDecimal(tx.amount, 0, 'COMMA', 0, 'POINT') + ' đ'}">
+                                        +50,000 đ
+                                    </div>
+                                    <small class="text-muted" th:if="${tx.remainingBalance != null}" th:text="'Số dư: ' + ${#numbers.formatDecimal(tx.remainingBalance, 0, 'COMMA', 0, 'POINT')} + ' đ'">Dư</small>
+                                </td>
+
+                                <!-- Cột 5: Chức năng -->
+                                <td class="text-center">
+                                    <button type="button" class="btn btn-sm btn-outline-info font-weight-bold"
+                                            th:attr="data-id=${tx.id},data-code=${tx.vnpayTxnRef ?: ('TX-' + tx.id)},data-type=${tx.type.displayName},data-amount=${#numbers.formatDecimal(tx.amount, 0, 'COMMA', 0, 'POINT') + ' đ'},data-balance=${tx.balanceAfter != null ? (#numbers.formatDecimal(tx.balanceAfter, 0, 'COMMA', 0, 'POINT') + ' đ') : '0 đ'},data-desc=${tx.description ?: ''},data-ref=${tx.vnpayTxnRef ?: 'N/A'},data-date=${#temporals.format(tx.createdAt, 'dd/MM/yyyy HH:mm:ss')},data-status=${tx.status.name()},data-status-label=${tx.status.displayName}"
+                                            onclick="viewTxModal(this)">
+                                        <i class="fas fa-file-invoice fa-sm mr-1"></i> Chi Tiết
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
 
-            <!-- Transaction Details -->
-            <div class="flex-1">
-              <div class="flex items-center gap-2 mb-1">
-                <h4
-                  class="font-semibold text-gray-900"
-                  th:text="${transaction.type.displayName}"
-                >
-                  Loại giao dịch
-                </h4>
-                <span
-                  class="inline-block px-2 py-1 text-xs rounded-full"
-                  th:classappend="${transaction.status.cssClass}"
-                  th:text="${transaction.status.displayName}"
-                >
-                  Trạng thái
-                </span>
-              </div>
-
-              <p
-                class="text-sm text-gray-600 mb-1"
-                th:text="${transaction.description ?: transaction.type.description}"
-              >
-                Mô tả giao dịch
-              </p>
-
-              <div class="flex items-center gap-4 text-xs text-gray-500">
-                <span
-                  th:text="${#temporals.format(transaction.createdAt, 'dd/MM/yyyy HH:mm:ss')}"
-                >
-                  Thời gian
-                </span>
-                <span
-                  th:if="${transaction.vnpayTransactionRef}"
-                  th:text="'Mã GD: ' + ${transaction.vnpayTransactionRef}"
-                >
-                  Mã giao dịch
-                </span>
-                <span
-                  th:if="${transaction.remainingBalance != null}"
-                  th:text="'Số dư: ' + ${#numbers.formatDecimal(transaction.remainingBalance, 0, 'COMMA', 0, 'POINT')} + ' đ'"
-                >
-                  Số dư còn lại
-                </span>
-              </div>
+            <!-- Card Footer: Pagination -->
+            <div class="card-footer bg-white d-flex flex-column flex-md-row justify-content-between align-items-center py-3" th:if="${!transactions.empty}">
+                <div class="text-muted small mb-2 mb-md-0">
+                    Hiển thị từ <strong th:text="${transactions.number * transactions.size + 1}">1</strong>
+                    đến <strong th:text="${transactions.number * transactions.size + transactions.numberOfElements}">20</strong>
+                    trong tổng số <strong th:text="${transactions.totalElements}">0</strong> giao dịch
+                </div>
+                <nav aria-label="Page navigation" th:if="${transactions.totalPages > 1}">
+                    <ul class="pagination pagination-sm m-0">
+                        <li class="page-item" th:classappend="${transactions.first} ? 'disabled' : ''">
+                            <a class="page-link" th:href="@{/owner/wallet/transactions(page=${transactions.number - 1})}">
+                                <i class="fas fa-chevron-left"></i>
+                            </a>
+                        </li>
+                        <li class="page-item" th:each="i : ${#numbers.sequence(0, transactions.totalPages - 1)}"
+                            th:if="${i >= transactions.number - 2 and i <= transactions.number + 2}"
+                            th:classappend="${i == transactions.number} ? 'active' : ''">
+                            <a class="page-link" th:href="@{/owner/wallet/transactions(page=${i})}" th:text="${i + 1}">1</a>
+                        </li>
+                        <li class="page-item" th:classappend="${transactions.last} ? 'disabled' : ''">
+                            <a class="page-link" th:href="@{/owner/wallet/transactions(page=${transactions.number + 1})}">
+                                <i class="fas fa-chevron-right"></i>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
             </div>
-          </div>
-
-          <!-- Amount -->
-          <div class="text-right ml-4">
-            <p
-              class="text-xl font-bold"
-              th:classappend="${transaction.type == T(com.pms.propertymanagement.enums.TransactionType).DEPOSIT} ? 'text-green-600' : 
-                             (${transaction.type == T(com.pms.propertymanagement.enums.TransactionType).PAYMENT} ? 'text-red-600' : 'text-blue-600')"
-              th:text="${(transaction.type == T(com.pms.propertymanagement.enums.TransactionType).DEPOSIT) ? '+' : 
-                       (transaction.type == T(com.pms.propertymanagement.enums.TransactionType).PAYMENT) ? '-' : '+'} + 
-                       ${#numbers.formatDecimal(transaction.amount, 0, 'COMMA', 0, 'POINT')} + ' đ'"
-            >
-              0 đ
-            </p>
-          </div>
         </div>
-      </div>
+
+    <!-- Modal Chi Tiết Giao Dịch -->
+    <div class="modal fade" id="txDetailModal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content border-0 shadow-lg">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title font-weight-bold"><i class="fas fa-receipt mr-2"></i>Biên Lai Giao Dịch</h5>
+                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="text-center mb-4">
+                        <div class="text-muted small text-uppercase">Số tiền giao dịch</div>
+                        <div class="h3 font-weight-bold text-success my-1" id="mAmount">0 đ</div>
+                        <span class="badge badge-light border px-3 py-1" id="mType">Loại GD</span>
+                    </div>
+                    <div class="border-top pt-3">
+                        <div class="d-flex justify-content-between py-2 border-bottom">
+                            <span class="text-muted small">Mã giao dịch:</span>
+                            <span class="font-weight-bold font-monospace" id="mCode">TX-000</span>
+                        </div>
+                        <div class="d-flex justify-content-between py-2 border-bottom">
+                            <span class="text-muted small">Thời gian ghi nhận:</span>
+                            <span class="font-weight-bold" id="mTime">--</span>
+                        </div>
+                        <div class="d-flex justify-content-between py-2 border-bottom">
+                            <span class="text-muted small">Trạng thái:</span>
+                            <span id="modalTxStatus"><span class="badge badge-success">Thành công</span></span>
+                        </div>
+                        <div class="py-2">
+                            <span class="text-muted small d-block">Diễn giải nội dung:</span>
+                            <span class="font-weight-bold text-gray-800" id="mDesc">--</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light">
+                    <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Đóng</button>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <!-- Pagination -->
-    <div
-      th:if="${!transactions.empty}"
-      class="px-6 py-4 border-t border-gray-200 bg-gray-50"
-    >
-      <div class="flex items-center justify-between">
-        <div class="text-sm text-gray-600">
-          Hiển thị
-          <span th:text="${transactions.number * transactions.size + 1}"
-            >1</span
-          >
-          -
-          <span
-            th:text="${transactions.number * transactions.size + transactions.numberOfElements}"
-            >20</span
-          >
-          trong tổng số
-          <span th:text="${transactions.totalElements}">0</span>
-          giao dịch
-        </div>
+    <!-- Live Search & Modal Script -->
+    <script>
+        function viewTxModal(btn) {
+            const d = btn.dataset;
+            document.getElementById('mCode').textContent = d.code || (d.ref !== 'N/A' ? d.ref : ('TX-' + d.id));
+            document.getElementById('mType').textContent = d.type || '';
+            document.getElementById('mAmount').textContent = d.amount || '0 đ';
+            document.getElementById('mTime').textContent = d.date || '--';
+            document.getElementById('mDesc').textContent = d.desc || 'Không có mô tả chi tiết';
+            const statusEl = document.getElementById('modalTxStatus');
+            if (statusEl) {
+                const status = d.status || 'COMPLETED';
+                const badgeClass = status === 'COMPLETED' ? 'badge-success'
+                    : (status === 'PENDING' ? 'badge-warning'
+                    : (status === 'FAILED' ? 'badge-danger' : 'badge-secondary'));
+                const label = d.statusLabel || (status === 'COMPLETED' ? 'Hoàn thành'
+                    : (status === 'PENDING' ? 'Đang xử lý'
+                    : (status === 'FAILED' ? 'Thất bại' : 'Đã hủy')));
+                statusEl.innerHTML = '';
+                const badge = document.createElement('span');
+                badge.className = 'badge ' + badgeClass;
+                badge.textContent = label;
+                statusEl.appendChild(badge);
+            }
+            $('#txDetailModal').modal('show');
+        }
 
-        <div class="flex items-center gap-2">
-          <!-- Previous Page -->
-          <a
-            th:if="${!transactions.first}"
-            th:href="@{/owner/wallet/transactions(page=${transactions.number - 1})}"
-            class="px-3 py-2 text-sm border border-gray-300 rounded hover:bg-gray-100"
-          >
-            <i class="fa-solid fa-chevron-left"></i>
-          </a>
+        document.addEventListener('DOMContentLoaded', function () {
+            const input = document.getElementById('liveSearchInput');
+            const typeFilter = document.getElementById('typeFilter');
+            const table = document.getElementById('txTable');
+            const rows = table.querySelectorAll('tbody tr');
 
-          <!-- Page Numbers -->
-          <div class="flex items-center gap-1">
-            <span
-              th:each="i : ${#numbers.sequence(0, transactions.totalPages - 1)}"
-              th:if="${i >= transactions.number - 2 && i <= transactions.number + 2}"
-            >
-              <a
-                th:if="${i != transactions.number}"
-                th:href="@{/owner/wallet/transactions(page=${i})}"
-                th:text="${i + 1}"
-                class="px-3 py-2 text-sm border border-gray-300 rounded hover:bg-gray-100"
-              ></a>
-              <span
-                th:if="${i == transactions.number}"
-                th:text="${i + 1}"
-                class="px-3 py-2 text-sm bg-blue-600 text-white rounded"
-              ></span>
-            </span>
-          </div>
+            function filter() {
+                const query = input.value.toLowerCase().trim();
+                const selectedType = typeFilter.value.toLowerCase().trim();
 
-          <!-- Next Page -->
-          <a
-            th:if="${!transactions.last}"
-            th:href="@{/owner/wallet/transactions(page=${transactions.number + 1})}"
-            class="px-3 py-2 text-sm border border-gray-300 rounded hover:bg-gray-100"
-          >
-            <i class="fa-solid fa-chevron-right"></i>
-          </a>
-        </div>
-      </div>
-    </div>
-  </div>
+                rows.forEach(row => {
+                    const text = row.textContent.toLowerCase();
+                    const matchesQuery = !query || text.includes(query);
+                    const matchesType = !selectedType || text.includes(selectedType);
+
+                    if (matchesQuery && matchesType) {
+                        row.style.display = '';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+            }
+
+            if (input) input.addEventListener('input', filter);
+            if (typeFilter) typeFilter.addEventListener('change', filter);
+        });
+    </script>
 </div>
+

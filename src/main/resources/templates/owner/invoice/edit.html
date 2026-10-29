@@ -1,0 +1,160 @@
+<div class="container-fluid" th:fragment="content">
+<!-- Page Heading -->
+        <div class="d-sm-flex align-items-center justify-content-between mb-4">
+            <div>
+                <a th:href="@{'/owner/invoices/' + ${invoice.id}}" class="btn btn-sm btn-outline-secondary mb-2">
+                    <i class="fas fa-arrow-left fa-sm mr-1"></i> Quay lại chi tiết hóa đơn
+                </a>
+                <h1 class="h3 mb-0 text-gray-800 font-weight-bold">
+                    <i class="fas fa-edit text-warning mr-2"></i>Chỉnh Sửa Hóa Đơn: <span th:text="${invoice.invoiceCode}"></span>
+                </h1>
+                <p class="text-muted small mb-0 mt-1" th:text="${'Phòng: ' + invoice.room.name + ' - Kỳ thu: Tháng ' + invoice.month + '/' + invoice.year}"></p>
+            </div>
+        </div>
+
+        <form th:action="@{'/owner/invoices/' + ${invoice.id} + '/edit'}" th:object="${invoiceRequest}" method="post"
+              data-confirm="Bạn có chắc chắn muốn lưu thay đổi điều chỉnh cho hóa đơn này?">
+            <input type="hidden" th:field="*{id}">
+            <input type="hidden" th:field="*{roomId}">
+            <input type="hidden" th:field="*{month}">
+            <input type="hidden" th:field="*{year}">
+
+            <div class="row">
+                <!-- Cột trái: Form điều chỉnh khoản thu -->
+                <div class="col-lg-7">
+                    <div class="card shadow mb-4">
+                        <div class="card-header py-3 bg-white border-bottom-warning">
+                            <h6 class="m-0 font-weight-bold text-warning">
+                                <i class="fas fa-file-invoice mr-2"></i>Thông Tin Khoản Thu Cần Điều Chỉnh
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="form-group">
+                                <label class="font-weight-bold small text-gray-700">Tiền Phòng Thu Cố Định (đ) <span class="text-danger">*</span></label>
+                                <input type="number" step="1000" th:field="*{roomPrice}" id="editInvoiceRoomPrice" class="form-control font-weight-bold font-mono tabular-nums" required min="0" oninput="recalcInvoiceEditSummary()">
+                            </div>
+
+                            <div class="form-group">
+                                <label class="font-weight-bold small text-gray-700">Chi Phí Phát Sinh Khác (đ)</label>
+                                <input type="number" step="1000" th:field="*{otherAmount}" id="editInvoiceOtherAmount" class="form-control font-mono tabular-nums" min="0" oninput="recalcInvoiceEditSummary()">
+                                <small class="form-text text-muted">Ví dụ: phụ phí vệ sinh thêm, sửa chữa bóng đèn riêng, phạt nộp trễ...</small>
+                            </div>
+
+                            <div class="form-group mb-0">
+                                <label class="font-weight-bold small text-gray-700">Hạn Thanh Toán <span class="text-danger">*</span></label>
+                                <input type="date" th:field="*{dueDate}" class="form-control" required>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cột phải: Tóm tắt hóa đơn sau điều chỉnh -->
+                <div class="col-lg-5">
+                    <div class="card shadow mb-4">
+                        <div class="card-header py-3 bg-white border-bottom-success">
+                            <h6 class="m-0 font-weight-bold text-success">
+                                <i class="fas fa-calculator mr-2"></i>Tóm tắt hóa đơn sau điều chỉnh
+                            </h6>
+                        </div>
+                        <div class="card-body"
+                             id="invoiceEditSummaryCard"
+                             th:data-orig-total="${invoice.totalAmount ?: 0}"
+                             th:data-orig-room="${invoiceRequest.roomPrice ?: (invoice.roomPrice ?: 0)}"
+                             th:data-orig-other="${invoiceRequest.otherAmount ?: 0}">
+                            <div class="d-flex justify-content-between py-2 border-bottom small">
+                                <span class="text-muted">Tiền phòng thu cố định:</span>
+                                <strong class="text-dark font-mono tabular-nums" id="summaryRoomPriceDisplay">0 đ</strong>
+                            </div>
+                            <div class="d-flex justify-content-between py-2 border-bottom small">
+                                <span class="text-muted">Tiền điện, nước &amp; dịch vụ:</span>
+                                <strong class="text-info font-mono tabular-nums" id="summaryFixedUtilityDisplay">0 đ</strong>
+                            </div>
+                            <div class="d-flex justify-content-between py-2 border-bottom small">
+                                <span class="text-muted">Chi phí phát sinh khác:</span>
+                                <strong class="text-warning font-mono tabular-nums" id="summaryOtherAmountDisplay">0 đ</strong>
+                            </div>
+
+                            <div class="p-3 bg-light rounded border text-center my-3">
+                                <div class="text-xs font-weight-bold text-uppercase text-muted mb-1">Tổng cộng sau điều chỉnh</div>
+                                <div class="h4 font-weight-bold text-danger font-mono tabular-nums mb-1" id="summaryNewTotalDisplay">0 đ</div>
+                                <div class="small font-italic text-muted" id="summaryNewTotalWords">Không đồng</div>
+                            </div>
+
+                            <button type="submit" class="btn btn-warning btn-block py-2 shadow-sm font-weight-bold text-white">
+                                <i class="fas fa-save mr-1"></i> Lưu Thay Đổi Hóa Đơn
+                            </button>
+                            <a th:href="@{'/owner/invoices/' + ${invoice.id}}" class="btn btn-outline-secondary btn-block mt-2 font-weight-bold">
+                                <i class="fas fa-times mr-1"></i> Hủy Bỏ
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+
+        <script>
+        function readVietnameseMoney(num) {
+            num = Math.round(Math.abs(num || 0));
+            if (num === 0) return 'Không đồng';
+            var digits = ['không', 'một', 'hai', 'ba', 'bốn', 'năm', 'sáu', 'bảy', 'tám', 'chín'];
+            var units = ['', 'nghìn', 'triệu', 'tỷ'];
+            function readTriple(n, showZeroHundred) {
+                var h = Math.floor(n / 100);
+                var t = Math.floor((n % 100) / 10);
+                var u = n % 10;
+                var res = '';
+                if (h > 0 || showZeroHundred) res += digits[h] + ' trăm ';
+                if (t > 1) {
+                    res += digits[t] + ' mươi ';
+                    if (u === 1) res += 'mốt ';
+                    else if (u === 5) res += 'lăm ';
+                    else if (u > 0) res += digits[u] + ' ';
+                } else if (t === 1) {
+                    res += 'mười ';
+                    if (u === 5) res += 'lăm ';
+                    else if (u > 0) res += digits[u] + ' ';
+                } else if (t === 0 && u > 0) {
+                    if (h > 0 || showZeroHundred) res += 'lẻ ';
+                    res += digits[u] + ' ';
+                }
+                return res.trim();
+            }
+            var groups = [];
+            var temp = num;
+            while (temp > 0) {
+                groups.push(temp % 1000);
+                temp = Math.floor(temp / 1000);
+            }
+            var out = '';
+            for (var i = groups.length - 1; i >= 0; i--) {
+                if (groups[i] > 0) {
+                    out += readTriple(groups[i], i < groups.length - 1) + ' ' + units[i] + ' ';
+                }
+            }
+            out = out.trim();
+            return out.charAt(0).toUpperCase() + out.slice(1) + ' đồng';
+        }
+
+        function recalcInvoiceEditSummary() {
+            var card = document.getElementById('invoiceEditSummaryCard');
+            if (!card) return;
+            var origTotal = parseFloat(card.getAttribute('data-orig-total')) || 0;
+            var origRoom = parseFloat(card.getAttribute('data-orig-room')) || 0;
+            var origOther = parseFloat(card.getAttribute('data-orig-other')) || 0;
+            var fixedServices = Math.max(0, origTotal - origRoom - origOther);
+
+            var roomPrice = parseFloat(document.getElementById('editInvoiceRoomPrice').value) || 0;
+            var otherAmount = parseFloat(document.getElementById('editInvoiceOtherAmount').value) || 0;
+            var newTotal = roomPrice + fixedServices + otherAmount;
+
+            document.getElementById('summaryRoomPriceDisplay').textContent = roomPrice.toLocaleString('vi-VN') + ' đ';
+            document.getElementById('summaryFixedUtilityDisplay').textContent = fixedServices.toLocaleString('vi-VN') + ' đ';
+            document.getElementById('summaryOtherAmountDisplay').textContent = otherAmount.toLocaleString('vi-VN') + ' đ';
+            document.getElementById('summaryNewTotalDisplay').textContent = newTotal.toLocaleString('vi-VN') + ' đ';
+            document.getElementById('summaryNewTotalWords').textContent = 'Bằng chữ: ' + readVietnameseMoney(newTotal);
+        }
+
+        document.addEventListener('DOMContentLoaded', recalcInvoiceEditSummary);
+        </script>
+</div>
+

@@ -17,9 +17,6 @@ public class OwnerSubscriptionDTO {
     private Integer usedPropertySlots;
     private Integer availablePropertySlots;
     private Boolean canCreateProperty;
-    private String statusText;
-    private String nextBillingText;
-    private Long daysUntilBilling;
     
     public String getStatusText() {
         switch (status) {

@@ -1,60 +1,187 @@
-<div th:fragment="content">
-    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+<div class="container-fluid" th:fragment="content">
+
+    <!-- Page Heading -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
         <div>
-            <h1 class="text-2xl font-bold text-gray-900">Danh sách yêu cầu bảo trì</h1>
-            <p class="text-sm text-gray-500">
-                Tổng cộng:
-                <span class="font-semibold text-blue-600" th:text="${requests.size()}">0</span>
-                yêu cầu
-            </p>
+            <h1 class="h3 mb-0 text-gray-800 font-weight-bold">
+                <i class="fas fa-tools text-success mr-2"></i>Quản Lý Yêu Cầu Sửa Chữa & Bảo Trì
+            </h1>
+            <p class="text-muted small mb-0 mt-1">Tiếp nhận báo cáo sự cố từ khách thuê, phân công kỹ thuật viên và kiểm tra tiến độ hoàn thành</p>
+        </div>
+        <div class="d-none d-sm-inline-block">
+            <span class="badge badge-success px-3 py-2 font-weight-bold shadow-sm">
+                <i class="fas fa-wrench mr-1"></i>
+                <span th:text="${requests != null ? requests.size() : 0}">0</span> Yêu Cầu
+            </span>
         </div>
     </div>
 
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-        <div class="overflow-x-auto">
-            <table class="w-full text-left border-collapse text-sm">
-                <thead class="bg-gray-50/50 border-b border-gray-100">
-                <tr class="text-gray-500 uppercase text-[11px] tracking-wider">
-                    <th class="px-6 py-4 font-bold">Mã</th>
-                    <th class="px-6 py-4 font-bold">Phòng</th>
-                    <th class="px-6 py-4 font-bold">Khách</th>
-                    <th class="px-6 py-4 font-bold">Trạng thái</th>
-                    <th class="px-6 py-4 font-bold">Nhân viên</th>
-                    <th class="px-6 py-4 font-bold">Ngày tạo</th>
-                    <th class="px-6 py-4 font-bold text-right">Thao tác</th>
-                </tr>
-                </thead>
+    <!-- Alert Messages -->
+    <div th:if="${param.success}" class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+        <i class="fas fa-check-circle mr-2"></i>Thao tác xử lý yêu cầu bảo trì thành công!
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
 
-                <tbody class="divide-y divide-gray-50">
-                <tr th:each="r : ${requests}" class="hover:bg-blue-50/30 transition-colors">
-                    <td class="px-6 py-4 font-semibold text-gray-900" th:text="${r.code != null ? r.code : r.id}">MR-...</td>
-                    <td class="px-6 py-4" th:text="${r.room != null ? r.room.name : 'N/A'}">Phòng</td>
-                    <td class="px-6 py-4">
-                        <div class="font-medium text-gray-900" th:text="${r.tenant != null ? (r.tenant.fullName != null ? r.tenant.fullName : r.tenant.username) : 'N/A'}"></div>
-                        <div class="text-xs text-gray-500" th:text="${r.tenant != null ? r.tenant.phone : ''}"></div>
-                    </td>
-                    <td class="px-6 py-4">
-                        <span th:class="${r.status.name() == 'PENDING' ? 'bg-yellow-100 text-yellow-800' :
-                                         r.status.name() == 'ASSIGNED' ? 'bg-blue-100 text-blue-800' :
-                                         r.status.name() == 'IN_PROGRESS' ? 'bg-orange-100 text-orange-800' :
-                                         r.status.name() == 'COMPLETED' ? 'bg-green-100 text-green-800' :
-                                         r.status.name() == 'CONFIRMED' ? 'bg-gray-200 text-gray-800' :
-                                         r.status.name() == 'REJECTED' ? 'bg-red-100 text-red-800' :
-                                         r.status.name() == 'REOPENED' ? 'bg-purple-100 text-purple-800' : 'bg-gray-100 text-gray-800'} + ' px-2 py-1 rounded text-xs font-semibold'"
-                              th:text="${r.status.displayName}"></span>
-                    </td>
-                    <td class="px-6 py-4" th:text="${r.staff != null ? (r.staff.fullName != null ? r.staff.fullName : r.staff.username) : '-'}">-</td>
-                    <td class="px-6 py-4" th:text="${r.createdAt != null ? #temporals.format(r.createdAt, 'dd/MM/yyyy HH:mm') : '-'}">-</td>
-                    <td class="px-6 py-4 text-right">
-                        <a th:href="@{|/owner/maintenance/${r.id}|}" class="text-blue-600 hover:underline">Chi tiết</a>
-                    </td>
-                </tr>
-
-                <tr th:if="${#lists.isEmpty(requests)}">
-                    <td colspan="7" class="py-16 text-center text-gray-500">Chưa có yêu cầu bảo trì nào.</td>
-                </tr>
-                </tbody>
-            </table>
+    <!-- Search & Filter Card -->
+    <div class="search-container border-left-success">
+        <div class="row align-items-center">
+            <div class="col-md-5 mb-2 mb-md-0">
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text bg-light border-0"><i class="fas fa-search text-gray-400"></i></span>
+                    </div>
+                    <input type="text" id="ownerMaintSearch" class="form-control border-0 bg-light small" 
+                           placeholder="Tìm nhanh theo mã yêu cầu, tên phòng, khách báo..." onkeyup="filterOwnerMaint()">
+                </div>
+            </div>
+            <div class="col-md-4 mb-2 mb-md-0">
+                <select id="ownerMaintStatusFilter" class="form-control custom-select" onchange="filterOwnerMaint()">
+                    <option value="ALL">-- Tất cả trạng thái --</option>
+                    <option value="PENDING">Chờ tiếp nhận (PENDING)</option>
+                    <option value="ASSIGNED">Đã phân công (ASSIGNED)</option>
+                    <option value="IN_PROGRESS">Đang sửa chữa (IN_PROGRESS)</option>
+                    <option value="COMPLETED">Đã hoàn thành (COMPLETED)</option>
+                    <option value="CONFIRMED">Đã xác nhận (CONFIRMED)</option>
+                    <option value="REJECTED">Đã từ chối (REJECTED)</option>
+                    <option value="REOPENED" th:selected="${selectedStatus != null and selectedStatus.name() == 'REOPENED'}">Yêu cầu xử lý lại (Reopened)</option>
+                </select>
+            </div>
+            <div class="col-md-3 text-md-right">
+                <span class="small text-gray-600 font-weight-bold">
+                    Hiển thị <span id="maintFilteredCount" class="text-success font-weight-bold" th:text="${requests != null ? requests.size() : 0}">0</span> yêu cầu
+                </span>
+            </div>
         </div>
     </div>
+
+    <!-- DataTales Card -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 bg-white border-bottom-success d-flex justify-content-between align-items-center">
+            <h6 class="m-0 font-weight-bold text-success">
+                <i class="fas fa-list mr-1"></i>Danh Sách Yêu Cầu Sửa Chữa
+            </h6>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover mb-0" id="ownerMaintTable" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th style="width: 20%;">Mã Yêu Cầu & Ngày Gửi</th>
+                            <th style="width: 20%;">Phòng Trọ & Khách Báo</th>
+                            <th style="width: 25%;">Hạng Mục & Mô Tả Sự Cố</th>
+                            <th style="width: 20%;">Trạng Thái & Kỹ Thuật Viên</th>
+                            <th style="width: 15%;" class="text-center">Chức Năng</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:if="${requests == null or #lists.isEmpty(requests)}">
+                            <td colspan="5" class="text-center py-5 text-muted">
+                                <i class="fas fa-check-circle fa-3x mb-3 text-success d-block"></i>
+                                Tuyệt vời! Hiện tại không có yêu cầu sửa chữa hư hỏng nào cần xử lý.
+                            </td>
+                        </tr>
+                        <tr th:each="r : ${requests}" class="owner-maint-row"
+                            th:data-code="${r.code != null ? r.code.toLowerCase() : ''}"
+                            th:data-room="${r.room != null ? r.room.name.toLowerCase() : ''}"
+                            th:data-tenant="${r.tenant != null ? (r.tenant.fullName != null ? r.tenant.fullName.toLowerCase() : r.tenant.username.toLowerCase()) : ''}"
+                            th:data-status="${r.status.name()}">
+                            
+                            <!-- Cột 1: Mã & Ngày gửi -->
+                            <td>
+                                <strong class="text-primary font-weight-bold font-mono" th:text="${r.code != null ? r.code : ('#MR-' + r.id)}">MR-001</strong>
+                                <div class="small text-muted font-mono mt-1">
+                                    <i class="far fa-clock text-secondary mr-1"></i>
+                                    <span th:text="${r.createdAt != null ? #temporals.format(r.createdAt, 'dd/MM/yyyy HH:mm') : '-'}">01/01/2026</span>
+                                </div>
+                            </td>
+
+                            <!-- Cột 2: Phòng & Khách báo -->
+                            <td>
+                                <div class="font-weight-bold text-dark" th:text="${r.room != null ? r.room.name : 'N/A'}">Phòng 101</div>
+                                <div class="small text-gray-800" th:text="${r.tenant != null ? (r.tenant.fullName != null ? r.tenant.fullName : r.tenant.username) : 'Khách thuê'}">
+                                    Nguyễn Văn A
+                                </div>
+                                <div class="small text-muted" th:if="${r.tenant != null and r.tenant.phone != null}">
+                                    <i class="fas fa-phone-alt text-success mr-1"></i>
+                                    <span th:text="${r.tenant.phone}">0912345678</span>
+                                </div>
+                            </td>
+
+                            <!-- Cột 3: Hạng mục & Mô tả -->
+                            <td>
+                                <span class="badge badge-light border text-dark font-weight-bold mb-1" 
+                                      th:text="${r.category != null ? r.category.displayName : 'Bảo trì chung'}">
+                                    Điện nước
+                                </span>
+                                <div class="small text-muted text-truncate" style="max-width: 250px;" th:text="${r.description}">
+                                    Bóng đèn chập chờn...
+                                </div>
+                            </td>
+
+                            <!-- Cột 4: Trạng thái & Kỹ thuật -->
+                            <td>
+                                <div>
+                                    <span th:class="${r.status.name() == 'PENDING' ? 'badge badge-warning' :
+                                                     r.status.name() == 'ASSIGNED' ? 'badge badge-primary' :
+                                                     r.status.name() == 'IN_PROGRESS' ? 'badge badge-info' :
+                                                     r.status.name() == 'COMPLETED' ? 'badge badge-success' :
+                                                     r.status.name() == 'CONFIRMED' ? 'badge badge-secondary' :
+                                                     r.status.name() == 'REJECTED' ? 'badge badge-danger' :
+                                                     r.status.name() == 'REOPENED' ? 'badge badge-dark' : 'badge badge-light'} + ' px-2 py-1 font-weight-bold'"
+                                          th:text="${r.status.displayName}">
+                                        Đã phân công
+                                    </span>
+                                </div>
+                                <div class="small text-muted mt-1" th:if="${r.staff != null}">
+                                    <i class="fas fa-user-cog text-info mr-1"></i>
+                                    Thợ: <strong class="text-dark" th:text="${r.staff.fullName != null ? r.staff.fullName : r.staff.username}">Kỹ thuật</strong>
+                                </div>
+                                <div class="small text-warning" th:unless="${r.staff != null}">
+                                    <i class="fas fa-exclamation-circle mr-1"></i>Chưa giao thợ
+                                </div>
+                            </td>
+
+                            <!-- Cột 5: Chức Năng (Thao Tác) -->
+                            <td class="text-center action-btns">
+                                <a th:href="@{|/owner/maintenance/${r.id}|}" class="btn btn-info btn-sm shadow-sm" title="Xem chi tiết & Phân công thợ">
+                                    <i class="fas fa-eye mr-1"></i>Chi Tiết
+                                </a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
 </div>
+
+<script>
+function filterOwnerMaint() {
+    var search = document.getElementById('ownerMaintSearch').value.toLowerCase().trim();
+    var status = document.getElementById('ownerMaintStatusFilter').value;
+    var rows = document.querySelectorAll('.owner-maint-row');
+    var count = 0;
+
+    rows.forEach(function(row) {
+        var code = row.getAttribute('data-code') || '';
+        var room = row.getAttribute('data-room') || '';
+        var tenant = row.getAttribute('data-tenant') || '';
+        var rowStatus = row.getAttribute('data-status') || '';
+
+        var matchSearch = !search || code.includes(search) || room.includes(search) || tenant.includes(search);
+        var matchStatus = (status === 'ALL') || (rowStatus === status);
+
+        if (matchSearch && matchStatus) {
+            row.style.display = '';
+            count++;
+        } else {
+            row.style.display = 'none';
+        }
+    });
+
+    document.getElementById('maintFilteredCount').textContent = count;
+}
+</script>

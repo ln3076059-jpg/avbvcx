@@ -1,0 +1,87 @@
+<div th:fragment="content" class="container-fluid">
+
+    <!-- Page Heading -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <div>
+            <h1 class="h3 mb-1 text-gray-800 font-weight-bold">
+                Chỉnh Sửa Tin Đăng: <span class="text-primary" th:text="${post.title}">Tiêu đề</span>
+            </h1>
+            <p class="text-muted small mb-0">Cập nhật tiêu đề hiển thị, đường dẫn thân thiện SEO (slug) và trạng thái tin rao.</p>
+        </div>
+        <a th:href="@{/admin/posts}" class="btn btn-secondary btn-icon-split shadow-sm">
+            <span class="icon text-white-50">
+                <i class="fas fa-arrow-left"></i>
+            </span>
+            <span class="text font-weight-bold">Quay Lại Danh Sách</span>
+        </a>
+    </div>
+
+    <!-- Form Card -->
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 bg-white border-bottom-primary d-flex align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-edit mr-1"></i> Thông Tin Bài Đăng
+                    </h6>
+                    <span class="badge badge-info">Mã Tin: <span th:text="${post.id}">1</span></span>
+                </div>
+                <div class="card-body p-4">
+                    <form th:action="@{'/admin/posts/' + ${post.id} + '/edit'}" method="post">
+                        
+                        <div class="form-group">
+                            <label for="title" class="font-weight-bold text-gray-700">
+                                Tiêu đề tin đăng <span class="text-danger">*</span>
+                            </label>
+                            <input type="text" class="form-control" id="title" name="title" required 
+                                   th:value="${post.title}" placeholder="Nhập tiêu đề tin đăng...">
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group col-md-6">
+                                <label for="slug" class="font-weight-bold text-gray-700">
+                                    Đường dẫn SEO (Slug) <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" class="form-control" id="slug" name="slug" required 
+                                       th:value="${post.slug}">
+                            </div>
+
+                            <div class="form-group col-md-6">
+                                <label for="status" class="font-weight-bold text-gray-700">
+                                    Trạng thái bài đăng <span class="text-danger">*</span>
+                                </label>
+                                <select class="form-control" id="status" name="status" required>
+                                    <option th:each="st : ${statuses}" 
+                                            th:value="${st}" 
+                                            th:text="${st}" 
+                                            th:selected="${post.status == st}">ACTIVE</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="description" class="font-weight-bold text-gray-700">
+                                Nội dung mô tả chi tiết
+                            </label>
+                            <textarea class="form-control" id="description" name="description" rows="6" 
+                                      th:text="${post.description}" placeholder="Nhập mô tả bài đăng..."></textarea>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <div class="d-flex justify-content-end">
+                            <a th:href="@{/admin/posts}" class="btn btn-secondary mr-2">
+                                <i class="fas fa-times mr-1"></i> Hủy Bỏ
+                            </a>
+                            <button type="submit" class="btn btn-primary font-weight-bold">
+                                <i class="fas fa-save mr-1"></i> Cập Nhật Bài Đăng
+                            </button>
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>

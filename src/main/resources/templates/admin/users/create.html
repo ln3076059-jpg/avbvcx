@@ -1,0 +1,116 @@
+<div th:fragment="content" class="container-fluid">
+
+    <!-- Page Heading -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <div>
+            <h1 class="h3 mb-1 text-gray-800 font-weight-bold">Thêm Người Dùng Mới</h1>
+            <p class="text-muted small mb-0">Tạo tài khoản mới và thiết lập vai trò phân quyền trên hệ thống Trọ Mới.</p>
+        </div>
+        <a th:href="@{/admin/users}" class="btn btn-secondary btn-icon-split shadow-sm">
+            <span class="icon text-white-50">
+                <i class="fas fa-arrow-left"></i>
+            </span>
+            <span class="text font-weight-bold">Quay Lại Danh Sách</span>
+        </a>
+    </div>
+
+    <!-- Form Card -->
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 bg-white border-bottom-primary">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-user-plus mr-1"></i> Thông Tin Tài Khoản Mới
+                    </h6>
+                </div>
+                <div class="card-body p-4">
+                    <form th:action="@{/admin/users/create}" method="post">
+                        
+                        <div class="form-row">
+                            <div class="form-group col-md-6">
+                                <label for="username" class="font-weight-bold text-gray-700">
+                                    Tên đăng nhập (Username) <span class="text-danger">*</span>
+                                </label>
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text"><i class="fas fa-user"></i></span>
+                                    </div>
+                                    <input type="text" class="form-control" id="username" name="username" required 
+                                           placeholder="Ví dụ: host_hanoi123">
+                                </div>
+                                <small class="form-text text-muted">Dùng để đăng nhập vào hệ thống, không chứa dấu cách.</small>
+                            </div>
+
+                            <div class="form-group col-md-6">
+                                <label for="password" class="font-weight-bold text-gray-700">
+                                    Mật khẩu khởi tạo <span class="text-danger">*</span>
+                                </label>
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text"><i class="fas fa-key"></i></span>
+                                    </div>
+                                    <input type="password" class="form-control" id="password" name="password" required 
+                                           placeholder="Nhập mật khẩu ban đầu">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="fullName" class="font-weight-bold text-gray-700">Họ và tên đầy đủ</label>
+                            <input type="text" class="form-control" id="fullName" name="fullName" 
+                                   placeholder="Ví dụ: Nguyễn Văn Minh Đức">
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group col-md-6">
+                                <label for="email" class="font-weight-bold text-gray-700">Địa chỉ Email</label>
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text"><i class="fas fa-envelope"></i></span>
+                                    </div>
+                                    <input type="email" class="form-control" id="email" name="email" 
+                                           placeholder="nguyenvana@tromoi.vn">
+                                </div>
+                            </div>
+
+                            <div class="form-group col-md-6">
+                                <label for="phone" class="font-weight-bold text-gray-700">Số điện thoại liên hệ</label>
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text"><i class="fas fa-phone"></i></span>
+                                    </div>
+                                    <input type="tel" class="form-control" id="phone" name="phone" 
+                                           placeholder="0912345678">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="roleName" class="font-weight-bold text-gray-700">
+                                Vai trò & Phân quyền trên hệ thống (3 vai trò) <span class="text-danger">*</span>
+                            </label>
+                            <select class="form-control" id="roleName" name="roleName" required>
+                                <option value="USER" selected>Khách hàng (USER - Tìm phòng, đặt lịch hẹn, xem hợp đồng, thanh toán hóa đơn)</option>
+                                <option value="OWNER">Chủ nhà trọ (OWNER - Quản lý cơ sở nhà trọ, phòng, dịch vụ, hợp đồng, hóa đơn)</option>
+                                <option value="ADMIN">Quản trị viên (ADMIN - Toàn quyền quản trị, kiểm duyệt và vận hành hệ thống)</option>
+                            </select>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <div class="d-flex justify-content-end">
+                            <a th:href="@{/admin/users}" class="btn btn-secondary mr-2">
+                                <i class="fas fa-times mr-1"></i> Hủy Bỏ
+                            </a>
+                            <button type="submit" class="btn btn-primary font-weight-bold">
+                                <i class="fas fa-save mr-1"></i> Lưu Người Dùng
+                            </button>
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>

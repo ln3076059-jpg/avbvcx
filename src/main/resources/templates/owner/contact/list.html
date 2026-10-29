@@ -1,132 +1,287 @@
-<div th:fragment="content">
-  <div
-    class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8"
-  >
-    <div>
-      <h1 class="text-2xl font-bold text-gray-900">Danh sách liên hệ</h1>
-      <p class="text-sm text-gray-500">
-        Tổng cộng:
-        <span class="font-semibold text-blue-600" th:text="${contacts.size()}"
-          >0</span
-        >
-        yêu cầu hỗ trợ
-      </p>
+<div class="container-fluid" th:fragment="content">
+
+    <!-- Page Heading -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <div>
+            <h1 class="h3 mb-0 text-gray-800 font-weight-bold">
+                <i class="fas fa-clipboard-check text-primary mr-2"></i>Quản Lý Đơn Đặt Thuê Phòng &amp; Lịch Hẹn Xem Phòng
+            </h1>
+            <p class="text-muted small mb-0 mt-1">Tiếp nhận, xét duyệt đơn đặt thuê phòng trực tuyến của khách hàng và tạo hợp đồng thuê tự động</p>
+        </div>
+        <div class="d-none d-sm-inline-block">
+            <a th:href="@{/owner/contracts/create}" class="btn btn-sm btn-primary shadow-sm font-weight-bold mr-2">
+                <i class="fas fa-file-signature mr-1"></i> Lập Hợp Đồng Mới
+            </a>
+            <span class="badge badge-success px-3 py-2 font-weight-bold shadow-sm">
+                <i class="fas fa-shopping-bag mr-1"></i>
+                <span th:text="${contacts != null ? contacts.size() : 0}">0</span> Đơn &amp; Yêu Cầu
+            </span>
+        </div>
     </div>
-  </div>
 
-  <div
-    class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden"
-  >
-    <div class="overflow-x-auto">
-      <table class="w-full text-left border-collapse">
-        <thead class="bg-gray-50/50 border-b border-gray-100">
-          <tr class="text-gray-500 uppercase text-[11px] tracking-wider">
-            <th class="px-6 py-4 font-bold">Họ và tên</th>
-            <th class="px-6 py-4 font-bold">Quan tâm đến</th>
-            <th class="px-6 py-4 font-bold">Số điện thoại</th>
-            <th class="px-6 py-4 font-bold">Ghi chú</th>
-            <th class="px-6 py-4 font-bold text-center">Trạng thái</th>
-            <th class="px-6 py-4 font-bold text-center">Hành động</th>
-          </tr>
-        </thead>
-
-        <tbody class="divide-y divide-gray-50">
-          <tr
-            th:each="contact : ${contacts}"
-            class="hover:bg-blue-50/30 transition-colors group"
-          >
-            <td class="px-6 py-4">
-              <div class="font-bold text-gray-900" th:text="${contact.name}">
-                Nguyễn Văn A
-              </div>
-            </td>
-
-            <td class="px-6 py-4">
-              <a
-                th:href="@{/public/property/{slug}(slug=${contact.propertySlug})}"
-                target="_blank"
-                class="font-medium text-blue-600 hover:underline truncate max-w-[200px] block"
-                th:text="${contact.propertyTitle}"
-                >Nhà trọ giá rẻ</a
-              >
-            </td>
-
-            <td class="px-6 py-4">
-              <a
-                th:href="'tel:' + ${contact.phone}"
-                class="text-blue-600 hover:underline"
-                th:text="${contact.phone}"
-                >0909000111</a
-              >
-            </td>
-
-            <td class="px-6 py-4">
-              <span class="text-gray-600" th:text="${contact.note}"
-                >Cần xem phòng gấp...</span
-              >
-            </td>
-
-            <td class="px-6 py-4 text-center">
-              <span
-                th:if="${contact.isChecked}"
-                class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-green-50 text-green-600 border border-green-100"
-              >
-                <span class="w-1.5 h-1.5 rounded-full bg-green-500"></span>
-                Đã liên hệ
-              </span>
-              <span
-                th:unless="${contact.isChecked}"
-                class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-yellow-50 text-yellow-600 border border-yellow-100"
-              >
-                <span
-                  class="w-1.5 h-1.5 rounded-full bg-yellow-500 animate-pulse"
-                ></span>
-                Chờ xử lý
-              </span>
-            </td>
-
-            <td class="px-6 py-4 text-center space-x-2">
-              <a
-                th:href="'tel:' + ${contact.phone}"
-                class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 text-blue-600 hover:bg-blue-200 transition-colors"
-                title="Gọi điện"
-              >
-                <i class="fa-solid fa-phone text-xs"></i>
-              </a>
-
-              <a
-                th:href="@{/owner/contact/toggle/{id}(id=${contact.id})}"
-                class="inline-flex items-center justify-center w-8 h-8 rounded-full transition-colors"
-                th:classappend="${contact.isChecked} ? 'bg-gray-100 text-gray-500 hover:bg-gray-200' : 'bg-green-100 text-green-600 hover:bg-green-200'"
-                th:title="${contact.isChecked} ? 'Đánh dấu chưa xử lý' : 'Đánh dấu đã liên hệ'"
-              >
-                <i
-                  class="fa-solid"
-                  th:classappend="${contact.isChecked} ? 'fa-rotate-left' : 'fa-check'"
-                ></i>
-              </a>
-            </td>
-          </tr>
-
-          <tr th:if="${#lists.isEmpty(contacts)}">
-            <td colspan="6" class="py-20 text-center">
-              <div class="flex flex-col items-center">
-                <div
-                  class="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mb-4"
-                >
-                  <i
-                    class="fa-regular fa-address-book text-2xl text-gray-300"
-                  ></i>
+    <!-- 4 SB Admin 2 KPI Cards -->
+    <div class="row mb-2">
+        <div class="col-xl-3 col-md-6 mb-3">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body py-2">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Tổng Đơn &amp; Liên Hệ</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800" th:text="${contacts != null ? contacts.size() : 0}">27</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-inbox fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
                 </div>
-                <h3 class="text-gray-900 font-semibold">Chưa có liên hệ nào</h3>
-                <p class="text-gray-400 text-sm mt-1">
-                  Các yêu cầu liên hệ từ khách hàng sẽ hiển thị ở đây.
-                </p>
-              </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-3">
+            <div class="card border-left-danger shadow h-100 py-2">
+                <div class="card-body py-2">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">Đơn Đặt Thuê Phòng</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800" th:text="${rentOrderCount != null ? rentOrderCount : 1}">1</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-shopping-cart fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-3">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body py-2">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Đang Chờ Xét Duyệt</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800" th:text="${pendingCount != null ? pendingCount : 1}">1</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-hourglass-half fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-3">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body py-2">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Đã Duyệt &amp; Xử Lý</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800" th:text="${approvedCount != null ? approvedCount : 0}">0</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-check-circle fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-  </div>
+
+    <!-- Search & Filter Card -->
+    <div class="search-container border-left-primary">
+        <div class="row align-items-center">
+            <div class="col-md-5 mb-2 mb-md-0">
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text bg-light border-0"><i class="fas fa-search text-gray-400"></i></span>
+                    </div>
+                    <input type="text" id="ownerContactSearch" class="form-control border-0 bg-light small" 
+                           placeholder="Tìm theo mã đơn, họ tên khách, số điện thoại, nhà trọ..." onkeyup="filterOwnerContacts()">
+                </div>
+            </div>
+            <div class="col-md-4 mb-2 mb-md-0">
+                <select id="ownerContactStatusFilter" class="form-control custom-select bg-light border-0 small font-weight-bold text-gray-700" onchange="filterOwnerContacts()">
+                    <option value="ALL">Bộ lọc: Tất cả đơn đặt thuê &amp; lịch hẹn</option>
+                    <option value="RENT_ORDER">Chỉ xem: Đơn đặt thuê phòng trực tuyến</option>
+                    <option value="PENDING">Trạng thái: Đang chờ duyệt / Chưa xử lý</option>
+                    <option value="CONTACTED">Trạng thái: Đã duyệt / Đã xử lý</option>
+                </select>
+            </div>
+            <div class="col-md-3 text-md-right">
+                <span class="small text-gray-600 font-weight-bold">
+                    Hiển thị <span id="contactFilteredCount" class="text-primary font-weight-bold" th:text="${contacts != null ? contacts.size() : 0}">0</span> đơn &amp; yêu cầu
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- DataTales Card -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 bg-white border-bottom-primary d-flex justify-content-between align-items-center">
+            <h6 class="m-0 font-weight-bold text-primary">
+                <i class="fas fa-clipboard-list mr-1"></i>Danh Sách Đơn Đặt Thuê Phòng &amp; Yêu Cầu Xem Phòng
+            </h6>
+            <span class="badge badge-warning text-dark px-2 py-1">
+                <i class="fas fa-bolt mr-1"></i>Bấm "Duyệt &amp; Tạo HĐ" để phê duyệt đơn và cấp hợp đồng thuê
+            </span>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover mb-0" id="ownerContactsTable" width="100%" cellspacing="0">
+                    <thead class="bg-light">
+                        <tr class="text-nowrap">
+                            <th style="width: 8%;">Mã Đơn</th>
+                            <th style="width: 17%;">Khách Đặt &amp; SĐT</th>
+                            <th style="width: 20%;">Khu Trọ &amp; Loại Yêu Cầu</th>
+                            <th style="width: 24%;">Chi Tiết Phòng &amp; Kỳ Hạn Đặt</th>
+                            <th style="width: 11%;" class="text-center">Trạng Thái</th>
+                            <th style="width: 20%;" class="text-center">Thao Tác Xét Duyệt</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:if="${contacts == null or #lists.isEmpty(contacts)}">
+                            <td colspan="6" class="text-center py-5 text-muted">
+                                <i class="fas fa-inbox fa-3x mb-3 text-gray-300 d-block"></i>
+                                Hiện chưa có đơn đặt thuê phòng hoặc lịch hẹn xem phòng nào từ khách hàng.
+                            </td>
+                        </tr>
+                        <tr th:each="c : ${contacts}" class="owner-contact-row"
+                            th:data-name="${c.name != null ? c.name.toLowerCase() : ''}"
+                            th:data-phone="${c.phone != null ? c.phone : ''}"
+                            th:data-prop="${c.propertyTitle != null ? c.propertyTitle.toLowerCase() : ''}"
+                            th:data-type="${c.rentRegistration ? 'RENT_ORDER' : 'VISIT'}"
+                            th:data-status="${c.status ? 'CONTACTED' : 'PENDING'}">
+                            
+                            <!-- Cột 0: Mã Đơn -->
+                            <td class="font-weight-bold font-mono text-primary align-middle text-nowrap" th:text="${'#ĐƠN-' + c.id}">
+                                #ĐƠN-48
+                            </td>
+
+                            <!-- Cột 1: Tên & SĐT -->
+                            <td class="align-middle">
+                                <div class="font-weight-bold text-dark" style="font-size: 0.95rem;" th:text="${c.name}">Nguyễn Văn An</div>
+                                <div class="small mt-1">
+                                    <i class="fas fa-phone-alt text-success mr-1"></i>
+                                    <a th:href="'tel:' + ${c.phone}" class="text-success font-weight-bold font-mono" th:text="${c.phone}">0912345678</a>
+                                </div>
+                            </td>
+
+                            <!-- Cột 2: Nhà trọ quan tâm -->
+                            <td class="align-middle">
+                                <a th:href="@{|/properties/${c.propertySlug}|}" target="_blank" 
+                                   class="font-weight-bold text-primary text-decoration-none" th:text="${c.propertyTitle != null ? #strings.replace(c.propertyTitle, '[Nhà trọ] ', '') : 'N/A'}">
+                                    Nhà trọ Green House
+                                </a>
+                                <div class="mt-1">
+                                    <span th:if="${c.rentRegistration}" class="badge badge-danger px-2 py-1">
+                                        <i class="fas fa-shopping-cart mr-1"></i>Đơn đặt thuê phòng
+                                    </span>
+                                    <span th:unless="${c.rentRegistration}" class="badge badge-info px-2 py-1">
+                                        <i class="far fa-calendar-check mr-1"></i>Lịch hẹn xem phòng
+                                    </span>
+                                </div>
+                            </td>
+
+                            <!-- Cột 3: Lời nhắn / Phân loại đặt -->
+                            <td class="align-middle">
+                                <div class="small font-weight-bold text-gray-800" th:text="${c.note ?: 'Tôi muốn xem phòng vào cuối tuần này...'}">
+                                    Tôi muốn xem phòng...
+                                </div>
+                            </td>
+
+                            <!-- Cột 4: Trạng thái -->
+                            <td class="text-center align-middle text-nowrap">
+                                <span th:if="${c.cancelled}" class="badge badge-secondary font-weight-bold px-2.5 py-1.5">
+                                    <i class="fas fa-ban mr-1"></i>Đã Hủy / Từ Chối
+                                </span>
+                                <span th:if="${!c.cancelled and c.status}" class="badge badge-success font-weight-bold px-2.5 py-1.5">
+                                    <i class="fas fa-check-circle mr-1"></i>
+                                    <span th:text="${c.rentRegistration ? 'Đã Duyệt &amp; Cấp HĐ' : 'Đã Xác Nhận Hẹn'}">Đã Duyệt Thuê</span>
+                                </span>
+                                <span th:if="${!c.cancelled and !c.status}" class="badge badge-warning text-dark font-weight-bold px-2.5 py-1.5">
+                                    <i class="fas fa-hourglass-half mr-1"></i>
+                                    <span th:text="${c.rentRegistration ? 'Chờ Duyệt Thuê' : 'Chờ Xác Nhận'}">Chờ Duyệt Thuê</span>
+                                </span>
+                            </td>
+
+                            <!-- Cột 5: Chức Năng (Thao Tác) -->
+                            <td class="text-center align-middle action-btns text-nowrap">
+                                <div class="d-inline-flex align-items-center justify-content-center flex-nowrap" style="gap: 6px;">
+                                    <form th:if="${c.rentRegistration and !c.status and !c.cancelled}" th:action="@{|/owner/contact/approve-auto/${c.id}|}" method="post" class="d-inline m-0">
+                                        <button type="submit" class="btn btn-primary btn-sm shadow-sm font-weight-bold text-nowrap px-2.5"
+                                                style="height: 31px; line-height: 1;"
+                                                title="Duyệt đơn đặt thuê &amp; Tự động tạo Hồ sơ Cư dân + Hợp đồng ACTIVE ngay lập tức">
+                                            <i class="fas fa-bolt mr-1"></i>Duyệt &amp; Cấp HĐ
+                                        </button>
+                                    </form>
+                                    <a th:if="${!c.rentRegistration and !c.status and !c.cancelled}" th:href="@{|/owner/contact/toggle/${c.id}|}" 
+                                       class="btn btn-success btn-sm shadow-sm font-weight-bold text-nowrap px-2.5 d-inline-flex align-items-center"
+                                       style="height: 31px; line-height: 1;"
+                                       title="Xác nhận lịch hẹn xem phòng">
+                                        <i class="fas fa-check mr-1"></i>Xác nhận hẹn
+                                    </a>
+                                    <a th:if="${c.status}" th:href="@{/owner/tenants/create(fullName=${c.name}, phone=${c.phone}, contactId=${c.id}, roomId=${c.requestedRoomId})}"
+                                       class="btn btn-outline-primary btn-sm shadow-sm font-weight-bold text-nowrap px-2.5 d-inline-flex align-items-center"
+                                       style="height: 31px; line-height: 1;"
+                                       title="Xem / Lập bổ sung hồ sơ khách thuê">
+                                        <i class="fas fa-file-signature mr-1"></i>Hồ Sơ HĐ
+                                    </a>
+                                    <a th:if="${c.status or c.cancelled}" th:href="@{|/owner/contact/toggle/${c.id}|}" 
+                                       class="btn btn-outline-secondary btn-sm shadow-sm font-weight-bold text-nowrap px-2 d-inline-flex align-items-center"
+                                       style="height: 31px; line-height: 1;"
+                                       title="Đặt lại trạng thái Chờ duyệt">
+                                        <i class="fas fa-undo mr-1"></i>Hoàn tác
+                                    </a>
+                                    <form th:if="${!c.cancelled and !c.status}" th:action="@{|/owner/contact/reject/${c.id}|}" method="post" class="d-inline m-0"
+                                          onsubmit="return confirm('Xác nhận từ chối / hủy đơn đặt phòng này?');">
+                                        <button type="submit" class="btn btn-outline-danger btn-sm shadow-sm font-weight-bold d-inline-flex align-items-center justify-content-center"
+                                                style="width: 31px; height: 31px; padding: 0;" title="Từ chối / Hủy đơn">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </form>
+                                    <a th:if="${c.phone != null and !#strings.isEmpty(c.phone)}"
+                                       th:href="'https://zalo.me/' + ${c.phone}"
+                                       target="_blank" rel="noopener"
+                                       class="btn btn-outline-info btn-sm shadow-sm font-weight-bold d-inline-flex align-items-center justify-content-center"
+                                       style="width: 31px; height: 31px; padding: 0;"
+                                       title="Nhắn Zalo cho khách">
+                                        <i class="fas fa-comment-dots"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    function filterOwnerContacts() {
+        var search = document.getElementById('ownerContactSearch').value.toLowerCase().trim();
+        var statusFilterEl = document.getElementById('ownerContactStatusFilter');
+        var statusFilter = statusFilterEl ? statusFilterEl.value : 'ALL';
+        var rows = document.querySelectorAll('.owner-contact-row');
+        var count = 0;
+
+        rows.forEach(function(row) {
+            var name = row.getAttribute('data-name') || '';
+            var phone = row.getAttribute('data-phone') || '';
+            var prop = row.getAttribute('data-prop') || '';
+            var status = row.getAttribute('data-status') || '';
+            var type = row.getAttribute('data-type') || '';
+
+            var matchSearch = !search || name.includes(search) || phone.includes(search) || prop.includes(search);
+            var matchStatus = (statusFilter === 'ALL')
+                || (statusFilter === 'RENT_ORDER' && type === 'RENT_ORDER')
+                || (status === statusFilter);
+            if (matchSearch && matchStatus) {
+                row.style.display = '';
+                count++;
+            } else {
+                row.style.display = 'none';
+            }
+        });
+
+        var countEl = document.getElementById('contactFilteredCount');
+        if (countEl) countEl.textContent = count;
+    }
+    </script>
+
 </div>

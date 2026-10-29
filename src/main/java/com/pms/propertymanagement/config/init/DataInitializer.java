@@ -4,30 +4,17 @@ import com.pms.propertymanagement.entity.*;
 import com.pms.propertymanagement.repository.*;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 
-import static com.pms.propertymanagement.utils.SlugUtil.makeSlug;
-
 @Component
 @RequiredArgsConstructor
-
+@Slf4j
 public class DataInitializer implements CommandLineRunner {
-
-    @Autowired
-    private RoleRepository roleRepository;
-
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private ProvinceRepository provinceRepository;
-
-    @Autowired
-    private WardRepository wardRepository;
 
     @Autowired
     private CategoryRepository categoryRepository;
@@ -54,12 +41,12 @@ public class DataInitializer implements CommandLineRunner {
     private final PostInitializer postInitializer;
     private final OwnerDataInitializer ownerDataInitializer;
     private final LargeScaleDataInitializer largeScaleDataInitializer;
-
+    private final RentalDemoDataInitializer rentalDemoDataInitializer;
 
     @Override
     @Transactional
     public void run(String... args) throws Exception {
-        System.out.println("Hệ thống đang khởi tạo");
+        log.info("Hệ thống đang khởi tạo dữ liệu...");
 
         roleInitializer.init();
         userInitializer.init();
@@ -93,7 +80,7 @@ public class DataInitializer implements CommandLineRunner {
         postingPackageInitializer.init();
         managementPlanInitializer.init();
         postPackageInitializer.init();
-        
+
         // NEW ARCHITECTURE: Initialize Posts for Properties
         postInitializer.init();
 
@@ -103,9 +90,9 @@ public class DataInitializer implements CommandLineRunner {
         // Large scale data for statistics
         largeScaleDataInitializer.init();
 
-        System.out.println("Hệ thống đã sẵn sàng");
-    }}
+        // Rental Demo Data: meters, invoices, payments, maintenance
+        rentalDemoDataInitializer.init();
 
-
-
-
+        log.info("Hệ thống đã sẵn sàng!");
+    }
+}

@@ -1,27 +1,223 @@
-<div>
-    <a href="/tenant/rooms" class="text-sm text-blue-600 hover:underline">&larr; Quay lại danh sách</a>
-    <h1 class="text-2xl font-semibold mt-2" th:text="${room.name}">Chi tiết phòng</h1>
-    <div th:if="${maintenanceError != null}" class="mt-3 p-3 bg-yellow-100 text-yellow-800 rounded" th:text="${maintenanceError}"></div>
-    <div class="mt-3 border rounded p-4">
-        <p><span class="font-medium">Tòa nhà:</span> <span th:text="${room.property != null ? room.property.name : 'N/A'}"></span></p>
-        <p><span class="font-medium">Giá:</span> <span th:text="${#numbers.formatDecimal(room.price, 0, 'COMMA', 0, 'POINT')}"></span></p>
-        <p><span class="font-medium">Trạng thái:</span> <span th:text="${room.status.displayName}"></span></p>
-        <p class="mt-2"><span class="font-medium">Mô tả:</span></p>
-        <p class="text-gray-700 whitespace-pre-line" th:text="${room.description}">Mô tả</p>
-    </div>
-    <div class="mt-4">
-        <div th:if="${room.status.name() == 'AVAILABLE'}">
-            <form th:action="@{|/tenant/rooms/${room.id}/rent|}" method="post">
-                <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Thuê phòng này</button>
-            </form>
-        </div>
-        <div th:if="${canRequestMaintenance}" class="flex flex-wrap gap-2">
-            <a th:href="@{|/tenant/rooms/${room.id}/maintenance/create|}" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Yêu cầu bảo trì</a>
-            <a th:href="@{/tenant/maintenance}" class="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300">Danh sách yêu cầu</a>
-        </div>
-        <div th:if="${canRequestMaintenance == false}" class="text-sm text-gray-600">
-            Phòng này không thuộc danh sách phòng đang thuê của bạn.
-        </div>
-    </div>
-</div>
+<div th:fragment="content">
 
+    <!-- Page Heading -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <div>
+            <a href="/tenant/rooms" class="btn btn-sm btn-outline-secondary mb-2">
+                <i class="fas fa-arrow-left mr-1"></i> Quay lại danh sách phòng
+            </a>
+            <h1 class="h3 mb-1 text-gray-800 font-weight-bold">
+                <i class="fas fa-door-open text-primary mr-2"></i>
+                <span th:text="${room.name}">Phòng 102</span>
+            </h1>
+            <p class="mb-0 text-muted small">
+                <i class="fas fa-map-marker-alt text-danger mr-1"></i>
+                <span th:text="${room.property != null ? room.property.name + ' - ' + (room.property.addressNumber ?: '') : 'Địa chỉ đang cập nhật'}">Nhà trọ Green House</span>
+            </p>
+        </div>
+        <div th:if="${canRequestMaintenance}" class="mt-2 mt-sm-0">
+            <a th:href="@{/tenant/contract}" class="btn btn-sm btn-info shadow-sm font-weight-bold mr-1">
+                <i class="fas fa-file-contract fa-sm mr-1"></i> Xem hợp đồng phòng này
+            </a>
+            <a th:href="@{|/tenant/rooms/${room.id}/maintenance/create|}" class="btn btn-sm btn-warning shadow-sm font-weight-bold text-dark mr-1">
+                <i class="fas fa-tools fa-sm mr-1"></i> Yêu cầu sửa chữa
+            </a>
+            <a href="/tenant/maintenance" class="btn btn-sm btn-primary shadow-sm font-weight-bold">
+                <i class="fas fa-clipboard-list fa-sm text-white-50 mr-1"></i> Lịch sử bảo trì
+            </a>
+        </div>
+    </div>
+
+    <!-- Alert -->
+    <div th:if="${maintenanceError != null}" class="alert alert-warning border-left-warning shadow-sm mb-4">
+        <i class="fas fa-exclamation-triangle mr-2"></i>
+        <span th:text="${maintenanceError}">Thông báo</span>
+    </div>
+
+    <!-- 4 Key Specs KPI Cards -->
+    <div class="row">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Giá thuê phòng / tháng</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800 font-mono"
+                                 th:text="${#numbers.formatDecimal(activeContract != null ? activeContract.rentPrice : room.price, 0, 'POINT', 0, 'COMMA') + ' đ'}">2.500.000 đ</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-coins fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Mã hợp đồng hiệu lực</div>
+                            <div class="h6 mb-0 font-weight-bold text-gray-800"
+                                 th:text="${activeContract != null ? activeContract.code : 'Đang hoạt động'}">HD-410-38667</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-file-contract fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Tình trạng lưu trú</div>
+                            <div class="h5 mb-0 font-weight-bold text-success"
+                                 th:text="${room.status != null ? room.status.displayName : 'Đang thuê'}">Đang thuê</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-check-circle fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Diện tích &amp; Sức chứa</div>
+                            <div class="h6 mb-0 font-weight-bold text-gray-800"
+                                 th:text="${(room.area != null ? room.area + ' m²' : '25 m²') + ' · Tối đa ' + (room.maxOccupancy != null ? room.maxOccupancy : 2) + ' người'}">25 m² · 2 người</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-ruler-combined fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Thông tin Hợp đồng & Nội thất bàn giao -->
+    <div class="row">
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow h-100">
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-file-signature mr-1"></i> Tóm tắt Hợp đồng gắn với Phòng
+                    </h6>
+                    <a th:href="@{/tenant/contract}" class="btn btn-sm btn-outline-primary font-weight-bold">Xem bản đầy đủ</a>
+                </div>
+                <div class="card-body">
+                    <div th:if="${activeContract != null}" class="table-responsive">
+                        <table class="table table-bordered table-sm mb-0">
+                            <tbody>
+                                <tr>
+                                    <th class="bg-light" style="width: 40%;">Mã hợp đồng</th>
+                                    <td class="font-weight-bold text-primary" th:text="${activeContract.code}">HD-410-38667</td>
+                                </tr>
+                                <tr>
+                                    <th class="bg-light">Thời hạn hợp đồng</th>
+                                    <td th:text="${#temporals.format(activeContract.startDate, 'dd/MM/yyyy') + ' → ' + #temporals.format(activeContract.endDate, 'dd/MM/yyyy')}"></td>
+                                </tr>
+                                <tr>
+                                    <th class="bg-light">Tiền đặt cọc</th>
+                                    <td class="font-weight-bold text-info" th:text="${#numbers.formatDecimal(activeContract.deposit, 0, 'POINT', 0, 'COMMA') + ' đ'}"></td>
+                                </tr>
+                                <tr>
+                                    <th class="bg-light">Chu kỳ thanh toán</th>
+                                    <td th:text="${(activeContract.paymentCycle != null ? activeContract.paymentCycle : 1) + ' tháng / lần'}">1 tháng / lần</td>
+                                </tr>
+                                <tr>
+                                    <th class="bg-light">Chủ nhà trọ quản lý</th>
+                                    <td th:text="${room.property != null and room.property.owner != null ? (room.property.owner.fullName ?: room.property.owner.username) + ' (' + (room.property.owner.phone ?: '0975893248') + ')' : 'Chủ trọ'}"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div th:if="${activeContract == null}" class="text-muted small">
+                        Đang cập nhật thông tin hợp đồng thuê phòng.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow h-100">
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-couch mr-1"></i> Trang thiết bị bàn giao &amp; Mô tả phòng
+                    </h6>
+                    <span class="badge badge-success px-2 py-1">Đã bàn giao</span>
+                </div>
+                <div class="card-body">
+                    <div class="p-3 bg-light rounded border text-gray-800 small mb-3" style="white-space: pre-line;"
+                         th:text="${room.description != null and !room.description.isEmpty() ? room.description : 'Phòng trọ đầy đủ trang thiết bị cơ bản (điều hòa, bình nóng lạnh, kệ bếp, thiết bị vệ sinh). Mọi sự cố kỹ thuật vui lòng tạo yêu cầu bảo trì.'}">
+                        Phòng trọ tiện nghi, sạch sẽ.
+                    </div>
+
+                    <div th:if="${room.services != null and !room.services.isEmpty()}">
+                        <div class="text-xs font-weight-bold text-uppercase text-muted mb-2">Dịch vụ áp dụng tại phòng:</div>
+                        <div class="d-flex flex-wrap" style="gap: 6px;">
+                            <span th:each="sv : ${room.services}" class="badge badge-light border text-gray-800 px-2 py-1">
+                                <i class="fas fa-check text-success mr-1"></i>
+                                <span th:text="${sv.name + ': ' + #numbers.formatDecimal(sv.price, 0, 'POINT', 0, 'COMMA') + ' đ/' + sv.unit}"></span>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bảng lịch sử chỉ số Điện - Nước hàng tháng của phòng -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+            <h6 class="m-0 font-weight-bold text-primary">
+                <i class="fas fa-tachometer-alt mr-1"></i> Lịch Sử Chốt Chỉ Số Điện – Nước Hàng Tháng Của Phòng
+            </h6>
+            <span class="badge badge-primary px-2 py-1" th:text="${(meterReadings != null ? meterReadings.size() : 0) + ' kỳ ghi số'}">0 kỳ</span>
+        </div>
+        <div class="card-body">
+            <div th:if="${meterReadings == null or meterReadings.isEmpty()}" class="text-center py-4 text-muted small">
+                Chưa có bản ghi chốt chỉ số công tơ điện nước cho phòng này.
+            </div>
+            <div th:if="${meterReadings != null and !meterReadings.isEmpty()}" class="table-responsive">
+                <table class="table table-bordered table-hover table-sm mb-0">
+                    <thead class="bg-light">
+                        <tr>
+                            <th>Kỳ chốt số</th>
+                            <th class="text-right">Điện cũ (kWh)</th>
+                            <th class="text-right">Điện mới (kWh)</th>
+                            <th class="text-right text-primary">Tiêu thụ Điện</th>
+                            <th class="text-right">Nước cũ (m³)</th>
+                            <th class="text-right">Nước mới (m³)</th>
+                            <th class="text-right text-info">Tiêu thụ Nước</th>
+                            <th class="text-center">Ngày ghi nhận</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="mr : ${meterReadings}">
+                            <td class="font-weight-bold text-gray-800" th:text="${'Tháng ' + mr.month + '/' + mr.year}">Tháng 10/2026</td>
+                            <td class="text-right tabular-nums" th:text="${#numbers.formatDecimal(mr.oldElectricityIndex, 1, 0)}">185</td>
+                            <td class="text-right font-weight-bold tabular-nums" th:text="${#numbers.formatDecimal(mr.newElectricityIndex, 1, 0)}">260</td>
+                            <td class="text-right font-weight-bold text-primary tabular-nums" th:text="${#numbers.formatDecimal(mr.electricityUsage, 1, 0) + ' kWh'}">75 kWh</td>
+                            <td class="text-right tabular-nums" th:text="${#numbers.formatDecimal(mr.oldWaterIndex, 1, 0)}">22</td>
+                            <td class="text-right font-weight-bold tabular-nums" th:text="${#numbers.formatDecimal(mr.newWaterIndex, 1, 0)}">31</td>
+                            <td class="text-right font-weight-bold text-info tabular-nums" th:text="${#numbers.formatDecimal(mr.waterUsage, 1, 0) + ' m³'}">9 m³</td>
+                            <td class="text-center small text-muted" th:text="${mr.createdAt != null ? #temporals.format(mr.createdAt, 'dd/MM/yyyy') : '-'}"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</div>

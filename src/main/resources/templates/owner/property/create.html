@@ -1,491 +1,438 @@
-<div th:fragment="content" class="bg-gray-50 min-h-screen py-8">
-  <form
-    th:action="@{${actionUrl}}"
-    th:object="${propertyRequest}"
-    method="POST"
-    class="space-y-6"
-    id="property-form"
-  >
-    <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
-      <h2 class="text-xl font-bold text-gray-800 mb-6 flex items-center">
-        <span class="w-1 h-6 bg-blue-600 mr-3"></span> Thông tin nhà trọ
-      </h2>
-
-      <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6">
-        <div class="flex">
-          <div class="flex-shrink-0">
-            <i class="fa-solid fa-info-circle text-blue-500"></i>
-          </div>
-          <div class="ml-3">
-            <p class="text-sm text-blue-700">
-              <strong>Lưu ý:</strong> Form này chỉ tạo thông tin nhà trọ để quản
-              lý nội bộ. Sau khi tạo, bạn cần
-              <strong>tạo bài đăng</strong> riêng để hiển thị lên marketplace.
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div class="md:col-span-2">
-          <label class="block text-sm font-medium text-gray-700 mb-1"
-            >Tên nhà trọ <span class="text-red-500">*</span></label
-          >
-          <input
-            type="text"
-            th:field="*{name}"
-            placeholder="Ví dụ: Trọ cô Ba, Nhà trọ Hòa Bình..."
-            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            required
-          />
-          <p class="text-xs text-gray-500 mt-1">
-            Tên này chỉ dùng để quản lý nội bộ
-          </p>
-        </div>
-
-        <div class="md:col-span-1">
-          <label class="block text-sm font-medium text-gray-700 mb-1"
-            >Loại hình <span class="text-red-500">*</span></label
-          >
-          <select
-            th:field="*{categoryId}"
-            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-            required
-          >
-            <option value="">-- Chọn loại hình --</option>
-            <option
-              th:each="c : ${categories}"
-              th:value="${c.id}"
-              th:text="${c.name}"
-            ></option>
-          </select>
-        </div>
-
-        <div class="grid grid-cols-2 gap-2">
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1"
-              >Số lượng phòng</label
-            >
-            <input
-              type="number"
-              th:field="*{numberOfRooms}"
-              min="1"
-              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            />
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1"
-              >Giá thuê (đ/tháng)</label
-            >
-            <input
-              type="number"
-              th:field="*{price}"
-              min="1"
-              step="1"
-              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            />
-          </div>
-        </div>
-
-        <div class="md:col-span-2">
-          <label class="block text-sm font-medium text-gray-700 mb-1"
-            >Diện tích ($m^2$)</label
-          >
-          <input
-            type="number"
-            step="0.1"
-            th:field="*{acreage}"
-            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-          />
-        </div>
-      </div>
-    </div>
-
-    <!-- Địa chỉ -->
-    <div
-      class="bg-white p-6 md:p-8 rounded-xl shadow-sm border border-gray-100"
-    >
-      <h2
-        class="text-lg font-bold text-gray-800 mb-6 flex items-center border-b pb-2"
-      >
-        <span class="w-1 h-6 bg-green-600 mr-3 rounded"></span> Địa chỉ
-      </h2>
-
-      <!-- Hàng 1: Tỉnh + Phường -->
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<div th:fragment="content" class="container-fluid mb-4">
+    <!-- Page Heading -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">
-            Tỉnh / Thành phố
-          </label>
-          <select
-            id="province-select"
-            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="">-- Chọn Tỉnh --</option>
-            <option
-              th:each="p : ${provinces}"
-              th:value="${p.code}"
-              th:text="${p.name}"
-            ></option>
-          </select>
+            <h1 class="h3 mb-0 text-gray-800 font-weight-bold">
+                <i class="fas fa-building text-success mr-2"></i>Thiết Lập Thông Tin Nhà Trọ
+            </h1>
+            <p class="text-muted small mb-0 mt-1">Khai báo thông tin cơ sở, địa chỉ, tiện ích và hình ảnh để đưa vào hệ thống quản lý</p>
         </div>
-
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">
-            Phường / Xã
-          </label>
-          <select
-            th:field="*{wardCode}"
-            id="ward-select"
-            disabled
-            class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-100 focus:ring-2 focus:ring-blue-500 disabled:cursor-not-allowed"
-          >
-            <option value="">-- Chọn Phường --</option>
-          </select>
-        </div>
-      </div>
-
-      <!-- Hàng 2: Địa chỉ chi tiết -->
-      <div class="mt-6">
-        <label class="block text-sm font-medium text-gray-700 mb-1">
-          Số nhà, Tên đường
-        </label>
-        <input
-          type="text"
-          th:field="*{addressNumber}"
-          placeholder="Ví dụ: 341 Bùi Minh Trực"
-          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-        />
-      </div>
+        <a th:href="@{/owner/properties}" class="btn btn-secondary btn-sm shadow-sm font-weight-bold">
+            <i class="fas fa-arrow-left mr-1"></i>Quay lại danh sách
+        </a>
     </div>
 
-    <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
-      <div class="mb-8">
-        <h3 class="text-lg font-bold text-gray-800 mb-4">Đối tượng</h3>
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div
-            th:each="target : ${targetTenants}"
-            class="flex items-center space-x-3 p-2 hover:bg-gray-50 rounded"
-          >
-            <input
-              type="checkbox"
-              th:value="${target.id}"
-              th:field="*{targetIds}"
-              class="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
-            />
-            <label class="text-sm text-gray-700 flex items-center">
-              <i th:class="${target.icon} + ' mr-2 text-blue-500'"></i>
-              <span th:text="${target.name}">Wifi</span>
-            </label>
-          </div>
-        </div>
-      </div>
+    <form th:action="@{${actionUrl}}" th:object="${propertyRequest}" method="POST" id="property-form">
+        <!-- 1. Thông tin chung -->
+        <div class="card shadow mb-4">
+            <div class="card-header py-3 bg-white border-bottom-success">
+                <h6 class="m-0 font-weight-bold text-success">
+                    <i class="fas fa-info-circle mr-1"></i>1. Thông Tin Cơ Sở Nhà Trọ
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="form-group">
+                    <label class="font-weight-bold small text-gray-700">Tên Nhà Trọ / Cơ Sở <span class="text-danger">*</span></label>
+                    <input type="text" th:field="*{name}" placeholder="Ví dụ: Tòa Nhà Trọ Hòa Bình, Nhà Trọ Cô Ba..." class="form-control" required>
+                    <small class="form-text text-muted">Tên gọi dùng để phân biệt và quản lý nội bộ các cơ sở cho thuê của bạn.</small>
+                </div>
 
-      <div class="mb-8">
-        <h3 class="text-lg font-bold text-gray-800 mb-4">Tiện nghi</h3>
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div
-            th:each="amenity : ${amenities}"
-            class="flex items-center space-x-3 p-2 hover:bg-gray-50 rounded"
-          >
-            <input
-              type="checkbox"
-              th:value="${amenity.id}"
-              th:field="*{amenityIds}"
-              class="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
-            />
-            <label class="text-sm text-gray-700 flex items-center">
-              <i th:class="${amenity.icon} + ' mr-2 text-blue-500'"></i>
-              <span th:text="${amenity.name}">Wifi</span>
-            </label>
-          </div>
-        </div>
-      </div>
-
-      <div>
-        <h3 class="text-lg font-bold text-gray-800 mb-4">
-          Môi trường xung quanh
-        </h3>
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div
-            th:each="sur : ${surroundings}"
-            class="flex items-center space-x-3 p-2 hover:bg-gray-50 rounded"
-          >
-            <input
-              type="checkbox"
-              th:value="${sur.id}"
-              th:field="*{surroundingIds}"
-              class="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
-            />
-            <label class="text-sm text-gray-700 flex items-center">
-              <i th:class="${sur.icon} + ' mr-2 text-green-500'"></i>
-              <span th:text="${sur.name}">Chợ</span>
-            </label>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div
-      class="bg-white p-6 md:p-8 rounded-xl shadow-sm border border-gray-100"
-    >
-      <h2
-        class="text-lg font-bold text-gray-800 mb-6 flex items-center border-b pb-2"
-      >
-        <span class="w-1 h-6 bg-purple-600 mr-3 rounded"></span> Hình ảnh &
-        Video
-      </h2>
-
-      <div class="space-y-4">
-        <div
-          class="bg-blue-50 text-blue-700 px-4 py-3 rounded-lg text-sm flex items-start"
-        >
-          <i class="fa-solid fa-circle-info mt-0.5 mr-2"></i>
-          <span>
-            Ảnh đầu tiên sẽ là <strong>Ảnh bìa</strong>. Click vào từng ô để
-            chọn ảnh — ảnh sẽ được upload ngay và hiện preview trực tiếp.
-          </span>
+                <div class="form-row">
+                    <div class="form-group col-md-6">
+                        <label class="font-weight-bold small text-gray-700">Loại Hình Nhà Trọ <span class="text-danger">*</span></label>
+                        <select th:field="*{categoryId}" class="form-control custom-select" required>
+                            <option value="">-- Chọn loại hình --</option>
+                            <option th:each="c : ${categories}" th:value="${c.id}" th:text="${c.name}"></option>
+                        </select>
+                    </div>
+                    <div class="form-group col-md-2">
+                        <label class="font-weight-bold small text-gray-700">Số Lượng Phòng</label>
+                        <input type="number" th:field="*{numberOfRooms}" min="1" class="form-control" placeholder="10">
+                    </div>
+                    <div class="form-group col-md-2">
+                        <label class="font-weight-bold small text-gray-700">Giá Thuê Tham Khảo (đ)</label>
+                        <input type="number" th:field="*{price}" min="0" step="1000" class="form-control font-mono" placeholder="3000000">
+                    </div>
+                    <div class="form-group col-md-2">
+                        <label class="font-weight-bold small text-gray-700">Diện Tích Đất (m²)</label>
+                        <input type="number" step="0.1" th:field="*{acreage}" class="form-control" placeholder="100">
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <!-- Image upload grid -->
-        <div
-          id="image-inputs-container"
-          class="grid grid-cols-2 md:grid-cols-3 gap-3"
-        ></div>
+        <!-- 2. Địa chỉ -->
+        <div class="card shadow mb-4">
+            <div class="card-header py-3 bg-white border-bottom-primary d-flex justify-content-between align-items-center">
+                <h6 class="m-0 font-weight-bold text-primary">
+                    <i class="fas fa-map-marked-alt mr-1"></i>2. Địa Chỉ Cơ Sở
+                </h6>
+                <button type="button" onclick="updateAddressMapPreview()" class="btn btn-outline-primary btn-sm font-weight-bold shadow-xs">
+                    <i class="fas fa-location-arrow mr-1"></i>Cập nhật vị trí trên bản đồ
+                </button>
+            </div>
+            <div class="card-body">
+                <div class="form-row">
+                    <div class="form-group col-md-6">
+                        <label class="font-weight-bold small text-gray-700">Tỉnh / Thành Phố <span class="text-danger">*</span></label>
+                        <select id="province-select" class="form-control custom-select">
+                            <option value="">-- Chọn Tỉnh / Thành Phố --</option>
+                            <option th:each="p : ${provinces}" th:value="${p.code}" th:text="${p.name}"></option>
+                        </select>
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label class="font-weight-bold small text-gray-700">Phường / Xã <span class="text-danger">*</span></label>
+                        <select th:field="*{wardCode}" id="ward-select" disabled class="form-control custom-select">
+                            <option value="">-- Chọn Phường / Xã --</option>
+                        </select>
+                    </div>
+                </div>
 
-        <!-- Add image button -->
-        <button
-          type="button"
-          onclick="addImageSlot()"
-          class="w-full py-3 border-2 border-dashed border-gray-300 rounded-lg text-gray-500 font-semibold hover:border-purple-500 hover:text-purple-600 hover:bg-purple-50 transition-all flex items-center justify-center group"
-        >
-          <i
-            class="fa-solid fa-plus mr-2 group-hover:rotate-90 transition-transform duration-300"
-          ></i>
-          Thêm ảnh
-        </button>
-      </div>
-    </div>
+                <div class="form-group mb-3">
+                    <label class="font-weight-bold small text-gray-700">Số Nhà, Tên Đường <span class="text-danger">*</span></label>
+                    <input type="text" th:field="*{addressNumber}" id="address-number-input" placeholder="Ví dụ: Số 341 Đường Bùi Minh Trực, Ngõ 12..." class="form-control" required>
+                </div>
 
-    <div class="flex justify-end space-x-4">
-      <a
-        th:href="@{/owner/properties}"
-        type="button"
-        class="px-6 py-2 border border-gray-300 rounded-md text-gray-700 bg-white hover:bg-gray-50 transition"
-      >
-        Hủy bỏ
-      </a>
-      <button
-        type="submit"
-        class="px-10 py-2 bg-blue-600 text-white font-bold rounded-md hover:bg-blue-700 shadow-md transition flex items-center gap-2"
-      >
-        <i class="fa-solid fa-floppy-disk"></i>
-        Lưu nhà trọ
-      </button>
-    </div>
-  </form>
-</div>
+                <!-- Bản đồ định vị trực quan (Google Maps Embed Preview) -->
+                <div class="border rounded bg-light p-2">
+                    <div class="d-flex justify-content-between align-items-center mb-2 px-1">
+                        <span class="small font-weight-bold text-gray-700">
+                            <i class="fas fa-map-pin text-danger mr-1"></i>Bản đồ định vị trực quan (Google Maps Embed Preview)
+                        </span>
+                        <span id="mapQueryDisplay" class="small text-muted font-italic">Việt Nam</span>
+                    </div>
+                    <div class="rounded overflow-hidden border bg-white" style="height: 240px;">
+                        <iframe id="addressMapPreview"
+                                src="https://maps.google.com/maps?q=Vi%E1%BB%87t%20Nam&amp;t=&amp;z=15&amp;ie=UTF8&amp;iwloc=&amp;output=embed"
+                                width="100%" height="240" style="border: 0;" allowfullscreen="" loading="lazy"
+                                referrerpolicy="no-referrer-when-downgrade"></iframe>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-<script th:inline="javascript">
-  /* --- 1. XỬ LÝ DROPDOWN TỈNH/HUYỆN --- */
-  const provinceSelect = document.getElementById("province-select");
-  const wardSelect = document.getElementById("ward-select");
+        <!-- 3. Tiện ích & Môi trường -->
+        <div class="card shadow mb-4">
+            <div class="card-header py-3 bg-white border-bottom-info">
+                <h6 class="m-0 font-weight-bold text-info">
+                    <i class="fas fa-tasks mr-1"></i>3. Tiện Nghi & Môi Trường Xung Quanh
+                </h6>
+            </div>
+            <div class="card-body">
+                <!-- Đối tượng phù hợp -->
+                <div class="mb-4">
+                    <h6 class="font-weight-bold small text-gray-800 text-uppercase mb-2">Đối Tượng Phù Hợp</h6>
+                    <div class="row">
+                        <div th:each="target : ${targetTenants}" class="col-6 col-md-3 mb-2">
+                            <div class="custom-control custom-checkbox">
+                                <input type="checkbox" th:value="${target.id}" th:field="*{targetIds}" class="custom-control-input" th:id="'target_' + ${target.id}">
+                                <label class="custom-control-label font-weight-bold text-dark cursor-pointer small" th:for="'target_' + ${target.id}">
+                                    <i th:class="${target.icon} + ' mr-1 text-primary'"></i>
+                                    <span th:text="${target.name}">Sinh viên</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
-  // Get edit mode data from Thymeleaf
-  const selectedProvinceCode = /*[[${selectedProvinceCode}]]*/ null;
-  const selectedWardCode = /*[[${propertyRequest.wardCode}]]*/ null;
+                <hr class="my-3">
 
-  if (provinceSelect) {
-    // Event listener for province change
-    provinceSelect.addEventListener("change", function () {
-      loadWards(this.value);
-    });
+                <!-- Tiện nghi -->
+                <div class="mb-4">
+                    <h6 class="font-weight-bold small text-gray-800 text-uppercase mb-2">Tiện Nghi Trong Cơ Sở</h6>
+                    <div class="row">
+                        <div th:each="amenity : ${amenities}" class="col-6 col-md-3 mb-2">
+                            <div class="custom-control custom-checkbox">
+                                <input type="checkbox" th:value="${amenity.id}" th:field="*{amenityIds}" class="custom-control-input" th:id="'amenity_' + ${amenity.id}">
+                                <label class="custom-control-label font-weight-bold text-dark cursor-pointer small" th:for="'amenity_' + ${amenity.id}">
+                                    <i th:class="${amenity.icon} + ' mr-1 text-info'"></i>
+                                    <span th:text="${amenity.name}">Wifi</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
-    // Load wards function
-    function loadWards(provinceCode, selectWardCode = null) {
-      wardSelect.innerHTML = '<option value="">-- Chọn Phường --</option>';
+                <hr class="my-3">
 
-      if (provinceCode) {
-        wardSelect.disabled = false;
-        wardSelect.classList.remove("bg-gray-100", "cursor-not-allowed");
+                <!-- Môi trường xung quanh -->
+                <div>
+                    <h6 class="font-weight-bold small text-gray-800 text-uppercase mb-2">Môi Trường Xung Quanh</h6>
+                    <div class="row">
+                        <div th:each="sur : ${surroundings}" class="col-6 col-md-3 mb-2">
+                            <div class="custom-control custom-checkbox">
+                                <input type="checkbox" th:value="${sur.id}" th:field="*{surroundingIds}" class="custom-control-input" th:id="'sur_' + ${sur.id}">
+                                <label class="custom-control-label font-weight-bold text-dark cursor-pointer small" th:for="'sur_' + ${sur.id}">
+                                    <i th:class="${sur.icon} + ' mr-1 text-success'"></i>
+                                    <span th:text="${sur.name}">Gần chợ</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-        fetch(`/api/locations/wards/${provinceCode}`)
-          .then((response) => response.json())
-          .then((data) => {
-            data.forEach((ward) => {
-              const option = document.createElement("option");
-              option.value = ward.code;
-              option.text = ward.name;
+        <!-- 4. Hình ảnh cơ sở -->
+        <div class="card shadow mb-4">
+            <div class="card-header py-3 bg-white border-bottom-warning">
+                <h6 class="m-0 font-weight-bold text-warning">
+                    <i class="fas fa-camera mr-1"></i>4. Hình Ảnh Nhà Trọ
+                </h6>
+            </div>
+            <div class="card-body">
+                <!-- Inline validation banner -->
+                <div id="imageValidationError" class="alert alert-danger border-left-danger shadow-sm small mb-3" style="display: none;" role="alert">
+                    <i class="fas fa-exclamation-triangle mr-1"></i>
+                    <span id="imageValidationErrorText">Vui lòng tải lên ít nhất 1 ảnh cho cơ sở nhà trọ!</span>
+                </div>
 
-              // Pre-select ward if provided (edit mode)
-              if (selectWardCode && ward.code === selectWardCode) {
-                option.selected = true;
-              }
+                <!-- Hiển thị danh sách ảnh hiện có khi chỉnh sửa cơ sở -->
+                <div th:if="${propertyId != null and existingImages != null and !existingImages.isEmpty()}" class="mb-4 p-3 bg-light rounded border">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="font-weight-bold small text-success">
+                            <i class="fas fa-images mr-1"></i>Ảnh hiện tại của cơ sở (<span class="tabular-nums" th:text="${existingImages.size()}">0</span> ảnh)
+                        </span>
+                        <span class="badge badge-info px-2 py-1">Được giữ nguyên nếu không tải ảnh mới</span>
+                    </div>
+                    <div class="row">
+                        <div th:each="img, stat : ${existingImages}" class="col-6 col-md-3 col-lg-2 mb-2">
+                            <div class="position-relative border rounded overflow-hidden bg-white shadow-xs" style="height: 95px;">
+                                <img th:src="${img}" alt="Ảnh cơ sở" class="w-100 h-100" style="object-fit: cover;"
+                                     onerror="this.onerror=null;this.src='/images/rooms/room-1.jpg';">
+                                <span th:if="${stat.index == 0}" class="badge badge-warning position-absolute" style="top: 4px; left: 4px; font-size: 0.65rem;">ĐẠI DIỆN</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
-              wardSelect.appendChild(option);
-            });
-          })
-          .catch((error) => console.error("Error loading wards:", error));
-      } else {
-        wardSelect.disabled = true;
-        wardSelect.classList.add("bg-gray-100", "cursor-not-allowed");
-      }
+                <div class="alert alert-light border small mb-3">
+                    <i class="fas fa-info-circle mr-1 text-primary"></i>
+                    Ảnh đầu tiên sẽ là <strong>Ảnh đại diện</strong> của cơ sở. Click vào từng khung để chọn ảnh từ máy tính (ảnh sẽ được upload tự động).
+                </div>
+
+                <div id="image-inputs-container" class="row"></div>
+
+                <button type="button" onclick="addImageSlot()" class="btn btn-outline-primary btn-block mt-3 py-2 font-weight-bold shadow-sm">
+                    <i class="fas fa-plus mr-1"></i> Thêm Khung Ảnh Khác
+                </button>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="d-flex justify-content-end mt-4 pt-3 border-top">
+            <a th:href="@{/owner/properties}" class="btn btn-secondary font-weight-bold mr-2 shadow-sm">
+                <i class="fas fa-times mr-1"></i>Hủy Bỏ
+            </a>
+            <button type="submit" class="btn btn-success font-weight-bold px-4 shadow-sm">
+                <i class="fas fa-save mr-1"></i>Lưu Thông Tin Nhà Trọ
+            </button>
+        </div>
+    </form>
+
+    <script th:inline="javascript">
+    /* --- 1. XỬ LÝ DROPDOWN TỈNH/HUYỆN & BẢN ĐỒ GOOGLE MAPS --- */
+    const provinceSelect = document.getElementById("province-select");
+    const wardSelect = document.getElementById("ward-select");
+    const addressInput = document.getElementById("address-number-input");
+
+    const selectedProvinceCode = /*[[${selectedProvinceCode}]]*/ null;
+    const selectedWardCode = /*[[${propertyRequest.wardCode}]]*/ null;
+
+    function updateAddressMapPreview() {
+        const mapFrame = document.getElementById("addressMapPreview");
+        const queryDisplay = document.getElementById("mapQueryDisplay");
+        if (!mapFrame) return;
+
+        const parts = [];
+        if (addressInput && addressInput.value.trim()) {
+            parts.push(addressInput.value.trim());
+        }
+        if (wardSelect && wardSelect.selectedIndex > 0) {
+            parts.push(wardSelect.options[wardSelect.selectedIndex].text);
+        }
+        if (provinceSelect && provinceSelect.selectedIndex > 0) {
+            parts.push(provinceSelect.options[provinceSelect.selectedIndex].text);
+        }
+
+        const query = parts.length > 0 ? parts.join(", ") : "Việt Nam";
+        if (queryDisplay) {
+            queryDisplay.textContent = query;
+        }
+        mapFrame.src = "https://maps.google.com/maps?q=" + encodeURIComponent(query) + "&t=&z=15&ie=UTF8&iwloc=&output=embed";
     }
 
-    // Initialize for edit mode
-    if (selectedProvinceCode) {
-      provinceSelect.value = selectedProvinceCode;
-      loadWards(selectedProvinceCode, selectedWardCode);
+    let mapDebounceTimer = null;
+    if (addressInput) {
+        addressInput.addEventListener("input", function () {
+            clearTimeout(mapDebounceTimer);
+            mapDebounceTimer = setTimeout(updateAddressMapPreview, 600);
+        });
+        addressInput.addEventListener("change", updateAddressMapPreview);
     }
-  }
-
-  /* --- 2. XỬ LÝ UPLOAD ẢNH LÊN CLOUDINARY --- */
-  let imageCount = 0;
-
-  function addImageSlot(previewUrl = null) {
-    const container = document.getElementById("image-inputs-container");
-    const index = imageCount++;
-    // Cover = first slot still present in DOM
-    const isCover = container.children.length === 0;
-
-    const slot = document.createElement("div");
-    slot.className =
-      "relative group aspect-square rounded-xl border-2 border-dashed border-gray-300 bg-gray-50 overflow-hidden flex items-center justify-center cursor-pointer hover:border-purple-400 transition-all";
-    slot.dataset.index = index;
-
-    slot.innerHTML = `
-      <input type="file" accept="image/*" class="absolute inset-0 opacity-0 cursor-pointer z-10"
-             onchange="handleFileSelect(this, ${index})"/>
-      <input type="hidden" name="imageUrls" id="url-${index}" value=""/>
-
-      <div id="empty-${index}" class="flex flex-col items-center text-gray-400 pointer-events-none">
-        <i class="fa-solid fa-image text-3xl mb-2"></i>
-        <span class="text-xs font-medium">${isCover ? "Ảnh bìa" : "Ảnh " + (index + 1)}</span>
-        <span class="text-xs text-gray-400 mt-1">Click để chọn</span>
-      </div>
-
-      <img id="preview-${index}" src="" alt=""
-           class="hidden absolute inset-0 w-full h-full object-cover pointer-events-none"/>
-
-      <div id="loading-${index}" class="hidden absolute inset-0 bg-black/50 flex items-center justify-center pointer-events-none">
-        <i class="fa-solid fa-spinner fa-spin text-white text-2xl"></i>
-      </div>
-
-      ${isCover ? `<div class="absolute top-1.5 left-1.5 bg-orange-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded pointer-events-none z-20">BÌA</div>` : ""}
-
-      <button type="button" onclick="removeSlot(${index}, event)"
-              id="remove-${index}"
-              class="hidden absolute top-1.5 right-1.5 bg-red-500 hover:bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center z-20 text-xs">
-        <i class="fa-solid fa-times"></i>
-      </button>
-    `;
-
-    container.appendChild(slot);
-
-    if (previewUrl) {
-      showPreview(index, previewUrl);
-      document.getElementById(`url-${index}`).value = previewUrl;
+    if (wardSelect) {
+        wardSelect.addEventListener("change", updateAddressMapPreview);
     }
-  }
 
-  function handleFileSelect(input, index) {
-    const file = input.files[0];
-    if (!file) return;
+    if (provinceSelect) {
+        provinceSelect.addEventListener("change", function () {
+            loadWards(this.value);
+            updateAddressMapPreview();
+        });
 
-    // Show local preview immediately
-    const reader = new FileReader();
-    reader.onload = (e) => showPreview(index, e.target.result);
-    reader.readAsDataURL(file);
+        function loadWards(provinceCode, selectWardCode = null) {
+            wardSelect.innerHTML = '<option value="">-- Chọn Phường / Xã --</option>';
 
-    // Show loading spinner
-    document.getElementById(`loading-${index}`).classList.remove("hidden");
+            if (provinceCode) {
+                wardSelect.disabled = false;
 
-    // Upload to Cloudinary via backend
-    const formData = new FormData();
-    formData.append("file", file);
+                fetch(`/api/locations/wards/${provinceCode}`)
+                    .then((response) => response.json())
+                    .then((data) => {
+                        data.forEach((ward) => {
+                            const option = document.createElement("option");
+                            option.value = ward.code;
+                            option.text = ward.name;
+                            if (selectWardCode && ward.code === selectWardCode) {
+                                option.selected = true;
+                            }
+                            wardSelect.appendChild(option);
+                        });
+                        updateAddressMapPreview();
+                    })
+                    .catch((error) => console.error("Error loading wards:", error));
+            } else {
+                wardSelect.disabled = true;
+            }
+        }
 
-    fetch("/api/images/upload", { method: "POST", body: formData })
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.url) {
-          document.getElementById(`url-${index}`).value = data.url;
+        if (selectedProvinceCode) {
+            provinceSelect.value = selectedProvinceCode;
+            loadWards(selectedProvinceCode, selectedWardCode);
         } else {
-          alert("Upload thất bại: " + (data.error || "Lỗi không xác định"));
-          removeSlot(index, null);
+            updateAddressMapPreview();
         }
-      })
-      .catch(() => alert("Không thể kết nối server để upload ảnh."))
-      .finally(() => {
-        document.getElementById(`loading-${index}`).classList.add("hidden");
-      });
-  }
+    }
 
-  function showPreview(index, src) {
-    document.getElementById(`empty-${index}`).classList.add("hidden");
-    const img = document.getElementById(`preview-${index}`);
-    img.src = src;
-    img.classList.remove("hidden");
-    // Only show remove button after an image is loaded
-    const removeBtn = document.getElementById(`remove-${index}`);
-    if (removeBtn) removeBtn.classList.remove("hidden");
-  }
+    /* --- 2. XỬ LÝ UPLOAD ẢNH & VALIDATION INLINE --- */
+    let imageCount = 0;
 
-  function removeSlot(index, event) {
-    if (event) event.stopPropagation();
-    const slot = document.querySelector(`[data-index="${index}"]`);
-    if (slot) slot.remove();
-  }
-
-  // Before submit: disable all file inputs (already uploaded via Ajax, not needed)
-  // and disable empty hidden URL inputs so they don't pollute the request
-  document
-    .getElementById("property-form")
-    .addEventListener("submit", function (e) {
-      // Check if any image is still uploading (preview shown but URL not yet set)
-      const slots = document.querySelectorAll(
-        "#image-inputs-container [data-index]",
-      );
-      for (const slot of slots) {
-        const idx = slot.dataset.index;
-        const preview = document.getElementById(`preview-${idx}`);
-        const urlInput = document.getElementById(`url-${idx}`);
-        if (
-          preview &&
-          !preview.classList.contains("hidden") &&
-          urlInput &&
-          urlInput.value === ""
-        ) {
-          e.preventDefault();
-          alert("Vui lòng chờ ảnh upload xong trước khi lưu.");
-          return;
+    function showImageValidationError(msg) {
+        const errBanner = document.getElementById("imageValidationError");
+        const errText = document.getElementById("imageValidationErrorText");
+        if (errText && msg) {
+            errText.textContent = msg;
         }
-      }
-      // Disable ALL file inputs — they are only used for Ajax upload, not form submit
-      document
-        .querySelectorAll("#image-inputs-container input[type=file]")
-        .forEach((f) => (f.disabled = true));
-      // Disable empty hidden URL inputs
-      document
-        .querySelectorAll(
-          "#image-inputs-container input[type=hidden][name=imageUrls]",
-        )
-        .forEach((input) => {
-          if (input.value === "") input.disabled = true;
+        if (errBanner) {
+            errBanner.style.display = "block";
+            errBanner.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+    }
+
+    function hideImageValidationError() {
+        const errBanner = document.getElementById("imageValidationError");
+        if (errBanner) {
+            errBanner.style.display = "none";
+        }
+    }
+
+    function addImageSlot(previewUrl = null) {
+        const container = document.getElementById("image-inputs-container");
+        const index = imageCount++;
+        const isCover = container.children.length === 0;
+
+        const col = document.createElement("div");
+        col.className = "col-6 col-md-4 col-lg-3 mb-3";
+        col.dataset.index = index;
+
+        col.innerHTML = `
+            <div class="card h-100 border text-center p-2 position-relative bg-light" style="min-height: 140px; cursor: pointer;">
+                <input type="file" accept="image/*" class="position-absolute w-100 h-100" style="opacity: 0; left: 0; top: 0; cursor: pointer; z-index: 10;"
+                       onchange="handleFileSelect(this, ${index})"/>
+                <input type="hidden" name="imageUrls" id="url-${index}" value=""/>
+
+                <div id="empty-${index}" class="d-flex flex-column align-items-center justify-content-center h-100 py-3 text-muted">
+                    <i class="fas fa-image fa-2x mb-1 text-gray-400"></i>
+                    <span class="small font-weight-bold text-dark">${isCover ? "Ảnh đại diện" : "Ảnh " + (index + 1)}</span>
+                    <span class="text-xs text-gray-500">Click để chọn</span>
+                </div>
+
+                <img id="preview-${index}" src="" alt=""
+                     class="d-none position-absolute w-100 h-100 rounded" style="left: 0; top: 0; object-fit: cover; z-index: 5;"/>
+
+                <div id="loading-${index}" class="d-none position-absolute w-100 h-100 bg-dark text-white d-flex align-items-center justify-content-center rounded" style="left: 0; top: 0; opacity: 0.7; z-index: 15;">
+                    <i class="fas fa-spinner fa-spin fa-2x"></i>
+                </div>
+
+                ${isCover ? `<span class="badge badge-warning position-absolute" style="top: 5px; left: 5px; z-index: 20;">ĐẠI DIỆN</span>` : ""}
+
+                <button type="button" onclick="removeSlot(${index}, event)"
+                        id="remove-${index}"
+                        class="btn btn-danger btn-sm rounded-circle position-absolute d-none p-0"
+                        style="top: 5px; right: 5px; width: 24px; height: 24px; line-height: 20px; z-index: 25;">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        `;
+
+        container.appendChild(col);
+
+        if (previewUrl) {
+            showPreview(index, previewUrl);
+            document.getElementById(`url-${index}`).value = previewUrl;
+        }
+    }
+
+    function handleFileSelect(input, index) {
+        const file = input.files[0];
+        if (!file) return;
+
+        hideImageValidationError();
+
+        const reader = new FileReader();
+        reader.onload = (e) => showPreview(index, e.target.result);
+        reader.readAsDataURL(file);
+
+        document.getElementById(`loading-${index}`).classList.remove("d-none");
+        document.getElementById(`loading-${index}`).classList.add("d-flex");
+
+        const formData = new FormData();
+        formData.append("file", file);
+
+        fetch("/api/images/upload", { method: "POST", body: formData })
+            .then((res) => res.json())
+            .then((data) => {
+                if (data.url) {
+                    document.getElementById(`url-${index}`).value = data.url;
+                } else {
+                    showImageValidationError("Tải ảnh lên thất bại: " + (data.error || "Vui lòng thử lại với định dạng ảnh hợp lệ."));
+                    removeSlot(index, null);
+                }
+            })
+            .catch(() => showImageValidationError("Không thể kết nối máy chủ để tải ảnh lên. Vui lòng kiểm tra kết nối mạng."))
+            .finally(() => {
+                document.getElementById(`loading-${index}`).classList.add("d-none");
+                document.getElementById(`loading-${index}`).classList.remove("d-flex");
+            });
+    }
+
+    function showPreview(index, src) {
+        document.getElementById(`empty-${index}`).classList.add("d-none");
+        const img = document.getElementById(`preview-${index}`);
+        img.src = src;
+        img.classList.remove("d-none");
+        const removeBtn = document.getElementById(`remove-${index}`);
+        if (removeBtn) removeBtn.classList.remove("d-none");
+    }
+
+    function removeSlot(index, event) {
+        if (event) event.stopPropagation();
+        const slot = document.querySelector(`[data-index="${index}"]`);
+        if (slot) slot.remove();
+    }
+
+    document.getElementById("property-form").addEventListener("submit", function (e) {
+        document.querySelectorAll("#image-inputs-container input[type=file]").forEach((f) => (f.disabled = true));
+        document.querySelectorAll("#image-inputs-container input[type=hidden][name=imageUrls]").forEach((input) => {
+            if (input.value === "") input.disabled = true;
         });
     });
 
-  // Auto-add first slot (cover photo) on page load, or pre-fill existing images in edit mode
-  const existingImages = /*[[${propertyRequest.imageUrls}]]*/ [];
-  if (existingImages && existingImages.length > 0) {
-    existingImages.forEach((url) => addImageSlot(url));
-  } else {
-    addImageSlot();
-  }
-</script>
-
-<style>
-  /* Keep aspect-square slots a reasonable minimum size */
-  #image-inputs-container > div {
-    min-height: 120px;
-  }
-</style>
+    const existingImages = /*[[${existingImages != null ? existingImages : propertyRequest.imageUrls}]]*/ [];
+    if (existingImages && existingImages.length > 0) {
+        existingImages.forEach((url) => addImageSlot(url));
+    } else {
+        addImageSlot();
+    }
+    </script>
+</div>

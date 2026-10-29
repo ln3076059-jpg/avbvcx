@@ -21,13 +21,13 @@ public class ServiceItem {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, columnDefinition = "nvarchar(255)")
+    @Column(nullable = false, length = 255)
     private String name; // Ví dụ: Tiền điện, Tiền rác
 
     @Column(nullable = false)
     private Double price;
 
-    @Column(nullable = false, columnDefinition = "nvarchar(50)")
+    @Column(nullable = false, length = 50)
     private String unit; // Cái, Chiếc, Bình, Lần, Tháng, Người, Kwh, Khối
 
     @Enumerated(EnumType.STRING)

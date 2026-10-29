@@ -24,7 +24,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -124,7 +123,7 @@ public class WalletServiceImpl implements WalletService {
         }
         
         UserWallet wallet = getOrCreateWallet(user);
-        wallet.addBalance(amount);
+        wallet.refundBalance(amount);
         walletRepository.save(wallet);
         
         WalletTransaction transaction = new WalletTransaction();
@@ -172,8 +171,9 @@ public class WalletServiceImpl implements WalletService {
         if (wallet == null) return BigDecimal.ZERO;
         
         LocalDateTime startOfMonth = LocalDateTime.now().withDayOfMonth(1).withHour(0).withMinute(0).withSecond(0);
-        BigDecimal result = transactionRepository.sumAmountByWalletAndTypeAndDateAfter(wallet, TransactionType.PURCHASE, startOfMonth);
-        return result != null ? result : BigDecimal.ZERO;
+        BigDecimal purchase = transactionRepository.sumAmountByWalletAndTypeAndDateAfter(wallet, TransactionType.PURCHASE, startOfMonth);
+        BigDecimal extension = transactionRepository.sumAmountByWalletAndTypeAndDateAfter(wallet, TransactionType.EXTENSION, startOfMonth);
+        return (purchase != null ? purchase : BigDecimal.ZERO).add(extension != null ? extension : BigDecimal.ZERO);
     }
     
     @Override
@@ -182,6 +182,7 @@ public class WalletServiceImpl implements WalletService {
     }
     
     @Override
+    @Transactional
     public String createDepositUrl(User user, BigDecimal amount, String returnUrl, String ipAddress) {
         // Create pending transaction first
         UserWallet wallet = getOrCreateWallet(user);
@@ -273,6 +274,7 @@ public class WalletServiceImpl implements WalletService {
                 wallet.addBalance(transaction.getAmount());
                 
                 // Update remaining balance in transaction record
+                transaction.setBalanceAfter(wallet.getBalance());
                 transaction.setRemainingBalance(wallet.getBalance());
                 
                 // Save updates

@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title th:text="${title} ?: 'Kiểm duyệt - Trọ Mới'"></title>
 
+    <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Sen:wght@400;700;800&display=swap" rel="stylesheet">
+
     <script src="https://cdn.tailwindcss.com"></script>
     <link
       rel="stylesheet"
@@ -13,8 +16,55 @@
 
     <style>
       :root {
-        --tm-blue: #0054a5;
-        --tm-orange: #ff7b00;
+        --ground: #f8fafc;
+        --surface: #ffffff;
+        --raised: #f1f5f9;
+        --active: #e0f2fe;
+        --border: #e2e8f0;
+        --rule: #f1f5f9;
+        --control: #cbd5e1;
+        --text: #1b1b1b;
+        --muted: #444444;
+        --accent: #0a68ff;
+        --positive: #146c38;
+        --negative: #c4242a;
+        --warning: #92400e;
+        --chart-1: #0a68ff;
+        --chart-2: #2f70bb;
+        --chart-3: #f9bc19;
+        --pill-positive-bg: #dcfae5; --pill-positive-ink: #04250e;
+        --pill-negative-bg: #ffedea; --pill-negative-ink: #831c1e;
+        --pill-warning-bg: #fffbeb; --pill-warning-ink: #92400e;
+        --pill-neutral-bg: #ebedee; --pill-neutral-ink: #353736;
+        --radius-card: 8px;
+        --radius-control: 6px;
+        --radius-sheet: 16px;
+        --sheet-inset: 8px;
+        --row-height: 48px;
+        --sidebar-width: 228px;
+        --gap: 24px;
+        --pad: 24px;
+        --control-height: 32px;
+        --fs-title: 22px;
+        --fs-section: 16px;
+        --fs-kpi: 28px;
+        --fs-body: 14px;
+        --fs-small: 12px;
+        --tm-blue: #0a68ff;
+        --tm-orange: #f9bc19;
+      }
+      body {
+        font-family: 'Sen', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        background: var(--ground);
+        color: var(--text);
+        font-size: var(--fs-body);
+      }
+      h1, h2, h3, h4, h5, h6 {
+        font-family: 'Sen', sans-serif;
+      }
+      code, pre, .font-mono {
+        font-family: 'JetBrains Mono', monospace !important;
+        font-variant-numeric: tabular-nums;
       }
       .text-tm-blue {
         color: var(--tm-blue);
@@ -25,36 +75,173 @@
       .bg-tm-orange {
         background-color: var(--tm-orange);
       }
+      .moderator-sheet {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sheet);
+        margin: 0 8px 8px 0;
+        padding: 24px;
+        min-height: calc(100svh - 56px);
+      }
+      @media (max-width: 768px) {
+        .moderator-sheet {
+          margin: 0;
+          border-radius: 0;
+          padding: 16px;
+        }
+      }
     </style>
   </head>
 
-  <body class="bg-gray-50 text-gray-800">
+  <body style="background: var(--ground); color: var(--text);">
     <div class="flex min-h-screen">
-      <!-- CỘT 1: Section switcher (72px, xanh đậm) -->
-      <div th:replace="~{layout/moderator-sidebar1 :: sidebar1}"></div>
+      <!-- CỘT 1: Section switcher -->
+      <div class="hidden md:block" th:replace="~{layout/moderator-sidebar1 :: sidebar1}"></div>
 
-      <!-- CỘT 2: Contextual nav (240px, trắng) -->
+      <!-- CỘT 2: Contextual nav -->
       <aside
-        class="w-60 bg-white border-r border-gray-200 flex flex-col sticky top-0 h-screen overflow-y-auto"
+        class="hidden md:flex flex-col sticky top-0 h-screen overflow-y-auto"
+        style="width: var(--sidebar-width); background: var(--ground);"
       >
         <div th:replace="~{layout/moderator-sidebar2 :: sidebar2}"></div>
       </aside>
 
       <!-- CỘT 3: Nội dung chính -->
-      <div class="flex-1 flex flex-col min-w-0">
+      <div class="flex-1 flex flex-col min-w-0" style="background: var(--ground);">
         <header th:replace="~{layout/moderator-header :: header}"></header>
 
-        <main class="flex-1 p-6">
-          <div th:replace="${content}"></div>
+        <main class="flex-1 moderator-sheet">
+          <div th:replace="~{${content}}"></div>
         </main>
 
         <footer
-          class="p-4 text-xs text-gray-400 border-t border-gray-100 bg-white"
+          class="px-4 py-2 text-xs"
+          style="color: var(--muted); background: var(--ground);"
         >
-          Copyright © 2015 - 2026 OHI Co.Ltd | Hệ thống được xây dựng bởi
-          <span class="font-bold">OHI Co.Ltd</span>
+          Bản quyền © 2015 - 2026 OHI Co.Ltd | Hệ thống được xây dựng bởi
+          <span class="font-medium">OHI Co.Ltd</span>
         </footer>
       </div>
     </div>
+
+    <!-- Custom Confirmation Modal (#uxConfirmModal) -->
+    <div id="uxConfirmModal" class="hidden fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-[1px] flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="uxConfirmModalTitle">
+      <div class="bg-white rounded-xl border border-slate-200 w-full max-w-md p-6 space-y-4 shadow-xl">
+        <div class="flex items-start gap-3">
+          <div class="w-10 h-10 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
+            <i class="fa-solid fa-circle-question text-lg"></i>
+          </div>
+          <div class="space-y-1 flex-1">
+            <h3 id="uxConfirmModalTitle" class="text-base font-semibold text-slate-900">Xác nhận thao tác</h3>
+            <p id="uxConfirmModalMessage" class="text-xs text-slate-600 leading-relaxed">Bạn có chắc chắn muốn thực hiện thao tác này?</p>
+          </div>
+        </div>
+        <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+          <button type="button" id="uxConfirmCancelBtn" class="px-4 py-2 rounded-lg border border-slate-200 text-xs font-semibold text-slate-600 hover:bg-slate-50 transition cursor-pointer">
+            Hủy bỏ
+          </button>
+          <button type="button" id="uxConfirmAcceptBtn" class="px-4 py-2 rounded-lg text-white text-xs font-semibold transition cursor-pointer" style="background: var(--accent);">
+            Đồng ý thực hiện
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      (function () {
+        const modal = document.getElementById('uxConfirmModal');
+        const msgEl = document.getElementById('uxConfirmModalMessage');
+        const cancelBtn = document.getElementById('uxConfirmCancelBtn');
+        const acceptBtn = document.getElementById('uxConfirmAcceptBtn');
+        let pendingAction = null;
+        let lastClickedSubmitBtn = null;
+
+        function openUxConfirm(message, onConfirm) {
+          if (!modal || !msgEl) {
+            onConfirm();
+            return;
+          }
+          msgEl.textContent = message || 'Bạn có chắc chắn muốn thực hiện thao tác này?';
+          pendingAction = onConfirm;
+          modal.classList.remove('hidden');
+        }
+
+        function closeUxConfirm() {
+          if (modal) modal.classList.add('hidden');
+          pendingAction = null;
+        }
+
+        if (cancelBtn) cancelBtn.addEventListener('click', closeUxConfirm);
+        if (modal) {
+          modal.addEventListener('click', function (e) {
+            if (e.target === modal) closeUxConfirm();
+          });
+        }
+        if (acceptBtn) {
+          acceptBtn.addEventListener('click', function () {
+            const fn = pendingAction;
+            closeUxConfirm();
+            if (typeof fn === 'function') fn();
+          });
+        }
+
+        function lockSubmitButton(btn) {
+          if (!btn || btn.disabled) return;
+          if (btn.name && btn.form) {
+            const hidden = document.createElement('input');
+            hidden.type = 'hidden';
+            hidden.name = btn.name;
+            hidden.value = btn.value;
+            btn.form.appendChild(hidden);
+          }
+          btn.disabled = true;
+          btn.classList.add('opacity-75', 'cursor-not-allowed');
+          btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-1"></i> Đang xử lý...';
+        }
+
+        document.addEventListener('click', function (e) {
+          const submitBtn = e.target.closest('button[type="submit"]');
+          if (submitBtn) {
+            lastClickedSubmitBtn = submitBtn;
+          }
+          const confirmEl = e.target.closest('a[data-confirm], button[type="button"][data-confirm]');
+          if (confirmEl) {
+            e.preventDefault();
+            const msg = confirmEl.getAttribute('data-confirm');
+            const href = confirmEl.getAttribute('href');
+            openUxConfirm(msg, function () {
+              if (href) window.location.href = href;
+            });
+          }
+        }, true);
+
+        document.addEventListener('DOMContentLoaded', function () {
+          document.querySelectorAll('form').forEach(function (form) {
+            form.addEventListener('submit', function (e) {
+              const submitBtn = (lastClickedSubmitBtn && this.contains(lastClickedSubmitBtn))
+                ? lastClickedSubmitBtn
+                : this.querySelector('button[type="submit"]');
+              const confirmMsg = (submitBtn && submitBtn.getAttribute('data-confirm')) || this.getAttribute('data-confirm');
+
+              if (confirmMsg && this.dataset.uxConfirmed !== 'true') {
+                e.preventDefault();
+                e.stopImmediatePropagation();
+                const targetForm = this;
+                openUxConfirm(confirmMsg, function () {
+                  targetForm.dataset.uxConfirmed = 'true';
+                  lockSubmitButton(submitBtn);
+                  targetForm.submit();
+                });
+                return;
+              }
+
+              if (!e.defaultPrevented && submitBtn) {
+                lockSubmitButton(submitBtn);
+              }
+            });
+          });
+        });
+      })();
+    </script>
   </body>
 </html>

@@ -43,7 +43,7 @@ public class PropertyPost {
     private LocalDateTime expiryDate;
     
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, columnDefinition = "nvarchar(20)")
+    @Column(nullable = false, length = 20)
     private PostStatus status = PostStatus.ACTIVE;
     
     // === USAGE TRACKING ===

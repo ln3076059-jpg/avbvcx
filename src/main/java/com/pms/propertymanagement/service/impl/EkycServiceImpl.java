@@ -36,6 +36,7 @@ public class EkycServiceImpl implements EkycService {
     private final FileUploadService fileUploadService;
     private final UserRepository userRepository;
     private final EkycSubmissionRepository ekycSubmissionRepository;
+    private final com.pms.propertymanagement.repository.TenantRepository tenantRepository;
 
     @Value("${vnpt.unit}")
     private String vnptUnit;
@@ -154,8 +155,15 @@ public class EkycServiceImpl implements EkycService {
         }
 
         OcrIdResponse.OcrIdResult ocrResult = ocrResponse.getResult();
+        if (ocrResult == null || !isValidCitizenId(ocrResult.getId())) {
+            outcome.setSuccess(false);
+            outcome.setErrors(List.of("Không thể đọc số CCCD hợp lệ từ giấy tờ. Vui lòng chụp lại ảnh CCCD rõ nét hơn."));
+            return outcome;
+        }
+
+        String validCardId = ocrResult.getId().trim();
         user.setFullName(ocrResult.getName());
-        user.setCardId(ocrResult.getId());
+        user.setCardId(validCardId);
         user.setDob(ocrResult.getBirthDay());
         user.setAddress(ocrResult.getRecentLocation());
         user.setHometown(ocrResult.getOriginLocation());
@@ -164,6 +172,22 @@ public class EkycServiceImpl implements EkycService {
         user.setEkycVerifiedAt(LocalDateTime.now());
 
         User saved = userRepository.save(user);
+
+        // Tự động đồng bộ thông tin CCCD định danh chính xác sang hồ sơ Tenant (nếu đã được tạo trước đó theo SĐT)
+        if (saved.getPhone() != null && !saved.getPhone().isBlank()) {
+            tenantRepository.findFirstByPhone(saved.getPhone().trim()).ifPresent(tenant -> {
+                if (ocrResult.getName() != null && !ocrResult.getName().isBlank()) {
+                    tenant.setFullName(ocrResult.getName());
+                }
+                if (isValidCitizenId(validCardId)) {
+                    tenant.setCitizenId(validCardId);
+                }
+                if (ocrResult.getRecentLocation() != null && !ocrResult.getRecentLocation().isBlank()) {
+                    tenant.setPermanentAddress(ocrResult.getRecentLocation());
+                }
+                tenantRepository.save(tenant);
+            });
+        }
 
         EkycSubmission submission = new EkycSubmission();
         submission.setUser(saved);
@@ -285,7 +309,16 @@ public class EkycServiceImpl implements EkycService {
 
     private boolean isOcrOk(OcrIdResponse response) {
         if (response == null || response.getResult() == null) return false;
-        return "IDG-00000000".equals(response.getMessage()) && "OK".equals(response.getResult().getMsg());
+        if (!"IDG-00000000".equals(response.getMessage()) || !"OK".equals(response.getResult().getMsg())) {
+            return false;
+        }
+        return isValidCitizenId(response.getResult().getId());
+    }
+
+    private boolean isValidCitizenId(String id) {
+        if (id == null || id.isBlank()) return false;
+        String trimmed = id.trim();
+        return !"000000000000".equals(trimmed) && !"Chưa xác định".equalsIgnoreCase(trimmed);
     }
 
     private boolean isLivenessOk(FaceLivenessResponse response) {

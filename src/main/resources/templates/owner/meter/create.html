@@ -1,0 +1,478 @@
+<div class="container-fluid" th:fragment="content">
+
+    <!-- Page Heading -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <div>
+            <h1 class="h3 mb-0 text-gray-800 font-weight-bold">
+                <i class="fas fa-tachometer-alt text-success mr-2"></i>Ghi Chỉ Số Điện - Nước Mới
+            </h1>
+            <p class="text-muted small mb-0 mt-1">
+                Tự động kế thừa chỉ số cuối kỳ trước làm chỉ số đầu kỳ này để tính sản lượng tiêu thụ
+            </p>
+        </div>
+        <div>
+            <a th:href="@{/owner/meters}" class="btn btn-sm btn-outline-secondary font-weight-bold shadow-sm">
+                <i class="fas fa-arrow-left fa-sm mr-1"></i> Danh Sách Chỉ Số
+            </a>
+        </div>
+    </div>
+
+    <!-- Inline Validation Banner -->
+    <div id="meterValidationAlert" class="alert alert-danger shadow-sm py-2 px-3 mb-4" style="display: none;" role="alert">
+        <i class="fas fa-exclamation-triangle mr-2"></i>
+        <span id="meterValidationMsg">Lỗi dữ liệu chỉ số!</span>
+    </div>
+
+    <form th:action="@{/owner/meters/create}" th:object="${meterRequest}" method="post" id="meterForm">
+        <!-- Hidden input cho chức năng Lưu & Tiếp Tục và Lưu & Tự Động Lập Hóa Đơn -->
+        <input type="hidden" name="saveAndNext" id="saveAndNextInput" value="false">
+        <input type="hidden" name="createInvoiceNow" id="createInvoiceNowInput" value="false">
+
+        <div class="row">
+            <!-- Cột trái: Thông tin & Chỉ số -->
+            <div class="col-lg-8">
+                
+                <!-- Card 1: Thông tin kỳ ghi & phòng -->
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3 bg-white border-bottom-success d-flex justify-content-between align-items-center">
+                        <h6 class="m-0 font-weight-bold text-success">
+                            <i class="fas fa-info-circle mr-2"></i>Thông Tin Kỳ Ghi & Phòng Trọ
+                        </h6>
+                        <span id="loadingRoomSpinner" class="small text-primary" style="display: none;">
+                            <i class="fas fa-spinner fa-spin mr-1"></i>Đang tải dữ liệu...
+                        </span>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-row">
+                            <div class="form-group col-md-6">
+                                <label class="font-weight-bold small text-gray-700">
+                                    <i class="fas fa-building text-secondary mr-1"></i>Cơ Sở Nhà Trọ <span class="text-danger">*</span>
+                                </label>
+                                <select id="propertySelect" class="form-control custom-select">
+                                    <option value="">-- Chọn cơ sở nhà trọ --</option>
+                                    <option th:each="p : ${properties}" th:value="${p.id}" th:text="${p.name}" 
+                                            th:selected="${selectedPropertyId != null and selectedPropertyId == p.id}"></option>
+                                </select>
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label class="font-weight-bold small text-gray-700">
+                                    <i class="fas fa-door-closed text-primary mr-1"></i>Phòng Trọ <span class="text-danger">*</span>
+                                </label>
+                                <select th:field="*{roomId}" id="roomSelect" class="form-control custom-select" required>
+                                    <option value="">-- Vui lòng chọn nhà trọ trước --</option>
+                                </select>
+                                <div th:if="${#fields.hasErrors('roomId')}" th:errors="*{roomId}" class="text-danger small mt-1"></div>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group col-md-6">
+                                <label class="font-weight-bold small text-gray-700">Kỳ Tháng <span class="text-danger">*</span></label>
+                                <select th:field="*{month}" id="monthSelect" class="form-control custom-select" required>
+                                    <option th:each="m : ${#numbers.sequence(1, 12)}" th:value="${m}" th:text="'Tháng ' + ${m}"></option>
+                                </select>
+                                <div th:if="${#fields.hasErrors('month')}" th:errors="*{month}" class="text-danger small mt-1"></div>
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label class="font-weight-bold small text-gray-700">Năm <span class="text-danger">*</span></label>
+                                <input type="number" th:field="*{year}" id="yearInput" class="form-control font-mono font-weight-bold" required min="2020" max="2035">
+                                <div th:if="${#fields.hasErrors('year')}" th:errors="*{year}" class="text-danger small mt-1"></div>
+                            </div>
+                        </div>
+
+                        <!-- Lựa chọn ngoại lệ: Thay công tơ mới / Quay vòng số -->
+                        <div class="card bg-light border p-2 mb-1">
+                            <div class="custom-control custom-checkbox">
+                                <input type="checkbox" class="custom-control-input" th:field="*{isReset}" id="isResetCheck">
+                                <label class="custom-control-label font-weight-bold text-dark small" for="isResetCheck">
+                                    <i class="fas fa-sync-alt text-warning mr-1"></i>Công tơ thay mới hoặc quay vòng số (Số mới nhỏ hơn số cũ)
+                                </label>
+                            </div>
+                            <small class="text-muted d-block mt-1 pl-4" id="isResetHint" style="display: none;">
+                                Khi bật tùy chọn này, hệ thống sẽ cho phép chỉ số mới nhỏ hơn chỉ số cũ và tính lượng tiêu thụ bằng chỉ số mới.
+                            </small>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- Card 2: Chỉ số Điện -->
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3 bg-white border-bottom-warning d-flex justify-content-between align-items-center">
+                        <h6 class="m-0 font-weight-bold text-warning">
+                            <i class="fas fa-bolt mr-2"></i>Chỉ Số Điện Tiêu Thụ (kWh)
+                        </h6>
+                        <span class="badge badge-warning px-2 py-1 font-weight-bold">ĐIỆN</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-row">
+                            <div class="form-group col-md-3 col-6">
+                                <label class="font-weight-bold small text-gray-700">Chỉ số cũ <span class="text-danger">*</span></label>
+                                <input type="number" step="0.1" inputmode="decimal" th:field="*{oldElectricityIndex}" id="oldElec" class="form-control bg-light font-mono font-weight-bold" required min="0">
+                                <div th:if="${#fields.hasErrors('oldElectricityIndex')}" th:errors="*{oldElectricityIndex}" class="text-danger small mt-1"></div>
+                            </div>
+                            <div class="form-group col-md-3 col-6">
+                                <label class="font-weight-bold small text-gray-700">Chỉ số mới <span class="text-danger">*</span></label>
+                                <input type="number" step="0.1" inputmode="decimal" th:field="*{newElectricityIndex}" id="newElec" class="form-control font-weight-bold text-warning font-mono" required min="0">
+                                <div th:if="${#fields.hasErrors('newElectricityIndex')}" th:errors="*{newElectricityIndex}" class="text-danger small mt-1"></div>
+                            </div>
+                            <div class="form-group col-md-3 col-6">
+                                <label class="font-weight-bold small text-gray-700">Sản lượng dùng (kWh)</label>
+                                <input type="text" id="elecUsage" readonly class="form-control bg-light font-weight-bold text-dark font-mono" value="0">
+                            </div>
+                            <div class="form-group col-md-3 col-6">
+                                <label class="font-weight-bold small text-gray-700">Đơn giá (đ/kWh)</label>
+                                <input type="number" step="100" inputmode="decimal" th:field="*{electricityPrice}" id="elecPrice" class="form-control font-mono" value="3500">
+                            </div>
+                        </div>
+
+                        <!-- Cảnh báo sản lượng bất thường (Spike Warning > 300 kWh) -->
+                        <div id="elecAnomalyAlert" class="alert alert-warning border-left-warning py-2 px-3 mb-0 small" style="display: none;">
+                            <i class="fas fa-exclamation-triangle mr-1 text-danger"></i>
+                            <strong>Cảnh báo sản lượng bất thường (Spike Warning &gt; 300 kWh):</strong> Sản lượng điện kỳ này đang ở mức cao (<strong id="elecAnomalyVal" class="tabular-nums">0</strong> kWh). Vui lòng kiểm tra lại công tơ hoặc rò rỉ điện.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 3: Chỉ số Nước -->
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3 bg-white border-bottom-info d-flex justify-content-between align-items-center">
+                        <h6 class="m-0 font-weight-bold text-info">
+                            <i class="fas fa-tint mr-2"></i>Chỉ Số Nước Tiêu Thụ (m³)
+                        </h6>
+                        <span class="badge badge-info px-2 py-1 font-weight-bold">NƯỚC</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-row">
+                            <div class="form-group col-md-3 col-6">
+                                <label class="font-weight-bold small text-gray-700">Chỉ số cũ <span class="text-danger">*</span></label>
+                                <input type="number" step="0.1" inputmode="decimal" th:field="*{oldWaterIndex}" id="oldWater" class="form-control bg-light font-mono font-weight-bold" required min="0">
+                                <div th:if="${#fields.hasErrors('oldWaterIndex')}" th:errors="*{oldWaterIndex}" class="text-danger small mt-1"></div>
+                            </div>
+                            <div class="form-group col-md-3 col-6">
+                                <label class="font-weight-bold small text-gray-700">Chỉ số mới <span class="text-danger">*</span></label>
+                                <input type="number" step="0.1" inputmode="decimal" th:field="*{newWaterIndex}" id="newWater" class="form-control font-weight-bold text-info font-mono" required min="0">
+                                <div th:if="${#fields.hasErrors('newWaterIndex')}" th:errors="*{newWaterIndex}" class="text-danger small mt-1"></div>
+                            </div>
+                            <div class="form-group col-md-3 col-6">
+                                <label class="font-weight-bold small text-gray-700">Sản lượng dùng (m³)</label>
+                                <input type="text" id="waterUsage" readonly class="form-control bg-light font-weight-bold text-dark font-mono" value="0">
+                            </div>
+                            <div class="form-group col-md-3 col-6">
+                                <label class="font-weight-bold small text-gray-700">Đơn giá (đ/m³)</label>
+                                <input type="number" step="100" inputmode="decimal" th:field="*{waterPrice}" id="waterPrice" class="form-control font-mono" value="20000">
+                            </div>
+                        </div>
+
+                        <!-- Cảnh báo sản lượng bất thường (Spike Warning > 25 m3) -->
+                        <div id="waterAnomalyAlert" class="alert alert-warning border-left-warning py-2 px-3 mb-0 small" style="display: none;">
+                            <i class="fas fa-exclamation-triangle mr-1 text-danger"></i>
+                            <strong>Cảnh báo sản lượng bất thường (Spike Warning &gt; 25 m³):</strong> Sản lượng nước kỳ này đang ở mức cao (<strong id="waterAnomalyVal" class="tabular-nums">0</strong> m³). Vui lòng kiểm tra lại đồng hồ nước hoặc đường ống.
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Cột phải: Bảng tóm tắt & Nút lưu -->
+            <div class="col-lg-4">
+                <div class="card shadow mb-4 sticky-top" style="top: 25px; z-index: 10;">
+                    <div class="card-header py-3 bg-white border-bottom-primary">
+                        <h6 class="m-0 font-weight-bold text-primary">
+                            <i class="fas fa-calculator mr-2"></i>Tạm Tính Chi Phí Kỳ Này
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
+                            <div>
+                                <span class="text-muted small">Tiền điện tiêu thụ:</span>
+                                <div class="text-muted" style="font-size: 0.75rem;" id="subElecCalc">0 kWh &times; 0 đ</div>
+                            </div>
+                            <span id="estElecCost" class="font-weight-bold text-warning font-mono">0 đ</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
+                            <div>
+                                <span class="text-muted small">Tiền nước tiêu thụ:</span>
+                                <div class="text-muted" style="font-size: 0.75rem;" id="subWaterCalc">0 m³ &times; 0 đ</div>
+                            </div>
+                            <span id="estWaterCost" class="font-weight-bold text-info font-mono">0 đ</span>
+                        </div>
+                        <div class="p-3 bg-light rounded text-center mb-4">
+                            <div class="small text-uppercase text-muted font-weight-bold mb-1">Tổng tiền điện + nước</div>
+                            <div id="totalCost" class="h3 mb-0 font-weight-bold text-success font-mono">0 đ</div>
+                        </div>
+
+                        <!-- Nút 1: Lưu & Tiếp tục phòng kế (Senior UX cải tiến cho Field work) -->
+                        <button type="button" id="btnSaveAndNext" class="btn btn-outline-success btn-block py-2 font-weight-bold shadow-sm mb-2">
+                            <i class="fas fa-arrow-right mr-1"></i>Lưu & Tiếp Tục Phòng Kế
+                        </button>
+
+                        <!-- Nút 2: Lưu và quay lại danh sách -->
+                        <button type="submit" id="btnSubmitMeter" class="btn btn-success btn-block py-2 font-weight-bold shadow-sm">
+                            <i class="fas fa-save mr-2"></i>Lưu & Hoàn Tất
+                        </button>
+
+                        <!-- Nút 3: Lưu Chỉ Số & Tự Động Lập Hóa Đơn Luôn -->
+                        <button type="button" id="btnSaveAndCreateInvoice" class="btn btn-primary btn-block py-2 font-weight-bold shadow-sm mt-2">
+                            <i class="fas fa-bolt mr-1"></i>Lưu Chỉ Số & Tự Động Lập Hóa Đơn Luôn
+                        </button>
+
+                        <a th:href="@{/owner/meters}" class="btn btn-outline-secondary btn-block mt-2">
+                            <i class="fas fa-times mr-1"></i>Hủy Bỏ
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+
+</div>
+
+<!-- Script tính toán và AJAX load phòng & chỉ số -->
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const propSelect = document.getElementById('propertySelect');
+        const roomSelect = document.getElementById('roomSelect');
+        const isResetCheck = document.getElementById('isResetCheck');
+        const isResetHint = document.getElementById('isResetHint');
+
+        const oldElec = document.getElementById('oldElec');
+        const newElec = document.getElementById('newElec');
+        const elecUsage = document.getElementById('elecUsage');
+        const elecPrice = document.getElementById('elecPrice');
+
+        const oldWater = document.getElementById('oldWater');
+        const newWater = document.getElementById('newWater');
+        const waterUsage = document.getElementById('waterUsage');
+        const waterPrice = document.getElementById('waterPrice');
+
+        const estElecCost = document.getElementById('estElecCost');
+        const estWaterCost = document.getElementById('estWaterCost');
+        const totalCost = document.getElementById('totalCost');
+
+        const subElecCalc = document.getElementById('subElecCalc');
+        const subWaterCalc = document.getElementById('subWaterCalc');
+
+        const elecAnomalyAlert = document.getElementById('elecAnomalyAlert');
+        const elecAnomalyVal = document.getElementById('elecAnomalyVal');
+        const waterAnomalyAlert = document.getElementById('waterAnomalyAlert');
+        const waterAnomalyVal = document.getElementById('waterAnomalyVal');
+
+        const validationAlert = document.getElementById('meterValidationAlert');
+        const validationMsg = document.getElementById('meterValidationMsg');
+        const spinner = document.getElementById('loadingRoomSpinner');
+
+        function calc() {
+            const isReset = isResetCheck && isResetCheck.checked;
+            const oE = parseFloat(oldElec.value) || 0;
+            const nE = parseFloat(newElec.value) || 0;
+            const eP = parseFloat(elecPrice.value) || 0;
+            
+            let uE = 0;
+            if (isReset && nE < oE) {
+                uE = nE; // Thay công tơ mới bắt đầu từ 0
+            } else {
+                uE = Math.max(0, nE - oE);
+            }
+            elecUsage.value = uE.toFixed(1);
+
+            const oW = parseFloat(oldWater.value) || 0;
+            const nW = parseFloat(newWater.value) || 0;
+            const wP = parseFloat(waterPrice.value) || 0;
+
+            let uW = 0;
+            if (isReset && nW < oW) {
+                uW = nW;
+            } else {
+                uW = Math.max(0, nW - oW);
+            }
+            waterUsage.value = uW.toFixed(1);
+
+            const costE = uE * eP;
+            const costW = uW * wP;
+            const total = costE + costW;
+
+            estElecCost.textContent = costE.toLocaleString('vi-VN') + ' đ';
+            estWaterCost.textContent = costW.toLocaleString('vi-VN') + ' đ';
+            totalCost.textContent = total.toLocaleString('vi-VN') + ' đ';
+
+            subElecCalc.textContent = uE.toFixed(1) + ' kWh × ' + eP.toLocaleString('vi-VN') + ' đ';
+            subWaterCalc.textContent = uW.toFixed(1) + ' m³ × ' + wP.toLocaleString('vi-VN') + ' đ';
+
+            // Kiểm tra lỗi tức thời
+            if (!isReset && nE < oE && nE > 0) {
+                newElec.classList.add('is-invalid');
+                showInlineError('Chỉ số điện mới (' + nE + ') nhỏ hơn chỉ số cũ (' + oE + '). Nếu thay công tơ, vui lòng tích chọn ô "Công tơ thay mới" bên trên.');
+            } else {
+                newElec.classList.remove('is-invalid');
+                hideInlineError();
+            }
+
+            if (!isReset && nW < oW && nW > 0) {
+                newWater.classList.add('is-invalid');
+                showInlineError('Chỉ số nước mới (' + nW + ') nhỏ hơn chỉ số cũ (' + oW + '). Nếu thay công tơ, vui lòng tích chọn ô "Công tơ thay mới" bên trên.');
+            } else if (!(!isReset && nE < oE && nE > 0)) {
+                newWater.classList.remove('is-invalid');
+                hideInlineError();
+            }
+
+            // Kiểm tra cảnh báo sản lượng bất thường (Spike Warning > 300 kWh hoặc > 25 m3)
+            if (uE > 300) {
+                elecAnomalyAlert.style.display = 'block';
+                elecAnomalyVal.textContent = uE.toFixed(1);
+            } else {
+                elecAnomalyAlert.style.display = 'none';
+            }
+
+            if (uW > 25) {
+                waterAnomalyAlert.style.display = 'block';
+                waterAnomalyVal.textContent = uW.toFixed(1);
+            } else {
+                waterAnomalyAlert.style.display = 'none';
+            }
+        }
+
+        function showInlineError(msg) {
+            validationMsg.textContent = msg;
+            validationAlert.style.display = 'block';
+            if (window.showUxToast) window.showUxToast(msg, 'danger');
+        }
+
+        function hideInlineError() {
+            validationAlert.style.display = 'none';
+        }
+
+        [oldElec, newElec, elecPrice, oldWater, newWater, waterPrice].forEach(input => {
+            input.addEventListener('input', calc);
+        });
+
+        if (isResetCheck) {
+            isResetCheck.addEventListener('change', function () {
+                if (isResetHint) isResetHint.style.display = this.checked ? 'block' : 'none';
+                calc();
+            });
+        }
+
+        // Tải danh sách phòng theo cơ sở
+        function loadRooms(propId, preselectRoomId) {
+            roomSelect.innerHTML = '<option value="">-- Đang tải danh sách phòng... --</option>';
+            if (spinner) spinner.style.display = 'inline-block';
+
+            if (!propId) {
+                roomSelect.innerHTML = '<option value="">-- Vui lòng chọn nhà trọ trước --</option>';
+                if (spinner) spinner.style.display = 'none';
+                return;
+            }
+
+            fetch('/owner/contracts/api/rooms-by-property?propertyId=' + propId)
+                .then(res => res.json())
+                .then(rooms => {
+                    roomSelect.innerHTML = '<option value="">-- Chọn phòng --</option>';
+                    rooms.forEach(r => {
+                        const opt = document.createElement('option');
+                        opt.value = r.id;
+                        opt.textContent = r.name;
+                        if (preselectRoomId && r.id == preselectRoomId) {
+                            opt.selected = true;
+                        }
+                        roomSelect.appendChild(opt);
+                    });
+                    if (spinner) spinner.style.display = 'none';
+                    if (preselectRoomId) {
+                        loadLatestIndex(preselectRoomId);
+                    }
+                })
+                .catch(() => {
+                    roomSelect.innerHTML = '<option value="">-- Lỗi khi tải phòng --</option>';
+                    if (spinner) spinner.style.display = 'none';
+                });
+        }
+
+        // Tải chỉ số cũ gần nhất
+        function loadLatestIndex(roomId) {
+            if (!roomId) return;
+            if (spinner) spinner.style.display = 'inline-block';
+            fetch('/owner/meters/api/latest-index?roomId=' + roomId)
+                .then(res => res.json())
+                .then(data => {
+                    oldElec.value = data.oldElectricityIndex || 0;
+                    oldWater.value = data.oldWaterIndex || 0;
+                    if (data.electricityPrice) elecPrice.value = data.electricityPrice;
+                    if (data.waterPrice) waterPrice.value = data.waterPrice;
+                    if (!newElec.value || parseFloat(newElec.value) < parseFloat(oldElec.value)) {
+                        newElec.value = oldElec.value;
+                    }
+                    if (!newWater.value || parseFloat(newWater.value) < parseFloat(oldWater.value)) {
+                        newWater.value = oldWater.value;
+                    }
+                    if (spinner) spinner.style.display = 'none';
+                    calc();
+                })
+                .catch(() => {
+                    if (spinner) spinner.style.display = 'none';
+                });
+        }
+
+        propSelect.addEventListener('change', function () {
+            loadRooms(this.value, null);
+        });
+
+        roomSelect.addEventListener('change', function () {
+            loadLatestIndex(this.value);
+        });
+
+        // Xử lý form submit & Save and Next & Save and Create Invoice
+        const meterForm = document.getElementById('meterForm');
+        const saveAndNextInput = document.getElementById('saveAndNextInput');
+        const createInvoiceNowInput = document.getElementById('createInvoiceNowInput');
+        const btnSaveAndNext = document.getElementById('btnSaveAndNext');
+        const btnSaveAndCreateInvoice = document.getElementById('btnSaveAndCreateInvoice');
+
+        if (btnSaveAndNext) {
+            btnSaveAndNext.addEventListener('click', function () {
+                saveAndNextInput.value = 'true';
+                if (createInvoiceNowInput) createInvoiceNowInput.value = 'false';
+                meterForm.requestSubmit();
+            });
+        }
+
+        if (btnSaveAndCreateInvoice) {
+            btnSaveAndCreateInvoice.addEventListener('click', function () {
+                if (createInvoiceNowInput) createInvoiceNowInput.value = 'true';
+                saveAndNextInput.value = 'false';
+                meterForm.requestSubmit();
+            });
+        }
+
+        if (meterForm) {
+            meterForm.addEventListener('submit', function (e) {
+                const isReset = isResetCheck && isResetCheck.checked;
+                const oE = parseFloat(oldElec.value) || 0;
+                const nE = parseFloat(newElec.value) || 0;
+                const oW = parseFloat(oldWater.value) || 0;
+                const nW = parseFloat(newWater.value) || 0;
+
+                if (!isReset) {
+                    if (nE < oE) {
+                        e.preventDefault();
+                        showInlineError('Chỉ số điện mới (' + nE + ') không được nhỏ hơn chỉ số cũ (' + oE + '). Nếu thay mới công tơ, vui lòng tích chọn "Công tơ thay mới / Quay vòng số".');
+                        newElec.focus();
+                        return false;
+                    }
+                    if (nW < oW) {
+                        e.preventDefault();
+                        showInlineError('Chỉ số nước mới (' + nW + ') không được nhỏ hơn chỉ số cũ (' + oW + '). Nếu thay mới công tơ, vui lòng tích chọn "Công tơ thay mới / Quay vòng số".');
+                        newWater.focus();
+                        return false;
+                    }
+                }
+            });
+        }
+
+        // Khởi tạo nếu đã chọn property sẵn
+        if (propSelect.value) {
+            loadRooms(propSelect.value, "[[${selectedRoomId}]]");
+        }
+
+        calc();
+    });
+</script>

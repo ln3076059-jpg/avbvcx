@@ -33,7 +33,7 @@ public class MaintenanceRequestLog {
     @Column(nullable = false)
     private MaintenanceStatus status;
 
-    @Column(columnDefinition = "nvarchar(MAX)")
+    @Column(columnDefinition = "TEXT")
     private String note;
 
     private LocalDateTime createdAt = LocalDateTime.now();

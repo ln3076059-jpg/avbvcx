@@ -1,201 +1,230 @@
-<div th:fragment="content" class="bg-gray-50 min-h-screen py-8">
-  <div class="max-w-2xl mx-auto">
-    <!-- Header -->
-    <div class="mb-6">
-      <a
-        href="/owner/posts"
-        class="inline-flex items-center text-gray-500 hover:text-gray-700 mb-4"
-      >
-        <i class="fas fa-arrow-left mr-2"></i> Quay lại danh sách bài đăng
-      </a>
-      <h1 class="text-2xl font-bold text-gray-900">Tạo bài đăng mới</h1>
-      <p class="text-gray-600 mt-1">
-        Tạo bài đăng để hiển thị nhà trọ của bạn trên marketplace
-      </p>
-    </div>
+<div class="container-fluid" th:fragment="content">
 
-    <!-- Info box -->
-    <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6 rounded-lg">
-      <div class="flex">
-        <i class="fas fa-info-circle text-blue-500 mt-0.5 mr-3"></i>
-        <div class="space-y-1">
-          <p class="text-sm text-blue-700">
-            <strong>Quy trình duyệt bài:</strong>
-          </p>
-          <ol
-            class="text-sm text-blue-700 list-decimal list-inside space-y-0.5"
-          >
-            <li>
-              Bạn tạo bài đăng → trạng thái
-              <span class="font-semibold">Chờ duyệt</span>
-            </li>
-            <li>
-              Staff xem xét và duyệt → trạng thái
-              <span class="font-semibold text-green-700">Đang hiển thị</span> (7
-              ngày miễn phí)
-            </li>
-            <li>Nếu bị từ chối → chỉnh sửa lại và gửi lại</li>
-          </ol>
-        </div>
-      </div>
-    </div>
-
-    <!-- Create Post Form -->
-    <form action="/owner/posts/create" method="POST" class="space-y-6">
-      <!-- Select Property -->
-      <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
-        <h2 class="text-lg font-bold text-gray-800 mb-4 flex items-center">
-          <span class="w-1 h-6 bg-orange-500 mr-3 rounded"></span>
-          Chọn nhà trọ
-        </h2>
-
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">
-            Nhà trọ <span class="text-red-500">*</span>
-          </label>
-          <select
-            name="propertyId"
-            id="propertySelect"
-            required
-            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            onchange="suggestTitle()"
-          >
-            <option value="">-- Chọn nhà trọ để đăng bài --</option>
-            <option
-              th:each="prop : ${availableProperties}"
-              th:value="${prop.id}"
-              th:text="${prop.name} + ' (' + ${prop.numberOfRooms} + ' phòng - ' + ${#numbers.formatDecimal(prop.price, 0, 'COMMA', 0, 'POINT')} + 'đ/tháng)'"
-              th:data-name="${prop.name}"
-            ></option>
-          </select>
-          <p class="text-xs text-gray-500 mt-1">
-            Chỉ hiển thị nhà trọ chưa có bài đăng
-          </p>
-        </div>
-      </div>
-
-      <!-- Post Content -->
-      <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
-        <h2 class="text-lg font-bold text-gray-800 mb-4 flex items-center">
-          <span class="w-1 h-6 bg-blue-600 mr-3 rounded"></span>
-          Nội dung bài đăng
-        </h2>
-
-        <div class="space-y-4">
-          <!-- Title -->
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">
-              Tiêu đề bài đăng <span class="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              name="title"
-              id="postTitle"
-              required
-              placeholder="Ví dụ: Phòng trọ giá rẻ gần ĐH Bách Khoa, đầy đủ tiện nghi"
-              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              oninput="updateSlug()"
-            />
-            <p class="text-xs text-gray-500 mt-1">
-              Tiêu đề hấp dẫn giúp thu hút người thuê
-            </p>
-          </div>
-
-          <!-- Slug (auto-generated, editable) -->
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">
-              Đường dẫn (slug)
-            </label>
-            <div
-              class="flex items-center border border-gray-300 rounded-lg overflow-hidden focus-within:ring-2 focus-within:ring-blue-500"
-            >
-              <span
-                class="bg-gray-50 px-3 py-2 text-gray-500 text-sm border-r border-gray-300"
-                >/properties/</span
-              >
-              <input
-                type="text"
-                name="slug"
-                id="postSlug"
-                placeholder="tu-dong-tao-tu-tieu-de"
-                class="flex-1 px-3 py-2 focus:outline-none text-sm"
-              />
+        <!-- Page Heading -->
+        <div class="d-sm-flex align-items-center justify-content-between mb-4">
+            <div>
+                <a th:href="@{/owner/posts}" class="btn btn-sm btn-outline-secondary mb-2">
+                    <i class="fas fa-arrow-left fa-sm mr-1"></i> Quay lại danh sách bài đăng
+                </a>
+                <h1 class="h3 mb-0 text-gray-800 font-weight-bold">
+                    <i class="fas fa-bullhorn text-success mr-2"></i>Tạo Bài Đăng Mới
+                </h1>
+                <p class="text-muted small mb-0 mt-1">Đăng tin để hiển thị cơ sở nhà trọ của bạn trên sàn marketplace tìm kiếm phòng.</p>
             </div>
-            <p class="text-xs text-gray-500 mt-1">
-              Tự động tạo từ tiêu đề, có thể chỉnh sửa
-            </p>
-          </div>
-
-          <!-- Description -->
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">
-              Mô tả bài đăng
-            </label>
-            <textarea
-              name="description"
-              rows="6"
-              placeholder="Mô tả chi tiết về nhà trọ: vị trí thuận tiện, tiện nghi, môi trường xung quanh, giá cả, điều kiện thuê..."
-              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-y"
-            ></textarea>
-            <p class="text-xs text-gray-500 mt-1">
-              Mô tả chi tiết giúp người thuê hiểu rõ hơn về nhà trọ
-            </p>
-          </div>
         </div>
-      </div>
 
-      <!-- Action Buttons -->
-      <div class="flex justify-end space-x-4">
-        <a
-          href="/owner/posts"
-          class="px-6 py-2 border border-gray-300 rounded-md text-gray-700 bg-white hover:bg-gray-50 transition"
-        >
-          Hủy bỏ
-        </a>
-        <button
-          type="submit"
-          class="px-8 py-2 bg-blue-600 text-white font-bold rounded-md hover:bg-blue-700 shadow-md transition flex items-center gap-2"
-        >
-          <i class="fas fa-paper-plane"></i>
-          Đăng bài
-        </button>
-      </div>
-    </form>
-  </div>
+        <!-- Info alert -->
+        <div class="alert alert-info border-left-info shadow-sm mb-4" role="alert">
+            <h6 class="font-weight-bold mb-1"><i class="fas fa-info-circle mr-1"></i> Quy trình kiểm duyệt tin đăng:</h6>
+            <ol class="small mb-0 pl-3">
+                <li>Bạn soạn và gửi bài đăng &rarr; trạng thái chuyển sang <span class="badge badge-warning text-dark">Chờ duyệt</span>.</li>
+                <li>Ban quản trị / Kỹ thuật viên kiểm tra nội dung &rarr; duyệt trạng thái <span class="badge badge-success">Đang hiển thị</span>.</li>
+                <li>Nếu không đạt yêu cầu sẽ có thông báo phản hồi lý do từ chối để chỉnh sửa lại.</li>
+            </ol>
+        </div>
+
+        <form action="/owner/posts/create" method="POST">
+            <div class="row justify-content-center">
+                <div class="col-lg-9">
+                    <!-- Chọn nhà trọ -->
+                    <div class="card shadow mb-4">
+                        <div class="card-header py-3 bg-white border-bottom-success">
+                            <h6 class="m-0 font-weight-bold text-success">
+                                <i class="fas fa-building mr-2"></i>1. Chọn Cơ Sở Nhà Trọ
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="form-group">
+                                <label class="font-weight-bold small text-gray-700">Cơ Sở Nhà Trọ Cần Đăng Tin <span class="text-danger">*</span></label>
+                                <select name="propertyId" id="propertySelect" required class="form-control" onchange="suggestTitle()">
+                                    <option value="">-- Chọn nhà trọ để đăng bài --</option>
+                                    <option th:each="prop : ${availableProperties}"
+                                            th:value="${prop.id}"
+                                            th:text="${prop.name} + ' (' + ${prop.numberOfRooms} + ' phòng - ' + ${#numbers.formatDecimal(prop.price, 0, 'COMMA', 0, 'POINT')} + ' đ/tháng)'"
+                                            th:data-name="${prop.name}">
+                                    </option>
+                                </select>
+                                <small class="form-text text-muted">Hệ thống chỉ hiển thị các cơ sở nhà trọ đang hoạt động chưa có bài đăng nào.</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Nội dung bài đăng -->
+                    <div class="card shadow mb-4">
+                        <div class="card-header py-3 bg-white border-bottom-primary">
+                            <h6 class="m-0 font-weight-bold text-primary">
+                                <i class="fas fa-edit mr-2"></i>2. Nội Dung Marketing Bài Đăng
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <!-- Hỗ Trợ Soạn Bài Đăng Chuẩn SEO -->
+                            <div class="p-3 mb-4 rounded border" style="background: var(--raised); border-color: var(--border);">
+                                <div class="d-flex flex-wrap align-items-center justify-content-between">
+                                    <div class="mb-2 mb-md-0">
+                                        <div class="font-weight-bold text-primary small">
+                                            <i class="fas fa-wand-magic-sparkles mr-1"></i>Hỗ trợ soạn bài đăng chuẩn SEO
+                                        </div>
+                                        <div class="text-muted" style="font-size: 0.78rem;">
+                                            Tự động phân tích thông tin cơ sở, giá thuê, diện tích &amp; tiện ích để viết bài đăng thu hút khách thuê.
+                                        </div>
+                                    </div>
+                                    <div class="d-flex flex-wrap align-items-center" style="gap: 8px;">
+                                        <select id="aiCopyStyle" class="form-control form-control-sm font-weight-bold text-dark" style="max-width: 240px;">
+                                            <option value="CHUYEN_NGHIEP">Chuẩn SEO &amp; Chuyên nghiệp</option>
+                                            <option value="SINH_VIEN">Thân thiện &amp; Thu hút Sinh viên</option>
+                                            <option value="CAO_CAP">Sang trọng &amp; Căn hộ dịch vụ</option>
+                                        </select>
+                                        <button type="button" id="btnAiGeneratePost" onclick="generatePostWithAi()" class="btn btn-sm btn-primary font-weight-bold shadow-sm">
+                                            <i class="fas fa-wand-magic-sparkles fas fa-magic mr-1"></i>Tự Động Soạn Nội Dung
+                                        </button>
+                                    </div>
+                                </div>
+                                <div id="aiGenerateStatus" class="small mt-2 font-weight-bold" style="display: none;"></div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="font-weight-bold small text-gray-700">Tiêu Đề Bài Đăng <span class="text-danger">*</span></label>
+                                <input type="text" name="title" id="postTitle" required
+                                       placeholder="Ví dụ: Phòng trọ cao cấp gần ĐH Bách Khoa, khép kín, an ninh 24/7"
+                                       class="form-control font-weight-bold" oninput="updateSlug()">
+                                <small class="form-text text-muted">Tiêu đề hấp dẫn, rõ ràng giúp tăng gấp đôi tỷ lệ người thuê bấm vào xem.</small>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="font-weight-bold small text-gray-700">Đường Dẫn Thân Thiện (Slug URL)</label>
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text bg-light text-muted small">/properties/</span>
+                                    </div>
+                                    <input type="text" name="slug" id="postSlug" placeholder="tu-dong-tao-tu-tieu-de" class="form-control">
+                                </div>
+                                <small class="form-text text-muted">Tự động tạo từ tiêu đề, có thể chỉnh sửa cho chuẩn SEO.</small>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="font-weight-bold small text-gray-700">Mô Tả Chi Tiết Về Nhà Trọ & Tiện Ích</label>
+                                <textarea name="description" id="postDescription" rows="7" class="form-control"
+                                          placeholder="Mô tả chi tiết: vị trí giao thông thuận tiện, nội thất có sẵn (điều hòa, nóng lạnh, máy giặt), camera an ninh, giờ giấc tự do, chi phí điện nước, ưu đãi cọc..."></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Action buttons -->
+                    <div class="d-flex justify-content-end mb-5">
+                        <a href="/owner/posts" class="btn btn-outline-secondary mr-2">
+                            <i class="fas fa-times mr-1"></i> Hủy Bỏ
+                        </a>
+                        <button type="submit" class="btn btn-success shadow-sm font-weight-bold px-4">
+                            <i class="fas fa-paper-plane mr-1"></i> Gửi Duyệt Bài Đăng
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </form>
+
+    <script>
+      function updateSlug() {
+        const title = document.getElementById("postTitle").value;
+        const slug = generateSlug(title);
+        document.getElementById("postSlug").value = slug;
+      }
+
+      function suggestTitle() {
+        const select = document.getElementById("propertySelect");
+        const selectedOption = select.options[select.selectedIndex];
+        const titleInput = document.getElementById("postTitle");
+        if (titleInput.value === "" && selectedOption.value !== "") {
+          const name = selectedOption.getAttribute("data-name");
+          titleInput.value = name;
+          updateSlug();
+        }
+      }
+
+      function generateSlug(str) {
+        return str
+          .toLowerCase()
+          .replace(/[àáạảãâầấậẩẫăằắặẳẵ]/g, "a")
+          .replace(/[èéẹẻẽêềếệểễ]/g, "e")
+          .replace(/[ìíịỉĩ]/g, "i")
+          .replace(/[òóọỏõôồốộổỗơờớợởỡ]/g, "o")
+          .replace(/[ùúụủũưừứựửữ]/g, "u")
+          .replace(/[ỳýỵỷỹ]/g, "y")
+          .replace(/đ/g, "d")
+          .replace(/[^a-z0-9\s-]/g, "")
+          .replace(/\s+/g, "-")
+          .replace(/-+/g, "-")
+          .replace(/^-+|-+$/g, "");
+      }
+
+      function generatePostWithAi() {
+        const propSelect = document.getElementById("propertySelect");
+        const propId = propSelect ? propSelect.value : "";
+        const styleSelect = document.getElementById("aiCopyStyle");
+        const style = styleSelect ? styleSelect.value : "CHUYEN_NGHIEP";
+        const statusEl = document.getElementById("aiGenerateStatus");
+        const btn = document.getElementById("btnAiGeneratePost");
+
+        if (!propId) {
+          if (statusEl) {
+            statusEl.style.display = "block";
+            statusEl.className = "small mt-2 font-weight-bold text-danger";
+            statusEl.innerHTML = '<i class="fas fa-exclamation-circle mr-1"></i>Vui lòng chọn Cơ Sở Nhà Trọ ở mục 1 trước khi sử dụng công cụ soạn nội dung!';
+          }
+          if (propSelect) propSelect.focus();
+          return;
+        }
+
+        if (statusEl) {
+          statusEl.style.display = "block";
+          statusEl.className = "small mt-2 font-weight-bold text-primary";
+          statusEl.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>Hệ thống đang phân tích tiện ích &amp; soạn nội dung chuẩn SEO...';
+        }
+        if (btn) btn.disabled = true;
+
+        fetch('/owner/posts/api/ai-generate-content?propertyId=' + encodeURIComponent(propId) + '&style=' + encodeURIComponent(style), {
+          method: 'POST'
+        })
+          .then(res => {
+            if (!res.ok) throw new Error('Không thể tạo nội dung lúc này');
+            return res.json();
+          })
+          .then(data => {
+            const titleEl = document.getElementById("postTitle");
+            const slugEl = document.getElementById("postSlug");
+            const descEl = document.getElementById("postDescription") || document.querySelector('textarea[name="description"]');
+
+            if (titleEl && data.title) titleEl.value = data.title;
+            if (slugEl && data.slug) slugEl.value = data.slug;
+            else if (titleEl) updateSlug();
+            if (descEl && data.description) descEl.value = data.description;
+
+            [titleEl, slugEl, descEl].forEach(el => {
+              if (el) {
+                el.style.transition = "background-color 0.5s ease, box-shadow 0.5s ease";
+                el.style.backgroundColor = "#e8f8f5";
+                el.style.boxShadow = "0 0 0 0.2rem rgba(28, 200, 138, 0.25)";
+                setTimeout(() => {
+                  el.style.backgroundColor = "";
+                  el.style.boxShadow = "";
+                }, 1800);
+              }
+            });
+
+            if (statusEl) {
+              statusEl.className = "small mt-2 font-weight-bold text-success";
+              statusEl.innerHTML = '<i class="fas fa-check-circle mr-1"></i>Đã tự động soạn tiêu đề, đường dẫn SEO và mô tả chi tiết thành công!';
+            }
+          })
+          .catch(() => {
+            if (statusEl) {
+              statusEl.className = "small mt-2 font-weight-bold text-danger";
+              statusEl.innerHTML = '<i class="fas fa-exclamation-triangle mr-1"></i>Có lỗi xảy ra khi gọi công cụ soạn nội dung. Vui lòng thử lại!';
+            }
+          })
+          .finally(() => {
+            if (btn) btn.disabled = false;
+          });
+      }
+    </script>
 </div>
 
-<script>
-  function updateSlug() {
-    const title = document.getElementById("postTitle").value;
-    const slug = generateSlug(title);
-    document.getElementById("postSlug").value = slug;
-  }
-
-  function suggestTitle() {
-    const select = document.getElementById("propertySelect");
-    const selectedOption = select.options[select.selectedIndex];
-    const titleInput = document.getElementById("postTitle");
-    // Only suggest if title is empty
-    if (titleInput.value === "" && selectedOption.value !== "") {
-      const name = selectedOption.getAttribute("data-name");
-      titleInput.value = name;
-      updateSlug();
-    }
-  }
-
-  function generateSlug(str) {
-    return str
-      .toLowerCase()
-      .replace(/[àáạảãâầấậẩẫăằắặẳẵ]/g, "a")
-      .replace(/[èéẹẻẽêềếệểễ]/g, "e")
-      .replace(/[ìíịỉĩ]/g, "i")
-      .replace(/[òóọỏõôồốộổỗơờớợởỡ]/g, "o")
-      .replace(/[ùúụủũưừứựửữ]/g, "u")
-      .replace(/[ỳýỵỷỹ]/g, "y")
-      .replace(/đ/g, "d")
-      .replace(/[^a-z0-9\s-]/g, "")
-      .replace(/\s+/g, "-")
-      .replace(/-+/g, "-")
-      .replace(/^-+|-+$/g, "");
-  }
-</script>

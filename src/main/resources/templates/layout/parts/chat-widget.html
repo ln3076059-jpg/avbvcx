@@ -1,86 +1,140 @@
 <!doctype html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
   <body>
     <!-- ============================================================
-     AI Chat Widget — floating button + slide-up panel
-     Vanilla JS + Tailwind, no extra dependencies.
+     Hỗ Trợ Tìm Phòng — Upside Blue (#fe9901) & Gold (#f9bc19)
      API: POST /api/chat/message  { guestId, message }
      ============================================================ -->
-    <div th:fragment="chat-widget">
-      <!-- Floating toggle button (positioned above scroll-to-top button) -->
+    <div th:fragment="chat-widget" data-ui>
+      <!-- Floating toggle button -->
       <button
         id="chatToggle"
-        title="Tìm phòng bằng AI"
-        class="fixed bottom-24 right-10 z-50 w-14 h-14 rounded-full bg-[#0054a5] shadow-xl flex items-center justify-center text-white hover:bg-blue-700 active:scale-95 transition-all"
+        title="Hỗ trợ tìm phòng trực tuyến"
+        class="fixed bottom-6 right-6 z-50 w-12 h-12 rounded-full flex items-center justify-center text-white active:scale-95 transition-transform cursor-pointer border-0"
+        style="background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); box-shadow: 0 8px 24px rgba(234, 88, 12, 0.4);"
       >
-        <i id="chatToggleIcon" class="fa-solid fa-comments text-xl"></i>
+        <i id="chatToggleIcon" class="fa-solid fa-comments text-lg"></i>
+        <span
+          class="absolute -top-1.5 -right-1.5 bg-[#161825] text-white font-bold px-1.5 py-0.5 rounded-full leading-none"
+          style="font-size: 13px;"
+          >24/7</span
+        >
       </button>
 
       <!-- Chat panel -->
       <div
         id="chatPanel"
-        class="fixed bottom-40 right-10 z-50 w-80 sm:w-96 bg-white rounded-2xl shadow-2xl border border-gray-100 flex flex-col hidden"
-        style="height: 520px"
+        class="fixed bottom-24 right-6 z-50 w-80 sm:w-96 bg-white flex flex-col hidden rounded-2xl overflow-hidden"
+        style="height: 520px; border: 2px solid #cbd5e1;"
       >
         <!-- Header -->
         <div
-          class="bg-[#0054a5] text-white px-4 py-3 rounded-t-2xl flex items-center justify-between flex-shrink-0"
+          class="text-white px-4 py-3 flex items-center justify-between flex-shrink-0"
+          style="background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);"
         >
-          <div class="flex items-center gap-2">
+          <div class="flex items-center gap-2.5">
             <div
-              class="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center"
+              class="w-9 h-9 rounded-full flex items-center justify-center text-white"
+              style="background-color: rgba(255, 255, 255, 0.2);"
             >
-              <i class="fa-solid fa-robot text-sm"></i>
+              <i class="fa-solid fa-headset text-sm"></i>
             </div>
             <div>
-              <p class="font-semibold text-sm leading-tight">
-                Trợ lý tìm phòng
+              <p class="font-bold text-sm leading-tight m-0">
+                Tư Vấn Phòng TrọMới
               </p>
-              <p class="text-xs text-blue-200">Hỏi mình về phòng trọ nhé!</p>
+              <p class="text-xs text-white/90 m-0">
+                Hỗ trợ tìm phòng theo khu vực &amp; ngân sách
+              </p>
             </div>
           </div>
-          <button
-            id="chatClose"
-            class="w-8 h-8 rounded-full hover:bg-white/20 flex items-center justify-center transition"
-          >
-            <i class="fa-solid fa-xmark"></i>
-          </button>
+          <div class="flex items-center gap-1">
+            <button
+              id="chatReset"
+              type="button"
+              title="Làm mới hội thoại"
+              class="w-8 h-8 rounded-full hover:bg-white/20 text-white flex items-center justify-center transition-colors border-0 bg-transparent cursor-pointer"
+            >
+              <i class="fa-solid fa-rotate-right text-xs"></i>
+            </button>
+            <button
+              id="chatClose"
+              type="button"
+              title="Đóng cửa sổ chat"
+              class="w-8 h-8 rounded-full hover:bg-white/20 text-white flex items-center justify-center transition-colors border-0 bg-transparent cursor-pointer"
+            >
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+          </div>
         </div>
 
         <!-- Message list -->
         <div
           id="chatMessages"
-          class="flex-1 overflow-y-auto px-4 py-3 space-y-3"
+          class="flex-1 overflow-y-auto px-4 py-3 space-y-3 bg-[#f8fafc]"
         >
           <!-- Welcome bubble (static) -->
           <div class="flex gap-2">
             <div
-              class="w-7 h-7 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0 mt-1"
+              class="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 mt-1 text-white"
+              style="background-color: #fe9901;"
             >
-              <i class="fa-solid fa-robot text-blue-600 text-xs"></i>
+              <i class="fa-solid fa-headset text-xs"></i>
             </div>
             <div
-              class="bg-gray-100 rounded-2xl rounded-tl-none px-3 py-2 text-sm text-gray-700 max-w-[82%] leading-relaxed"
+              class="bg-white rounded-2xl rounded-tl-none px-3.5 py-2.5 text-sm text-[#444444] max-w-[82%] leading-relaxed"
             >
-              Xin chào! Mình là trợ lý tìm phòng của Trọ Mới 🏠<br />
+              Xin chào! Mình là chuyên viên tư vấn tìm phòng của <strong>TrọMới</strong>.<br />
               Cho mình biết nhu cầu của bạn nhé!
             </div>
           </div>
         </div>
 
+        <!-- Quick Prompt Chips (Gợi ý tìm nhanh) -->
+        <div class="px-3 pt-2.5 pb-1.5 bg-white flex-shrink-0">
+          <p class="text-xs font-semibold text-[#1b1b1b] mb-1.5 flex items-center gap-1 m-0">
+            <i class="fa-solid fa-bolt" style="color: #ea580c;"></i>
+            <span>Gợi ý tìm nhanh:</span>
+          </p>
+          <div class="flex flex-wrap gap-1.5 mt-1">
+            <button
+              type="button"
+              onclick="sendQuickChatPrompt('Phòng dưới 3 triệu')"
+              class="px-2.5 py-1 rounded-full bg-[#f1f5f9] hover:bg-[#fe9901] text-[#1b1b1b] hover:text-white text-xs font-medium transition-colors cursor-pointer border-0"
+            >
+              Phòng dưới 3 triệu
+            </button>
+            <button
+              type="button"
+              onclick="sendQuickChatPrompt('Phòng gần trung tâm có ban công')"
+              class="px-2.5 py-1 rounded-full bg-[#f1f5f9] hover:bg-[#fe9901] text-[#1b1b1b] hover:text-white text-xs font-medium transition-colors cursor-pointer border-0"
+            >
+              Phòng gần trung tâm có ban công
+            </button>
+            <button
+              type="button"
+              onclick="sendQuickChatPrompt('Căn hộ mini đầy đủ nội thất')"
+              class="px-2.5 py-1 rounded-full bg-[#f1f5f9] hover:bg-[#fe9901] text-[#1b1b1b] hover:text-white text-xs font-medium transition-colors cursor-pointer border-0"
+            >
+              Căn hộ mini đầy đủ nội thất
+            </button>
+          </div>
+        </div>
+
         <!-- Input area -->
-        <div class="px-3 py-3 border-t border-gray-100 flex-shrink-0">
+        <div class="px-3 py-3 bg-white flex-shrink-0">
           <div class="flex gap-2 items-center">
             <input
               id="chatInput"
               type="text"
-              placeholder="Nhập tin nhắn..."
+              placeholder="Nhập nhu cầu tìm phòng..."
               autocomplete="off"
-              class="flex-1 px-3 py-2 border border-gray-200 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              class="flex-1 px-3.5 py-2 bg-[#f1f5f9] rounded-full text-sm text-[#1b1b1b] focus:outline-none border-0"
             />
             <button
               id="chatSend"
-              class="w-9 h-9 bg-[#0054a5] hover:bg-blue-700 text-white rounded-full flex-shrink-0 flex items-center justify-center transition active:scale-90"
+              class="w-9 h-9 rounded-full text-white flex-shrink-0 flex items-center justify-center transition-transform active:scale-90 border-0 cursor-pointer"
+              style="background-color: #fe9901;"
             >
               <i class="fa-solid fa-paper-plane text-sm"></i>
             </button>
@@ -92,20 +146,21 @@
         (function () {
           "use strict";
 
-          /* ── Initial quick replies — property types only (shown on fresh welcome + after reset) ── */
           const INIT_QUICK_REPLIES = [
             "Căn hộ",
             "Ký túc xá / KTX",
             "Nhà trọ / Phòng trọ",
             "Nhà nguyên căn",
+            "Phòng dưới 3.5tr có điều hòa",
+            "Căn hộ mini đầy đủ nội thất",
           ];
           const CHAT_LOG_KEY = "chatMsgLog";
 
-          /* ── DOM refs ── */
           const toggle = document.getElementById("chatToggle");
           const toggleIcon = document.getElementById("chatToggleIcon");
           const panel = document.getElementById("chatPanel");
           const closeBtn = document.getElementById("chatClose");
+          const resetBtn = document.getElementById("chatReset");
           const messages = document.getElementById("chatMessages");
           const input = document.getElementById("chatInput");
           const sendBtn = document.getElementById("chatSend");
@@ -116,7 +171,6 @@
           let autoFollowupTimer = null;
           let userTypedSinceResults = false;
 
-          /* ── Message log persistence (sessionStorage — survives page navigation within same tab) ── */
           function saveLog() {
             try {
               sessionStorage.setItem(CHAT_LOG_KEY, JSON.stringify(msgLog));
@@ -142,7 +196,6 @@
             }
           }
 
-          /* ── guestId — generate once, persist forever ── */
           function getGuestId() {
             let id = localStorage.getItem("chatGuestId");
             if (!id) {
@@ -156,7 +209,6 @@
             return id;
           }
 
-          /* ── chatParams — 7-day TTL ── */
           function saveChatParams(data) {
             if (!data) return;
             localStorage.setItem(
@@ -169,13 +221,12 @@
             );
           }
 
-          /* ── Toggle open / close ── */
           toggle.addEventListener("click", () => {
             isOpen = !isOpen;
             panel.classList.toggle("hidden", !isOpen);
             toggleIcon.className = isOpen
-              ? "fa-solid fa-xmark text-xl"
-              : "fa-solid fa-comments text-xl";
+              ? "fa-solid fa-xmark text-lg"
+              : "fa-solid fa-comments text-lg";
             if (isOpen) {
               input.focus();
               scrollBottom();
@@ -185,30 +236,44 @@
           closeBtn.addEventListener("click", () => {
             isOpen = false;
             panel.classList.add("hidden");
-            toggleIcon.className = "fa-solid fa-comments text-xl";
+            toggleIcon.className = "fa-solid fa-comments text-lg";
           });
 
-          /* ── Enter to send ── */
+          if (resetBtn) {
+            resetBtn.addEventListener("click", () => {
+              clearTimeout(autoFollowupTimer);
+              sessionStorage.removeItem(CHAT_LOG_KEY);
+              msgLog = [];
+              while (messages.children.length > 1) {
+                messages.removeChild(messages.lastChild);
+              }
+              appendQuickReplies(INIT_QUICK_REPLIES);
+              fetch("/api/chat/reset", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ guestId: getGuestId() }),
+              }).catch(() => {});
+              input.focus();
+            });
+          }
+
           input.addEventListener("keydown", function (e) {
             if (e.key === "Enter" && !e.shiftKey) {
               e.preventDefault();
               sendMessage();
             }
           });
-          /* Mark that user is typing — cancels auto follow-up */
           input.addEventListener("input", function () {
             userTypedSinceResults = true;
           });
           sendBtn.addEventListener("click", sendMessage);
 
-          /* ── Scroll helpers ── */
           function scrollBottom() {
             requestAnimationFrame(() => {
               messages.scrollTop = messages.scrollHeight;
             });
           }
 
-          /* ── Safe HTML escape ── */
           function esc(str) {
             if (str == null) return "";
             return String(str)
@@ -218,14 +283,12 @@
               .replace(/"/g, "&quot;");
           }
 
-          /* ── Remove all quick-reply chip rows ── */
           function removeQuickReplies() {
             document
               .querySelectorAll("#chatMessages .qr-wrap")
               .forEach((el) => el.remove());
           }
 
-          /* ── Append quick-reply chips ── */
           function appendQuickReplies(replies) {
             if (!replies || replies.length === 0) return;
             const wrap = document.createElement("div");
@@ -235,8 +298,8 @@
               btn.type = "button";
               btn.textContent = label;
               btn.className =
-                "qr-chip px-2.5 py-1 rounded-full text-xs border border-blue-300 " +
-                "text-[#0054a5] bg-white hover:bg-blue-50 hover:border-blue-500 " +
+                "qr-chip px-2.5 py-1 rounded-full text-xs border border-[#fe9901] " +
+                "text-[#1b1b1b] bg-white hover:bg-[#fe9901] hover:text-white " +
                 "active:scale-95 transition cursor-pointer";
               btn.addEventListener("click", function () {
                 input.value = label;
@@ -249,12 +312,11 @@
             scrollBottom();
           }
 
-          /* ── Append user bubble ── */
           function appendUser(text) {
             const div = document.createElement("div");
             div.className = "flex justify-end";
             div.innerHTML =
-              '<div class="bg-[#0054a5] text-white rounded-2xl rounded-tr-none px-3 py-2 text-sm max-w-[82%] leading-relaxed">' +
+              '<div class="text-white rounded-2xl rounded-tr-none px-3.5 py-2 text-sm max-w-[82%] leading-relaxed" style="background-color: #fe9901;">' +
               esc(text) +
               "</div>";
             messages.appendChild(div);
@@ -265,14 +327,13 @@
             }
           }
 
-          /* ── Append bot bubble ── */
           function appendBot(text) {
             const div = document.createElement("div");
             div.className = "flex gap-2";
             div.innerHTML =
-              '<div class="w-7 h-7 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0 mt-1">' +
-              '<i class="fa-solid fa-robot text-blue-600 text-xs"></i></div>' +
-              '<div class="bg-gray-100 rounded-2xl rounded-tl-none px-3 py-2 text-sm text-gray-700 max-w-[82%] leading-relaxed">' +
+              '<div class="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 mt-1 text-white" style="background-color: #fe9901;">' +
+              '<i class="fa-solid fa-headset text-xs"></i></div>' +
+              '<div class="bg-white rounded-2xl rounded-tl-none px-3.5 py-2 text-sm text-[#444444] max-w-[82%] leading-relaxed">' +
               esc(text) +
               "</div>";
             messages.appendChild(div);
@@ -283,7 +344,6 @@
             }
           }
 
-          /* ── Append property cards ── */
           function appendCards(results, highlightSlug) {
             if (!results || results.length === 0) return;
             const wrap = document.createElement("div");
@@ -303,31 +363,31 @@
 
               const card = document.createElement("div");
               card.className =
-                "property-card rounded-xl border p-3 text-sm transition-all cursor-default " +
+                "property-card p-3 rounded-xl border text-sm transition-colors cursor-default bg-white " +
                 (isHl
-                  ? "border-blue-500 bg-blue-50 ring-2 ring-blue-400"
-                  : "border-gray-100 bg-white hover:border-gray-200");
+                  ? "border-[#fe9901] ring-2 ring-[#fe9901]"
+                  : "border-gray-200 hover:border-[#fe9901]");
               card.dataset.slug = r.postSlug || "";
 
               card.innerHTML =
                 '<div class="flex items-start gap-2">' +
-                '<span class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-[#0054a5] text-white text-[11px] font-bold flex-shrink-0 mt-0.5">' +
+                '<span class="inline-flex items-center justify-center w-5 h-5 rounded-full text-white text-xs font-bold flex-shrink-0 mt-0.5" style="background-color: #fe9901;">' +
                 esc(r.displayIndex) +
                 "</span>" +
                 '<div class="min-w-0 flex-1">' +
-                '<p class="font-semibold text-gray-800 truncate text-sm">' +
+                '<p class="font-semibold text-[#1b1b1b] truncate text-sm m-0">' +
                 esc(r.postTitle || "") +
                 "</p>" +
-                '<p class="text-[#0054a5] font-bold text-sm mt-0.5">' +
+                '<p class="font-bold text-sm mt-0.5 m-0" style="color: #ea580c;">' +
                 esc(price) +
                 "</p>" +
                 (loc
-                  ? '<p class="text-gray-400 text-xs mt-0.5 truncate">' +
+                  ? '<p class="text-gray-500 text-xs mt-0.5 truncate m-0">' +
                     esc(loc) +
                     "</p>"
                   : "") +
                 (tags
-                  ? '<p class="text-gray-400 text-xs mt-1 truncate"><i class="fa-solid fa-circle-check text-green-400 mr-1"></i>' +
+                  ? '<p class="text-gray-500 text-xs mt-1 truncate m-0"><i class="fa-solid fa-circle-check text-[#ea580c] mr-1"></i>' +
                     esc(tags) +
                     "</p>"
                   : "") +
@@ -335,12 +395,12 @@
                 '<a href="/public/property/' +
                 esc(r.postSlug) +
                 '" target="_blank" rel="noopener noreferrer"' +
-                ' class="mt-2 block w-full text-center py-1.5 rounded-lg text-xs font-semibold transition ' +
+                ' class="mt-2 block w-full text-center py-1.5 rounded-full text-xs font-semibold text-decoration-none transition ' +
                 (isHl
-                  ? "bg-[#0054a5] text-white hover:bg-blue-700"
-                  : "bg-gray-50 text-[#0054a5] border border-blue-200 hover:bg-blue-50") +
+                  ? "bg-[#fe9901] text-white"
+                  : "bg-[#f8fafc] text-[#1b1b1b] border border-[#fe9901] hover:bg-[#fe9901] hover:text-white") +
                 '">' +
-                'Xem chi tiết <i class="fa-solid fa-arrow-up-right-from-square ml-1 text-[10px]"></i>' +
+                'Xem chi tiết <i class="fa-solid fa-arrow-up-right-from-square ml-1 text-xs"></i>' +
                 "</a>";
 
               wrap.appendChild(card);
@@ -364,38 +424,23 @@
               .querySelectorAll("#chatMessages .property-card")
               .forEach(function (card) {
                 const match = card.dataset.slug === slug;
-                card.classList.toggle("border-blue-500", match);
-                card.classList.toggle("bg-blue-50", match);
-                card.classList.toggle("ring-2", match);
-                card.classList.toggle("ring-blue-400", match);
-                card.classList.toggle("border-gray-100", !match);
-                card.classList.toggle("bg-white", !match);
-                const btn = card.querySelector("a");
-                if (btn) {
-                  btn.className =
-                    "mt-2 block w-full text-center py-1.5 rounded-lg text-xs font-semibold transition " +
-                    (match
-                      ? "bg-[#0054a5] text-white hover:bg-blue-700"
-                      : "bg-gray-50 text-[#0054a5] border border-blue-200 hover:bg-blue-50");
-                }
                 if (match)
                   card.scrollIntoView({ behavior: "smooth", block: "nearest" });
               });
           }
 
-          /* ── Typing indicator ── */
           function showTyping() {
             const div = document.createElement("div");
             div.id = "chatTyping";
             div.className = "flex gap-2";
             div.innerHTML =
-              '<div class="w-7 h-7 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0 mt-1">' +
-              '<i class="fa-solid fa-robot text-blue-600 text-xs"></i></div>' +
-              '<div class="bg-gray-100 rounded-2xl rounded-tl-none px-3 py-2">' +
+              '<div class="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 mt-1 text-white" style="background-color: #fe9901;">' +
+              '<i class="fa-solid fa-headset text-xs"></i></div>' +
+              '<div class="bg-white rounded-2xl rounded-tl-none px-3 py-2">' +
               '<span class="flex gap-1 items-center h-4">' +
-              '<span class="w-1.5 h-1.5 rounded-full bg-gray-400 animate-bounce" style="animation-delay:0ms"></span>' +
-              '<span class="w-1.5 h-1.5 rounded-full bg-gray-400 animate-bounce" style="animation-delay:150ms"></span>' +
-              '<span class="w-1.5 h-1.5 rounded-full bg-gray-400 animate-bounce" style="animation-delay:300ms"></span>' +
+              '<span class="w-1.5 h-1.5 rounded-full bg-[#fe9901]"></span>' +
+              '<span class="w-1.5 h-1.5 rounded-full bg-[#fe9901]"></span>' +
+              '<span class="w-1.5 h-1.5 rounded-full bg-[#fe9901]"></span>' +
               "</span></div>";
             messages.appendChild(div);
             scrollBottom();
@@ -406,19 +451,11 @@
             if (el) el.remove();
           }
 
-          /* ── Input enable / disable during request ── */
           function setDisabled(disabled) {
             input.disabled = disabled;
             sendBtn.disabled = disabled;
-            sendBtn.className =
-              "w-9 h-9 " +
-              (disabled
-                ? "bg-gray-300 cursor-not-allowed"
-                : "bg-[#0054a5] hover:bg-blue-700 active:scale-90") +
-              " text-white rounded-full flex-shrink-0 flex items-center justify-center transition";
           }
 
-          /* ── Main send logic ── */
           async function sendMessage() {
             const text = input.value.trim();
             if (!text) return;
@@ -441,7 +478,6 @@
 
               removeTyping();
 
-              /* resetChat = true → clear all messages except welcome, re-add chips */
               if (data.resetChat) {
                 while (messages.children.length > 1) {
                   messages.removeChild(messages.lastChild);
@@ -451,19 +487,15 @@
                 appendQuickReplies(INIT_QUICK_REPLIES);
               }
 
-              /* Always show bot message */
               if (data.message) appendBot(data.message);
 
-              /* Quick-reply chips from server */
               if (data.quickReplies && data.quickReplies.length > 0) {
                 appendQuickReplies(data.quickReplies);
               }
 
-              /* New results → render cards */
               if (data.results && data.results.length > 0) {
                 appendCards(data.results, null);
                 saveChatParams({ _resultsAt: Date.now() });
-                /* Auto follow-up after 6 seconds if user hasn't typed */
                 userTypedSinceResults = false;
                 clearTimeout(autoFollowupTimer);
                 autoFollowupTimer = setTimeout(function () {
@@ -474,17 +506,16 @@
                     appendQuickReplies([
                       "Tìm thêm tiện ích",
                       "Đổi khu vực",
-                      "Phù hợp rồi 👍",
+                      "Phù hợp rồi",
                     ]);
                   }
                 }, 6000);
               }
 
-              /* Interest action → highlight matching card */
               if (data.postSlug) {
                 highlightCard(data.postSlug);
                 appendBot(
-                  'Đây là phòng bạn quan tâm ☝️ Bấm "Xem chi tiết" để xem thêm nhé!',
+                  'Đây là phòng bạn quan tâm. Bấm "Xem chi tiết" để xem thêm nhé!',
                 );
               }
             } catch (err) {
@@ -497,7 +528,20 @@
             }
           }
 
-          /* ── Init: restore saved chat log or show welcome chips ── */
+          window.sendQuickChatPrompt = function (promptText) {
+            if (!promptText) return;
+            if (!isOpen) {
+              isOpen = true;
+              panel.classList.remove("hidden");
+              toggleIcon.className = "fa-solid fa-xmark text-lg";
+            }
+            const targetInput = document.getElementById("chatInput") || document.getElementById("chat-input") || input;
+            if (targetInput) {
+              targetInput.value = promptText;
+            }
+            sendMessage();
+          };
+
           (function initChat() {
             try {
               const saved = JSON.parse(

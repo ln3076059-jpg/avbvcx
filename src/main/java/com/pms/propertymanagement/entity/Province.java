@@ -21,7 +21,7 @@ public class Province {
     @Id
     private String code;
 
-    @Column(unique = true, nullable = false, columnDefinition = "nvarchar(255)")
+    @Column(unique = true, nullable = false, length = 255)
     private String name;
 
     public Province(String code, String name) {

@@ -1,6 +1,7 @@
 package com.pms.propertymanagement.config.init;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.annotation.Order;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -9,12 +10,25 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 @Order(0)
+@Slf4j
 public class MaintenanceSchemaInitializer implements CommandLineRunner {
 
     private final JdbcTemplate jdbcTemplate;
 
     @Override
     public void run(String... args) {
+        try {
+            var conn = jdbcTemplate.getDataSource().getConnection();
+            String dbProduct = conn.getMetaData().getDatabaseProductName();
+            conn.close();
+            if (dbProduct != null && !dbProduct.toLowerCase().contains("sql server") && !dbProduct.toLowerCase().contains("microsoft")) {
+                // Hibernate ddl-auto=update automatically creates/updates MySQL schema from entities
+                return;
+            }
+        } catch (Exception e) {
+            return;
+        }
+
         ensureMaintenanceRequestsCodePopulated();
         ensureMaintenanceRequestsHasTenantId();
         ensureMaintenanceRequestsHasStaffWorkflowColumns();
@@ -42,7 +56,7 @@ public class MaintenanceSchemaInitializer implements CommandLineRunner {
             return;
         }
 
-        System.out.println("Đang cập nhật schema: thêm cột tenant_id vào bảng maintenance_requests");
+        log.info("Đang cập nhật schema: thêm cột tenant_id vào bảng maintenance_requests");
         jdbcTemplate.execute("ALTER TABLE maintenance_requests ADD tenant_id BIGINT NULL");
 
         Integer fkCount = jdbcTemplate.queryForObject(
@@ -50,7 +64,7 @@ public class MaintenanceSchemaInitializer implements CommandLineRunner {
                 Integer.class
         );
         if (fkCount != null && fkCount == 0) {
-            System.out.println("Đang cập nhật schema: thêm FK FK_maintenance_requests_tenant");
+            log.info("Đang cập nhật schema: thêm FK FK_maintenance_requests_tenant");
             jdbcTemplate.execute(
                     "ALTER TABLE maintenance_requests WITH NOCHECK " +
                             "ADD CONSTRAINT FK_maintenance_requests_tenant " +
@@ -233,7 +247,7 @@ public class MaintenanceSchemaInitializer implements CommandLineRunner {
             return;
         }
 
-        System.out.println("Đang cập nhật schema: xóa cột priority khỏi bảng maintenance_requests");
+        log.info("Đang cập nhật schema: xóa cột priority khỏi bảng maintenance_requests");
 
         jdbcTemplate.queryForList(
                 "SELECT dc.name " +
@@ -288,7 +302,7 @@ public class MaintenanceSchemaInitializer implements CommandLineRunner {
                 String.class
         );
         if ("NO".equalsIgnoreCase(requesterNullable)) {
-            System.out.println("Đang cập nhật schema: cho phép NULL cho cột requester_id trong bảng maintenance_requests");
+            log.info("Đang cập nhật schema: cho phép NULL cho cột requester_id trong bảng maintenance_requests");
             jdbcTemplate.execute("ALTER TABLE maintenance_requests ALTER COLUMN requester_id BIGINT NULL");
         }
 
@@ -304,12 +318,7 @@ public class MaintenanceSchemaInitializer implements CommandLineRunner {
         }
     }
 
-    /**
-     * Drop any auto-generated CHECK constraint on posts.status and recreate it
-     * to include the new PENDING_REVISION value introduced in 2026-02.
-     */
     private void ensurePostsStatusConstraintIncludesPendingRevision() {
-        // Check if PENDING_REVISION is already allowed (constraint already updated)
         Integer alreadyOk = jdbcTemplate.queryForObject(
                 "SELECT COUNT(*) FROM sys.check_constraints cc " +
                 "JOIN sys.objects o ON cc.parent_object_id = o.object_id " +
@@ -317,10 +326,9 @@ public class MaintenanceSchemaInitializer implements CommandLineRunner {
                 Integer.class
         );
         if (alreadyOk != null && alreadyOk > 0) {
-            return; // Already contains PENDING_REVISION — nothing to do
+            return;
         }
 
-        // Drop all existing CHECK constraints on the posts.status column
         try {
             String dropSql =
                 "DECLARE @sql NVARCHAR(MAX) = ''; " +
@@ -332,12 +340,11 @@ public class MaintenanceSchemaInitializer implements CommandLineRunner {
                 "WHERE o.name = 'posts' AND col.name = 'status'; " +
                 "EXEC sp_executesql @sql;";
             jdbcTemplate.execute(dropSql);
-            System.out.println("[Schema] Dropped old posts.status CHECK constraint(s).");
+            log.info("[Schema] Dropped old posts.status CHECK constraint(s).");
         } catch (Exception e) {
-            System.out.println("[Schema] Could not drop posts.status constraint (may not exist): " + e.getMessage());
+            log.warn("[Schema] Could not drop posts.status constraint (may not exist): {}", e.getMessage());
         }
 
-        // Recreate with all current PostStatus enum values
         try {
             jdbcTemplate.execute(
                 "ALTER TABLE posts ADD CONSTRAINT CK_posts_status_v2 " +
@@ -345,9 +352,9 @@ public class MaintenanceSchemaInitializer implements CommandLineRunner {
                 "'PENDING_APPROVAL','PENDING_REVISION','REJECTED'," +
                 "'DRAFT','ACTIVE','EXPIRED','HIDDEN'))"
             );
-            System.out.println("[Schema] Created new posts.status CHECK constraint with PENDING_REVISION.");
+            log.info("[Schema] Created new posts.status CHECK constraint with PENDING_REVISION.");
         } catch (Exception e) {
-            System.out.println("[Schema] Could not create posts.status constraint: " + e.getMessage());
+            log.warn("[Schema] Could not create posts.status constraint: {}", e.getMessage());
         }
     }
 }

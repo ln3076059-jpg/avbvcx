@@ -25,7 +25,7 @@ public class User {
     @Column(nullable = false)
     private String password;
 
-    @Column(name = "full_name", columnDefinition = "nvarchar(255)")
+    @Column(name = "full_name", length = 255)
     private String fullName;
 
     @Column(unique = true)
@@ -40,14 +40,23 @@ public class User {
     @Column(name = "dob")
     private String dob;
     
-    @Column(name = "address", columnDefinition = "nvarchar(500)")
+    @Column(name = "address", length = 500)
     private String address;
     
-    @Column(name = "hometown", columnDefinition = "nvarchar(500)")
+    @Column(name = "hometown", length = 500)
     private String hometown;
     
     @Column(name = "gender")
     private String gender;
+
+    @Column(name = "bank_code", length = 50)
+    private String bankCode; // VD: MB, VCB, TCB, ACB, VPB, TPB, BIDV, CTG...
+
+    @Column(name = "bank_account_number", length = 50)
+    private String bankAccountNumber;
+
+    @Column(name = "bank_account_name", length = 255)
+    private String bankAccountName;
 
     @Column(name = "is_active")
     private boolean isActive = true;
@@ -57,6 +66,24 @@ public class User {
 
     @Column(name = "ekyc_verified_at")
     private LocalDateTime ekycVerifiedAt;
+
+    public String getEffectiveBankCode() {
+        return (bankCode != null && !bankCode.isBlank()) ? bankCode.trim().toUpperCase() : "MB";
+    }
+
+    public String getEffectiveBankAccountNumber() {
+        if (bankAccountNumber != null && !bankAccountNumber.isBlank()) {
+            return bankAccountNumber.trim();
+        }
+        return (phone != null && !phone.isBlank()) ? phone.trim() : "";
+    }
+
+    public String getEffectiveBankAccountName() {
+        if (bankAccountName != null && !bankAccountName.isBlank()) {
+            return bankAccountName.trim().toUpperCase();
+        }
+        return (fullName != null && !fullName.isBlank()) ? fullName.trim().toUpperCase() : "CHU NHA TRO";
+    }
 
     @Column(name="create_at", updatable = false)
     private LocalDateTime createAt;

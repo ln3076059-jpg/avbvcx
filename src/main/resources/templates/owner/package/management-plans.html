@@ -1,500 +1,171 @@
-<!doctype html>
-<div th:fragment="content" class="space-y-6">
-  <!-- Flash Messages -->
-  <div
-    th:if="${errorMessage}"
-    class="flex items-start gap-3 bg-red-50 border border-red-300 text-red-800 rounded-xl p-4"
-  >
-    <i
-      class="fa-solid fa-circle-exclamation text-red-500 mt-0.5 text-lg flex-shrink-0"
-    ></i>
-    <div>
-      <p class="font-semibold">Không thể thực hiện</p>
-      <p class="text-sm mt-0.5" th:text="${errorMessage}"></p>
-    </div>
-  </div>
+<div class="container-fluid" th:fragment="content">
 
-  <div
-    th:if="${successMessage}"
-    class="flex items-start gap-3 bg-green-50 border border-green-300 text-green-800 rounded-xl p-4"
-  >
-    <i
-      class="fa-solid fa-circle-check text-green-500 mt-0.5 text-lg flex-shrink-0"
-    ></i>
-    <div>
-      <p class="font-semibold">Thành công</p>
-      <p class="text-sm mt-0.5" th:text="${successMessage}"></p>
-    </div>
-  </div>
-
-  <!-- Page Header -->
-  <div
-    class="bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl p-6 text-white"
-  >
-    <div class="flex items-center justify-between">
-      <div>
-        <h1 class="text-2xl font-bold mb-2">
-          <i class="fa-solid fa-cogs mr-3"></i>
-          Gói quản lý tài sản
-        </h1>
-        <p class="text-blue-100">Chọn gói phù hợp với quy mô quản lý của bạn</p>
-      </div>
-      <div class="text-right">
-        <p class="text-sm text-blue-200 mb-1">Gói hiện tại</p>
-        <p class="text-2xl font-bold" th:text="${currentPlanName}">Free</p>
-        <p
-          class="text-sm text-blue-200"
-          th:text="${propertyCounts.active()} + '/' + ${(currentPropertyLimit != null && currentPropertyLimit == -1) ? '∞' : (currentPropertyLimit ?: 'N/A')} + ' Properties'"
-        >
-          0/0 Properties
-        </p>
-      </div>
-    </div>
-  </div>
-
-  <!-- Current Subscription Status -->
-  <div
-    th:if="${hasActiveSubscription}"
-    class="bg-green-50 border border-green-200 rounded-xl p-4"
-  >
-    <div class="flex items-center justify-between">
-      <div class="flex items-center">
-        <i class="fa-solid fa-check-circle text-green-600 mr-3"></i>
-        <div>
-          <h3 class="font-semibold text-green-900">Đăng ký đang hoạt động</h3>
-          <p
-            class="text-sm text-green-700"
-            th:text="${currentPlanName} + ' - Hết hạn: ' + ${#temporals.format(currentSubscription.expiredAt, 'dd/MM/yyyy HH:mm')}"
-          >
-            Pro - Hết hạn: 15/03/2026 23:59
-          </p>
-        </div>
-      </div>
-      <div class="text-right">
-        <p class="text-sm text-green-600">Sử dụng Properties</p>
-        <div class="flex items-center gap-2">
-          <!-- Unlimited plan: show ∞ icon instead of dots -->
-          <div
-            th:if="${currentPropertyLimit != null && currentPropertyLimit == -1}"
-            class="flex items-center gap-1"
-          >
-            <span class="text-green-500 font-bold text-base">∞</span>
-          </div>
-          <!-- Limited plan: show dot indicators -->
-          <div
-            th:unless="${currentPropertyLimit != null && currentPropertyLimit == -1}"
-            class="flex"
-          >
-            <div
-              th:each="i : ${#numbers.sequence(1, currentPropertyLimit ?: 0)}"
-              th:class="${i <= propertyCounts.active()} ? 'w-3 h-3 bg-green-500 rounded mr-1' : 'w-3 h-3 bg-gray-300 rounded mr-1'"
-            ></div>
-          </div>
-          <span
-            class="text-sm font-medium"
-            th:text="${propertyCounts.active()} + '/' + ${(currentPropertyLimit != null && currentPropertyLimit == -1) ? '∞' : (currentPropertyLimit ?: 0)}"
-          >
-            2/3
-          </span>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- No Active Subscription Warning -->
-  <div
-    th:if="${!hasActiveSubscription}"
-    class="bg-yellow-50 border border-yellow-200 rounded-xl p-4"
-  >
-    <div class="flex items-center">
-      <i class="fa-solid fa-exclamation-triangle text-yellow-600 mr-3"></i>
-      <div>
-        <h3 class="font-semibold text-yellow-900">Chưa có đăng ký quản lý</h3>
-        <p class="text-sm text-yellow-700">
-          Bạn cần đăng ký gói quản lý để có thể tạo và quản lý properties.
-          Properties hiện tại:
-          <span th:text="${propertyCounts.planLocked()}">0</span> đang bị khóa.
-        </p>
-      </div>
-    </div>
-  </div>
-
-  <!-- Management Plans Grid: 4 plans -->
-  <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5">
-    <div
-      th:each="plan : ${availablePlans}"
-      class="bg-white rounded-xl border-2 shadow-sm overflow-hidden relative flex flex-col"
-      th:classappend="${plan.isRecommended} ? 'border-orange-400 shadow-lg' : 'border-gray-200'"
-    >
-      <!-- POPULAR / CURRENT badges -->
-      <div
-        th:if="${currentSubscription != null and currentSubscription.managementPlanId == plan.id}"
-        class="absolute top-3 right-3 bg-green-500 text-white text-xs font-bold px-2 py-0.5 rounded-full"
-      >
-        ĐANG DÙNG
-      </div>
-      <div
-        th:if="${plan.isRecommended and (currentSubscription == null or currentSubscription.managementPlanId != plan.id)}"
-        class="absolute top-3 right-3 bg-orange-500 text-white text-xs font-bold px-2 py-0.5 rounded-full"
-      >
-        PHỔ BIẾN
-      </div>
-
-      <!-- Header -->
-      <div
-        class="px-5 py-4 text-center"
-        th:classappend="${plan.isRecommended} ? 'bg-gradient-to-r from-orange-500 to-orange-600 text-white' : 'bg-gray-50 text-gray-800'"
-      >
-        <h3 class="text-lg font-bold" th:text="${plan.name}">FREE</h3>
-        <p class="text-xs mt-0.5 opacity-80" th:text="${plan.description}">
-          Miễn phí
-        </p>
-      </div>
-
-      <div class="p-5 flex flex-col flex-1">
-        <!-- Price -->
-        <div class="text-center mb-4">
-          <span
-            class="text-3xl font-extrabold"
-            th:classappend="${plan.isRecommended} ? 'text-orange-600' : 'text-gray-900'"
-            th:text="${plan.monthlyPrice == 0} ? 'Miễn phí' : ${#numbers.formatDecimal(plan.monthlyPrice, 0, 'COMMA', 0, 'POINT')} + 'đ'"
-          >
-            Miễn phí
-          </span>
-          <span
-            class="text-xs text-gray-500 block"
-            th:text="${plan.monthlyPrice > 0} ? '/tháng' : 'mãi mãi'"
-            >mãi mãi</span
-          >
+        <!-- Page Heading -->
+        <div class="d-sm-flex align-items-center justify-content-between mb-4">
+            <div>
+                <h1 class="h3 mb-0 text-gray-800 font-weight-bold">
+                    <i class="fas fa-layer-group text-success mr-2"></i>Gói Dịch Vụ Quản Lý Cơ Sở
+                </h1>
+                <p class="text-muted small mb-0 mt-1">Lựa chọn gói quản trị phù hợp với quy mô phòng trọ và hệ thống cơ sở kinh doanh của bạn.</p>
+            </div>
+            <div class="card border-left-success shadow-sm py-2 px-3 bg-white text-right">
+                <div class="text-xs text-uppercase font-weight-bold text-muted">Gói Hiện Tại: <strong class="text-success" th:text="${currentPlanName}">Free</strong></div>
+                <div class="small font-weight-bold text-dark mt-1"
+                     th:text="${propertyCounts.active()} + '/' + ${(currentPropertyLimit != null && currentPropertyLimit == -1) ? '∞' : (currentPropertyLimit ?: 'N/A')} + ' Cơ sở'">
+                    0/0 Cơ sở
+                </div>
+            </div>
         </div>
 
-        <!-- Limits table -->
-        <ul class="space-y-2 text-sm mb-5 flex-1">
-          <li class="flex items-center gap-2">
-            <i class="fa-solid fa-home text-blue-500 w-4 text-center"></i>
-            <span class="text-gray-700">Nhà trọ:&nbsp;</span>
-            <strong
-              th:text="${plan.maxProperties == -1 ? 'Không giới hạn' : plan.maxProperties}"
-              >1</strong
-            >
-          </li>
-          <li class="flex items-center gap-2">
-            <i class="fa-solid fa-file-alt text-green-500 w-4 text-center"></i>
-            <span class="text-gray-700">Bài đăng:&nbsp;</span>
-            <strong
-              th:text="${plan.maxPosts == -1 ? 'Không giới hạn' : plan.maxPosts}"
-              >1</strong
-            >
-          </li>
-          <li class="flex items-center gap-2">
-            <i
-              class="fa-solid fa-door-open text-purple-500 w-4 text-center"
-            ></i>
-            <span class="text-gray-700">Phòng/nhà:&nbsp;</span>
-            <strong
-              th:text="${plan.maxRoomsPerProperty == -1 ? 'Không giới hạn' : plan.maxRoomsPerProperty}"
-              >3</strong
-            >
-          </li>
-          <li class="flex items-center gap-2">
-            <i class="fa-solid fa-clock text-orange-500 w-4 text-center"></i>
-            <span class="text-gray-700">Thời hạn bài:&nbsp;</span>
-            <strong th:text="${plan.postDurationDays} + ' ngày'">7 ngày</strong>
-          </li>
-          <!-- Feature flags -->
-          <li
-            th:if="${plan.hasContracts}"
-            class="flex items-center gap-2 text-gray-600"
-          >
-            <i class="fa-solid fa-check text-green-500 w-4 text-center"></i>
-            Quản lý hợp đồng
-          </li>
-          <li
-            th:if="${plan.hasInvoices}"
-            class="flex items-center gap-2 text-gray-600"
-          >
-            <i class="fa-solid fa-check text-green-500 w-4 text-center"></i> Hóa
-            đơn tự động
-          </li>
-          <li
-            th:if="${plan.hasAdvancedReports}"
-            class="flex items-center gap-2 text-gray-600"
-          >
-            <i class="fa-solid fa-check text-green-500 w-4 text-center"></i> Báo
-            cáo nâng cao
-          </li>
-          <li
-            th:if="${plan.hasAutoReminders}"
-            class="flex items-center gap-2 text-gray-600"
-          >
-            <i class="fa-solid fa-check text-green-500 w-4 text-center"></i>
-            Nhắc tiền tự động
-          </li>
-          <li
-            th:if="${plan.hasStaffManagement}"
-            class="flex items-center gap-2 text-gray-600"
-          >
-            <i class="fa-solid fa-check text-green-500 w-4 text-center"></i>
-            Phân quyền nhân viên
-          </li>
-          <li
-            th:if="${plan.hasExcelExport}"
-            class="flex items-center gap-2 text-gray-600"
-          >
-            <i class="fa-solid fa-check text-green-500 w-4 text-center"></i>
-            Xuất Excel
-          </li>
-        </ul>
-
-        <!-- Action -->
-        <div th:if="${currentSubscription == null}">
-          <form
-            th:action="@{/owner/management-plans/subscribe/{planId}(planId=${plan.id})}"
-            method="post"
-          >
-            <input type="hidden" name="durationDays" value="30" />
-            <button
-              type="submit"
-              class="w-full font-semibold py-2.5 rounded-lg transition-colors text-sm"
-              th:classappend="${plan.isRecommended} ? 'bg-orange-500 hover:bg-orange-600 text-white' : 'bg-blue-500 hover:bg-blue-600 text-white'"
-            >
-              <i class="fa-solid fa-plus mr-1"></i> Đăng ký ngay
-            </button>
-          </form>
+        <!-- No Active Subscription Warning -->
+        <div th:if="${!hasActiveSubscription}" class="alert alert-warning border-left-warning shadow-sm mb-4">
+            <div class="d-flex align-items-center">
+                <i class="fas fa-exclamation-triangle fa-2x text-warning mr-3"></i>
+                <div>
+                    <h6 class="font-weight-bold mb-1">Chưa có gói dịch vụ quản lý đang hoạt động</h6>
+                    <p class="small mb-0">
+                        Bạn cần đăng ký gói quản lý để có thể tạo và vận hành các cơ sở nhà trọ.
+                        Hiện có <strong th:text="${propertyCounts.planLocked()}">0</strong> cơ sở đang bị khóa tính năng do hết hạn hạn mức.
+                    </p>
+                </div>
+            </div>
         </div>
 
-        <div
-          th:if="${currentSubscription != null and currentSubscription.managementPlanId == plan.id}"
-        >
-          <div
-            class="w-full bg-green-500 text-white font-semibold py-2.5 rounded-lg text-center text-sm"
-          >
-            <i class="fa-solid fa-check mr-1"></i> Đang sử dụng
-          </div>
-          <form
-            th:action="@{/owner/subscriptions/cancel/{subId}(subId=${currentSubscription.id})}"
-            method="post"
-            class="mt-2"
-          >
-            <button
-              type="submit"
-              class="w-full bg-red-100 hover:bg-red-200 text-red-700 font-medium py-2 rounded-lg text-xs"
-              onclick="
-                return confirm(
-                  'Hủy đăng ký sẽ khóa các nhà trọ vượt quota. Tiếp tục?',
-                );
-              "
-            >
-              <i class="fa-solid fa-times mr-1"></i> Hủy đăng ký
-            </button>
-          </form>
+        <!-- 4 Plans Grid -->
+        <div class="row mb-4">
+            <div th:each="plan : ${availablePlans}" class="col-xl-3 col-md-6 mb-4">
+                <div class="card shadow h-100" th:classappend="${plan.isRecommended} ? 'border-success' : ''">
+                    <div class="card-header py-3 bg-white d-flex justify-content-between align-items-center"
+                         th:classappend="${plan.isRecommended} ? 'border-bottom-success' : 'border-bottom-primary'">
+                        <div>
+                            <h6 class="m-0 font-weight-bold text-gray-900" th:text="${plan.name}">FREE</h6>
+                            <small class="text-muted" th:text="${plan.description}">Miễn phí</small>
+                        </div>
+                        <span th:if="${currentSubscription != null and currentSubscription.managementPlanId == plan.id}" class="badge badge-success px-2 py-1">ĐANG DÙNG</span>
+                        <span th:if="${plan.isRecommended and (currentSubscription == null or currentSubscription.managementPlanId != plan.id)}" class="badge badge-warning text-dark font-weight-bold px-2 py-1">PHỔ BIẾN</span>
+                    </div>
+                    <div class="card-body d-flex flex-column">
+                        <!-- Giá -->
+                        <div class="text-center py-3 bg-light rounded mb-3">
+                            <div class="h3 font-weight-bold text-success mb-0"
+                                 th:text="${plan.monthlyPrice == 0} ? 'Miễn phí' : ${#numbers.formatDecimal(plan.monthlyPrice, 0, 'COMMA', 0, 'POINT')} + ' đ'">
+                                Miễn phí
+                            </div>
+                            <small class="text-muted" th:text="${plan.monthlyPrice > 0} ? '/tháng' : 'vĩnh viễn'">vĩnh viễn</small>
+                        </div>
+
+                        <!-- Giới hạn & Quyền lợi -->
+                        <ul class="list-unstyled small mb-4 flex-grow-1">
+                            <li class="mb-2 text-gray-700">
+                                <i class="fas fa-building text-primary mr-2"></i>
+                                <span>Cơ sở nhà trọ: </span>
+                                <strong th:text="${plan.maxProperties == -1 ? 'Không giới hạn' : plan.maxProperties}">1</strong>
+                            </li>
+                            <li class="mb-2 text-gray-700">
+                                <i class="fas fa-door-open text-info mr-2"></i>
+                                <span>Số phòng/cơ sở: </span>
+                                <strong th:text="${plan.maxRoomsPerProperty == -1 ? 'Không giới hạn' : plan.maxRoomsPerProperty}">3</strong>
+                            </li>
+                            <li class="mb-2 text-gray-700">
+                                <i class="fas fa-bullhorn text-warning mr-2"></i>
+                                <span>Bài đăng tối đa: </span>
+                                <strong th:text="${plan.maxPosts == -1 ? 'Không giới hạn' : plan.maxPosts}">1</strong>
+                            </li>
+                            <li class="mb-2 text-gray-700">
+                                <i class="fas fa-clock text-secondary mr-2"></i>
+                                <span>Hạn hiển thị bài: </span>
+                                <strong th:text="${plan.postDurationDays} + ' ngày'">7 ngày</strong>
+                            </li>
+                            <li th:if="${plan.hasContracts}" class="mb-1 text-muted">
+                                <i class="fas fa-check text-success mr-2"></i> Quản lý hợp đồng điện tử
+                            </li>
+                            <li th:if="${plan.hasInvoices}" class="mb-1 text-muted">
+                                <i class="fas fa-check text-success mr-2"></i> Tự động lập hóa đơn
+                            </li>
+                            <li th:if="${plan.hasAdvancedReports}" class="mb-1 text-muted">
+                                <i class="fas fa-check text-success mr-2"></i> Báo cáo thống kê nâng cao
+                            </li>
+                            <li th:if="${plan.hasAutoReminders}" class="mb-1 text-muted">
+                                <i class="fas fa-check text-success mr-2"></i> Nhắc nợ tiền phòng tự động
+                            </li>
+                        </ul>
+
+                        <!-- Action Buttons -->
+                        <div class="mt-auto">
+                            <!-- Chưa đăng ký gói nào -->
+                            <div th:if="${currentSubscription == null}">
+                                <form th:action="@{/owner/management-plans/subscribe/{planId}(planId=${plan.id})}" method="post">
+                                    <input type="hidden" name="durationDays" value="30" />
+                                    <button type="submit" class="btn btn-success btn-block font-weight-bold py-2 shadow-sm">
+                                        <i class="fas fa-plus mr-1"></i> Đăng Ký Ngay
+                                    </button>
+                                </form>
+                            </div>
+
+                            <!-- Đang dùng gói này -->
+                            <div th:if="${currentSubscription != null and currentSubscription.managementPlanId == plan.id}">
+                                <button class="btn btn-success btn-block font-weight-bold py-2 disabled" disabled>
+                                    <i class="fas fa-check mr-1"></i> Gói Đang Hoạt Động
+                                </button>
+                                <form th:action="@{/owner/subscriptions/cancel/{subId}(subId=${currentSubscription.id})}" method="post" class="mt-2"
+                                      data-confirm="Hủy gói sẽ khóa các cơ sở vượt quota cho phép. Bạn có chắc muốn tiếp tục?">
+                                    <button type="submit" class="btn btn-outline-danger btn-sm btn-block"
+                                            data-confirm="Hủy gói sẽ khóa các cơ sở vượt quota cho phép. Bạn có chắc muốn tiếp tục?">
+                                        <i class="fas fa-times mr-1"></i> Hủy Gói Này
+                                    </button>
+                                </form>
+                            </div>
+
+                            <!-- Đang dùng gói khác -->
+                            <div th:if="${currentSubscription != null and currentSubscription.managementPlanId != plan.id}">
+                                <form th:action="@{/owner/management-plans/upgrade/{planId}(planId=${plan.id})}" method="post">
+                                    <!-- Nâng cấp -->
+                                    <button th:if="${plan.monthlyPrice >= currentPlanMonthlyPrice}" type="submit"
+                                            class="btn btn-success btn-block font-weight-bold py-2 shadow-sm"
+                                            th:data-confirm="${'Xác nhận nâng cấp lên gói ' + plan.name + '? Chi phí: ' + (plan.monthlyPrice == 0 ? 'Miễn phí' : #numbers.formatDecimal(plan.monthlyPrice, 0, 'COMMA', 0, 'POINT') + ' đ') + ' sẽ được trừ trực tiếp từ số dư ví Trọ Mới của bạn. Bạn có chắc muốn tiến hành?'}">
+                                        <i class="fas fa-arrow-up mr-1"></i> Nâng Cấp
+                                    </button>
+                                    <!-- Hạ cấp -->
+                                    <button th:if="${plan.monthlyPrice < currentPlanMonthlyPrice}" type="submit"
+                                            class="btn btn-secondary btn-block font-weight-bold py-2 shadow-sm"
+                                            th:data-confirm="${'Xác nhận chuyển xuống gói ' + plan.name + '? Lưu ý: Nếu số cơ sở hiện có vượt quá hạn mức gói mới, các cơ sở dư thừa sẽ tạm thời bị khóa. Bạn có chắc muốn tiếp tục?'}">
+                                        <i class="fas fa-arrow-down mr-1"></i> Chuyển Xuống
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <div
-          th:if="${currentSubscription != null and currentSubscription.managementPlanId != plan.id}"
-        >
-          <form
-            th:action="@{/owner/management-plans/upgrade/{planId}(planId=${plan.id})}"
-            method="post"
-          >
-            <!-- Upgrade button -->
-            <button
-              th:if="${plan.monthlyPrice >= currentPlanMonthlyPrice}"
-              type="submit"
-              class="w-full font-semibold py-2.5 rounded-lg transition-colors text-sm"
-              th:classappend="${plan.isRecommended} ? 'bg-orange-500 hover:bg-orange-600 text-white' : 'bg-blue-500 hover:bg-blue-600 text-white'"
-              data-confirm-type="upgrade"
-              th:data-plan-name="${plan.name}"
-              th:data-plan-price="${plan.monthlyPrice}"
-              onclick="return confirmPlanChange(this);"
-            >
-              <i class="fa-solid fa-arrow-up mr-1"></i> Nâng cấp
-            </button>
-            <!-- Downgrade button -->
-            <button
-              th:if="${plan.monthlyPrice < currentPlanMonthlyPrice}"
-              type="submit"
-              class="w-full font-semibold py-2.5 rounded-lg transition-colors text-sm bg-gray-500 hover:bg-gray-600 text-white"
-              data-confirm-type="downgrade"
-              th:data-plan-name="${plan.name}"
-              onclick="return confirmPlanChange(this);"
-            >
-              <i class="fa-solid fa-arrow-down mr-1"></i> Hạ cấp
-            </button>
-          </form>
+        <!-- Tình trạng hạn mức hiện tại -->
+        <div class="card shadow mb-4">
+            <div class="card-header py-3 bg-white border-bottom-primary">
+                <h6 class="m-0 font-weight-bold text-primary">
+                    <i class="fas fa-tachometer-alt mr-2"></i>Hiện Trạng Hạn Mức Quản Trị Của Bạn
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-md-4 mb-3 mb-md-0 border-right">
+                        <div class="h2 font-weight-bold text-success mb-1" th:text="${propertyCounts.active()}">0</div>
+                        <div class="small font-weight-bold text-gray-700">Cơ Sở Đang Hoạt Động</div>
+                        <small class="text-muted">Được quản lý và đăng bài bình thường</small>
+                    </div>
+                    <div class="col-md-4 mb-3 mb-md-0 border-right">
+                        <div class="h2 font-weight-bold text-warning mb-1" th:text="${propertyCounts.planLocked()}">0</div>
+                        <div class="small font-weight-bold text-gray-700">Cơ Sở Bị Khóa Hạn Mức</div>
+                        <small class="text-muted">Cần nâng gói để mở khóa sử dụng</small>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="h2 font-weight-bold text-primary mb-1" th:text="${availableSlots}">0</div>
+                        <div class="small font-weight-bold text-gray-700">Slot Cơ Sở Còn Trống</div>
+                        <small class="text-muted">Số nhà trọ có thể tạo thêm ngay</small>
+                    </div>
+                </div>
+            </div>
         </div>
-      </div>
+
     </div>
-  </div>
-
-  <!-- Downgrade behavior note -->
-  <div class="bg-amber-50 border border-amber-200 rounded-xl p-4">
-    <div class="flex items-start gap-3">
-      <i class="fa-solid fa-triangle-exclamation text-amber-600 mt-0.5"></i>
-      <div class="text-sm text-amber-800">
-        <h4 class="font-semibold mb-1">Khi hạ cấp gói (ví dụ VIP → Premium)</h4>
-        <ul class="space-y-0.5 list-disc list-inside">
-          <li>
-            Các nhà trọ vượt quota mới sẽ bị
-            <strong>khóa tạm thời</strong> (không bị xóa).
-          </li>
-          <li>
-            Bạn có thể vào
-            <a href="/owner/properties" class="underline font-medium"
-              >Quản lý nhà trọ</a
-            >
-            để chọn những nhà trọ nào tiếp tục hoạt động.
-          </li>
-          <li>
-            Các bài đăng đã tạo <strong>không bị ảnh hưởng</strong> — tiếp tục
-            chạy đến hết hạn.
-          </li>
-          <li>
-            Khi bài đăng hết hạn, bạn có thể
-            <strong>gia hạn độc lập</strong> (có phí) mà không cần gói cao.
-          </li>
-        </ul>
-      </div>
-    </div>
-  </div>
-
-  <!-- Post Renewal Info -->
-  <div class="bg-green-50 border border-green-200 rounded-xl p-5">
-    <div class="flex items-start gap-3">
-      <i class="fa-solid fa-rotate text-green-600 mt-0.5 text-lg"></i>
-      <div>
-        <h4 class="font-semibold text-green-900 mb-1">
-          Gia hạn bài đăng — độc lập với gói quản lý
-        </h4>
-        <p class="text-sm text-green-800 mb-2">
-          Khi bài đăng hết hạn, bạn có thể gia hạn bất kỳ bài nào với giá cố
-          định — <strong>không phụ thuộc gói Free, VIP hay Enterprise</strong>.
-        </p>
-        <div class="grid grid-cols-3 gap-3 text-sm text-center">
-          <div class="bg-white rounded-lg p-2 border border-green-200">
-            <div class="font-bold text-green-700">7 ngày</div>
-            <div class="text-gray-600">29.000đ</div>
-          </div>
-          <div class="bg-white rounded-lg p-2 border border-green-200">
-            <div class="font-bold text-green-700">14 ngày</div>
-            <div class="text-gray-600">49.000đ</div>
-          </div>
-          <div class="bg-white rounded-lg p-2 border border-green-200">
-            <div class="font-bold text-green-700">30 ngày</div>
-            <div class="text-gray-600">89.000đ</div>
-          </div>
-        </div>
-        <p class="text-xs text-green-700 mt-2">
-          * Gia hạn từ trang
-          <a href="/owner/posts" class="underline font-medium"
-            >Quản lý bài đăng</a
-          >
-          → nút "Gia hạn"
-        </p>
-      </div>
-    </div>
-  </div>
-
-  <!-- Current Status Summary -->
-  <div class="bg-gray-50 rounded-xl p-6">
-    <h3 class="text-lg font-bold text-gray-900 mb-4 text-center">
-      <i class="fa-solid fa-chart-pie text-blue-500 mr-2"></i>
-      Tình trạng hiện tại
-    </h3>
-
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-      <div class="text-center">
-        <div
-          class="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3"
-        >
-          <span
-            class="text-2xl font-bold text-blue-600"
-            th:text="${propertyCounts.active()}"
-            >0</span
-          >
-        </div>
-        <h4 class="font-semibold text-gray-900 mb-1">Properties hoạt động</h4>
-        <p class="text-sm text-gray-600">Sẵn sàng đăng tin</p>
-      </div>
-
-      <div class="text-center">
-        <div
-          class="bg-yellow-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3"
-        >
-          <span
-            class="text-2xl font-bold text-yellow-600"
-            th:text="${propertyCounts.planLocked()}"
-            >0</span
-          >
-        </div>
-        <h4 class="font-semibold text-gray-900 mb-1">Properties bị khóa</h4>
-        <p class="text-sm text-gray-600">Cần đăng ký gói quản lý</p>
-      </div>
-
-      <div class="text-center">
-        <div
-          class="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-3"
-        >
-          <span
-            class="text-2xl font-bold text-green-600"
-            th:text="${availableSlots}"
-            >0</span
-          >
-        </div>
-        <h4 class="font-semibold text-gray-900 mb-1">Slot còn lại</h4>
-        <p class="text-sm text-gray-600">Có thể tạo thêm</p>
-      </div>
-    </div>
-
-    <!-- Action Button -->
-    <div class="text-center mt-6">
-      <div th:if="${!canCreateProperty && !hasActiveSubscription}" class="mb-4">
-        <p class="text-orange-600 font-medium">
-          Bạn cần đăng ký gói quản lý để tạo properties mới
-        </p>
-      </div>
-
-      <div th:if="${propertyCounts.active() > 0}">
-        <a
-          href="/owner/post-packages"
-          class="bg-green-500 hover:bg-green-600 text-white font-semibold px-8 py-3 rounded-lg transition-colors"
-        >
-          <i class="fa-solid fa-megaphone mr-2"></i>
-          Quản lý đăng tin
-        </a>
-      </div>
-    </div>
-  </div>
 </div>
-
-<script>
-  function confirmPlanChange(btn) {
-    var type = btn.getAttribute("data-confirm-type");
-    var name = btn.getAttribute("data-plan-name");
-    if (type === "upgrade") {
-      var price = parseInt(btn.getAttribute("data-plan-price"), 10);
-      var priceStr =
-        price === 0 ? "Miễn phí" : price.toLocaleString("vi-VN") + "đ";
-      return confirm(
-        "Nâng cấp lên gói " +
-          name +
-          "?\n\n" +
-          "Chi phí: " +
-          priceStr +
-          " sẽ được trừ từ ví của bạn.\n" +
-          "Bài đăng hiện tại sẽ được tự động kéo dài theo thời hạn mới.\n\n" +
-          "Bạn có chắc chắn muốn tiếp tục?",
-      );
-    } else {
-      return confirm(
-        "Hạ cấp xuống gói " +
-          name +
-          "?\n\n" +
-          "⚠ Lưu ý:\n" +
-          "• Các nhà trọ vượt quota mới sẽ bị khóa tạm thời.\n" +
-          "• Bài đăng hiện tại vẫn tiếp tục chạy đến hết thời hạn còn lại.\n\n" +
-          "Bạn có chắc chắn muốn tiếp tục?",
-      );
-    }
-  }
-</script>

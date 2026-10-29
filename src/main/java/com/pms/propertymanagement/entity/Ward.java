@@ -19,7 +19,7 @@ public class Ward {
     @Id
     private String code;
 
-    @Column(nullable = false, columnDefinition = "nvarchar(255)")
+    @Column(nullable = false, length = 255)
     private String name;
 
     public Ward(String code, String name, Province province) {

@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="Trang Kỹ Thuật & Vận Hành Hệ Thống Quản Lý Phòng Trọ Trọ Mới">
+    <meta name="author" content="Trọ Mới Kỹ Thuật">
+
+    <title th:text="${pageTitle != null ? pageTitle + ' - Trọ Mới Kỹ Thuật' : 'Trọ Mới - Cổng Kỹ Thuật & Vận Hành'}">Trọ Mới - Cổng Kỹ Thuật & Vận Hành</title>
+
+    <!-- Google Fonts: Nunito (SB Admin 2 Standard) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,200;0,300;0,400;0,600;0,700;0,800;0,900;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+    <!-- FontAwesome 6.5.1 Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
+    <!-- SB Admin 2 Custom Styles -->
+    <link th:href="@{/sb-admin-2/css/sb-admin-2.min.css}" rel="stylesheet">
+
+    <!-- DataTables Bootstrap 4 Styles -->
+    <link th:href="@{/sb-admin-2/vendor/datatables/dataTables.bootstrap4.min.css}" rel="stylesheet">
+
+    <style>
+        .font-mono {
+            font-family: 'JetBrains Mono', monospace !important;
+            font-variant-numeric: tabular-nums;
+        }
+        .table td, .table th {
+            vertical-align: middle !important;
+        }
+        .action-btns .btn {
+            margin: 2px;
+        }
+        .btn-circle-sm {
+            width: 30px;
+            height: 30px;
+            padding: 0;
+            border-radius: 50%;
+            text-align: center;
+            font-size: 12px;
+            line-height: 28px;
+        }
+    </style>
+</head>
+
+<body id="page-top">
+
+    <!-- Page Wrapper -->
+    <div id="wrapper">
+
+        <!-- Sidebar -->
+        <ul class="navbar-nav sidebar sidebar-dark accordion" style="background-color: #0a68ff;" id="accordionSidebar">
+
+            <!-- Sidebar - Brand -->
+            <a class="sidebar-brand d-flex align-items-center justify-content-center" th:href="@{/staff/maintenance}">
+                <div class="sidebar-brand-icon">
+                    <i class="fas fa-tools"></i>
+                </div>
+                <div class="sidebar-brand-text mx-3">Trọ Mới <sup>Kỹ thuật</sup></div>
+            </a>
+
+            <!-- Divider -->
+            <hr class="sidebar-divider my-0">
+
+            <!-- Nav Item - Công việc sửa chữa -->
+            <li class="nav-item" th:classappend="${activeMenu == 'staff-maintenance' or activeMenu == null} ? 'active' : ''">
+                <a class="nav-link" th:href="@{/staff/maintenance}">
+                    <i class="fas fa-fw fa-wrench"></i>
+                    <span>Việc sửa chữa được giao</span>
+                </a>
+            </li>
+
+            <!-- Divider -->
+            <hr class="sidebar-divider">
+
+            <!-- Heading -->
+            <div class="sidebar-heading">
+                Nhiệm vụ vận hành
+            </div>
+
+            <!-- Nav Item - Duyệt bài đăng -->
+            <li class="nav-item" th:classappend="${activeMenu == 'staff-posts'} ? 'active' : ''">
+                <a class="nav-link" th:href="@{/staff/posts}">
+                    <i class="fas fa-fw fa-clipboard-check"></i>
+                    <span>Kiểm duyệt bài đăng</span>
+                </a>
+            </li>
+
+            <!-- Divider -->
+            <hr class="sidebar-divider d-none d-md-block">
+
+            <!-- Sidebar Toggler (Sidebar) -->
+            <div class="text-center d-none d-md-inline">
+                <button class="rounded-circle border-0" id="sidebarToggle"></button>
+            </div>
+
+        </ul>
+        <!-- End of Sidebar -->
+
+        <!-- Content Wrapper -->
+        <div id="content-wrapper" class="d-flex flex-column">
+
+            <!-- Main Content -->
+            <div id="content">
+
+                <!-- Topbar -->
+                <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
+
+                    <!-- Sidebar Toggle (Topbar) -->
+                    <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
+                        <i class="fa fa-bars"></i>
+                    </button>
+
+                    <!-- Topbar Breadcrumb / Portal Badge -->
+                    <div class="d-none d-sm-inline-block form-inline mr-auto ml-md-3 my-2 my-md-0 mw-100">
+                        <span class="badge badge-info px-3 py-2 shadow-sm"><i class="fas fa-tools mr-1"></i> Bộ phận Kỹ thuật &amp; Vận hành</span>
+                        <span class="ml-2 text-muted small font-weight-bold d-none d-lg-inline">
+                            Hệ thống vận hành Trọ Mới
+                        </span>
+                    </div>
+
+                    <!-- Topbar Navbar -->
+                    <ul class="navbar-nav ml-auto">
+
+                        <!-- Nav Item - View Public Portal -->
+                        <li class="nav-item no-arrow mx-1">
+                            <a class="nav-link text-primary font-weight-bold small" th:href="@{/}" target="_blank" title="Mở trang chủ khách thuê">
+                                <i class="fas fa-globe mr-1"></i> Trang chủ thuê
+                            </a>
+                        </li>
+
+                        <!-- Nav Item - View Admin if Admin -->
+                        <li class="nav-item no-arrow mx-1" th:if="${session.user != null and !session.user.roles.?[name == 'ADMIN'].isEmpty()}">
+                            <a class="nav-link text-danger font-weight-bold small" th:href="@{/admin/dashboard}" target="_blank" title="Mở cổng Quản trị">
+                                <i class="fas fa-shield-alt mr-1"></i> Admin Portal
+                            </a>
+                        </li>
+
+                        <div class="topbar-divider d-none d-sm-block"></div>
+
+                        <!-- Nav Item - User Information -->
+                        <li class="nav-item dropdown no-arrow">
+                            <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
+                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <span class="mr-2 d-none d-lg-inline text-gray-600 small font-weight-bold"
+                                      th:text="${session.user != null ? (session.user.fullName != null ? session.user.fullName : session.user.username) : 'Kỹ thuật viên'}">Kỹ thuật viên</span>
+                                <img class="img-profile rounded-circle border" th:src="@{/sb-admin-2/img/undraw_profile.svg}" alt="Avatar Staff">
+                            </a>
+                            <!-- Dropdown - User Information -->
+                            <div class="dropdown-menu dropdown-menu-right animated--grow-in" aria-labelledby="userDropdown">
+                                <div class="dropdown-item-text text-muted small pb-2 border-bottom">
+                                    <strong class="text-dark" th:text="${session.user != null ? session.user.username : 'staff'}">staff</strong><br>
+                                    Vai trò: <span class="badge badge-info">Kỹ thuật viên</span>
+                                </div>
+                                <a class="dropdown-item" th:href="@{/staff/maintenance}">
+                                    <i class="fas fa-wrench fa-sm fa-fw mr-2 text-gray-400"></i>
+                                    Việc được giao
+                                </a>
+                                <a class="dropdown-item" th:href="@{/staff/posts}">
+                                    <i class="fas fa-clipboard-check fa-sm fa-fw mr-2 text-gray-400"></i>
+                                    Kiểm duyệt bài
+                                </a>
+                                <div class="dropdown-divider"></div>
+                                <a class="dropdown-item text-danger font-weight-bold" href="#" data-toggle="modal" data-target="#logoutModal">
+                                    <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-danger"></i>
+                                    Đăng xuất
+                                </a>
+                            </div>
+                        </li>
+
+                    </ul>
+
+                </nav>
+                <!-- End of Topbar -->
+
+                <!-- Flash Messages -->
+                <div class="px-3 pt-2" th:if="${successMessage != null or errorMessage != null}">
+                    <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+                        <i class="fas fa-check-circle mr-2"></i>
+                        <span th:text="${successMessage}">Thao tác thực hiện thành công!</span>
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+
+                    <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <i class="fas fa-exclamation-triangle mr-2"></i>
+                        <span th:text="${errorMessage}">Đã xảy ra lỗi trong quá trình thực hiện!</span>
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Dynamic Content Injection -->
+                <div th:replace="~{${content} :: content}"></div>
+
+            </div>
+            <!-- End of Main Content -->
+
+            <!-- Footer -->
+            <footer class="sticky-footer bg-white">
+                <div class="container my-auto">
+                    <div class="copyright text-center my-auto">
+                        <span>Bản quyền &copy; Hệ thống quản lý nhà trọ Trọ Mới 2026</span>
+                    </div>
+                </div>
+            </footer>
+            <!-- End of Footer -->
+
+        </div>
+        <!-- End of Content Wrapper -->
+
+    </div>
+    <!-- End of Page Wrapper -->
+
+    <!-- Scroll to Top Button-->
+    <a class="scroll-to-top rounded" href="#page-top">
+        <i class="fas fa-angle-up"></i>
+    </a>
+
+    <!-- Logout Modal-->
+    <div class="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title font-weight-bold" id="exampleModalLabel">
+                        <i class="fas fa-sign-out-alt mr-2"></i>Xác nhận đăng xuất
+                    </h5>
+                    <button class="close text-white" type="button" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body text-gray-700">
+                    Bạn có chắc chắn muốn kết thúc phiên làm việc hiện tại và đăng xuất khỏi cổng Kỹ thuật Trọ Mới không?
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary font-weight-bold" type="button" data-dismiss="modal">Hủy bỏ</button>
+                    <a class="btn btn-danger font-weight-bold" th:href="@{/logout}">Đăng xuất ngay</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom Confirmation Modal (#uxConfirmModal) -->
+    <div id="uxConfirmModal" style="display: none; position: fixed; inset: 0; z-index: 2000; background: rgba(19, 20, 22, 0.5); align-items: center; justify-content: center; padding: 16px;" role="dialog" aria-modal="true" aria-labelledby="uxConfirmModalTitle">
+        <div style="background: #ffffff; border: 1px solid #e3e6f0; border-radius: 12px; width: 100%; max-width: 420px; padding: 24px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);">
+            <div class="d-flex align-items-start mb-3">
+                <div class="mr-3 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; border-radius: 8px; background: #fffbeb; color: #92400e; flex-shrink: 0;">
+                    <i class="fa-solid fa-circle-question"></i>
+                </div>
+                <div>
+                    <h6 id="uxConfirmModalTitle" class="font-weight-bold mb-1" style="color: #3a3b45; font-size: 16px;">Xác nhận thao tác</h6>
+                    <p id="uxConfirmModalMessage" class="mb-0" style="color: #858796; font-size: 13px; line-height: 1.5;">Bạn có chắc chắn muốn thực hiện thao tác này?</p>
+                </div>
+            </div>
+            <div class="d-flex justify-content-end pt-3" style="border-top: 1px solid #e3e6f0; gap: 8px;">
+                <button type="button" id="uxConfirmCancelBtn" class="btn btn-light border font-weight-bold" style="font-size: 12px;">
+                    Hủy bỏ
+                </button>
+                <button type="button" id="uxConfirmAcceptBtn" class="btn btn-primary text-white font-weight-bold" style="font-size: 12px;">
+                    Đồng ý thực hiện
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap core JavaScript-->
+    <script th:src="@{/sb-admin-2/vendor/jquery/jquery.min.js}"></script>
+    <script th:src="@{/sb-admin-2/vendor/bootstrap/js/bootstrap.bundle.min.js}"></script>
+
+    <!-- Core plugin JavaScript-->
+    <script th:src="@{/sb-admin-2/vendor/jquery-easing/jquery.easing.min.js}"></script>
+
+    <!-- Custom scripts for all pages-->
+    <script th:src="@{/sb-admin-2/js/sb-admin-2.min.js}"></script>
+
+    <!-- Page level plugins (DataTables) -->
+    <script th:src="@{/sb-admin-2/vendor/datatables/jquery.dataTables.min.js}"></script>
+    <script th:src="@{/sb-admin-2/vendor/datatables/dataTables.bootstrap4.min.js}"></script>
+
+    <script>
+        (function () {
+            const modal = document.getElementById('uxConfirmModal');
+            const msgEl = document.getElementById('uxConfirmModalMessage');
+            const cancelBtn = document.getElementById('uxConfirmCancelBtn');
+            const acceptBtn = document.getElementById('uxConfirmAcceptBtn');
+            let pendingAction = null;
+            let lastClickedSubmitBtn = null;
+
+            function openUxConfirm(message, onConfirm) {
+                if (!modal || !msgEl) {
+                    onConfirm();
+                    return;
+                }
+                msgEl.textContent = message || 'Bạn có chắc chắn muốn thực hiện thao tác này?';
+                pendingAction = onConfirm;
+                modal.style.display = 'flex';
+            }
+
+            function closeUxConfirm() {
+                if (modal) modal.style.display = 'none';
+                pendingAction = null;
+            }
+
+            if (cancelBtn) cancelBtn.addEventListener('click', closeUxConfirm);
+            if (modal) {
+                modal.addEventListener('click', function (e) {
+                    if (e.target === modal) closeUxConfirm();
+                });
+            }
+            if (acceptBtn) {
+                acceptBtn.addEventListener('click', function () {
+                    const fn = pendingAction;
+                    closeUxConfirm();
+                    if (typeof fn === 'function') fn();
+                });
+            }
+
+            function lockSubmitButton(btn) {
+                if (!btn || btn.disabled) return;
+                if (btn.name && btn.form) {
+                    const hidden = document.createElement('input');
+                    hidden.type = 'hidden';
+                    hidden.name = btn.name;
+                    hidden.value = btn.value;
+                    btn.form.appendChild(hidden);
+                }
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-1"></i> Đang xử lý...';
+            }
+
+            document.addEventListener('click', function (e) {
+                const submitBtn = e.target.closest('button[type="submit"]');
+                if (submitBtn) {
+                    lastClickedSubmitBtn = submitBtn;
+                }
+                const confirmEl = e.target.closest('a[data-confirm], button[type="button"][data-confirm]');
+                if (confirmEl) {
+                    e.preventDefault();
+                    const msg = confirmEl.getAttribute('data-confirm');
+                    const href = confirmEl.getAttribute('href');
+                    openUxConfirm(msg, function () {
+                        if (href) window.location.href = href;
+                    });
+                }
+            }, true);
+
+            document.addEventListener('DOMContentLoaded', function () {
+                document.querySelectorAll('form').forEach(function (form) {
+                    form.addEventListener('submit', function (e) {
+                        const submitBtn = (lastClickedSubmitBtn && this.contains(lastClickedSubmitBtn))
+                            ? lastClickedSubmitBtn
+                            : this.querySelector('button[type="submit"]');
+                        const confirmMsg = (submitBtn && submitBtn.getAttribute('data-confirm')) || this.getAttribute('data-confirm');
+
+                        if (confirmMsg && this.dataset.uxConfirmed !== 'true') {
+                            e.preventDefault();
+                            e.stopImmediatePropagation();
+                            const targetForm = this;
+                            openUxConfirm(confirmMsg, function () {
+                                targetForm.dataset.uxConfirmed = 'true';
+                                lockSubmitButton(submitBtn);
+                                targetForm.submit();
+                            });
+                            return;
+                        }
+
+                        if (!e.defaultPrevented && submitBtn) {
+                            lockSubmitButton(submitBtn);
+                        }
+                    });
+                });
+            });
+        })();
+    </script>
+
+</body>
+</html>

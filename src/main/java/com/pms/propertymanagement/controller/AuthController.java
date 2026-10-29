@@ -2,6 +2,7 @@ package com.pms.propertymanagement.controller;
 
 import com.pms.propertymanagement.entity.User;
 import com.pms.propertymanagement.service.UserService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
@@ -11,19 +12,22 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 /**
- * Authentication Controller - handles login and logout for all roles
+ * Authentication Controller - handles login and logout for the 3 system roles:
+ * 1. Khách hàng (USER)
+ * 2. Chủ nhà trọ (OWNER)
+ * 3. Quản trị viên - Toàn quyền (ADMIN)
  */
 @Controller
 @Slf4j
 public class AuthController {
 
     private final UserService userService;
-    
+
     public AuthController(UserService userService) {
         this.userService = userService;
     }
 
-    // ========== TENANT / USER LOGIN ==========
+    // ========== KHÁCH HÀNG (USER) LOGIN ==========
 
     @GetMapping("/login")
     public String showUserLoginForm(HttpSession session) {
@@ -34,19 +38,20 @@ public class AuthController {
     @PostMapping("/login")
     public String loginUser(@RequestParam("username") String username,
                             @RequestParam("password") String password,
-                            HttpSession session,
+                            HttpServletRequest request,
                             Model model) {
         User user = userService.authenticate(username, password);
         if (user == null) {
             model.addAttribute("error", "Sai username hoặc password");
             return "public/login-user";
         }
+        HttpSession session = rotateSessionOnLogin(request);
         session.setAttribute("user", user);
         String target = resolveRoleTarget(user);
         return "redirect:" + target;
     }
 
-    // ========== OWNER / STAFF LOGIN ==========
+    // ========== CHỦ NHÀ TRỌ (OWNER) & QUẢN TRỊ VIÊN (ADMIN) LOGIN ==========
 
     @GetMapping("/login/owner")
     public String showLoginForm() {
@@ -56,10 +61,11 @@ public class AuthController {
     @PostMapping("/login/owner")
     public String login(@RequestParam("username") String username,
                         @RequestParam("password") String password,
-                        HttpSession session,
+                        HttpServletRequest request,
                         Model model) {
         User user = userService.authenticate(username, password);
         if (user != null) {
+            HttpSession session = rotateSessionOnLogin(request);
             session.setAttribute("user", user);
             String target = resolveRoleTarget(user);
             return "redirect:" + target;
@@ -87,19 +93,24 @@ public class AuthController {
             }
         }
 
-        return "redirect:/login/owner";
+        return "redirect:/login";
     }
 
-    /**
-     * Validate redirect URL to prevent open redirect attacks.
-     * Only allow internal paths (starting with /).
-     */
+    private HttpSession rotateSessionOnLogin(HttpServletRequest request) {
+        HttpSession existing = request.getSession(false);
+        if (existing != null) {
+            try {
+                request.changeSessionId();
+                return request.getSession();
+            } catch (IllegalStateException ignored) {
+                return request.getSession(true);
+            }
+        }
+        return request.getSession(true);
+    }
+
     private boolean isValidRedirectUrl(String url) {
         return url.startsWith("/") && !url.startsWith("//");
-    }
-
-    private boolean requiresEkyc(User user) {
-        return user.getRoles().stream().anyMatch(r -> r.getName().equals("USER") || r.getName().equals("OWNER"));
     }
 
     private String resolveRoleTarget(User user) {
@@ -109,12 +120,6 @@ public class AuthController {
         if (user.getRoles().stream().anyMatch(role -> role.getName().equals("OWNER"))) {
             return "/owner/dashboard";
         }
-        if (user.getRoles().stream().anyMatch(role -> role.getName().equals("STAFF"))) {
-            return "/staff/maintenance";
-        }
-        if (user.getRoles().stream().anyMatch(role -> role.getName().equals("MODERATOR"))) {
-            return "/moderator";
-        }
-        return "/tenant/rooms";
+        return "/tenant/dashboard";
     }
 }

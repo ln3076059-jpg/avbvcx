@@ -25,8 +25,9 @@ public class StaffMaintenanceController {
         if (user == null) return "redirect:/login";
         List<MaintenanceRequest> requests = maintenanceWorkflowService.getRequestsForStaff(user);
         model.addAttribute("requests", requests);
+        model.addAttribute("activeMenu", "staff-maintenance");
         model.addAttribute("content", "staff/maintenance/list");
-        return "layout/public-main";
+        return "layout/staff-layout";
     }
 
     @GetMapping("/{id}")
@@ -37,16 +38,21 @@ public class StaffMaintenanceController {
         MaintenanceRequest req = maintenanceWorkflowService.getRequestDetailForStaff(id, user);
         model.addAttribute("request", req);
         model.addAttribute("success", success != null);
+        model.addAttribute("activeMenu", "staff-maintenance");
         model.addAttribute("content", "staff/maintenance/detail");
-        return "layout/public-main";
+        return "layout/staff-layout";
     }
 
     @PostMapping("/{id}/start")
     public String start(@PathVariable Long id, HttpSession session, RedirectAttributes redirectAttributes) {
         User user = (User) session.getAttribute("user");
         if (user == null) return "redirect:/login";
-        maintenanceWorkflowService.startRequest(id, user);
-        redirectAttributes.addAttribute("success", "true");
+        try {
+            maintenanceWorkflowService.startRequest(id, user);
+            redirectAttributes.addAttribute("success", "true");
+        } catch (IllegalStateException | IllegalArgumentException ex) {
+            redirectAttributes.addFlashAttribute("errorStart", ex.getMessage());
+        }
         return "redirect:/staff/maintenance/" + id;
     }
 
@@ -62,8 +68,13 @@ public class StaffMaintenanceController {
             redirectAttributes.addFlashAttribute("completeNote", note);
             return "redirect:/staff/maintenance/" + id;
         }
-        maintenanceWorkflowService.completeRequest(id, user, note.trim());
-        redirectAttributes.addAttribute("success", "true");
+        try {
+            maintenanceWorkflowService.completeRequest(id, user, note.trim());
+            redirectAttributes.addAttribute("success", "true");
+        } catch (IllegalStateException | IllegalArgumentException ex) {
+            redirectAttributes.addFlashAttribute("errorComplete", ex.getMessage());
+            redirectAttributes.addFlashAttribute("completeNote", note);
+        }
         return "redirect:/staff/maintenance/" + id;
     }
 }

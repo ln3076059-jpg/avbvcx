@@ -1,10 +1,7 @@
 package com.pms.propertymanagement.dto.request;
 
-import com.pms.propertymanagement.entity.PropertyImage;
-import com.pms.propertymanagement.entity.Room;
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 

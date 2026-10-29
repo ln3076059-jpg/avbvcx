@@ -1,0 +1,413 @@
+<div th:fragment="content" class="container-fluid mb-4">
+    <style>
+        @media print {
+            #accordionSidebar, .topbar, .navbar, footer, .btn, .no-print {
+                display: none !important;
+            }
+            #content-wrapper, #content, .container-fluid {
+                margin: 0 !important;
+                padding: 0 !important;
+                background: #fff !important;
+                width: 100% !important;
+            }
+            .card {
+                border: 1px solid #dee2e6 !important;
+                box-shadow: none !important;
+            }
+            body {
+                background: #fff !important;
+                color: #000 !important;
+                font-size: 13px !important;
+            }
+        }
+    </style>
+
+    <!-- Page Heading -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4 no-print">
+        <div>
+            <h1 class="h3 mb-0 text-gray-800 font-weight-bold">
+                <i class="fas fa-file-signature text-danger mr-2"></i>Thanh Lý Hợp Đồng & Quyết Toán Tiền Cọc
+            </h1>
+            <p class="text-muted small mb-0 mt-1">Kiểm kê tài sản, chốt chỉ số điện nước cuối cùng và cấn trừ tiền cọc khi khách trả phòng</p>
+        </div>
+        <div class="d-flex align-items-center">
+            <button type="button" onclick="window.print()" class="btn btn-outline-primary btn-sm shadow-sm font-weight-bold mr-2">
+                <i class="fas fa-print mr-1"></i>In Biên Bản Thanh Lý (PDF)
+            </button>
+            <a th:href="@{/owner/contracts}" class="btn btn-secondary btn-sm shadow-sm font-weight-bold">
+                <i class="fas fa-arrow-left mr-1"></i>Quay lại danh sách
+            </a>
+        </div>
+    </div>
+
+    <!-- Thông tin hợp đồng đang thanh lý -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 bg-white border-bottom-primary d-flex justify-content-between align-items-center">
+            <h6 class="m-0 font-weight-bold text-primary">
+                <i class="fas fa-info-circle mr-2"></i>Thông Tin Phòng & Hợp Đồng Thuê
+            </h6>
+            <span class="badge badge-danger px-3 py-1 font-weight-bold">Thanh lý trả phòng</span>
+        </div>
+        <div class="card-body">
+            <div class="row align-items-center">
+                <div class="col-md-3 mb-2 mb-md-0 border-right">
+                    <span class="text-xs text-muted text-uppercase d-block font-weight-bold">Phòng trọ</span>
+                    <strong class="h5 text-dark font-weight-bold mb-0 d-block" th:text="${contract.room.name}">Phòng 101</strong>
+                    <small class="text-muted" th:text="${contract.room.property.name}">Nhà trọ ABC</small>
+                </div>
+                <div class="col-md-3 mb-2 mb-md-0 border-right">
+                    <span class="text-xs text-muted text-uppercase d-block font-weight-bold">Khách thuê đại diện</span>
+                    <strong class="text-dark font-weight-bold d-block" th:text="${contract.representative != null ? contract.representative.fullName : 'N/A'}">Nguyễn Văn A</strong>
+                    <small class="text-muted" th:text="${contract.representative != null ? contract.representative.phone : ''}">0900000000</small>
+                </div>
+                <div class="col-md-3 mb-2 mb-md-0 border-right">
+                    <span class="text-xs text-muted text-uppercase d-block font-weight-bold">Thời hạn hợp đồng</span>
+                    <strong class="text-dark d-block" th:text="${#temporals.format(contract.startDate, 'dd/MM/yyyy') + ' - ' + #temporals.format(contract.endDate, 'dd/MM/yyyy')}">01/01/2026 - 01/07/2026</strong>
+                </div>
+                <div class="col-md-3 text-md-right">
+                    <span class="text-xs text-warning text-uppercase d-block font-weight-bold">Tiền cọc gốc đang giữ</span>
+                    <strong class="h4 font-weight-bold text-warning mb-0 font-mono"
+                            id="contractDepositDisplay"
+                            th:data-deposit="${contract.deposit}"
+                            th:text="${#numbers.formatDecimal(contract.deposit, 0, 'POINT', 0, 'COMMA') + ' đ'}">1.000.000 đ</strong>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Form Quyết toán Thanh lý -->
+    <form th:action="@{'/owner/contracts/' + ${contract.id} + '/checkout'}" th:object="${checkoutRequest}" method="post" 
+          data-confirm="Bạn có chắc chắn muốn xác nhận quyết toán và thanh lý hợp đồng này? Khách thuê sẽ được tất toán cọc và phòng sẽ được giải phóng.">
+        <input type="hidden" th:field="*{contractId}">
+        <input type="hidden" th:field="*{deposit}" th:value="${contract.deposit}" id="hiddenDeposit">
+
+        <div class="row">
+            <!-- Cột trái: Khấu trừ chi phí -->
+            <div class="col-lg-8">
+                <!-- Cảnh báo hóa đơn còn nợ chưa thanh toán -->
+                <div th:if="${unpaidInvoices != null and !unpaidInvoices.empty}" class="card border-left-warning shadow mb-4">
+                    <div class="card-header py-2.5 bg-warning text-dark d-flex justify-content-between align-items-center">
+                        <h6 class="m-0 font-weight-bold">
+                            <i class="fas fa-file-invoice-dollar mr-2"></i>Phát Hiện Hóa Đơn Chưa Thanh Toán Đầy Đủ (<span th:text="${unpaidInvoices.size()}">1</span> kỳ)
+                        </h6>
+                        <span class="badge badge-dark px-2 py-1 font-mono"
+                              th:text="'Tổng nợ: ' + ${#numbers.formatDecimal(unpaidInvoicesTotal, 0, 'POINT', 0, 'COMMA')} + ' đ'">0 đ</span>
+                    </div>
+                    <div class="card-body py-3">
+                        <p class="small text-gray-800 mb-2">
+                            Hệ thống đã tự động cộng tổng công nợ 
+                            <strong class="text-danger font-mono" th:text="${#numbers.formatDecimal(unpaidInvoicesTotal, 0, 'POINT', 0, 'COMMA') + ' đ'}">0 đ</strong>
+                            vào ô <strong>"Tiền Phòng Còn Nợ / Lẻ Ngày"</strong> bên dưới:
+                        </p>
+                        <div class="table-responsive">
+                            <table class="table table-sm table-bordered mb-0 small">
+                                <thead class="bg-light">
+                                    <tr>
+                                        <th>Mã Hóa Đơn</th>
+                                        <th>Kỳ Thu</th>
+                                        <th class="text-right">Còn Nợ</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="inv : ${unpaidInvoices}">
+                                        <td class="font-weight-bold font-mono" th:text="${inv.invoiceCode}">INV-01</td>
+                                        <td th:text="'Tháng ' + ${inv.month} + '/' + ${inv.year}">Tháng 10/2026</td>
+                                        <td class="text-right font-weight-bold text-danger font-mono"
+                                            th:text="${#numbers.formatDecimal(inv.remainingAmount, 0, 'POINT', 0, 'COMMA') + ' đ'}">0 đ</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3 bg-white border-bottom-danger d-flex flex-wrap justify-content-between align-items-center">
+                        <h6 class="m-0 font-weight-bold text-danger">
+                            <i class="fas fa-calculator mr-2"></i>Bảng Kê Chi Phí Khấu Trừ Ngày Trả Phòng
+                        </h6>
+                        <button type="button"
+                                id="btnProrateRent"
+                                class="btn btn-outline-danger btn-sm font-weight-bold mt-2 mt-sm-0"
+                                th:data-rent="${contract.rentPrice}"
+                                th:data-unpaid="${unpaidInvoicesTotal ?: 0}"
+                                onclick="calcProratedCheckoutRent()">
+                            <i class="fas fa-bolt mr-1"></i>Cộng thêm tiền phòng lẻ ngày tháng này
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-row">
+                            <div class="form-group col-md-4">
+                                <label class="font-weight-bold small text-gray-700">Ngày Trả Phòng <span class="text-danger">*</span></label>
+                                <input type="date" th:field="*{checkoutDate}" id="checkoutDateInput" class="form-control" required>
+                            </div>
+                            <div class="form-group col-md-4">
+                                <label class="font-weight-bold small text-gray-700">Điện Nước Chốt Cuối (đ)</label>
+                                <input type="number" step="1000" min="0" th:field="*{utilityAmount}" id="utilityInput" class="form-control font-weight-bold text-warning tabular-nums" placeholder="0" oninput="calculateSettlement()">
+                            </div>
+                            <div class="form-group col-md-4">
+                                <label class="font-weight-bold small text-gray-700">Tiền Phòng Còn Nợ / Lẻ Ngày (đ)</label>
+                                <input type="number" step="1000" min="0" th:field="*{unpaidRentAmount}" id="rentInput" class="form-control font-weight-bold text-danger tabular-nums" placeholder="0" oninput="calculateSettlement()">
+                                <small id="prorateHint" class="form-text text-muted small"></small>
+                            </div>
+                        </div>
+
+                        <!-- Tính nhanh Điện / Nước chốt ngày trả phòng -->
+                        <div class="card bg-light border mb-3 no-print">
+                            <div class="card-body py-2 px-3">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span class="small font-weight-bold text-primary">
+                                        <i class="fas fa-bolt mr-1 text-warning"></i>Tính nhanh Điện / Nước chốt ngày trả phòng
+                                    </span>
+                                    <small class="text-muted">Nhập chỉ số cũ &amp; mới để tự động điền thành tiền</small>
+                                </div>
+                                <div class="form-row align-items-end">
+                                    <div class="form-group col-md-2 col-6 mb-2">
+                                        <label class="text-xs font-weight-bold text-gray-700 mb-1">Điện cũ (kWh)</label>
+                                        <input type="number" step="0.1" min="0" id="chkOldElec" class="form-control form-control-sm font-mono tabular-nums" value="0" oninput="calcCheckoutUtility()">
+                                    </div>
+                                    <div class="form-group col-md-2 col-6 mb-2">
+                                        <label class="text-xs font-weight-bold text-gray-700 mb-1">Điện mới (kWh)</label>
+                                        <input type="number" step="0.1" min="0" id="chkNewElec" class="form-control form-control-sm font-mono tabular-nums" value="0" oninput="calcCheckoutUtility()">
+                                    </div>
+                                    <div class="form-group col-md-2 col-6 mb-2">
+                                        <label class="text-xs font-weight-bold text-gray-700 mb-1">Giá điện (đ)</label>
+                                        <input type="number" step="100" min="0" id="chkElecPrice" class="form-control form-control-sm font-mono tabular-nums" value="3500" oninput="calcCheckoutUtility()">
+                                    </div>
+                                    <div class="form-group col-md-2 col-6 mb-2">
+                                        <label class="text-xs font-weight-bold text-gray-700 mb-1">Nước cũ (m³)</label>
+                                        <input type="number" step="0.1" min="0" id="chkOldWater" class="form-control form-control-sm font-mono tabular-nums" value="0" oninput="calcCheckoutUtility()">
+                                    </div>
+                                    <div class="form-group col-md-2 col-6 mb-2">
+                                        <label class="text-xs font-weight-bold text-gray-700 mb-1">Nước mới (m³)</label>
+                                        <input type="number" step="0.1" min="0" id="chkNewWater" class="form-control form-control-sm font-mono tabular-nums" value="0" oninput="calcCheckoutUtility()">
+                                    </div>
+                                    <div class="form-group col-md-2 col-6 mb-2">
+                                        <label class="text-xs font-weight-bold text-gray-700 mb-1">Giá nước (đ)</label>
+                                        <input type="number" step="100" min="0" id="chkWaterPrice" class="form-control form-control-sm font-mono tabular-nums" value="20000" oninput="calcCheckoutUtility()">
+                                    </div>
+                                </div>
+                                <div id="chkUtilitySummary" class="text-xs text-muted font-italic">
+                                    Tiêu thụ: 0 kWh điện + 0 m³ nước = 0 đ
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Khấu trừ hư hại tài sản -->
+                        <div class="alert alert-danger border-left-danger shadow-sm my-3">
+                            <h6 class="font-weight-bold mb-2">
+                                <i class="fas fa-exclamation-triangle mr-1"></i> Khấu Trừ Hư Hại Tài Sản / Bồi Thường Thiết Bị (Nếu có)
+                            </h6>
+                            <div class="form-row">
+                                <div class="form-group col-md-4 mb-0">
+                                    <label class="font-weight-bold small text-gray-700">Chi phí đền bù (đ):</label>
+                                    <input type="number" step="1000" min="0" th:field="*{damageAmount}" id="damageInput" class="form-control font-weight-bold text-danger" placeholder="0" oninput="calculateSettlement()">
+                                </div>
+                                <div class="form-group col-md-8 mb-0">
+                                    <label class="font-weight-bold small text-gray-700">Chi tiết hư hại / Lý do khấu trừ:</label>
+                                    <input type="text" th:field="*{damageNote}" class="form-control" placeholder="Ví dụ: Hỏng vòi nước bồn rửa, mất chìa khóa cổng, vỡ gương...">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Trạng thái phòng & Ghi chú -->
+                        <div class="form-group mt-3">
+                            <div class="custom-control custom-checkbox">
+                                <input type="checkbox" th:field="*{markRoomForMaintenance}" class="custom-control-input" id="checkMaint">
+                                <label class="custom-control-label font-weight-bold text-gray-800" for="checkMaint">
+                                    Chuyển phòng sang trạng thái <strong class="text-warning">BẢO TRÌ</strong> (để vệ sinh, sơn sửa trước khi mở cho thuê lại)
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="font-weight-bold small text-gray-700">Ghi Chú Biên Bản Thanh Lý</label>
+                            <textarea th:field="*{finalNote}" rows="3" class="form-control" placeholder="Nhập thêm thỏa thuận giữa 2 bên nếu có..."></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cột phải: Bảng tổng kết quyết toán -->
+            <div class="col-lg-4">
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3 bg-white border-bottom-dark">
+                        <h6 class="m-0 font-weight-bold text-dark">
+                            <i class="fas fa-receipt mr-2"></i>Tổng Kết Quyết Toán Tiền Cọc
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between py-2 border-bottom">
+                            <span class="text-muted small">Tiền cọc gốc:</span>
+                            <span class="font-weight-bold text-warning" id="summaryDeposit">0 đ</span>
+                        </div>
+                        <div class="d-flex justify-content-between py-2 border-bottom">
+                            <span class="text-muted small">Tổng các khoản khấu trừ:</span>
+                            <span class="font-weight-bold text-danger" id="summaryDeduction">0 đ</span>
+                        </div>
+                        <div class="p-3 bg-light rounded text-center my-3 border">
+                            <div class="small font-weight-bold text-muted text-uppercase mb-1" id="settlementLabel">Kết quả quyết toán</div>
+                            <div class="h4 font-weight-bold text-success mb-0" id="summarySettlement">0 đ</div>
+                            <div class="small font-italic text-muted mt-1" id="settlementWords">Không đồng</div>
+                        </div>
+
+                        <input type="hidden" th:field="*{totalDeduction}" id="hiddenTotalDeduction">
+                        <input type="hidden" th:field="*{refundAmount}" id="hiddenRefundAmount">
+                        <input type="hidden" th:field="*{additionalCharge}" id="hiddenAdditionalCharge">
+
+                        <button type="submit" class="btn btn-danger btn-block py-2 font-weight-bold shadow-sm">
+                            <i class="fas fa-check mr-1"></i> Xác Nhận Thanh Lý & Trả Phòng
+                        </button>
+                        <button type="button" onclick="window.print()" class="btn btn-outline-primary btn-block mt-2 font-weight-bold">
+                            <i class="fas fa-print mr-1"></i> In Biên Bản Thanh Lý (PDF)
+                        </button>
+                        <a th:href="@{/owner/contracts}" class="btn btn-outline-secondary btn-block mt-2 font-weight-bold">
+                            <i class="fas fa-times mr-1"></i> Hủy Bỏ
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+
+    <script>
+        function calcCheckoutUtility() {
+            const oldE = parseFloat(document.getElementById('chkOldElec').value) || 0;
+            const newE = parseFloat(document.getElementById('chkNewElec').value) || 0;
+            const priceE = parseFloat(document.getElementById('chkElecPrice').value) || 0;
+
+            const oldW = parseFloat(document.getElementById('chkOldWater').value) || 0;
+            const newW = parseFloat(document.getElementById('chkNewWater').value) || 0;
+            const priceW = parseFloat(document.getElementById('chkWaterPrice').value) || 0;
+
+            const usageE = Math.max(0, newE - oldE);
+            const usageW = Math.max(0, newW - oldW);
+            const totalUtil = Math.round(usageE * priceE + usageW * priceW);
+
+            const utilInput = document.getElementById('utilityInput');
+            if (utilInput) {
+                utilInput.value = totalUtil;
+            }
+            const summaryEl = document.getElementById('chkUtilitySummary');
+            if (summaryEl) {
+                summaryEl.innerText = 'Tiêu thụ: ' + usageE.toFixed(1) + ' kWh điện + ' + usageW.toFixed(1) + ' m³ nước = ' + totalUtil.toLocaleString('vi-VN') + ' đ';
+            }
+            calculateSettlement();
+        }
+        function readVietnameseNumber(num) {
+            num = Math.round(Math.abs(num || 0));
+            if (num === 0) return 'Không đồng';
+            const digits = ['không', 'một', 'hai', 'ba', 'bốn', 'năm', 'sáu', 'bảy', 'tám', 'chín'];
+            const units = ['', 'nghìn', 'triệu', 'tỷ'];
+            function readTriple(n, showZeroHundred) {
+                const h = Math.floor(n / 100);
+                const t = Math.floor((n % 100) / 10);
+                const u = n % 10;
+                let res = '';
+                if (h > 0 || showZeroHundred) {
+                    res += digits[h] + ' trăm ';
+                }
+                if (t > 1) {
+                    res += digits[t] + ' mươi ';
+                    if (u === 1) res += 'mốt ';
+                    else if (u === 5) res += 'lăm ';
+                    else if (u > 0) res += digits[u] + ' ';
+                } else if (t === 1) {
+                    res += 'mười ';
+                    if (u === 5) res += 'lăm ';
+                    else if (u > 0) res += digits[u] + ' ';
+                } else if (t === 0 && u > 0) {
+                    if (h > 0 || showZeroHundred) res += 'lẻ ';
+                    res += digits[u] + ' ';
+                }
+                return res.trim();
+            }
+            const groups = [];
+            let temp = num;
+            while (temp > 0) {
+                groups.push(temp % 1000);
+                temp = Math.floor(temp / 1000);
+            }
+            let out = '';
+            for (let i = groups.length - 1; i >= 0; i--) {
+                if (groups[i] > 0) {
+                    const showZero = i < groups.length - 1;
+                    out += readTriple(groups[i], showZero) + ' ' + units[i] + ' ';
+                }
+            }
+            out = out.trim();
+            return out.charAt(0).toUpperCase() + out.slice(1) + ' đồng';
+        }
+
+        function calcProratedCheckoutRent() {
+            const btn = document.getElementById('btnProrateRent');
+            if (!btn) return;
+            const rentPrice = parseFloat(btn.getAttribute('data-rent')) || 0;
+            const unpaidTotal = parseFloat(btn.getAttribute('data-unpaid')) || 0;
+            const dateInput = document.getElementById('checkoutDateInput');
+            const dateVal = dateInput && dateInput.value ? new Date(dateInput.value) : new Date();
+
+            const year = dateVal.getFullYear();
+            const month = dateVal.getMonth() + 1;
+            const dayOfMonth = dateVal.getDate();
+            const daysInMonth = new Date(year, month, 0).getDate();
+
+            const prorated = Math.round(((rentPrice / daysInMonth) * dayOfMonth) / 1000) * 1000;
+            const newTotal = unpaidTotal + prorated;
+
+            const rentInput = document.getElementById('rentInput');
+            if (rentInput) {
+                rentInput.value = newTotal;
+            }
+            const hint = document.getElementById('prorateHint');
+            if (hint) {
+                hint.innerText = 'Đã tính ' + dayOfMonth + '/' + daysInMonth + ' ngày (' + prorated.toLocaleString('vi-VN') + ' đ) + nợ cũ (' + unpaidTotal.toLocaleString('vi-VN') + ' đ)';
+            }
+            calculateSettlement();
+        }
+
+        function calculateSettlement() {
+            const depositElem = document.getElementById('contractDepositDisplay');
+            const deposit = parseFloat(depositElem.getAttribute('data-deposit')) || 0;
+
+            const utility = parseFloat(document.getElementById('utilityInput').value) || 0;
+            const rent = parseFloat(document.getElementById('rentInput').value) || 0;
+            const damage = parseFloat(document.getElementById('damageInput').value) || 0;
+
+            const totalDeduction = utility + rent + damage;
+            const diff = deposit - totalDeduction;
+
+            document.getElementById('summaryDeposit').innerText = deposit.toLocaleString('vi-VN') + ' đ';
+            document.getElementById('summaryDeduction').innerText = totalDeduction.toLocaleString('vi-VN') + ' đ';
+            document.getElementById('hiddenTotalDeduction').value = totalDeduction;
+
+            const labelElem = document.getElementById('settlementLabel');
+            const summaryElem = document.getElementById('summarySettlement');
+            const wordsElem = document.getElementById('settlementWords');
+
+            if (diff > 0) {
+                labelElem.innerText = 'Hoàn trả lại khách:';
+                summaryElem.className = 'h4 font-weight-bold text-success mb-0';
+                summaryElem.innerText = '+ ' + diff.toLocaleString('vi-VN') + ' đ';
+                document.getElementById('hiddenRefundAmount').value = diff;
+                document.getElementById('hiddenAdditionalCharge').value = 0;
+            } else if (diff < 0) {
+                labelElem.innerText = 'Khách phải nộp thêm:';
+                summaryElem.className = 'h4 font-weight-bold text-danger mb-0';
+                summaryElem.innerText = '- ' + Math.abs(diff).toLocaleString('vi-VN') + ' đ';
+                document.getElementById('hiddenRefundAmount').value = 0;
+                document.getElementById('hiddenAdditionalCharge').value = Math.abs(diff);
+            } else {
+                labelElem.innerText = 'Quyết toán vừa đủ:';
+                summaryElem.className = 'h4 font-weight-bold text-secondary mb-0';
+                summaryElem.innerText = '0 đ';
+                document.getElementById('hiddenRefundAmount').value = 0;
+                document.getElementById('hiddenAdditionalCharge').value = 0;
+            }
+            if (wordsElem) {
+                wordsElem.innerText = 'Bằng chữ: ' + readVietnameseNumber(diff);
+            }
+        }
+        document.addEventListener('DOMContentLoaded', calculateSettlement);
+    </script>
+</div>

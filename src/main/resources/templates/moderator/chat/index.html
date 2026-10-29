@@ -1,7 +1,167 @@
-<div class="flex items-center justify-center h-full text-gray-400">
-  <div class="text-center">
-    <i class="fa-solid fa-comments text-5xl mb-4 block text-gray-200"></i>
-    <p class="text-base font-medium">Tính năng đang phát triển</p>
-    <p class="text-sm mt-1">Chat sẽ sớm có mặt tại đây!</p>
+<div class="space-y-6">
+  <!-- Header & Queue Metrics -->
+  <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+    <div>
+      <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-blue-50 text-[#0054a5] mb-2">
+        <i class="fa-solid fa-headset"></i>
+        <span>Điều phối viên &amp; Hỗ trợ trực tuyến</span>
+      </span>
+      <h1 class="text-2xl font-bold text-gray-900">
+        Trung Tâm Hỗ Trợ Khách Hàng &amp; Giám Sát Tư Vấn Trực Tuyến
+      </h1>
+      <p class="text-sm text-gray-500 mt-1">
+        Theo dõi yêu cầu đặt lịch xem phòng của khách thuê, hỗ trợ chủ nhà và giám sát hệ thống tư vấn tự động Trọ Mới.
+      </p>
+    </div>
+
+    <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 shrink-0">
+      <a href="/moderator/posts/pending" class="p-3.5 rounded-xl bg-orange-50 border border-orange-100 hover:bg-orange-100/70 transition text-left">
+        <div class="text-xs font-medium text-orange-700">Bài chờ duyệt</div>
+        <div class="text-xl font-bold text-orange-900 mt-0.5 tabular-nums" th:text="${totalPending != null ? totalPending : 0}">0</div>
+      </a>
+      <a href="/moderator/posts/re-review" class="p-3.5 rounded-xl bg-blue-50 border border-blue-100 hover:bg-blue-100/70 transition text-left">
+        <div class="text-xs font-medium text-blue-700">Chờ duyệt lại</div>
+        <div class="text-xl font-bold text-blue-900 mt-0.5 tabular-nums" th:text="${totalReReview != null ? totalReReview : 0}">0</div>
+      </a>
+      <div class="p-3.5 rounded-xl bg-emerald-50 border border-emerald-100 text-left col-span-2 sm:col-span-1">
+        <div class="text-xs font-medium text-emerald-700">Yêu cầu tư vấn</div>
+        <div class="text-xl font-bold text-emerald-900 mt-0.5 tabular-nums" th:text="${recentContacts != null ? recentContacts.size() : 0}">0</div>
+      </div>
+    </div>
   </div>
+
+  <!-- Main 12-Col Support Grid -->
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+    <!-- Left 7 Cols: Recent Customer Inquiries / Contacts -->
+    <div class="lg:col-span-7 bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+      <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+        <h2 class="text-base font-bold text-gray-900 flex items-center gap-2">
+          <i class="fa-solid fa-envelope-open-text text-[#0054a5]"></i>
+          <span>Danh sách khách gửi yêu cầu xem phòng &amp; tư vấn</span>
+        </h2>
+        <span class="text-xs font-semibold text-gray-500" th:text="${(recentContacts != null ? recentContacts.size() : 0) + ' liên hệ gần nhất'}">0 liên hệ</span>
+      </div>
+
+      <div th:if="${recentContacts == null or #lists.isEmpty(recentContacts)}" class="p-10 text-center text-gray-400 space-y-2">
+        <i class="fa-solid fa-comments text-3xl text-gray-300 block"></i>
+        <p class="text-sm font-medium text-gray-600">Chưa có yêu cầu tư vấn mới từ khách thuê</p>
+        <p class="text-xs text-gray-400">Các yêu cầu đặt lịch xem phòng từ trang chi tiết sẽ hiển thị trực tiếp tại đây.</p>
+      </div>
+
+      <div th:if="${recentContacts != null and !#lists.isEmpty(recentContacts)}" class="divide-y divide-gray-100">
+        <div th:each="c : ${recentContacts}" class="p-5 hover:bg-gray-50/80 transition space-y-2">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <div class="flex items-center gap-2.5">
+              <div class="w-9 h-9 rounded-full bg-[#0054a5] text-white font-bold text-xs flex items-center justify-center"
+                   th:text="${c.name != null and !c.name.isEmpty() ? #strings.substring(c.name, 0, 1).toUpperCase() : 'K'}">K</div>
+              <div>
+                <div class="text-sm font-bold text-gray-900" th:text="${c.name ?: 'Khách thuê'}">Nguyễn Văn A</div>
+                <div class="text-xs text-gray-500 font-mono" th:text="${c.phone ?: 'Chưa cập nhật SĐT'}">0912345678</div>
+              </div>
+            </div>
+            <div class="flex items-center gap-2">
+              <a th:if="${c.phone != null}" th:href="'tel:' + ${c.phone}"
+                 class="px-3 py-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-semibold flex items-center gap-1.5 transition">
+                <i class="fa-solid fa-phone text-xs"></i>
+                <span>Gọi hỗ trợ</span>
+              </a>
+              <a th:if="${c.phone != null}" th:href="'https://zalo.me/' + ${c.phone}" target="_blank"
+                 class="px-3 py-1.5 rounded-lg bg-blue-50 hover:bg-blue-100 text-[#0054a5] text-xs font-semibold flex items-center gap-1.5 transition">
+                <i class="fa-solid fa-comment-dots text-xs"></i>
+                <span>Nhắn Zalo</span>
+              </a>
+            </div>
+          </div>
+
+          <div class="p-3 rounded-xl bg-gray-50 text-xs text-gray-700 space-y-1">
+            <div th:if="${c.property != null}" class="font-semibold text-[#0054a5] flex items-center gap-1.5">
+              <i class="fa-solid fa-building text-xs"></i>
+              <span>Quan tâm cơ sở:</span>
+              <span th:text="${c.property.name}">Nhà trọ</span>
+            </div>
+            <p class="text-gray-600" th:text="${c.note != null and !c.note.isEmpty() ? c.note : 'Khách đăng ký nhận tư vấn và hẹn lịch xem phòng thực tế.'}">
+              Ghi chú
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right 5 Cols: Quick-Reply Support Templates & AI Assistant Status -->
+    <div class="lg:col-span-5 space-y-6">
+      <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 space-y-4">
+        <div class="flex items-center justify-between">
+          <h2 class="text-base font-bold text-gray-900 flex items-center gap-2">
+            <i class="fa-solid fa-bolt text-amber-500"></i>
+            <span>Mẫu phản hồi hỗ trợ nhanh</span>
+          </h2>
+          <span id="modCopyBadge" class="hidden text-xs font-semibold text-emerald-600">
+            <i class="fa-solid fa-check mr-1"></i>Đã sao chép
+          </span>
+        </div>
+        <p class="text-xs text-gray-500">
+          Bấm vào mẫu tin nhắn bên dưới để sao chép nhanh khi tư vấn cho khách thuê hoặc nhắc chủ nhà duyệt bài.
+        </p>
+
+        <div class="space-y-2.5 text-xs">
+          <button type="button"
+                  onclick="copyModTemplate('Chào bạn, Trọ Mới đã nhận được yêu cầu hẹn xem phòng của bạn. Chủ nhà sẽ liên hệ xác nhận lịch hẹn trong vòng 15 phút nhé!')"
+                  class="w-full p-3.5 rounded-xl border border-gray-200 hover:border-[#0054a5] hover:bg-blue-50/40 text-left transition space-y-1 cursor-pointer">
+            <div class="font-bold text-gray-800 flex items-center justify-between">
+              <span>1. Xác nhận lịch hẹn xem phòng</span>
+              <i class="fa-regular fa-copy text-gray-400"></i>
+            </div>
+            <p class="text-gray-500 line-clamp-2">Chào bạn, Trọ Mới đã nhận được yêu cầu hẹn xem phòng của bạn. Chủ nhà sẽ liên hệ xác nhận lịch hẹn trong vòng 15 phút nhé!</p>
+          </button>
+
+          <button type="button"
+                  onclick="copyModTemplate('Tin đăng của Anh/Chị cần bổ sung hình ảnh thực tế rõ nét hơn và ghi rõ đơn giá điện nước theo quy định trước khi hiển thị công khai.')"
+                  class="w-full p-3.5 rounded-xl border border-gray-200 hover:border-[#0054a5] hover:bg-blue-50/40 text-left transition space-y-1 cursor-pointer">
+            <div class="font-bold text-gray-800 flex items-center justify-between">
+              <span>2. Hướng dẫn chủ nhà bổ sung hồ sơ bài đăng</span>
+              <i class="fa-regular fa-copy text-gray-400"></i>
+            </div>
+            <p class="text-gray-500 line-clamp-2">Tin đăng của Anh/Chị cần bổ sung hình ảnh thực tế rõ nét hơn và ghi rõ đơn giá điện nước theo quy định trước khi hiển thị công khai.</p>
+          </button>
+
+          <button type="button"
+                  onclick="copyModTemplate('Trọ Mới khuyến nghị bạn kiểm tra trực tiếp hợp đồng và tuyệt đối không chuyển tiền cọc trước khi xem phòng thực tế.')"
+                  class="w-full p-3.5 rounded-xl border border-gray-200 hover:border-[#0054a5] hover:bg-blue-50/40 text-left transition space-y-1 cursor-pointer">
+            <div class="font-bold text-gray-800 flex items-center justify-between">
+              <span>3. Cảnh báo an toàn giao dịch đặt cọc</span>
+              <i class="fa-regular fa-copy text-gray-400"></i>
+            </div>
+            <p class="text-gray-500 line-clamp-2">Trọ Mới khuyến nghị bạn kiểm tra trực tiếp hợp đồng và tuyệt đối không chuyển tiền cọc trước khi xem phòng thực tế.</p>
+          </button>
+        </div>
+      </div>
+
+      <!-- Online Support Supervision Card -->
+      <div class="bg-slate-900 text-white rounded-2xl p-6 space-y-3">
+        <div class="flex items-center justify-between">
+          <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-300">
+            <i class="fa-solid fa-circle text-[8px]"></i> Tư vấn trực tuyến đang hoạt động
+          </span>
+          <span class="text-xs text-slate-400 font-mono">24/7 Hỗ trợ</span>
+        </div>
+        <h3 class="text-base font-bold">Giám sát Tư Vấn Tìm Phòng Nhanh</h3>
+        <p class="text-xs text-slate-300 leading-relaxed">
+          Hệ thống tư vấn trực tuyến gợi ý phòng theo ngân sách, khoảng cách trường đại học và giải đáp thắc mắc chi phí điện nước cho khách truy cập.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function copyModTemplate(text) {
+      if (!navigator.clipboard) return;
+      navigator.clipboard.writeText(text).then(function () {
+        var badge = document.getElementById('modCopyBadge');
+        if (badge) {
+          badge.classList.remove('hidden');
+          setTimeout(function () { badge.classList.add('hidden'); }, 2000);
+        }
+      });
+    }
+  </script>
 </div>

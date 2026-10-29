@@ -13,7 +13,6 @@ import com.pms.propertymanagement.entity.Amenity;
 import com.pms.propertymanagement.entity.Province;
 import com.pms.propertymanagement.entity.Surrounding;
 import com.pms.propertymanagement.entity.TargetTenant;
-// ... imports
 
 public interface PropertyService {
     List<PropertyOwnerResponse> getPropertiesByOwner(User owner);
@@ -25,8 +24,11 @@ public interface PropertyService {
 
     // Edit/Delete for Owner
     PropertyRequest getPropertyForEdit(Long id);
+    PropertyRequest getPropertyForEdit(Long id, Long ownerId);
     void updateProperty(Long id, PropertyRequest request);
+    void updateProperty(Long id, PropertyRequest request, Long ownerId);
     void deleteProperty(Long id);
+    void deleteProperty(Long id, Long ownerId);
 
     // Reference Data Methods
     List<Amenity> getAllAmenities();

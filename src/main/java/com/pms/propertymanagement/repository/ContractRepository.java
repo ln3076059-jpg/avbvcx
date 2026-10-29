@@ -14,6 +14,7 @@ import java.util.List;
 
 @Repository
 public interface ContractRepository extends JpaRepository<Contract, Long> {
+    List<Contract> findByStatus(ContractStatus status);
     List<Contract> findByRoom_Property_Owner_Id(Long ownerId);
     Page<Contract> findByRoom_Property_Owner_Id(Long ownerId, Pageable pageable);
     
@@ -35,6 +36,18 @@ public interface ContractRepository extends JpaRepository<Contract, Long> {
     List<Room> findActiveRoomsByTenantId(@Param("tenantId") Long tenantId);
 
     @Query("""
+            select distinct r
+            from Contract c
+            join c.room r
+            join fetch r.property
+            left join c.tenants t
+            where ((:tenantId IS NOT NULL AND (t.id = :tenantId or c.representative.id = :tenantId))
+                   or (:phone IS NOT NULL AND :phone <> '' AND (t.phone = :phone or c.representative.phone = :phone)))
+              and c.status = com.pms.propertymanagement.enums.ContractStatus.ACTIVE
+            """)
+    List<Room> findActiveRoomsByTenantIdOrPhone(@Param("tenantId") Long tenantId, @Param("phone") String phone);
+
+    @Query("""
             select count(c)
             from Contract c
             left join c.tenants t
@@ -43,6 +56,17 @@ public interface ContractRepository extends JpaRepository<Contract, Long> {
               and c.status = com.pms.propertymanagement.enums.ContractStatus.ACTIVE
             """)
     long countActiveContractsByTenantIdAndRoomId(@Param("tenantId") Long tenantId, @Param("roomId") Long roomId);
+
+    @Query("""
+            select count(c)
+            from Contract c
+            left join c.tenants t
+            where c.room.id = :roomId
+              and ((:tenantId IS NOT NULL AND (t.id = :tenantId or c.representative.id = :tenantId))
+                   or (:phone IS NOT NULL AND :phone <> '' AND (t.phone = :phone or c.representative.phone = :phone)))
+              and c.status = com.pms.propertymanagement.enums.ContractStatus.ACTIVE
+            """)
+    long countActiveContractsByTenantOrPhoneAndRoomId(@Param("tenantId") Long tenantId, @Param("phone") String phone, @Param("roomId") Long roomId);
 
     @Query("""
             select count(c)
@@ -70,4 +94,13 @@ public interface ContractRepository extends JpaRepository<Contract, Long> {
            "AND c.status = :status")
     Double sumRentPriceByOwnerAndStatus(@Param("ownerId") Long ownerId, @Param("status") ContractStatus status);
 
+    java.util.Optional<Contract> findFirstByRoom_IdAndStatus(Long roomId, ContractStatus status);
+
+    List<Contract> findByRoom_Property_IdAndStatus(Long propertyId, ContractStatus status);
+
+    List<Contract> findByRoom_Property_Owner_IdAndStatus(Long ownerId, ContractStatus status);
+
+    List<Contract> findByRepresentative_Id(Long tenantId);
+
+    List<Contract> findByRepresentative_Phone(String phone);
 }

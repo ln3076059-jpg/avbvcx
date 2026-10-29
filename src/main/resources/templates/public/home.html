@@ -1,285 +1,617 @@
-<div class="space-y-16 pb-8">
-  <section class="hero-surface reveal relative overflow-hidden rounded-[36px] px-6 py-10 md:px-10 md:py-14 lg:px-14">
-    <div class="hero-orb hero-orb-one"></div>
-    <div class="hero-orb hero-orb-two"></div>
-
-    <div class="relative grid gap-10 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
-      <div class="space-y-8">
-        <div class="inline-flex items-center gap-2 rounded-full border border-white/70 bg-white/80 px-4 py-2 text-sm font-semibold text-sky-800 shadow-sm backdrop-blur">
-          <i class="fa-solid fa-sparkles text-amber-500"></i>
-          Nền tảng tìm phòng trọ, căn hộ mini và nhà nguyên căn
-        </div>
-
-        <div class="space-y-5">
-          <h1 class="max-w-3xl text-4xl font-extrabold leading-tight text-slate-950 md:text-5xl lg:text-6xl">
-            Tìm chỗ ở hợp gu, xem bài đăng thật và kết nối chủ trọ nhanh hơn.
-          </h1>
-          <p class="max-w-2xl text-base leading-8 text-slate-600 md:text-lg">
-            Giao diện mới tập trung vào nhu cầu thuê trọ: xem hình ảnh rõ ràng, giá phòng minh bạch, khu vực nổi bật
-            và liên hệ ngay khi thấy phòng phù hợp.
-          </p>
-        </div>
-
-        <div class="flex flex-wrap gap-4">
-          <a
-            href="#latest-posts"
-            class="inline-flex items-center gap-2 rounded-full bg-slate-950 px-6 py-3.5 text-sm font-semibold text-white shadow-xl shadow-slate-950/15 transition hover:-translate-y-0.5 hover:bg-blue-700"
-          >
-            Xem tin mới
-            <i class="fa-solid fa-arrow-right-long"></i>
-          </a>
-          <a
-            href="/video-review"
-            class="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/90 px-6 py-3.5 text-sm font-semibold text-slate-700 transition hover:-translate-y-0.5 hover:border-sky-300 hover:text-blue-700"
-          >
-            <i class="fa-solid fa-circle-play text-rose-500"></i>
-            Video review
-          </a>
-        </div>
-
-        <div class="grid gap-4 sm:grid-cols-3">
-          <div class="rounded-[28px] border border-white/70 bg-white/80 p-5 shadow-sm backdrop-blur">
-            <p class="text-sm font-semibold text-slate-500">Tin đăng đang hoạt động</p>
-            <p class="mt-3 text-3xl font-extrabold text-slate-950" th:text="${postCount}">128</p>
-          </div>
-          <div class="rounded-[28px] border border-white/70 bg-white/80 p-5 shadow-sm backdrop-blur">
-            <p class="text-sm font-semibold text-slate-500">Khu vực đang có phòng</p>
-            <p class="mt-3 text-3xl font-extrabold text-slate-950" th:text="${provinceCount}">12</p>
-          </div>
-          <div class="rounded-[28px] border border-white/70 bg-white/80 p-5 shadow-sm backdrop-blur">
-            <p class="text-sm font-semibold text-slate-500">Giá khởi điểm</p>
-            <p class="mt-3 text-3xl font-extrabold text-slate-950">
-              <span th:text="${startingPrice > 0 ? #numbers.formatDecimal(startingPrice, 0, 'COMMA', 0, 'POINT') + ' đ' : 'Liên hệ'}">2,500,000 đ</span>
-            </p>
-          </div>
-        </div>
-
-        <div class="flex flex-wrap gap-3">
-          <span class="rounded-full bg-white/80 px-4 py-2 text-sm font-medium text-slate-700 shadow-sm" th:each="location : ${featuredLocations}">
-            <i class="fa-solid fa-location-dot mr-2 text-rose-500"></i>
-              <span th:text="${location}">Phường, Tỉnh</span>
-          </span>
-        </div>
-      </div>
-
-      <div class="reveal space-y-4 lg:pl-6">
-        <div class="hero-feature-card" th:if="${featuredProperty != null}">
-          <div class="relative overflow-hidden rounded-[30px]">
-            <img
-              th:src="${featuredProperty.imageUrl}"
-              th:alt="${featuredProperty.title}"
-              class="h-[360px] w-full object-cover"
-            />
-            <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/30 to-transparent"></div>
-
-            <div class="absolute left-5 right-5 top-5 flex items-start justify-between gap-4">
-              <span class="rounded-full bg-white/90 px-4 py-2 text-xs font-bold uppercase tracking-[0.24em] text-slate-700">
-                Bài đăng nổi bật
-              </span>
-              <span class="rounded-full bg-amber-400/95 px-4 py-2 text-sm font-bold text-slate-950 shadow-lg">
-                <span th:text="${#numbers.formatDecimal(featuredProperty.price, 0, 'COMMA', 0, 'POINT') + ' đ/tháng'}">4,500,000 đ/tháng</span>
-              </span>
-            </div>
-
-            <div class="absolute bottom-0 left-0 right-0 p-6 text-white">
-              <p class="mb-3 inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1.5 text-xs font-semibold backdrop-blur">
-                <i class="fa-solid fa-house"></i>
-                <span th:text="${featuredProperty.categoryName}">Can ho mini</span>
-              </p>
-              <h2 class="text-2xl font-extrabold leading-snug" th:text="${featuredProperty.title}">
-                Phong tro dep, gan trung tam, day du tien nghi
-              </h2>
-              <p class="mt-3 flex items-center gap-2 text-sm text-slate-200">
-                <i class="fa-solid fa-location-dot text-rose-300"></i>
-                <span th:text="${featuredProperty.addressNumber + ', ' + featuredProperty.wardName + ', ' + featuredProperty.provinceName}">
-                  Địa chỉ chi tiết
-                </span>
-              </p>
-              <a
-                th:href="@{/public/property/{slug}(slug=${featuredProperty.slug})}"
-                class="mt-5 inline-flex items-center gap-2 rounded-full bg-white px-5 py-3 text-sm font-semibold text-slate-900 transition hover:-translate-y-0.5 hover:bg-sky-100"
-              >
-                Xem chi tiết bài đăng
-                <i class="fa-solid fa-arrow-right-long"></i>
-              </a>
+<div>
+  <!-- 1. Rhino Banner Section (banner_main + #myCarousel + build_box) -->
+  <section class="banner_main rhino_hero_bg">
+    <div id="myCarousel" class="carousel slide banner" data-bs-ride="carousel">
+      <div class="carousel-inner">
+        <div class="carousel-item active">
+          <div class="container">
+            <div class="carousel-caption banner_po">
+              <div class="row align-items-center g-4">
+                <div class="col-lg-7 col-md-12">
+                  <div class="build_box">
+                    <h1>Tìm Phòng Trọ &amp; Căn Hộ Xác Thực</h1>
+                    <p th:text="${featuredProperty != null ? ('Không gian lưu trú xác thực tại ' + featuredProperty.wardName + ', ' + featuredProperty.provinceName + ' · Hỗ trợ xem mô hình 3D &amp; thanh toán VietQR minh bạch') : 'Hệ thống tìm kiếm phòng trọ, căn hộ dịch vụ và nhà nguyên căn xác thực thực tế 100%, minh bạch chi phí điện nước và hợp đồng điện tử.'}">
+                      Hệ thống tìm kiếm phòng trọ, căn hộ dịch vụ và nhà nguyên căn xác thực thực tế 100%, minh bạch chi phí điện nước và hợp đồng điện tử.
+                    </p>
+                    <div class="d-flex flex-wrap gap-3">
+                      <a class="read_more conatct_btn" th:href="${featuredProperty != null ? '/public/property/' + featuredProperty.slug : '/properties'}" role="button">Khám Phá Ngay</a>
+                      <a class="read_more" style="background-color: #ffffff; color: #161825 !important;" th:href="@{/video-review}" role="button">Xem Video 3D</a>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-lg-5 d-none d-lg-block">
+                  <div class="hero_showcase_frame ts-ambient-float">
+                    <img
+                      th:src="${featuredProperty != null and featuredProperty.imageUrl != null and !featuredProperty.imageUrl.contains('unsplash.com') ? featuredProperty.imageUrl : '/images/rooms/room-1.jpg'}"
+                      alt="Không gian căn hộ dịch vụ nổi bật"
+                    />
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
-
-        <div th:if="${featuredProperty == null}" class="rounded-[30px] border border-dashed border-slate-300 bg-white/80 p-8 text-center shadow-sm">
-          <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-sky-100 text-sky-700">
-            <i class="fa-solid fa-bed text-2xl"></i>
+        <div class="carousel-item">
+          <div class="container">
+            <div class="carousel-caption banner_po">
+              <div class="row align-items-center g-4">
+                <div class="col-lg-7 col-md-12">
+                  <div class="build_box">
+                    <h1>Đặt Thuê Phòng &amp; Hợp Đồng Online</h1>
+                    <p>Khảo sát phòng qua mô hình 3D &amp; Video thực tế, giữ phòng trực tuyến 24h, ký hợp đồng điện tử và thanh toán hóa đơn qua VietQR Napas247.</p>
+                    <div class="d-flex flex-wrap gap-3">
+                      <a class="read_more conatct_btn" th:href="@{/properties}" role="button">Tìm Phòng Ngay</a>
+                      <a class="read_more" style="background-color: #ffffff; color: #161825 !important;" th:href="@{/my-bookings}" role="button">Đơn Đặt Phòng</a>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-lg-5 d-none d-lg-block">
+                  <div class="hero_showcase_frame ts-ambient-float">
+                    <img th:src="@{/images/rooms/room-2.jpg}" alt="Đặt thuê phòng trực tuyến" />
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
-          <h2 class="mt-5 text-2xl font-extrabold text-slate-900">Đang chờ bài đăng đầu tiên</h2>
-          <p class="mt-3 text-sm leading-7 text-slate-500">
-            Khi có bài đăng được kích hoạt, khu vực nổi bật này sẽ hiện hình ảnh, giá thuê và thông tin tổng quan để người xem ra quyết định nhanh hơn.
-          </p>
         </div>
       </div>
     </div>
   </section>
+  <!-- end banner -->
 
-  <section class="reveal grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
-    <div class="rounded-[32px] border border-slate-200 bg-white p-7 shadow-[0_16px_45px_rgba(15,23,42,0.06)]">
-      <p class="text-sm font-bold uppercase tracking-[0.3em] text-sky-700">Danh mục nhanh</p>
-      <h2 class="mt-4 text-3xl font-extrabold text-slate-950">Chọn đúng loại phòng ngay từ đầu.</h2>
-      <p class="mt-4 text-sm leading-7 text-slate-500">
-        Từ phòng trọ giá mềm đến căn hộ mini hoàn chỉnh, người thuê có thể bắt đầu bằng danh mục phù hợp nhất với nhu cầu của mình.
-      </p>
+  <!-- 2. Rhino Three Box Section (.three_box) + Business Search Bar -->
+  <div class="three_box">
+    <div class="container">
+      <div class="row g-4">
+        <div class="col-md-4">
+          <a th:href="@{/properties}" class="d-block text-decoration-none h-100">
+            <div id="text_hover" class="const text_align_center">
+              <div class="d-inline-flex align-items-center justify-content-center rounded-circle" style="width: 64px; height: 64px; background: linear-gradient(135deg, #fe9901 0%, #ea580c 100%); color: #ffffff; font-size: 24px; box-shadow: 0 6px 16px rgba(254, 153, 1, 0.3);">
+                <i class="fa-solid fa-building" aria-hidden="true"></i>
+              </div>
+              <span>PHÒNG TRỌ &amp; CĂN HỘ XÁC THỰC</span>
+            </div>
+          </a>
+        </div>
+        <div class="col-md-4">
+          <a th:href="@{/my-bookings}" class="d-block text-decoration-none h-100">
+            <div id="text_hover" class="const text_align_center">
+              <div class="d-inline-flex align-items-center justify-content-center rounded-circle" style="width: 64px; height: 64px; background: linear-gradient(135deg, #fe9901 0%, #ea580c 100%); color: #ffffff; font-size: 24px; box-shadow: 0 6px 16px rgba(254, 153, 1, 0.3);">
+                <i class="fa-solid fa-file-signature" aria-hidden="true"></i>
+              </div>
+              <span>ĐẶT THUÊ &amp; HỢP ĐỒNG ONLINE</span>
+            </div>
+          </a>
+        </div>
+        <div class="col-md-4">
+          <a th:href="@{/video-review}" class="d-block text-decoration-none h-100">
+            <div id="text_hover" class="const text_align_center">
+              <div class="d-inline-flex align-items-center justify-content-center rounded-circle" style="width: 64px; height: 64px; background: linear-gradient(135deg, #fe9901 0%, #ea580c 100%); color: #ffffff; font-size: 24px; box-shadow: 0 6px 16px rgba(254, 153, 1, 0.3);">
+                <i class="fa-solid fa-qrcode" aria-hidden="true"></i>
+              </div>
+              <span>ĐIỆN NƯỚC &amp; VIETQR MINH BẠCH</span>
+            </div>
+          </a>
+        </div>
+      </div>
 
-      <div class="mt-6 flex flex-wrap gap-3">
-        <th:block th:each="cat : ${categories}">
-          <th:block th:if="${cat instanceof T(com.pms.propertymanagement.dto.response.CategoryResponse)}">
+      <!-- Search Form (Business Logic Preserved 100%) -->
+      <div class="rhino_search_card mt-4">
+        <div class="d-flex flex-wrap align-items-center justify-content-between mb-3 gap-2">
+          <h2 class="h4 fw-bold mb-0 text-uppercase" style="color: #161825;">
+            <i class="fa fa-search me-2" style="color: #fe9901;"></i>Tìm Kiếm Phòng Trọ &amp; Căn Hộ
+          </h2>
+          <div class="d-flex flex-wrap align-items-center gap-4">
+            <span class="small fw-bold" style="color: #334155;">
+              <strong style="color: #ea580c;" class="tabular-nums" th:text="${postCount != null ? postCount : 128}">128</strong> Phòng đang mở
+            </span>
+            <span class="small fw-bold" style="color: #334155;">
+              <strong style="color: #ea580c;" class="tabular-nums" th:text="${provinceCount != null ? provinceCount : 12}">12</strong> Tỉnh / Thành
+            </span>
+            <span class="small fw-bold" style="color: #334155;">
+              Giá từ <strong style="color: #ea580c;" class="tabular-nums" th:text="${startingPrice != null and startingPrice > 0 ? #numbers.formatDecimal(startingPrice, 0, 'POINT', 0, 'COMMA') + ' đ' : '1.500.000 đ'}">1.500.000 đ</strong>
+            </span>
+          </div>
+        </div>
+
+        <form th:action="@{/properties}" method="get" class="row g-3 align-items-center">
+          <div class="col-lg-3 col-md-6">
+            <input
+              type="text"
+              name="keyword"
+              class="upside-select-input"
+              placeholder="Khu vực, tên đường, trường..."
+            />
+          </div>
+
+          <div class="col-lg-3 col-md-6">
+            <select id="homeCategorySelect" name="categoryId" class="upside-select-input" aria-label="Loại hình lưu trú">
+              <option value="">Tất cả loại hình lưu trú</option>
+              <option th:each="cat : ${categories}" th:value="${cat.id}" th:text="${cat.name}">Phòng trọ</option>
+            </select>
+          </div>
+
+          <div class="col-lg-2 col-md-6">
+            <select id="homeMaxPriceSelect" name="maxPrice" class="upside-select-input tabular-nums" aria-label="Mức giá thuê">
+              <option value="">Mọi mức giá thuê</option>
+              <option value="2500000">Dưới 2.5 triệu</option>
+              <option value="3500000">Dưới 3.5 triệu</option>
+              <option value="5000000">Dưới 5 triệu</option>
+              <option value="15000000">Trên 5 triệu</option>
+            </select>
+          </div>
+
+          <div class="col-lg-4 col-md-6 d-flex gap-2 flex-nowrap">
+            <div class="find_btn flex-grow-1">
+              <button type="submit" class="w-100 text-nowrap" style="height: 46px;">Tìm Phòng Ngay</button>
+            </div>
+            <button
+              type="button"
+              onclick="var btn = document.getElementById('chatToggle'); if(btn) btn.click();"
+              title="Tư vấn gợi ý phòng nhanh"
+              class="btn-estate-outline px-3 text-nowrap flex-shrink-0"
+              style="height: 46px;"
+            >
+              <i class="fa fa-comments"></i>
+              <span>Tư vấn</span>
+            </button>
+          </div>
+        </form>
+
+        <!-- Category Quick Pills -->
+        <div class="d-flex flex-wrap align-items-center gap-2 mt-3 pt-2">
+          <span class="fw-bold small text-uppercase" style="color: #161825;">Danh mục nhanh:</span>
+          <a href="/properties" class="estate-action-pill text-decoration-none">Tất cả phòng</a>
+          <th:block th:each="cat : ${categories}">
             <a
               th:href="@{/public/category/{id}(id=${cat.id})}"
-              class="rounded-full border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:-translate-y-0.5 hover:border-sky-300 hover:bg-sky-50 hover:text-blue-700"
+              class="estate-action-pill text-decoration-none"
               th:text="${cat.name}"
-            >
-              Nha tro
-            </a>
+            >Nhà trọ</a>
           </th:block>
-        </th:block>
-      </div>
-    </div>
-
-    <div class="grid gap-4 sm:grid-cols-2">
-      <div class="rounded-[28px] bg-slate-950 p-6 text-white shadow-xl shadow-slate-950/10">
-        <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/10 text-sky-200">
-          <i class="fa-solid fa-camera-retro"></i>
         </div>
-        <h3 class="mt-5 text-xl font-extrabold">Hình ảnh rõ ràng</h3>
-        <p class="mt-3 text-sm leading-7 text-slate-300">
-          Bài đăng ưu tiên hình ảnh đầy đủ, góc chụp thật và thông tin có thể đối chiếu khi đến xem phòng.
-        </p>
       </div>
+    </div>
+  </div>
+  <!-- end three_box -->
 
-      <div class="rounded-[28px] bg-gradient-to-br from-sky-500 to-blue-700 p-6 text-white shadow-xl shadow-sky-500/20">
-        <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/15">
-          <i class="fa-solid fa-bolt-lightning"></i>
+  <!-- 3. Rhino About Section (.about) -->
+  <div class="about">
+    <div class="container">
+      <div class="row d_flex align-items-center g-4">
+        <div class="col-lg-7 col-md-12">
+          <div class="titlepage">
+            <h2>Về Hệ Thống TrọMới</h2>
+            <span>
+              TrọMới tích hợp quy trình tìm kiếm và quản lý lưu trú khép kín: khảo sát phòng qua mô hình 3D trực quan, đặt thuê phòng trực tuyến, ký hợp đồng điện tử, tự động chốt chỉ số điện nước kèm mã thanh toán VietQR Napas247 và xuất tờ khai tạm trú mẫu CT01.
+            </span>
+            <div class="d-flex flex-wrap gap-3">
+              <a class="read_more" th:href="@{/properties}">Đặt Phòng Ngay</a>
+              <a class="btn-estate" th:href="@{/video-review}">Xem Video Review</a>
+            </div>
+          </div>
         </div>
-        <h3 class="mt-5 text-xl font-extrabold">Liên hệ nhanh</h3>
-        <p class="mt-3 text-sm leading-7 text-sky-50">
-          Xem chi tiết bài đăng, liên hệ chủ trọ và đặt lịch xem phòng nhanh hơn ngay trên trang.
-        </p>
-      </div>
-
-      <div class="rounded-[28px] border border-slate-200 bg-white p-6 shadow-[0_16px_45px_rgba(15,23,42,0.06)]">
-        <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-700">
-          <i class="fa-solid fa-sliders"></i>
+        <div class="col-lg-5 col-md-12">
+          <div class="about_img">
+            <figure><img th:src="@{/images/rooms/room-3.jpg}" alt="Không gian căn hộ TrọMới" /></figure>
+          </div>
         </div>
-        <h3 class="mt-5 text-xl font-extrabold text-slate-900">Lọc theo nhu cầu</h3>
-        <p class="mt-3 text-sm leading-7 text-slate-500">
-          Người thuê có thể đi qua danh mục, mức giá và khu vực để thu hẹp lựa chọn nhanh hơn.
-        </p>
       </div>
+    </div>
+  </div>
+  <!-- end about -->
 
-      <div class="rounded-[28px] border border-slate-200 bg-white p-6 shadow-[0_16px_45px_rgba(15,23,42,0.06)]">
-        <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-100 text-amber-700">
-          <i class="fa-solid fa-circle-play"></i>
+  <!-- 4. Rhino Projects Section (.projects) + Dynamic Property Listings -->
+  <div class="projects" id="latest-posts">
+    <div class="container">
+      <div class="row">
+        <div class="col-md-12">
+          <div class="titlepage">
+            <h2>Không Gian Lưu Trú &amp; Phòng Trọ Mới Nhất</h2>
+            <span>Tổng hợp các khu nhà trọ, căn hộ dịch vụ và nhà nguyên căn xác thực chính chủ, niêm yết giá minh bạch</span>
+          </div>
         </div>
-        <h3 class="mt-5 text-xl font-extrabold text-slate-900">Video review thực tế</h3>
-        <p class="mt-3 text-sm leading-7 text-slate-500">
-          Thêm trải nghiệm review thực tế để người xem cảm nhận không gian rõ hơn trước khi đến nơi.
-        </p>
-      </div>
-    </div>
-  </section>
-
-  <section id="latest-posts" class="space-y-6">
-    <div class="reveal flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-      <div>
-        <p class="text-sm font-bold uppercase tracking-[0.3em] text-sky-700">Tin đăng mới nhất</p>
-        <h2 class="mt-3 text-3xl font-extrabold text-slate-950 md:text-4xl">Danh sách bài đăng đang được quan tâm.</h2>
-      </div>
-      <p class="max-w-xl text-sm leading-7 text-slate-500">
-        Bổ sung giao diện đậm chất marketplace: dễ xem, dễ so sánh và dễ chuyển sang trang chi tiết.
-      </p>
-    </div>
-
-    <div th:if="${session.user == null}" class="reveal flex flex-col gap-3 sm:flex-row">
-      <a href="/login" class="inline-flex items-center justify-center gap-2 rounded-full bg-slate-950 px-5 py-3 text-sm font-semibold text-white transition hover:bg-blue-700">
-        <i class="fa-solid fa-right-to-bracket"></i>
-        Đăng nhập
-      </a>
-      <a href="/register" class="inline-flex items-center justify-center gap-2 rounded-full border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:border-sky-300 hover:text-blue-700">
-        <i class="fa-solid fa-user-plus"></i>
-        Đăng ký
-      </a>
-    </div>
-
-    <div class="grid gap-5">
-      <div th:each="p : ${latestProperties}" class="reveal">
-        <div th:replace="~{layout/parts/property-card :: card(p=${p})}"></div>
-      </div>
-    </div>
-
-    <div th:if="${#lists.isEmpty(latestProperties)}" class="reveal rounded-[28px] border border-dashed border-slate-300 bg-white px-6 py-14 text-center shadow-sm">
-      <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-sky-100 text-sky-700">
-        <i class="fa-solid fa-house-circle-check text-2xl"></i>
-      </div>
-      <h3 class="mt-5 text-2xl font-extrabold text-slate-900">Chưa có bài đăng nào</h3>
-      <p class="mx-auto mt-3 max-w-2xl text-sm leading-7 text-slate-500">
-        Khi chủ trọ bắt đầu đăng bài, mục này sẽ tự động hiện các bài đăng mới nhất để người xem có thể khám phá ngay trên trang chủ.
-      </p>
-    </div>
-  </section>
-
-  <section class="reveal rounded-[36px] border border-slate-200 bg-white px-6 py-10 shadow-[0_18px_50px_rgba(15,23,42,0.06)] md:px-10">
-    <div class="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
-      <div>
-        <p class="text-sm font-bold uppercase tracking-[0.3em] text-sky-700">Hành trình tìm phòng</p>
-        <h2 class="mt-3 text-3xl font-extrabold text-slate-950">Ba bước để chọn được phòng hợp ý.</h2>
-      </div>
-      <p class="max-w-2xl text-sm leading-7 text-slate-500">
-        Giao diện mới được sắp xếp quanh hành vi thực tế của người thuê: xem nhanh, so sánh nhanh và liên hệ nhanh.
-      </p>
-    </div>
-
-    <div class="mt-10 grid gap-5 lg:grid-cols-3">
-      <div class="timeline-card">
-        <span class="timeline-step">01</span>
-        <h3 class="mt-5 text-xl font-extrabold text-slate-900">Lọc khu vực và danh mục</h3>
-        <p class="mt-3 text-sm leading-7 text-slate-500">
-          Bắt đầu từ nhu cầu thật: gần trường, gần chỗ làm hoặc cần nhà riêng để ở theo nhóm.
-        </p>
       </div>
 
-      <div class="timeline-card">
-        <span class="timeline-step">02</span>
-        <h3 class="mt-5 text-xl font-extrabold text-slate-900">Xem hình, giá và thông tin chi tiết</h3>
-        <p class="mt-3 text-sm leading-7 text-slate-500">
-          Trang bài đăng mới nổi bật hình ảnh, giá thuê, diện tích, địa chỉ và các tiện nghi để so sánh nhanh hơn.
-        </p>
+      <!-- Rhino Featured Project Showcase Row -->
+      <div class="row g-4 mb-4">
+        <div class="col-md-4">
+          <a th:href="@{/public/category/2}" class="d-block text-decoration-none h-100">
+            <div class="project h-100">
+              <div class="project_img">
+                <figure><img th:src="@{/images/rooms/room-4.jpg}" alt="Khu căn hộ dịch vụ" /></figure>
+              </div>
+              <div class="project_text">
+                <h3>Căn Hộ Studio Ban Công</h3>
+                <p>Trang bị đầy đủ điều hòa, nóng lạnh, kệ bếp riêng, khóa vân tay an ninh 24/7 và hỗ trợ xem phòng 3D trực tuyến.</p>
+              </div>
+            </div>
+          </a>
+        </div>
+        <div class="col-md-4">
+          <a th:href="@{/public/category/1}" class="d-block text-decoration-none h-100">
+            <div class="project h-100">
+              <div class="project_img">
+                <figure><img th:src="@{/images/rooms/room-5.jpg}" alt="Phòng trọ gác lửng" /></figure>
+              </div>
+              <div class="project_text">
+                <h3>Phòng Trọ Gác Lửng Tiện Nghi</h3>
+                <p>Không gian sạch đẹp, giờ giấc tự do, hầm để xe rộng rãi, đồng hồ điện nước riêng biệt theo giá nhà nước.</p>
+              </div>
+            </div>
+          </a>
+        </div>
+        <div class="col-md-4">
+          <a th:href="@{/public/category/3}" class="d-block text-decoration-none h-100">
+            <div class="project h-100">
+              <div class="project_img">
+                <figure><img th:src="@{/images/rooms/room-6.jpg}" alt="Nhà nguyên căn &amp; KTX" /></figure>
+              </div>
+              <div class="project_text">
+                <h3>Nhà Nguyên Căn &amp; Sleepbox</h3>
+                <p>Đa dạng phân khúc từ ký túc xá sinh viên tiện nghi đến nhà nguyên căn cho hộ gia đình và nhóm người đi làm.</p>
+              </div>
+            </div>
+          </a>
+        </div>
       </div>
 
-      <div class="timeline-card">
-        <span class="timeline-step">03</span>
-        <h3 class="mt-5 text-xl font-extrabold text-slate-900">Liên hệ chủ trọ và hẹn xem phòng</h3>
-        <p class="mt-3 text-sm leading-7 text-slate-500">
-          Khi đã thấy bài đăng phù hợp, người xem có thể đi thẳng vào thông tin chi tiết và kết nối ngay.
-        </p>
+      <!-- Dynamic Thymeleaf Latest Properties Grid -->
+      <div class="row g-4 mt-2">
+        <div
+          class="col-lg-4 col-md-6"
+          th:each="p : ${latestProperties != null and !latestProperties.isEmpty() ? latestProperties : featuredProperties}"
+        >
+          <div th:replace="~{layout/parts/property-card :: card(p=${p})}"></div>
+        </div>
+      </div>
+
+      <!-- Empty State -->
+      <div th:if="${#lists.isEmpty(latestProperties) and #lists.isEmpty(featuredProperties)}" class="text-center py-5 mt-4" style="background: #ffffff; border-radius: 8px;">
+        <h3 class="fw-bold">Chưa có bài đăng nào</h3>
+        <p class="text-muted mb-3">Hệ thống đang cập nhật các không gian lưu trú mới. Vui lòng quay lại sau.</p>
+      </div>
+
+      <div class="text-center mt-4">
+        <a th:href="@{/properties}" class="read_more">
+          <span>Xem Toàn Bộ Danh Sách Phòng</span>
+        </a>
+      </div>
+
+      <!-- Priority Properties Subsection (if present) -->
+      <div th:if="${not #lists.isEmpty(priorityProperties)}" class="mt-5 pt-4">
+        <div class="titlepage pb-4">
+          <h2>Tâm Điểm Tuyển Chọn</h2>
+        </div>
+        <div class="row g-4">
+          <div class="col-lg-4 col-md-6" th:each="p : ${priorityProperties}">
+            <div th:replace="~{layout/parts/property-card :: card(p=${p})}"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recently Viewed Subsection -->
+      <div id="recentlyViewedHomeSection" class="mt-5 pt-4 hidden">
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-4">
+          <h2 class="mb-0" style="color: #161825;">Vừa Xem Gần Đây</h2>
+          <button type="button" onclick="clearRecentlyViewedHome()" class="btn-estate-outline py-2 px-3 small">
+            <i class="fa fa-trash"></i>
+            <span>Xóa lịch sử</span>
+          </button>
+        </div>
+        <div id="recentlyViewedHomeGrid" class="row g-4"></div>
       </div>
     </div>
-  </section>
+  </div>
+  <!-- end projects -->
 
-  <section class="reveal cta-panel grid gap-8 rounded-[36px] px-6 py-10 text-white md:px-10 lg:grid-cols-[1fr_auto] lg:items-center">
-    <div>
-      <p class="text-sm font-bold uppercase tracking-[0.3em] text-sky-100">Dịch vụ cho chủ trọ</p>
-      <h2 class="mt-3 text-3xl font-extrabold md:text-4xl">Bạn có phòng trống? Đăng bài lên PMS để tiếp cận người thuê nhanh hơn.</h2>
-      <p class="mt-4 max-w-3xl text-sm leading-7 text-sky-50/90">
-        Giao diện mới được thiết kế để bài đăng trong sáng, dễ tin hơn và hướng người xem tập trung vào thông tin quan trọng nhất.
-      </p>
+  <!-- 5. Rhino Why Choose Us Section (.choose) -->
+  <div class="choose">
+    <div class="container">
+      <div class="row align-items-center g-4">
+        <div class="col-lg-7 col-md-12">
+          <div class="titlepage">
+            <h2>Vì Sao Chọn TrọMới</h2>
+            <p>
+              Đội ngũ TrọMới kiểm duyệt thực tế từng cơ sở nhà trọ và căn hộ, cam kết đúng hình ảnh, đúng giá niêm yết, hợp đồng điện tử minh bạch và hỗ trợ cư dân trong suốt quá trình lưu trú.
+            </p>
+            <div class="award">
+              <div id="awa_ho" class="award_icon text_align_center">
+                <i><img th:src="@{/rhino/images/ch1.png}" alt="Khách hàng hài lòng" /></i>
+                <strong>Khách Hài Lòng</strong>
+              </div>
+              <div id="awa_ho" class="award_icon text_align_center">
+                <i><img th:src="@{/rhino/images/ch2.png}" alt="Xác thực 100%" /></i>
+                <strong>Xác Thực 100%</strong>
+              </div>
+              <div id="awa_ho" class="award_icon text_align_center">
+                <i><img th:src="@{/rhino/images/ch3.png}" alt="Uy tín minh bạch" /></i>
+                <strong>Uy Tín Minh Bạch</strong>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-5 col-md-12">
+          <div class="hero_showcase_frame">
+            <img th:src="@{/images/rooms/room-7.jpg}" alt="Không gian sống tiện nghi xác thực" />
+          </div>
+        </div>
+      </div>
     </div>
+  </div>
+  <!-- end choose -->
 
-    <div class="flex flex-wrap gap-3">
-      <a href="/login/owner" class="inline-flex items-center gap-2 rounded-full bg-white px-6 py-3.5 text-sm font-semibold text-slate-900 transition hover:-translate-y-0.5 hover:bg-sky-100">
-        <i class="fa-solid fa-building"></i>
-        Đăng bài ngay
-      </a>
-      <a href="/video-review" class="inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/10 px-6 py-3.5 text-sm font-semibold text-white backdrop-blur transition hover:bg-white/20">
-        <i class="fa-solid fa-circle-play"></i>
-        Xem ý tưởng video review
-      </a>
+  <!-- 6. Rhino Staff Section (.staff_main) -->
+  <div class="staff_main">
+    <div class="container_staff">
+      <div class="row g-4">
+        <div class="col-md-12">
+          <div class="titlepage mb-0">
+            <h2>Đội Ngũ Quản Lý &amp; Hỗ Trợ Cư Dân</h2>
+            <span>Hỗ trợ dẫn xem phòng miễn phí, giải đáp hợp đồng, xử lý bảo trì kỹ thuật và tư vấn tìm phòng 24/7</span>
+          </div>
+        </div>
+        <div class="col-lg-3 col-md-6">
+          <div class="staff">
+            <div class="man">
+              <div class="d-inline-flex align-items-center justify-content-center rounded-circle mb-3" style="width: 68px; height: 68px; background: #fff7ed; color: #fe9901; font-size: 24px; border: 1px solid #fed7aa;">
+                <i class="fa-solid fa-location-dot" aria-hidden="true"></i>
+              </div>
+              <p class="small mb-0">Hỗ trợ tìm phòng theo khu vực, trường đại học và ngân sách thực tế.</p>
+            </div>
+            <div class="social_icon_main">
+              <h4>Tư Vấn Khu Vực</h4>
+              <ul class="social_icon_staff text_align_center">
+                <li><a th:href="@{/properties}" aria-label="Facebook"><i class="fa-brands fa-facebook-f" aria-hidden="true"></i></a></li>
+                <li><a th:href="@{/properties}" aria-label="Twitter"><i class="fa-brands fa-twitter" aria-hidden="true"></i></a></li>
+                <li><a th:href="@{/properties}" aria-label="LinkedIn"><i class="fa-brands fa-linkedin-in" aria-hidden="true"></i></a></li>
+                <li><a th:href="@{/properties}" aria-label="Instagram"><i class="fa-brands fa-instagram" aria-hidden="true"></i></a></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-3 col-md-6">
+          <div class="staff">
+            <div class="man">
+              <div class="d-inline-flex align-items-center justify-content-center rounded-circle mb-3" style="width: 68px; height: 68px; background: #fff7ed; color: #fe9901; font-size: 24px; border: 1px solid #fed7aa;">
+                <i class="fa-solid fa-video" aria-hidden="true"></i>
+              </div>
+              <p class="small mb-0">Quay dựng video thực tế và mô hình 3D giúp khách xem phòng từ xa.</p>
+            </div>
+            <div class="social_icon_main">
+              <h4>Khảo Sát Phòng 3D</h4>
+              <ul class="social_icon_staff text_align_center">
+                <li><a th:href="@{/video-review}" aria-label="Facebook"><i class="fa-brands fa-facebook-f" aria-hidden="true"></i></a></li>
+                <li><a th:href="@{/video-review}" aria-label="Twitter"><i class="fa-brands fa-twitter" aria-hidden="true"></i></a></li>
+                <li><a th:href="@{/video-review}" aria-label="LinkedIn"><i class="fa-brands fa-linkedin-in" aria-hidden="true"></i></a></li>
+                <li><a th:href="@{/video-review}" aria-label="Instagram"><i class="fa-brands fa-instagram" aria-hidden="true"></i></a></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-3 col-md-6">
+          <div class="staff">
+            <div class="man">
+              <div class="d-inline-flex align-items-center justify-content-center rounded-circle mb-3" style="width: 68px; height: 68px; background: #fff7ed; color: #fe9901; font-size: 24px; border: 1px solid #fed7aa;">
+                <i class="fa-solid fa-shield-halved" aria-hidden="true"></i>
+              </div>
+              <p class="small mb-0">Hướng dẫn ký hợp đồng điện tử, xác thực CCCD eKYC và khai báo CT01.</p>
+            </div>
+            <div class="social_icon_main">
+              <h4>Hợp Đồng &amp; CT01</h4>
+              <ul class="social_icon_staff text_align_center">
+                <li><a th:href="@{/my-bookings}" aria-label="Facebook"><i class="fa-brands fa-facebook-f" aria-hidden="true"></i></a></li>
+                <li><a th:href="@{/my-bookings}" aria-label="Twitter"><i class="fa-brands fa-twitter" aria-hidden="true"></i></a></li>
+                <li><a th:href="@{/my-bookings}" aria-label="LinkedIn"><i class="fa-brands fa-linkedin-in" aria-hidden="true"></i></a></li>
+                <li><a th:href="@{/my-bookings}" aria-label="Instagram"><i class="fa-brands fa-instagram" aria-hidden="true"></i></a></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-3 col-md-6">
+          <div class="staff">
+            <div class="man">
+              <div class="d-inline-flex align-items-center justify-content-center rounded-circle mb-3" style="width: 68px; height: 68px; background: #fff7ed; color: #fe9901; font-size: 24px; border: 1px solid #fed7aa;">
+                <i class="fa-solid fa-wrench" aria-hidden="true"></i>
+              </div>
+              <p class="small mb-0">Tiếp nhận yêu cầu sửa chữa điện nước, điều hòa và thiết bị trong 24h.</p>
+            </div>
+            <div class="social_icon_main">
+              <h4>Kỹ Thuật &amp; Bảo Trì</h4>
+              <ul class="social_icon_staff text_align_center">
+                <li><a th:href="@{/login}" aria-label="Facebook"><i class="fa-brands fa-facebook-f" aria-hidden="true"></i></a></li>
+                <li><a th:href="@{/login}" aria-label="Twitter"><i class="fa-brands fa-twitter" aria-hidden="true"></i></a></li>
+                <li><a th:href="@{/login}" aria-label="LinkedIn"><i class="fa-brands fa-linkedin-in" aria-hidden="true"></i></a></li>
+                <li><a th:href="@{/login}" aria-label="Instagram"><i class="fa-brands fa-instagram" aria-hidden="true"></i></a></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-12 text-center">
+          <a class="read_more" th:href="@{/properties}">Xem Tất Cả Phòng</a>
+        </div>
+      </div>
     </div>
-  </section>
+  </div>
+  <!-- end staff -->
+
+  <!-- 7. Rhino Contact Section (.contact + .main_form + .map_main) -->
+  <div class="contact">
+    <div class="container">
+      <div class="row">
+        <div class="col-md-12">
+          <div class="titlepage">
+            <h2>Yêu Cầu Tư Vấn &amp; Tìm Phòng</h2>
+          </div>
+        </div>
+      </div>
+      <div class="row g-4 align-items-stretch">
+        <div class="col-lg-6 col-md-12">
+          <form id="request" class="main_form h-100" th:action="@{/properties}" method="get">
+            <div class="row">
+              <div class="col-md-12">
+                <input class="contactus" placeholder="Họ và tên của bạn" type="text" name="contactName" />
+              </div>
+              <div class="col-md-12">
+                <input class="contactus" placeholder="Số điện thoại liên hệ (VD: 0988 123 456)" type="text" name="contactPhone" />
+              </div>
+              <div class="col-md-12">
+                <input class="contactus" placeholder="Khu vực hoặc mức giá mong muốn" type="text" name="keyword" />
+              </div>
+              <div class="col-md-12">
+                <textarea class="textarea" placeholder="Ghi chú nhu cầu thuê phòng (có ban công, điều hòa, máy giặt...)" name="note"></textarea>
+              </div>
+              <div class="col-md-12 d-flex flex-wrap align-items-center gap-3">
+                <button class="send_btn" type="submit">Gửi Yêu Cầu</button>
+                <button
+                  type="button"
+                  class="btn-estate"
+                  onclick="var btn = document.getElementById('chatToggle'); if(btn) btn.click();"
+                >
+                  Chat Tư Vấn
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
+        <div class="col-lg-6 col-md-12">
+          <div class="map_main h-100 rounded overflow-hidden">
+            <div class="map-responsive h-100">
+              <iframe
+                src="https://www.google.com/maps?q=Hà+Nội+Việt+Nam&output=embed"
+                width="600"
+                height="420"
+                style="border: 0; width: 100%; height: 100%; min-height: 380px;"
+                allowfullscreen=""
+                loading="lazy"
+                title="Bản đồ khu vực nhà trọ"
+              ></iframe>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- end contact -->
+
+  <!-- 8. Rhino Clients Words Section (.clients) -->
+  <div class="clients">
+    <div class="container">
+      <div class="row">
+        <div class="col-md-12">
+          <div class="titlepage">
+            <h2>Khách Thuê &amp; Chủ Trọ Đánh Giá</h2>
+            <span>Cảm nhận thực tế từ cư dân đang lưu trú và các chủ nhà trọ vận hành trên hệ thống TrọMới</span>
+          </div>
+        </div>
+      </div>
+      <div class="row g-4">
+        <div class="col-lg-6 col-md-12">
+          <div class="testimo_ban_bg h-100">
+            <div class="relative2 h-100">
+              <i>
+                <img class="qusright" th:src="@{/rhino/images/t.png}" alt="quote" />
+                <img th:src="@{/images/rooms/room-5.jpg}" alt="Hoàng Minh Tuấn" style="width: 64px; height: 64px; border-radius: 50%; object-fit: cover;" />
+                <img class="qusleft" th:src="@{/rhino/images/t.png}" alt="quote" />
+              </i>
+              <div class="consect">
+                <span>Hoàng Minh Tuấn · Kỹ sư Phần mềm</span>
+                <p>
+                  Nhờ tính năng xem mô hình phòng 3D và bảng tính tự động tiền điện nước hàng tháng, mình đã chọn được căn hộ mini rất ưng ý mà không mất công đi lại nhiều lần. Hợp đồng và hóa đơn VietQR cực kỳ minh bạch.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-6 col-md-12">
+          <div class="testimo_ban_bg h-100">
+            <div class="relative2 h-100">
+              <i>
+                <img class="qusright" th:src="@{/rhino/images/t.png}" alt="quote" />
+                <img th:src="@{/images/rooms/room-8.jpg}" alt="Nguyễn Thu Hà" style="width: 64px; height: 64px; border-radius: 50%; object-fit: cover;" />
+                <img class="qusleft" th:src="@{/rhino/images/t.png}" alt="quote" />
+              </i>
+              <div class="consect">
+                <span>Nguyễn Thu Hà · Chủ hệ thống Căn hộ</span>
+                <p>
+                  Từ khi quản lý 3 khu nhà trọ trên TrọMới, việc chốt điện nước hàng loạt, gửi hóa đơn VietQR và xuất mẫu khai báo tạm trú CT01 chỉ mất chưa đầy 10 phút mỗi tháng.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- end clients -->
+
+  <script>
+    (function initRecentlyViewedHome() {
+      function renderRecentlyViewed() {
+        var sec = document.getElementById('recentlyViewedHomeSection');
+        var grid = document.getElementById('recentlyViewedHomeGrid');
+        if (!sec || !grid) return;
+
+        var items = [];
+        try {
+          items = JSON.parse(localStorage.getItem('tm_recently_viewed') || '[]');
+        } catch (e) {
+          items = [];
+        }
+
+        if (!Array.isArray(items) || items.length === 0) {
+          sec.classList.add('hidden');
+          grid.innerHTML = '';
+          return;
+        }
+
+        sec.classList.remove('hidden');
+        grid.innerHTML = items.slice(0, 3).map(function (it) {
+          var slug = it.slug || '';
+          var title = it.title || 'Không gian lưu trú';
+          var priceNum = Number(it.price || 0);
+          var priceStr = priceNum > 0 ? priceNum.toLocaleString('vi-VN') + ' đ' : 'Liên hệ';
+          var addr = it.address || 'Trung tâm';
+          var img = (it.image && it.image.indexOf('/upside/images/') === -1) ? it.image : '/images/rooms/room-4.jpg';
+
+          return '<div class="col-lg-4 col-md-6">' +
+            '<div class="upside-property-card">' +
+              '<div class="blog_img">' +
+                '<a href="/public/property/' + slug + '" class="d-block w-100 h-100">' +
+                  '<img src=\'' + img + '\' onerror="this.onerror=null;this.src=\'/images/rooms/room-4.jpg\';" alt="' + title.replace(/"/g, '&quot;') + '" loading="lazy" />' +
+                '</a>' +
+                '<div class="position-absolute top-0 start-0 p-2">' +
+                  '<span class="estate-badge-cat">Vừa xem</span>' +
+                '</div>' +
+              '</div>' +
+              '<div class="image_box">' +
+                '<div class="left_box">' +
+                  '<h2 class="road_text"><a href="/public/property/' + slug + '">' + title + '</a></h2>' +
+                  '<div class="area_main">' +
+                    '<h3 class="area_text active"><a href="/public/property/' + slug + '">Khu vực:<br /><span>' + addr + '</span></a></h3>' +
+                  '</div>' +
+                '</div>' +
+                '<div class="right_box">' +
+                  '<a href="/public/property/' + slug + '" class="text-decoration-none"><div class="rate_text tabular-nums">' + priceStr + '</div></a>' +
+                '</div>' +
+              '</div>' +
+            '</div>' +
+          '</div>';
+        }).join('');
+      }
+
+      window.clearRecentlyViewedHome = function () {
+        try {
+          localStorage.removeItem('tm_recently_viewed');
+        } catch (e) {}
+        renderRecentlyViewed();
+      };
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', renderRecentlyViewed);
+      } else {
+        renderRecentlyViewed();
+      }
+    })();
+  </script>
 </div>

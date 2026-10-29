@@ -1,86 +1,61 @@
-<footer th:fragment="footer-main" class="mt-20 overflow-hidden border-t border-slate-200 bg-slate-950 text-slate-200">
-  <div class="container mx-auto px-4 py-16 md:px-6 lg:px-8">
-    <div class="grid gap-10 lg:grid-cols-[1.4fr_1fr_1fr_1.2fr]">
-      <div class="space-y-5">
-        <div class="flex items-center gap-3">
-          <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-sky-500 to-blue-700 text-white shadow-lg shadow-sky-500/30">
-            <i class="fa-solid fa-house-chimney-window text-lg"></i>
-          </div>
-          <div>
-            <p class="text-xs font-semibold uppercase tracking-[0.35em] text-sky-300">PMS Marketplace</p>
-            <h3 class="text-2xl font-extrabold text-white">Trọ Mới</h3>
-          </div>
+<footer th:fragment="footer-main" id="footer" class="mt-auto">
+  <div class="footer">
+    <div class="container">
+      <div class="row text-start g-4">
+        <div class="col-lg-3 col-md-6">
+          <a class="logo_bottom text-decoration-none gap-2" th:href="@{/}">
+            <span class="d-inline-flex align-items-center justify-content-center" style="width: 36px; height: 36px; border-radius: 9px; background-color: #fe9901; color: #ffffff; font-size: 16px;">
+              <i class="fa-solid fa-building" aria-hidden="true"></i>
+            </span>
+            <span style="font-size: 22px; font-weight: 800; color: #ffffff; letter-spacing: -0.02em;">TRỌ MỚI</span>
+          </a>
+          <p class="many">
+            TrọMới là hệ thống tìm kiếm phòng trọ, căn hộ dịch vụ và quản lý lưu trú trực tuyến. Hỗ trợ xem phòng thực tế 3D, đặt thuê online và thanh toán hóa đơn VietQR minh bạch.
+          </p>
         </div>
 
-        <p class="max-w-md text-sm leading-7 text-slate-300">
-          Nền tảng kết nối người tìm phòng với chủ trọ một cách nhanh, rõ ràng và dễ tin cậy hơn.
-          Tập trung vào phòng trọ, căn hộ mini và nhà nguyên căn có hình ảnh thật, mô tả rõ ràng và thông tin liên hệ dễ kiểm.
-        </p>
-
-        <div class="flex flex-wrap gap-3">
-          <span class="rounded-full border border-slate-800 bg-slate-900 px-4 py-2 text-xs font-semibold text-sky-200">Đăng tin nhanh</span>
-          <span class="rounded-full border border-slate-800 bg-slate-900 px-4 py-2 text-xs font-semibold text-emerald-200">Lọc theo nhu cầu</span>
-          <span class="rounded-full border border-slate-800 bg-slate-900 px-4 py-2 text-xs font-semibold text-amber-200">Xem phòng dễ dàng</span>
+        <div class="col-lg-2 offset-lg-1 col-md-6">
+          <h3>LIÊN KẾT NHANH</h3>
+          <ul class="link_menu">
+            <li><a th:href="@{/}">Trang chủ</a></li>
+            <li><a th:href="@{/properties}">Bất động sản</a></li>
+            <li><a th:href="@{/video-review}">Video Review</a></li>
+            <li><a th:href="@{/my-bookings}">Đơn đặt phòng</a></li>
+            <li><a th:href="@{/login}">Đăng nhập</a></li>
+            <li><a th:href="@{/register}">Đăng ký</a></li>
+          </ul>
         </div>
-      </div>
 
-      <div>
-        <h4 class="text-sm font-extrabold uppercase tracking-[0.28em] text-white">Khám phá</h4>
-        <ul class="mt-5 space-y-3 text-sm text-slate-300">
-          <li><a href="/" class="transition hover:text-white">Trang chủ</a></li>
-          <li><a href="/video-review" class="transition hover:text-white">Video review</a></li>
-          <li><a href="/register" class="transition hover:text-white">Tạo tài khoản</a></li>
-          <li><a href="/login/owner" class="transition hover:text-white">Đăng bài cho thuê</a></li>
-        </ul>
-      </div>
-
-      <div>
-        <h4 class="text-sm font-extrabold uppercase tracking-[0.28em] text-white">Danh mục</h4>
-        <div class="mt-5 flex flex-wrap gap-2">
-          <th:block th:each="cat : ${categories}">
-            <th:block th:if="${cat instanceof T(com.pms.propertymanagement.dto.response.CategoryResponse)}">
-              <a
-                th:href="@{/public/category/{id}(id=${cat.id})}"
-                th:text="${cat.name}"
-                class="rounded-full border border-slate-800 bg-slate-900 px-3 py-2 text-xs font-semibold text-slate-200 transition hover:border-sky-400 hover:text-white"
-              >
-                Nha tro
-              </a>
-            </th:block>
-          </th:block>
+        <div class="col-lg-3 col-md-6">
+          <h3>HÌNH ẢNH DỰ ÁN</h3>
+          <ul class="insta text_align_left">
+            <li><a th:href="@{/properties}"><img th:src="@{/images/rooms/room-1.jpg}" alt="Căn hộ Studio" /></a></li>
+            <li><a th:href="@{/properties}"><img th:src="@{/images/rooms/room-2.jpg}" alt="Phòng trọ gác lửng" /></a></li>
+            <li><a th:href="@{/properties}"><img th:src="@{/images/rooms/room-3.jpg}" alt="Nhà nguyên căn" /></a></li>
+            <li><a th:href="@{/properties}"><img th:src="@{/images/rooms/room-4.jpg}" alt="Ký túc xá hiện đại" /></a></li>
+          </ul>
         </div>
-      </div>
 
-      <div>
-        <h4 class="text-sm font-extrabold uppercase tracking-[0.28em] text-white">Liên hệ</h4>
-        <div class="mt-5 space-y-4 text-sm text-slate-300">
-          <p class="flex items-start gap-3">
-            <i class="fa-solid fa-location-dot mt-1 text-sky-300"></i>
-            <span>Hỗ trợ vận hành trên AWS EC2, Cloudflare và quy trình CI/CD từ GitHub Actions.</span>
-          </p>
-          <p class="flex items-center gap-3">
-            <i class="fa-solid fa-envelope text-sky-300"></i>
-            <span>huynhforlan21@gmail.com</span>
-          </p>
-          <p class="flex items-center gap-3">
-            <i class="fa-solid fa-globe text-sky-300"></i>
-            <a href="https://druignguyen.me" class="transition hover:text-white">druignguyen.me</a>
-          </p>
+        <div class="col-lg-3 col-md-6">
+          <h3>ĐĂNG KÝ NHẬN TIN MỚI</h3>
+          <form class="bottom_form" th:action="@{/properties}" method="get">
+            <input class="enter" placeholder="Nhập email hoặc khu vực..." type="text" name="keyword" />
+            <button class="sub_btn" type="submit">Đăng Ký Ngay</button>
+          </form>
         </div>
       </div>
     </div>
-  </div>
 
-  <div class="border-t border-slate-800/80 bg-slate-950/90">
-    <div class="container mx-auto flex flex-col gap-3 px-4 py-5 text-xs text-slate-400 md:flex-row md:items-center md:justify-between md:px-6 lg:px-8">
-      <p>Copyright © 2026 Property Management System. Built for rental marketplace operations.</p>
-      <button
-        onclick="window.scrollTo({top: 0, behavior: 'smooth'})"
-        class="inline-flex items-center gap-2 rounded-full border border-slate-700 px-4 py-2 text-slate-200 transition hover:border-sky-400 hover:text-white"
-      >
-        <i class="fa-solid fa-arrow-up"></i>
-        Lên đầu trang
-      </button>
+    <div class="copyright">
+      <div class="container">
+        <div class="row">
+          <div class="col-md-10 offset-md-1">
+            <p>
+              © 2026 All Rights Reserved. Hệ thống Quản lý Nhà trọ <a th:href="@{/}">TrọMới</a> · Hotline: 0988 123 456 · Email: <a href="mailto:admin@gmail.com">admin@gmail.com</a>
+            </p>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </footer>

@@ -1,162 +1,171 @@
-<div th:fragment="content" class="space-y-6">
-  <div class="max-w-3xl">
-    <!-- Header -->
-    <div class="mb-8">
-      <a
-        href="/owner/posts"
-        class="text-blue-600 hover:text-blue-800 mb-4 inline-block"
-      >
-        <i class="fas fa-arrow-left"></i> Quay lại danh sách
-      </a>
-      <h1 class="text-3xl font-bold text-gray-900 mb-2">Chỉnh sửa Bài Đăng</h1>
-      <p class="text-gray-600">Cập nhật nội dung marketing cho bài đăng</p>
-    </div>
-
-    <!-- Warning: editing pauses the post -->
-    <div
-      class="mb-6 flex gap-3 p-4 bg-amber-50 border border-amber-200 rounded-xl text-sm text-amber-800"
-    >
-      <i
-        class="fa-solid fa-triangle-exclamation mt-0.5 shrink-0 text-amber-500"
-      ></i>
-      <div>
-        <p class="font-semibold mb-1">Lưu ý quan trọng</p>
-        <p>
-          Sau khi lưu chỉnh sửa, bài đăng sẽ
-          <strong>tạm dừng hiển thị</strong> và chuyển sang trạng thái
-          <strong>Chờ duyệt</strong>. Thời gian còn lại của bài đăng sẽ được bảo
-          lưu và tiếp tục đếm
-          <strong>sau khi moderator duyệt thành công</strong>.
-        </p>
-      </div>
-    </div>
-    <div class="bg-white rounded-lg shadow p-6">
-      <form
-        th:action="@{/owner/posts/{id}/update(id=${post.postId})}"
-        method="post"
-      >
-        <!-- Title -->
-        <div class="mb-6">
-          <label
-            for="title"
-            class="block text-sm font-medium text-gray-700 mb-2"
-          >
-            Tiêu đề bài đăng <span class="text-red-500">*</span>
-          </label>
-          <input
-            type="text"
-            id="title"
-            name="title"
-            th:value="${post.title}"
-            required
-            maxlength="255"
-            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            placeholder="Nhập tiêu đề hấp dẫn cho bài đăng"
-          />
-          <p class="text-xs text-gray-500 mt-1">
-            Tiêu đề này sẽ hiển thị trên marketplace
-          </p>
+<div class="container-fluid" th:fragment="content">
+<!-- Page Heading -->
+        <div class="d-sm-flex align-items-center justify-content-between mb-4">
+            <div>
+                <a th:href="@{/owner/posts}" class="btn btn-sm btn-outline-secondary mb-2">
+                    <i class="fas fa-arrow-left fa-sm mr-1"></i> Quay lại danh sách bài đăng
+                </a>
+                <h1 class="h3 mb-0 text-gray-800 font-weight-bold">
+                    <i class="fas fa-edit text-warning mr-2"></i>Chỉnh Sửa Bài Đăng Marketplace
+                </h1>
+                <p class="text-muted small mb-0 mt-1">Cập nhật nội dung marketing cho bài đăng cơ sở nhà trọ.</p>
+            </div>
         </div>
 
-        <!-- Slug -->
-        <div class="mb-6">
-          <label
-            for="slug"
-            class="block text-sm font-medium text-gray-700 mb-2"
-          >
-            SEO Slug <span class="text-red-500">*</span>
-          </label>
-          <div class="flex">
-            <span
-              class="inline-flex items-center px-3 text-sm text-gray-500 bg-gray-100 border border-r-0 border-gray-300 rounded-l-lg"
-            >
-              /properties/
-            </span>
-            <input
-              type="text"
-              id="slug"
-              name="slug"
-              th:value="${post.slug}"
-              required
-              maxlength="255"
-              pattern="[a-z0-9\-]+"
-              class="flex-1 px-4 py-2 border border-gray-300 rounded-r-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="nha-tro-gan-dhbk"
-            />
-          </div>
-          <p class="text-xs text-gray-500 mt-1">
-            Chỉ chứa chữ thường, số và dấu gạch ngang
-          </p>
+        <!-- Warning alert -->
+        <div class="alert alert-warning border-left-warning shadow-sm mb-4" role="alert">
+            <h6 class="font-weight-bold mb-1"><i class="fas fa-exclamation-triangle mr-1"></i> Lưu ý quan trọng khi sửa bài:</h6>
+            <p class="small mb-0">
+                Sau khi lưu chỉnh sửa, bài đăng sẽ chuyển sang trạng thái <strong>Chờ duyệt</strong> để đảm bảo nội dung phù hợp.
+                Thời hạn hiển thị còn lại sẽ được bảo lưu nguyên vẹn và tiếp tục tính sau khi duyệt thành công.
+            </p>
         </div>
 
-        <!-- Description -->
-        <div class="mb-6">
-          <label
-            for="description"
-            class="block text-sm font-medium text-gray-700 mb-2"
-          >
-            Mô tả bài đăng
-          </label>
-          <textarea
-            id="description"
-            name="description"
-            rows="8"
-            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            placeholder="Nhập mô tả chi tiết về phòng trọ..."
-            th:text="${post.description}"
-          ></textarea>
-          <p class="text-xs text-gray-500 mt-1">
-            Mô tả chi tiết sẽ giúp thu hút khách thuê
-          </p>
+        <div class="row justify-content-center">
+            <div class="col-lg-9">
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3 bg-white border-bottom-warning d-flex justify-content-between align-items-center">
+                        <h6 class="m-0 font-weight-bold text-warning">
+                            <i class="fas fa-pen-nib mr-2"></i>Thông Tin Nội Dung Bài Đăng
+                        </h6>
+                        <span class="badge badge-info px-3 py-1 font-weight-bold" th:text="${'Nhà trọ: ' + post.propertyName}">Nhà trọ</span>
+                    </div>
+                    <div class="card-body">
+                        <form th:action="@{/owner/posts/{id}/update(id=${post.postId})}" method="post">
+                            <!-- Hỗ Trợ Soạn Bài Đăng Chuẩn SEO -->
+                            <div class="p-3 mb-4 rounded border" style="background: var(--raised); border-color: var(--border);">
+                                <div class="d-flex flex-wrap align-items-center justify-content-between">
+                                    <div class="mb-2 mb-md-0">
+                                        <div class="font-weight-bold text-primary small">
+                                            <i class="fas fa-wand-magic-sparkles mr-1"></i>Hỗ trợ soạn bài đăng chuẩn SEO
+                                        </div>
+                                        <div class="text-muted" style="font-size: 0.78rem;">
+                                            Làm mới tiêu đề và nội dung mô tả chuẩn SEO dựa trên dữ liệu thực tế của cơ sở.
+                                        </div>
+                                    </div>
+                                    <div class="d-flex flex-wrap align-items-center" style="gap: 8px;">
+                                        <select id="aiCopyStyle" class="form-control form-control-sm font-weight-bold text-dark" style="max-width: 240px;">
+                                            <option value="CHUYEN_NGHIEP">Chuẩn SEO &amp; Chuyên nghiệp</option>
+                                            <option value="SINH_VIEN">Thân thiện &amp; Thu hút Sinh viên</option>
+                                            <option value="CAO_CAP">Sang trọng &amp; Căn hộ dịch vụ</option>
+                                        </select>
+                                        <button type="button" id="btnAiGeneratePost" th:data-property-id="${post.propertyId}" onclick="generatePostWithAi()" class="btn btn-sm btn-primary font-weight-bold shadow-sm">
+                                            <i class="fas fa-wand-magic-sparkles fas fa-magic mr-1"></i>Tự Động Soạn Nội Dung
+                                        </button>
+                                    </div>
+                                </div>
+                                <div id="aiGenerateStatus" class="small mt-2 font-weight-bold" style="display: none;"></div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="font-weight-bold small text-gray-700">Tiêu Đề Bài Đăng <span class="text-danger">*</span></label>
+                                <input type="text" id="title" name="title" th:value="${post.title}" required maxlength="255"
+                                       class="form-control font-weight-bold" placeholder="Nhập tiêu đề bài đăng">
+                                <small class="form-text text-muted">Tiêu đề này sẽ hiển thị nổi bật trên marketplace tìm kiếm phòng.</small>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="font-weight-bold small text-gray-700">Đường Dẫn SEO (Slug) <span class="text-danger">*</span></label>
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text bg-light text-muted small">/properties/</span>
+                                    </div>
+                                    <input type="text" id="slug" name="slug" th:value="${post.slug}" required maxlength="255"
+                                           pattern="[a-z0-9\-]+" class="form-control" placeholder="nha-tro-gan-dhbk">
+                                </div>
+                                <small class="form-text text-muted">Chỉ chứa chữ cái thường không dấu, chữ số và dấu gạch ngang (-).</small>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="font-weight-bold small text-gray-700">Mô Tả Chi Tiết Về Nhà Trọ</label>
+                                <textarea id="description" name="description" rows="8" class="form-control"
+                                          placeholder="Nhập mô tả chi tiết phòng trọ..." th:text="${post.description}"></textarea>
+                            </div>
+
+                            <div class="p-3 bg-light rounded border mb-4">
+                                <div class="small font-weight-bold text-gray-700 mb-1">
+                                    <i class="fas fa-building text-primary mr-1"></i> Cơ sở liên kết:
+                                    <span class="text-dark font-weight-bold" th:text="${post.propertyName}"></span>
+                                </div>
+                                <div class="small text-muted">
+                                    Mã cơ sở hệ thống: #<span th:text="${post.propertyId}">123</span>
+                                </div>
+                            </div>
+
+                            <div class="d-flex justify-content-end">
+                                <a href="/owner/posts" class="btn btn-outline-secondary mr-2">
+                                    <i class="fas fa-times mr-1"></i> Hủy Bỏ
+                                </a>
+                                <button type="submit" class="btn btn-warning shadow-sm font-weight-bold text-white px-4">
+                                    <i class="fas fa-save mr-1"></i> Lưu Thay Đổi & Gửi Duyệt
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <!-- Property Reference -->
-        <div class="mb-6 p-4 bg-gray-50 rounded-lg">
-          <p class="text-sm font-medium text-gray-700 mb-2">
-            Thông tin Property liên kết:
-          </p>
-          <p class="text-sm text-gray-600">
-            <i class="fas fa-home text-gray-400"></i>
-            <span th:text="${post.propertyName}">Property Name</span>
-          </p>
-          <p class="text-xs text-gray-500 mt-1">
-            Property ID: <span th:text="${post.propertyId}">123</span>
-          </p>
-        </div>
+        <script th:inline="javascript">
+            function generatePostWithAi() {
+                const btn = document.getElementById("btnAiGeneratePost");
+                const propId = (btn && btn.getAttribute("data-property-id")) || /*[[${post.propertyId}]]*/ "";
+                const styleSelect = document.getElementById("aiCopyStyle");
+                const style = styleSelect ? styleSelect.value : "CHUYEN_NGHIEP";
+                const statusEl = document.getElementById("aiGenerateStatus");
 
-        <!-- Action Buttons -->
-        <div class="flex space-x-4">
-          <button
-            type="submit"
-            class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-6 rounded-lg transition-colors"
-          >
-            <i class="fas fa-save"></i> Lưu thay đổi
-          </button>
-          <a
-            href="/owner/posts"
-            class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium py-3 px-6 rounded-lg text-center transition-colors"
-          >
-            <i class="fas fa-times"></i> Hủy
-          </a>
-        </div>
-      </form>
-    </div>
+                if (!propId) return;
 
-    <!-- Help Section -->
-    <div class="mt-6 p-4 bg-blue-50 rounded-lg">
-      <h3 class="font-medium text-blue-900 mb-2">
-        <i class="fas fa-info-circle"></i> Mẹo tối ưu bài đăng
-      </h3>
-      <ul class="text-sm text-blue-800 space-y-1">
-        <li>
-          • Tiêu đề nên ngắn gọn, súc tích và có từ khóa (VD: "Phòng trọ gần ĐH
-          Bách Khoa giá rẻ")
-        </li>
-        <li>• Slug nên chứa từ khóa chính để tốt cho SEO</li>
-        <li>
-          • Mô tả nên đầy đủ thông tin: vị trí, tiện ích, giá cả, quy định
-        </li>
-      </ul>
-    </div>
-  </div>
+                if (statusEl) {
+                    statusEl.style.display = "block";
+                    statusEl.className = "small mt-2 font-weight-bold text-primary";
+                    statusEl.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>Hệ thống đang phân tích tiện ích &amp; soạn nội dung chuẩn SEO...';
+                }
+                if (btn) btn.disabled = true;
+
+                fetch('/owner/posts/api/ai-generate-content?propertyId=' + encodeURIComponent(propId) + '&style=' + encodeURIComponent(style), {
+                    method: 'POST'
+                })
+                .then(res => {
+                    if (!res.ok) throw new Error('Không thể tạo nội dung lúc này');
+                    return res.json();
+                })
+                .then(data => {
+                    const titleEl = document.getElementById("title");
+                    const slugEl = document.getElementById("slug");
+                    const descEl = document.getElementById("description");
+
+                    if (titleEl && data.title) titleEl.value = data.title;
+                    if (slugEl && data.slug) slugEl.value = data.slug;
+                    if (descEl && data.description) descEl.value = data.description;
+
+                    [titleEl, slugEl, descEl].forEach(el => {
+                        if (el) {
+                            el.style.transition = "background-color 0.5s ease, box-shadow 0.5s ease";
+                            el.style.backgroundColor = "#e8f8f5";
+                            el.style.boxShadow = "0 0 0 0.2rem rgba(28, 200, 138, 0.25)";
+                            setTimeout(() => {
+                                el.style.backgroundColor = "";
+                                el.style.boxShadow = "";
+                            }, 1800);
+                        }
+                    });
+
+                    if (statusEl) {
+                        statusEl.className = "small mt-2 font-weight-bold text-success";
+                        statusEl.innerHTML = '<i class="fas fa-check-circle mr-1"></i>Đã tự động soạn lại tiêu đề, đường dẫn SEO và mô tả chi tiết!';
+                    }
+                })
+                .catch(() => {
+                    if (statusEl) {
+                        statusEl.className = "small mt-2 font-weight-bold text-danger";
+                        statusEl.innerHTML = '<i class="fas fa-exclamation-triangle mr-1"></i>Có lỗi xảy ra khi gọi công cụ soạn nội dung. Vui lòng thử lại!';
+                    }
+                })
+                .finally(() => {
+                    if (btn) btn.disabled = false;
+                });
+            }
+        </script>
 </div>
+
